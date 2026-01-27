@@ -1,35 +1,68 @@
-# Hyperskills
+<h1 align="center">
+  ⚡ hyperskills
+</h1>
 
-Elite AI agent skills for rapid product development. Ship faster with specialized agents that know the cutting edge.
+<p align="center">
+  <strong>Elite AI Agent Skills for Rapid Product Development</strong><br>
+  <sub>Ship in days, not months</sub>
+</p>
 
-## Skills
+<p align="center">
+  <img src="https://img.shields.io/badge/Skills-7_Domains-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="7 Skills">
+  <img src="https://img.shields.io/badge/Agents-23_Specialized-80ffea?style=for-the-badge&logo=robot&logoColor=black" alt="23 Agents">
+  <img src="https://img.shields.io/badge/skills.sh-Compatible-ff6ac1?style=for-the-badge&logo=vercel&logoColor=white" alt="skills.sh">
+</p>
 
-| Skill | Domain | Agents |
-|-------|--------|--------|
-| **fullstack** | Web development | frontend-developer, backend-architect, rapid-prototyper, database-specialist |
-| **mobile** | Mobile apps | mobile-app-builder |
-| **ai** | AI/ML engineering | ai-engineer, mlops-engineer, data-scientist, ml-researcher, cv-engineer |
-| **platform** | Infrastructure | platform-engineer, data-engineer, finops-engineer |
-| **security** | Security ops | security-architect, incident-responder |
-| **quality** | Testing & a11y | test-writer-fixer, accessibility-specialist |
-| **growth** | Growth & product | growth-hacker, app-store-optimizer, content-strategist, trend-researcher, product-strategist |
+<p align="center">
+  <a href="https://github.com/hyperb1iss/hyperskills/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/hyperb1iss/hyperskills?style=flat-square&logo=apache&logoColor=white" alt="License">
+  </a>
+  <a href="https://github.com/hyperb1iss/hyperskills/releases">
+    <img src="https://img.shields.io/github/v/release/hyperb1iss/hyperskills?style=flat-square&logo=github&logoColor=white" alt="Release">
+  </a>
+</p>
 
-## Installation
+<p align="center">
+  <a href="#-installation">Installation</a> •
+  <a href="#-skills">Skills</a> •
+  <a href="#-agents">Agents</a> •
+  <a href="#-sota-knowledge">SOTA Knowledge</a> •
+  <a href="#-philosophy">Philosophy</a>
+</p>
+
+---
+
+## 💎 What This Is
+
+**hyperskills** is a collection of 23 specialized AI agents across 7 skill domains, designed for teams that ship fast. Originally developed as the agent ecosystem for [Contains Studio](https://github.com/hyperb1iss/agents)—a rapid app development framework built around 6-day sprint cycles—these agents have been battle-tested, consolidated, and enhanced with cutting-edge 2026 techniques.
+
+Instead of one generalist agent fumbling through everything, you get **specialists**:
+
+- A **security architect** who knows eBPF, Zero Trust, and SLSA
+- An **AI engineer** who speaks DSPy and MCP fluently
+- A **platform engineer** who thinks in GitOps and OpenTofu
+- A **growth hacker** who designs viral loops that actually work
+
+Works with Claude Code, Codex CLI, Cursor, and any agent supporting the [skills.sh](https://skills.sh) ecosystem.
+
+## ⚡ Installation
 
 ### Claude Code
 
 ```bash
-# From the plugin marketplace
-claude /plugin install hyperskills
-
-# Or from GitHub
-claude /plugin install github:hyperb1iss/hyperskills
+# Install the plugin
+/plugin install hyperskills
 ```
 
-### skills.sh Ecosystem
+### Vercel Skills (skills.sh)
 
 ```bash
-npx add-skill hyperb1iss/hyperskills
+# Install all skills
+npx skills add hyperb1iss/hyperskills --all
+
+# Or specific skills
+npx skills add hyperb1iss/hyperskills --skill ai
+npx skills add hyperb1iss/hyperskills --skill security
 ```
 
 ### Manual
@@ -39,63 +72,210 @@ git clone https://github.com/hyperb1iss/hyperskills.git
 ln -s $(pwd)/hyperskills/skills ~/.claude/skills/hyperskills
 ```
 
-## Usage
+## 🔮 Skills
 
-Skills auto-activate based on context. When you're working on React code, the fullstack skill loads. When you mention "deploy to kubernetes", the platform skill activates.
+Skills are contextual knowledge bundles that auto-activate when relevant. Working on React code? The fullstack skill loads. Mention "Kubernetes deployment"? Platform skill activates.
 
-You can also invoke skills directly:
+| Skill | Domain | Agents | Triggers |
+|-------|--------|--------|----------|
+| **fullstack** | Web Development | 4 | React, Next.js, APIs, databases, Tailwind |
+| **mobile** | Mobile Apps | 1 | React Native, Expo, iOS, Android |
+| **ai** | AI/ML Engineering | 5 | LLMs, RAG, embeddings, MLOps, computer vision |
+| **platform** | Infrastructure | 4 | Kubernetes, GitOps, CI/CD, data pipelines |
+| **security** | Security Ops | 2 | Pentesting, incidents, compliance, threat modeling |
+| **quality** | Testing & A11y | 2 | Tests, accessibility, performance, code review |
+| **growth** | Growth & Product | 5 | ASO, viral loops, content, market research |
+
+## 🦋 Agents
+
+### Fullstack Development
+
+| Agent | Specialty |
+|-------|-----------|
+| **frontend-developer** | React 19, Server Components, React Compiler, TanStack Query, shadcn/ui |
+| **backend-architect** | API design, system architecture, auth patterns, database modeling |
+| **rapid-prototyper** | MVP scaffolding, 6-day sprint delivery, trend integration |
+| **database-specialist** | Schema design, query optimization, migrations, replication |
+
+### Mobile Development
+
+| Agent | Specialty |
+|-------|-----------|
+| **mobile-app-builder** | React Native New Architecture, Expo SDK 53+, NativeWind, EAS |
+
+### AI/ML Engineering
+
+| Agent | Specialty |
+|-------|-----------|
+| **ai-engineer** | LLM integration, RAG pipelines, MCP servers, DSPy programmatic prompting |
+| **mlops-engineer** | Model deployment, monitoring, feature stores, A/B testing infrastructure |
+| **data-scientist** | Statistical analysis, A/B testing, predictive modeling, causal inference |
+| **ml-researcher** | Paper implementation, novel architectures, Flash Attention, MoE |
+| **cv-engineer** | Object detection (YOLO, RT-DETR), segmentation (SAM), video analysis |
+
+### Platform Engineering
+
+| Agent | Specialty |
+|-------|-----------|
+| **platform-engineer** | GitOps (Argo CD/Flux), OpenTofu, Crossplane v2, OpenTelemetry |
+| **data-engineer** | ETL/ELT pipelines, dbt, Airflow, Flink streaming, data quality |
+| **finops-engineer** | Cloud cost optimization, FinOps framework, right-sizing, reservations |
+| **git-wizard** | Complex rebases, merge conflicts, lock files, encrypted secrets |
+
+### Security Operations
+
+| Agent | Specialty |
+|-------|-----------|
+| **security-architect** | Threat modeling, Zero Trust, SBOM/SLSA, eBPF (Tetragon/Falco), compliance |
+| **incident-responder** | NIST IR framework, digital forensics, log analysis, recovery coordination |
+
+### Quality Engineering
+
+| Agent | Specialty |
+|-------|-----------|
+| **test-writer-fixer** | Test creation, failure analysis, CI integration, coverage optimization |
+| **accessibility-specialist** | WCAG 2.2, Playwright + Axe automation, screen reader testing |
+
+### Growth & Product
+
+| Agent | Specialty |
+|-------|-----------|
+| **growth-hacker** | Viral loops, PLG patterns, referral systems, conversion optimization |
+| **app-store-optimizer** | ASO strategy, keyword research, screenshot optimization, A/B testing |
+| **content-strategist** | Multi-platform content, SEO, repurposing workflows, video scripts |
+| **trend-researcher** | TikTok trends, app store intelligence, competitive analysis |
+| **product-strategist** | Feature prioritization, competitive intel, user feedback synthesis |
+
+## 🧪 SOTA Knowledge
+
+Every skill is enhanced with cutting-edge techniques (research-backed, 2025-2026):
+
+### Fullstack
+- **React 19** — Server Components, React Compiler, `use()` hook
+- **State** — TanStack Query v5, Zustand, jotai for atoms
+- **UI** — shadcn/ui + Radix primitives, Tailwind v4, Base UI
+- **Forms** — React Hook Form + Zod, Conform for progressive enhancement
+
+### AI/ML
+- **Prompting** — DSPy programmatic prompting (manual prompts are dead)
+- **RAG** — Hybrid search, RAGAS evaluation, ColBERT late interaction
+- **Fine-tuning** — LoRA/QLoRA, Unsloth, PEFT adapters
+- **Serving** — vLLM, TensorRT-LLM, speculative decoding
+
+### Platform
+- **GitOps** — Argo CD, Flux v2, ApplicationSets, progressive delivery
+- **IaC** — OpenTofu (not Terraform), Pulumi, Crossplane compositions
+- **Observability** — OpenTelemetry everywhere, Grafana stack, eBPF tracing
+- **Data** — dbt for transforms, Great Expectations for quality, Polars for speed
+
+### Security
+- **Runtime** — eBPF-based detection (Tetragon, Falco), runtime policies
+- **Supply Chain** — SBOM generation, SLSA attestations, Sigstore signing
+- **Compliance** — Automated evidence collection (Vanta/Drata patterns)
+- **Zero Trust** — Identity-aware proxies, microsegmentation, SPIFFE/SPIRE
+
+### Quality
+- **Testing** — Playwright for E2E, Component Testing, Axe for a11y
+- **Performance** — Core Web Vitals (INP focus), bundle analysis, edge caching
+- **Code Review** — AI-assisted review patterns, semantic diff analysis
+
+### Growth
+- **PLG** — Product-led growth funnels, self-serve onboarding, usage-based pricing
+- **Viral** — K-factor optimization, referral mechanics, UGC loops
+- **Content** — Multi-platform repurposing, short-form video hooks, SEO clusters
+
+## 📦 Structure
 
 ```
-/fullstack - Web development assistance
-/mobile - Mobile app development
-/ai - AI/ML engineering
-/platform - Infrastructure and DevOps
-/security - Security operations
-/quality - Testing and accessibility
-/growth - Growth and product strategy
+hyperskills/
+├── .claude-plugin/
+│   ├── plugin.json           # Claude Code manifest
+│   └── marketplace.json      # Distribution index
+├── skills/
+│   ├── fullstack/
+│   │   ├── SKILL.md          # Quick reference + triggers
+│   │   ├── agents/           # Specialized subagents
+│   │   ├── references/       # Deep documentation
+│   │   └── examples/         # Production configs
+│   ├── mobile/
+│   ├── ai/
+│   ├── platform/
+│   ├── security/
+│   ├── quality/
+│   └── growth/
+├── commands/                  # Slash commands
+├── AGENTS.md                  # skills.sh registry
+└── Makefile                   # Lint, format, validate
 ```
 
-## What Makes Hyperskills Different
+## 🪄 Commands
 
-### SOTA Knowledge (2026)
-
-Every skill is enhanced with cutting-edge techniques:
-
-- **fullstack**: React 19, Server Components, React Compiler, TanStack Query, shadcn/ui + Base UI
-- **mobile**: React Native New Architecture, Expo SDK 53+, Hermes engine
-- **ai**: DSPy programmatic prompting, MCP integration, RAG patterns, LoRA/QLoRA, RAGAS evaluation
-- **platform**: GitOps (Argo CD/Flux), OpenTofu/Pulumi, Crossplane v2, OpenTelemetry, FinOps
-- **security**: Agentic pentesting, eBPF (Tetragon/Falco), Zero Trust, SBOM/SLSA
-- **quality**: Playwright + Axe automation, Core Web Vitals (INP), AI code review
-- **growth**: PLG patterns, viral loops, UGC strategy, micro-influencer tactics
-
-### Layered Knowledge
-
-```
-SKILL.md (Quick reference, auto-activation triggers)
-    ↓
-agents/ (Specialized subagents for complex tasks)
-    ↓
-references/ (Deep-dive documentation)
-    ↓
-examples/ (Production-ready configs, copy-paste code)
+```bash
+/prototype    # Scaffold a new project with best practices
+/audit-security  # Run security audit on codebase
 ```
 
-### Multi-Platform
+## 🌐 Compatibility
 
-Works with Claude Code, Codex CLI, Cursor, and any agent supporting the skills.sh ecosystem.
+| Platform | Installation |
+|----------|--------------|
+| **Claude Code** | `/plugin install hyperskills` |
+| **Codex CLI** | `npx skills add hyperb1iss/hyperskills -a codex` |
+| **Cursor** | `npx skills add hyperb1iss/hyperskills -a cursor` |
+| **GitHub Copilot** | `npx skills add hyperb1iss/hyperskills -a copilot` |
+| **Gemini CLI** | `npx skills add hyperb1iss/hyperskills -a gemini` |
 
-## Philosophy
+## 🦋 Philosophy
 
-- **Ship fast**: 6-day sprint mentality, MVPs over perfection
-- **Stay current**: Research-backed, constantly updated
-- **Be practical**: Real production patterns, not academic exercises
-- **Automate everything**: CI/CD, testing, security - if it can be automated, it should be
+These skills embody the Contains Studio methodology:
 
-## Contributing
+| Principle | What It Means |
+|-----------|---------------|
+| **Ship in 6 days** | Every feature fits a sprint. No multi-month projects. |
+| **Research first** | SOTA techniques, not outdated tutorials. Web search beats training data. |
+| **Specialists over generalists** | Deep expertise wins. One agent per domain. |
+| **Automate the boring** | CI/CD, testing, security—if it can run automatically, it should. |
+| **Delight users** | Whimsy matters. Error messages can be fun. Loading states can spark joy. |
 
-PRs welcome. Keep skills focused, include examples, cite sources.
+## 🧪 Development
+
+```bash
+# Clone
+git clone https://github.com/hyperb1iss/hyperskills.git
+cd hyperskills
+
+# Lint & format
+make lint
+make format
+
+# Validate structure
+make check
+
+# Test locally
+claude --plugin-dir .
+```
+
+## 💜 Origins
+
+hyperskills evolved from the [Contains Studio agent ecosystem](https://github.com/hyperb1iss/agents)—59 specialized agents built for rapid app development. We consolidated them down to 23 essential agents, dropped the outdated ones (manual prompt engineering is dead, platform-specific social media bots are pointless), and enhanced everything with 2025-2026 SOTA techniques.
+
+The original agents powered 6-day sprint cycles for shipping apps fast. Now they're available for everyone.
 
 ## License
 
-Apache-2.0
+Apache-2.0 — See [LICENSE](LICENSE)
+
+---
+
+<p align="center">
+  Created by <a href="https://hyperbliss.tech">Stefanie Jane</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/hyperb1iss">
+    <img src="https://img.shields.io/badge/GitHub-hyperb1iss-181717?style=for-the-badge&logo=github" alt="GitHub">
+  </a>
+  <a href="https://bsky.app/profile/hyperbliss.tech">
+    <img src="https://img.shields.io/badge/Bluesky-@hyperbliss.tech-1185fe?style=for-the-badge&logo=bluesky" alt="Bluesky">
+  </a>
+</p>
