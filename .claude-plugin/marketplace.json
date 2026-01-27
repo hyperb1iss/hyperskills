@@ -1,5 +1,5 @@
 {
-  "name": "hyperb1iss-hyperskills",
+  "name": "hyperb1iss-skills",
   "owner": {
     "name": "Stefanie Jane",
     "url": "https://hyperbliss.tech"
@@ -8,7 +8,7 @@
     {
       "name": "hyperskills",
       "source": "./",
-      "description": "Elite AI agent skills for rapid product development - 7 specialized skill domains with 24 enhanced agents",
+      "description": "Elite AI agent skills for rapid product development - 7 skill domains, 23 specialized agents for fullstack, mobile, AI/ML, platform, security, quality, and growth",
       "version": "1.0.0",
       "author": {
         "name": "Stefanie Jane",

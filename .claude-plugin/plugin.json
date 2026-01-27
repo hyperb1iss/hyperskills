@@ -1,7 +1,7 @@
 {
   "name": "hyperskills",
   "version": "1.0.0",
-  "description": "Elite AI agent skills for rapid product development - fullstack, mobile, AI/ML, platform engineering, security, quality, and growth",
+  "description": "Elite AI agent skills for rapid product development - 7 skill domains, 23 specialized agents",
   "author": {
     "name": "Stefanie Jane",
     "url": "https://hyperbliss.tech"
@@ -26,8 +26,7 @@
     "security",
     "testing",
     "accessibility",
-    "growth-hacking",
-    "product-development"
+    "growth-hacking"
   ],
   "category": "development-tools"
 }
