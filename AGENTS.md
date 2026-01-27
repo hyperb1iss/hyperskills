@@ -40,7 +40,7 @@ npx skills add hyperbliss/hyperskills --skill security
 ### Platform Engineering (`platform`)
 
 - `platform-engineer` - GitOps, IaC, Kubernetes, observability
-- `data-engineer` - Pipelines, ETL, data infrastructure
+- `data-engineer` - Pipelines, ETL/ELT, dbt, Airflow, streaming
 - `finops-engineer` - Cloud cost optimization, FinOps framework
 - `git-wizard` - Complex rebases, merge conflicts, git archaeology
 
@@ -67,7 +67,7 @@ npx skills add hyperbliss/hyperskills --skill security
 | Metric | Count |
 |--------|-------|
 | Skills | 7 |
-| Agents | 22 |
+| Agents | 23 |
 | Commands | 2 |
 
 ## Usage
