@@ -1,0 +1,1 @@
+../skills/fullstack/agents/database-specialist.md

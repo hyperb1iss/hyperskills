@@ -1,0 +1,1 @@
+../skills/growth/agents/trend-researcher.md

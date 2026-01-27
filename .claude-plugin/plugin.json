@@ -6,21 +6,11 @@
     "name": "Stefanie Jane",
     "url": "https://hyperbliss.tech"
   },
-  "agents": [
-    "./skills/fullstack/agents",
-    "./skills/mobile/agents",
-    "./skills/ai/agents",
-    "./skills/platform/agents",
-    "./skills/security/agents",
-    "./skills/quality/agents",
-    "./skills/growth/agents"
-  ],
   "homepage": "https://github.com/hyperb1iss/hyperskills",
   "repository": "https://github.com/hyperb1iss/hyperskills",
   "license": "Apache-2.0",
   "keywords": [
     "claude-code",
-    "codex",
     "ai-agents",
     "fullstack",
     "react",
@@ -36,6 +26,5 @@
     "testing",
     "accessibility",
     "growth-hacking"
-  ],
-  "category": "development-tools"
+  ]
 }

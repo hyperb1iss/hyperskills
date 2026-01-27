@@ -1,0 +1,1 @@
+../skills/fullstack/agents/rapid-prototyper.md

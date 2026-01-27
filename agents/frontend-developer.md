@@ -1,0 +1,1 @@
+../skills/fullstack/agents/frontend-developer.md

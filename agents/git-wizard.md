@@ -1,0 +1,1 @@
+../skills/platform/agents/git-wizard.md
