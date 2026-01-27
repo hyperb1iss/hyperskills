@@ -1,0 +1,33 @@
+{
+  "name": "hyperskills",
+  "version": "1.0.0",
+  "description": "Elite AI agent skills for rapid product development - fullstack, mobile, AI/ML, platform engineering, security, quality, and growth",
+  "author": {
+    "name": "Stefanie Jane",
+    "url": "https://hyperbliss.tech"
+  },
+  "homepage": "https://github.com/hyperb1iss/hyperskills",
+  "repository": "https://github.com/hyperb1iss/hyperskills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "claude-code",
+    "codex",
+    "ai-agents",
+    "fullstack",
+    "react",
+    "nextjs",
+    "mobile",
+    "react-native",
+    "expo",
+    "ai-engineering",
+    "mlops",
+    "platform-engineering",
+    "devops",
+    "security",
+    "testing",
+    "accessibility",
+    "growth-hacking",
+    "product-development"
+  ],
+  "category": "development-tools"
+}
