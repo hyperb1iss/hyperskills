@@ -61,17 +61,13 @@ POST   /api/v1/users/:id/posts
 ```typescript
 // server/routers/user.ts
 export const userRouter = router({
-  getById: publicProcedure
-    .input(z.object({ id: z.string() }))
-    .query(async ({ input }) => {
-      return db.user.findUnique({ where: { id: input.id } });
-    }),
+  getById: publicProcedure.input(z.object({ id: z.string() })).query(async ({ input }) => {
+    return db.user.findUnique({ where: { id: input.id } });
+  }),
 
-  create: protectedProcedure
-    .input(createUserSchema)
-    .mutation(async ({ input, ctx }) => {
-      return db.user.create({ data: { ...input, createdBy: ctx.user.id } });
-    }),
+  create: protectedProcedure.input(createUserSchema).mutation(async ({ input, ctx }) => {
+    return db.user.create({ data: { ...input, createdBy: ctx.user.id } });
+  }),
 });
 ```
 
@@ -104,7 +100,7 @@ for (const user of users) {
 
 // GOOD: Single query with join
 const users = await db.user.findMany({
-  include: { posts: true }
+  include: { posts: true },
 });
 ```
 
@@ -114,7 +110,7 @@ const users = await db.user.findMany({
 // Use connection pooler (PgBouncer, Supabase)
 const db = new Pool({
   connectionString: process.env.DATABASE_URL,
-  max: 10,  // Match your serverless concurrency
+  max: 10, // Match your serverless concurrency
 });
 ```
 
@@ -124,18 +120,12 @@ const db = new Pool({
 
 ```typescript
 // Access token: Short-lived (15 min)
-const accessToken = jwt.sign(
-  { userId: user.id, role: user.role },
-  process.env.JWT_SECRET,
-  { expiresIn: '15m' }
-);
+const accessToken = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "15m" });
 
 // Refresh token: Long-lived (7 days), stored securely
-const refreshToken = jwt.sign(
-  { userId: user.id, tokenVersion: user.tokenVersion },
-  process.env.REFRESH_SECRET,
-  { expiresIn: '7d' }
-);
+const refreshToken = jwt.sign({ userId: user.id, tokenVersion: user.tokenVersion }, process.env.REFRESH_SECRET, {
+  expiresIn: "7d",
+});
 ```
 
 ### OAuth 2.0 Flow
@@ -149,10 +139,10 @@ const authUrl = `https://provider.com/oauth/authorize?
   state=${csrfToken}`;
 
 // 2. Exchange code for tokens
-const tokens = await fetch('https://provider.com/oauth/token', {
-  method: 'POST',
+const tokens = await fetch("https://provider.com/oauth/token", {
+  method: "POST",
   body: JSON.stringify({
-    grant_type: 'authorization_code',
+    grant_type: "authorization_code",
     code: authCode,
     redirect_uri: REDIRECT_URI,
     client_id: CLIENT_ID,
@@ -180,8 +170,8 @@ await redis.setex(`user:${id}`, 300, JSON.stringify(user)); // 5 min TTL
 // 3. CDN-level (Cache-Control headers)
 return new Response(JSON.stringify(user), {
   headers: {
-    'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300'
-  }
+    "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+  },
 });
 ```
 
@@ -194,7 +184,7 @@ class AppError extends Error {
     public code: string,
     public message: string,
     public statusCode: number = 500,
-    public details?: Record<string, unknown>
+    public details?: Record<string, unknown>,
   ) {
     super(message);
   }
@@ -202,7 +192,7 @@ class AppError extends Error {
 
 class NotFoundError extends AppError {
   constructor(resource: string, id: string) {
-    super('NOT_FOUND', `${resource} with id ${id} not found`, 404);
+    super("NOT_FOUND", `${resource} with id ${id} not found`, 404);
   }
 }
 
@@ -210,13 +200,13 @@ class NotFoundError extends AppError {
 function errorHandler(err: Error, req: Request, res: Response) {
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
-      error: { code: err.code, message: err.message, details: err.details }
+      error: { code: err.code, message: err.message, details: err.details },
     });
   }
   // Log unexpected errors, return generic message
   console.error(err);
   return res.status(500).json({
-    error: { code: 'INTERNAL_ERROR', message: 'Something went wrong' }
+    error: { code: "INTERNAL_ERROR", message: "Something went wrong" },
   });
 }
 ```

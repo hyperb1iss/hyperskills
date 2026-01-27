@@ -12,17 +12,19 @@ Build modern web applications with React 19, Next.js 15+, and server-first archi
 ### React 19 + Next.js 15 Patterns
 
 **Server Components (Default)**
+
 ```tsx
 // app/page.tsx - Server Component by default
 export default async function Page() {
-  const data = await db.query('SELECT * FROM posts'); // Direct DB access
+  const data = await db.query("SELECT * FROM posts"); // Direct DB access
   return <PostList posts={data} />;
 }
 ```
 
 **Client Components (Opt-in)**
+
 ```tsx
-'use client';
+"use client";
 // Only for interactivity: useState, useEffect, event handlers
 export function LikeButton({ postId }) {
   const [liked, setLiked] = useState(false);
@@ -31,18 +33,20 @@ export function LikeButton({ postId }) {
 ```
 
 **Server Actions**
+
 ```tsx
-'use server';
+"use server";
 export async function createPost(formData: FormData) {
-  const title = formData.get('title');
+  const title = formData.get("title");
   await db.insert(posts).values({ title });
-  revalidatePath('/posts');
+  revalidatePath("/posts");
 }
 ```
 
 ### React Compiler (Auto-Memoization)
 
 Enable in `next.config.js`:
+
 ```js
 module.exports = {
   experimental: {
@@ -55,26 +59,28 @@ module.exports = {
 
 ### State Management Stack
 
-| Need | Solution |
-|------|----------|
-| Server state | TanStack Query |
-| Global client state | Zustand |
-| Atomic state | Jotai |
-| Form state | React Hook Form + Zod |
-| URL state | nuqs |
+| Need                | Solution              |
+| ------------------- | --------------------- |
+| Server state        | TanStack Query        |
+| Global client state | Zustand               |
+| Atomic state        | Jotai                 |
+| Form state          | React Hook Form + Zod |
+| URL state           | nuqs                  |
 
 **TanStack Query for Server State**
+
 ```tsx
 const { data, isLoading } = useQuery({
-  queryKey: ['posts'],
-  queryFn: () => fetch('/api/posts').then(r => r.json()),
+  queryKey: ["posts"],
+  queryFn: () => fetch("/api/posts").then((r) => r.json()),
 });
 ```
 
 **Zustand for Client State**
+
 ```tsx
 const useStore = create((set) => ({
-  theme: 'dark',
+  theme: "dark",
   setTheme: (theme) => set({ theme }),
 }));
 ```
@@ -82,6 +88,7 @@ const useStore = create((set) => ({
 ### Component Libraries (2026)
 
 **Recommended Stack:**
+
 - **shadcn/ui** - Copy-paste components, full control
 - **Base UI** - Unstyled primitives (replacing Radix)
 - **Tailwind CSS v4** - Utility-first styling
@@ -89,11 +96,13 @@ const useStore = create((set) => ({
 ### Database Patterns
 
 **Drizzle ORM** (Type-safe, lightweight)
+
 ```tsx
 const posts = await db.select().from(postsTable).where(eq(postsTable.authorId, userId));
 ```
 
 **Prisma** (DX-focused, migrations)
+
 ```tsx
 const posts = await prisma.post.findMany({ where: { authorId: userId } });
 ```

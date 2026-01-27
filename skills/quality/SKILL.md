@@ -11,37 +11,38 @@ Ship reliable, accessible, performant software.
 
 ### Testing Stack (2026)
 
-| Type | Tool | Purpose |
-|------|------|---------|
-| Unit | Vitest | Fast, Vite-native |
-| Component | Testing Library | User-centric |
-| E2E | Playwright | Cross-browser |
-| API | Playwright API | Request testing |
-| Visual | Playwright + Percy | Screenshot comparison |
-| A11y | Axe-core | WCAG compliance |
-| Performance | Lighthouse CI | Core Web Vitals |
+| Type        | Tool               | Purpose               |
+| ----------- | ------------------ | --------------------- |
+| Unit        | Vitest             | Fast, Vite-native     |
+| Component   | Testing Library    | User-centric          |
+| E2E         | Playwright         | Cross-browser         |
+| API         | Playwright API     | Request testing       |
+| Visual      | Playwright + Percy | Screenshot comparison |
+| A11y        | Axe-core           | WCAG compliance       |
+| Performance | Lighthouse CI      | Core Web Vitals       |
 
 ### Vitest Setup
 
 ```typescript
 // vitest.config.ts
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
     globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./tests/setup.ts'],
+    environment: "jsdom",
+    setupFiles: ["./tests/setup.ts"],
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      exclude: ['node_modules', 'tests'],
+      provider: "v8",
+      reporter: ["text", "json", "html"],
+      exclude: ["node_modules", "tests"],
     },
   },
 });
 ```
 
 **Writing Tests:**
+
 ```typescript
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
@@ -66,32 +67,33 @@ describe('UserProfile', () => {
 
 ```typescript
 // tests/auth.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('Authentication', () => {
-  test('user can log in', async ({ page }) => {
-    await page.goto('/login');
-    await page.getByLabel('Email').fill('user@example.com');
-    await page.getByLabel('Password').fill('password123');
-    await page.getByRole('button', { name: 'Log in' }).click();
+test.describe("Authentication", () => {
+  test("user can log in", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByLabel("Email").fill("user@example.com");
+    await page.getByLabel("Password").fill("password123");
+    await page.getByRole("button", { name: "Log in" }).click();
 
-    await expect(page).toHaveURL('/dashboard');
-    await expect(page.getByText('Welcome back')).toBeVisible();
+    await expect(page).toHaveURL("/dashboard");
+    await expect(page.getByText("Welcome back")).toBeVisible();
   });
 });
 ```
 
 **Page Object Pattern:**
+
 ```typescript
 // pages/LoginPage.ts
 export class LoginPage {
   constructor(private page: Page) {}
 
   async login(email: string, password: string) {
-    await this.page.goto('/login');
-    await this.page.getByLabel('Email').fill(email);
-    await this.page.getByLabel('Password').fill(password);
-    await this.page.getByRole('button', { name: 'Log in' }).click();
+    await this.page.goto("/login");
+    await this.page.getByLabel("Email").fill(email);
+    await this.page.getByLabel("Password").fill(password);
+    await this.page.getByRole("button", { name: "Log in" }).click();
   }
 }
 ```
@@ -99,41 +101,45 @@ export class LoginPage {
 ### Accessibility Testing
 
 **Automated (catches ~50% of issues):**
+
 ```typescript
-import { test, expect } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { test, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 
-test('page should be accessible', async ({ page }) => {
-  await page.goto('/');
+test("page should be accessible", async ({ page }) => {
+  await page.goto("/");
 
-  const results = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-    .analyze();
+  const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
 
   expect(results.violations).toEqual([]);
 });
 ```
 
 **WCAG Checklist:**
+
 ```markdown
 ## Perceivable
+
 - [ ] All images have alt text
 - [ ] Color is not the only indicator
 - [ ] Contrast ratio ≥ 4.5:1 (text), ≥ 3:1 (large)
 - [ ] Text can be resized to 200%
 
 ## Operable
+
 - [ ] All functionality via keyboard
 - [ ] No keyboard traps
 - [ ] Skip links for navigation
 - [ ] Focus indicators visible
 
 ## Understandable
+
 - [ ] Language declared
 - [ ] Error messages clear
 - [ ] Labels on form inputs
 
 ## Robust
+
 - [ ] Valid HTML
 - [ ] ARIA used correctly
 - [ ] Works with assistive tech
@@ -142,11 +148,13 @@ test('page should be accessible', async ({ page }) => {
 ### Core Web Vitals
 
 **Targets:**
+
 - **LCP** < 2.5s (Largest Contentful Paint)
 - **INP** < 200ms (Interaction to Next Paint)
 - **CLS** < 0.1 (Cumulative Layout Shift)
 
 **Lighthouse CI:**
+
 ```yaml
 # lighthouserc.js
 module.exports = {
@@ -226,21 +234,25 @@ tests/
 
 ```markdown
 ## Functionality
+
 - [ ] Code does what it's supposed to
 - [ ] Edge cases handled
 - [ ] Error handling appropriate
 
 ## Security
+
 - [ ] No secrets in code
 - [ ] Input validated
 - [ ] Output escaped
 
 ## Performance
+
 - [ ] No N+1 queries
 - [ ] Expensive operations cached
 - [ ] Bundle size acceptable
 
 ## Maintainability
+
 - [ ] Code is readable
 - [ ] Tests included
 - [ ] Types correct

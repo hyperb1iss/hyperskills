@@ -34,6 +34,7 @@ tags:
 ```
 
 **Cost Allocation Setup:**
+
 ```hcl
 # Terraform: Enforce tagging
 resource "aws_organizations_policy" "require_tags" {
@@ -54,6 +55,7 @@ resource "aws_organizations_policy" "require_tags" {
 **Target:** 20-30% cost reduction
 
 **1. Rightsizing:**
+
 ```bash
 # AWS: Get rightsizing recommendations
 aws cost-explorer get-rightsizing-recommendation \
@@ -67,6 +69,7 @@ aws cost-explorer get-rightsizing-recommendation \
 ```
 
 **2. Reserved Instances / Savings Plans:**
+
 ```
 Coverage Strategy:
 ├── 60-70% - Reserved/Savings Plans (baseline)
@@ -75,6 +78,7 @@ Coverage Strategy:
 ```
 
 **3. Spot Instances for Stateless Workloads:**
+
 ```yaml
 # Kubernetes spot node pool
 apiVersion: karpenter.sh/v1alpha5
@@ -96,6 +100,7 @@ spec:
 ```
 
 **4. Storage Optimization:**
+
 ```bash
 # S3 lifecycle policy
 {
@@ -122,6 +127,7 @@ spec:
 ### Phase 3: OPERATE (Governance)
 
 **Budget Alerts:**
+
 ```hcl
 resource "aws_budgets_budget" "monthly" {
   name         = "monthly-budget"
@@ -149,6 +155,7 @@ resource "aws_budgets_budget" "monthly" {
 ```
 
 **Cost Anomaly Detection:**
+
 ```hcl
 resource "aws_ce_anomaly_monitor" "service" {
   name              = "ServiceAnomalyMonitor"
@@ -173,6 +180,7 @@ resource "aws_ce_anomaly_subscription" "alerts" {
 
 ```markdown
 ## Immediate (This Week)
+
 - [ ] Delete unattached EBS volumes
 - [ ] Remove unused Elastic IPs
 - [ ] Clean up old snapshots/AMIs
@@ -180,6 +188,7 @@ resource "aws_ce_anomaly_subscription" "alerts" {
 - [ ] Review and delete unused load balancers
 
 ## Short-term (This Month)
+
 - [ ] Implement S3 lifecycle policies
 - [ ] Enable S3 Intelligent-Tiering
 - [ ] Rightsize top 10 costliest instances
@@ -187,6 +196,7 @@ resource "aws_ce_anomaly_subscription" "alerts" {
 - [ ] Enable auto-scaling where missing
 
 ## Medium-term (This Quarter)
+
 - [ ] Purchase Savings Plans (70% coverage)
 - [ ] Migrate to Graviton instances
 - [ ] Implement spot for non-critical workloads
@@ -232,6 +242,7 @@ Total Cost / Number of Transactions
 Revenue / Infrastructure Cost
 
 ## Targets
+
 - Cost per user: < $0.50/month
 - Cost per 1000 API calls: < $0.10
 - Infrastructure as % of revenue: < 15%
@@ -243,11 +254,11 @@ Revenue / Infrastructure Cost
 # Resource requests/limits (prevent over-provisioning)
 resources:
   requests:
-    cpu: "100m"      # Start low, increase based on metrics
+    cpu: "100m" # Start low, increase based on metrics
     memory: "128Mi"
   limits:
-    cpu: "500m"      # 5x headroom for bursts
-    memory: "512Mi"  # Hard limit to prevent OOM
+    cpu: "500m" # 5x headroom for bursts
+    memory: "512Mi" # Hard limit to prevent OOM
 
 # Horizontal Pod Autoscaler
 apiVersion: autoscaling/v2
@@ -276,26 +287,31 @@ spec:
 # Monthly FinOps Report - [Month Year]
 
 ## Executive Summary
+
 - Total Spend: $X (+/-Y% MoM)
 - Budget Variance: $X under/over
 - Key Actions: [Summary]
 
 ## Spend by Category
-| Category | Spend | % Change | Notes |
-|----------|-------|----------|-------|
-| Compute | $X | +Y% | [Reason] |
-| Database | $X | -Y% | [Reason] |
-| Storage | $X | +Y% | [Reason] |
+
+| Category | Spend | % Change | Notes    |
+| -------- | ----- | -------- | -------- |
+| Compute  | $X    | +Y%      | [Reason] |
+| Database | $X    | -Y%      | [Reason] |
+| Storage  | $X    | +Y%      | [Reason] |
 
 ## Optimization Actions
+
 1. [Action taken] - Saved $X/month
 2. [Action taken] - Saved $X/month
 
 ## Recommendations
+
 1. [Recommendation] - Est. savings $X/month
 2. [Recommendation] - Est. savings $X/month
 
 ## Next Month Focus
+
 - [Priority 1]
 - [Priority 2]
 ```

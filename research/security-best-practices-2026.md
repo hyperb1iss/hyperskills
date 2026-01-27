@@ -10,13 +10,13 @@ This document outlines cutting-edge security techniques for development agents a
 
 ### Traditional Frameworks
 
-| Framework | Focus Area | Key Use Case |
-|-----------|------------|--------------|
-| **OSSTMM** | Scientific security testing | Peer-reviewed methodology with adaptable guides |
-| **OWASP Testing Guide** | Web/mobile/API/IoT | Identifies common vulnerabilities and logic flaws |
-| **MITRE ATT&CK** | Threat modeling | Maps attacker TTPs for Enterprise, Mobile, and ICS |
-| **PTES** | Comprehensive pentesting | Seven-section standard covering all aspects |
-| **NIST 800-115** | Infrastructure/network | IT security assessment and compliance |
+| Framework               | Focus Area                  | Key Use Case                                       |
+| ----------------------- | --------------------------- | -------------------------------------------------- |
+| **OSSTMM**              | Scientific security testing | Peer-reviewed methodology with adaptable guides    |
+| **OWASP Testing Guide** | Web/mobile/API/IoT          | Identifies common vulnerabilities and logic flaws  |
+| **MITRE ATT&CK**        | Threat modeling             | Maps attacker TTPs for Enterprise, Mobile, and ICS |
+| **PTES**                | Comprehensive pentesting    | Seven-section standard covering all aspects        |
+| **NIST 800-115**        | Infrastructure/network      | IT security assessment and compliance              |
 
 ### AI-Powered Penetration Testing (2026)
 
@@ -51,14 +51,14 @@ Social Engineering -> SET (Social-Engineer Toolkit)
 
 ### Top AI Code Review Platforms
 
-| Platform | Key Security Features |
-|----------|----------------------|
-| **Qodo** | 15+ agentic workflows, on-prem/VPC/zero-data-retention modes |
+| Platform       | Key Security Features                                               |
+| -------------- | ------------------------------------------------------------------- |
+| **Qodo**       | 15+ agentic workflows, on-prem/VPC/zero-data-retention modes        |
 | **CodeRabbit** | 40+ linters/scanners, SOC2 Type II certified, end-to-end encryption |
-| **Codacy** | AI Guardrails for AI-generated code vulnerabilities |
-| **Sourcery** | Zero-retention, bring-your-own-LLM, SOC 2 certified |
-| **Snyk** | Code + dependencies + containers + IaC scanning |
-| **CodeAnt AI** | Transitive dependency CVE checks, trust signal analysis |
+| **Codacy**     | AI Guardrails for AI-generated code vulnerabilities                 |
+| **Sourcery**   | Zero-retention, bring-your-own-LLM, SOC 2 certified                 |
+| **Snyk**       | Code + dependencies + containers + IaC scanning                     |
+| **CodeAnt AI** | Transitive dependency CVE checks, trust signal analysis             |
 
 ### Implementation Checklist
 
@@ -78,13 +78,13 @@ Social Engineering -> SET (Social-Engineer Toolkit)
 
 ### Core ML Techniques
 
-| Technique | Application |
-|-----------|-------------|
-| **Behavioral Anomaly Detection** | Baseline deviation flagging |
-| **Predictive Threat Intelligence** | Attack likelihood prediction from patterns |
-| **Supervised Learning** | Malware classification (file structure, behavior) |
-| **Unsupervised Learning** | Novel threat/anomaly detection |
-| **TF-IDF + Random Forest** | Text-based threat classification |
+| Technique                          | Application                                       |
+| ---------------------------------- | ------------------------------------------------- |
+| **Behavioral Anomaly Detection**   | Baseline deviation flagging                       |
+| **Predictive Threat Intelligence** | Attack likelihood prediction from patterns        |
+| **Supervised Learning**            | Malware classification (file structure, behavior) |
+| **Unsupervised Learning**          | Novel threat/anomaly detection                    |
+| **TF-IDF + Random Forest**         | Text-based threat classification                  |
 
 ### Emerging Techniques (2025-2026)
 
@@ -118,20 +118,21 @@ predictions = clf.predict(X_new)
 
 ### Platform Comparison
 
-| Platform | Frameworks Supported | Key Features |
-|----------|---------------------|--------------|
-| **Vanta** | 35+ frameworks | 375+ integrations, 1200+ hourly tests |
-| **Drata** | SOC 2, ISO 27001, HIPAA, GDPR, PCI DSS, NIST | AI-native GRC, deep integrations |
-| **Secureframe** | SOC 2, ISO 27001, PCI DSS, HIPAA, GDPR | Cross-framework evidence mapping |
-| **Scytale** | Multi-framework | AI agent (Scy) for evidence review |
-| **Scrut** | ISO 27001, SOC 2, GDPR, PCI DSS, HIPAA | Auto-clause mapping |
-| **Hyperproof** | 118+ frameworks | 70+ integrations |
-| **Comp AI** | SOC 2, ISO 27001, HIPAA, GDPR | AI agents for compliance tasks |
+| Platform        | Frameworks Supported                         | Key Features                          |
+| --------------- | -------------------------------------------- | ------------------------------------- |
+| **Vanta**       | 35+ frameworks                               | 375+ integrations, 1200+ hourly tests |
+| **Drata**       | SOC 2, ISO 27001, HIPAA, GDPR, PCI DSS, NIST | AI-native GRC, deep integrations      |
+| **Secureframe** | SOC 2, ISO 27001, PCI DSS, HIPAA, GDPR       | Cross-framework evidence mapping      |
+| **Scytale**     | Multi-framework                              | AI agent (Scy) for evidence review    |
+| **Scrut**       | ISO 27001, SOC 2, GDPR, PCI DSS, HIPAA       | Auto-clause mapping                   |
+| **Hyperproof**  | 118+ frameworks                              | 70+ integrations                      |
+| **Comp AI**     | SOC 2, ISO 27001, HIPAA, GDPR                | AI agents for compliance tasks        |
 
 ### Key Capabilities
 
 ```markdown
 Must-Have Features:
+
 - Automated evidence collection (continuous)
 - Control monitoring (24/7, not annual)
 - Cross-framework mapping (single evidence -> multiple frameworks)
@@ -143,11 +144,11 @@ Must-Have Features:
 
 ### Regulatory Timeline
 
-| Regulation | Effective Date | Key Requirements |
-|------------|----------------|------------------|
-| EU CRA (partial) | Dec 11, 2026 | Technical documentation |
-| EU CRA (SBOMs) | Dec 11, 2027 | Full SBOM requirements |
-| NIS2 | Oct 2024+ | Critical infrastructure security |
+| Regulation       | Effective Date | Key Requirements                 |
+| ---------------- | -------------- | -------------------------------- |
+| EU CRA (partial) | Dec 11, 2026   | Technical documentation          |
+| EU CRA (SBOMs)   | Dec 11, 2027   | Full SBOM requirements           |
+| NIS2             | Oct 2024+      | Critical infrastructure security |
 
 ---
 
@@ -189,6 +190,7 @@ Must-Have Features:
 ### Agentic AI in Incident Response
 
 Modern platforms combine deterministic playbooks with AI agents:
+
 - **Swimlane Turbine**: Deterministic guardrails + AI reasoning
 - **IBM ATOM**: Autonomous threat operations with context gathering
 - AI agents autonomously:
@@ -199,11 +201,11 @@ Modern platforms combine deterministic playbooks with AI agents:
 
 ### Response Time Targets
 
-| Metric | Target | Notes |
-|--------|--------|-------|
-| MTTD (Mean Time to Detect) | < 5 minutes | AI-enabled detection |
-| MTTR (Mean Time to Respond) | < 1 hour | Automated containment |
-| Post-Incident Report | Automated | Generated on resolution |
+| Metric                      | Target      | Notes                   |
+| --------------------------- | ----------- | ----------------------- |
+| MTTD (Mean Time to Detect)  | < 5 minutes | AI-enabled detection    |
+| MTTR (Mean Time to Respond) | < 1 hour    | Automated containment   |
+| Post-Incident Report        | Automated   | Generated on resolution |
 
 ---
 
@@ -224,12 +226,12 @@ Modern platforms combine deterministic playbooks with AI agents:
 
 ### Key Frameworks
 
-| Framework | Source | Focus |
-|-----------|--------|-------|
-| **ZTMM** | CISA | Maturity model (Traditional → Optimal) |
-| **SP 800-207** | NIST | Architecture specification |
-| **SP 1800-35** | NIST/NCCoE | Implementation guide (24 vendors) |
-| **ZIG** | NSA | Practical implementation guidelines |
+| Framework      | Source     | Focus                                  |
+| -------------- | ---------- | -------------------------------------- |
+| **ZTMM**       | CISA       | Maturity model (Traditional → Optimal) |
+| **SP 800-207** | NIST       | Architecture specification             |
+| **SP 1800-35** | NIST/NCCoE | Implementation guide (24 vendors)      |
+| **ZIG**        | NSA        | Practical implementation guidelines    |
 
 ### Implementation Pillars (CISA ZTMM)
 
@@ -257,10 +259,12 @@ Modern platforms combine deterministic playbooks with AI agents:
 ### AI-Enhanced Zero Trust (2026)
 
 Organizations implementing Zero Trust AI Security reported:
+
 - 76% fewer successful breaches
 - Incident response: days → minutes
 
 Key metrics to track:
+
 - Security incidents (should decrease)
 - MTTD (goal: < 5 minutes)
 - MTTR (goal: < 1 hour)
@@ -275,12 +279,12 @@ Key metrics to track:
 
 #### Standards and Formats
 
-| Standard | Format | Purpose |
-|----------|--------|---------|
-| **SPDX** | Machine-readable | Linux Foundation standard |
-| **CycloneDX** | Machine-readable | OWASP standard |
-| **NTIA Minimum** | Baseline | Who, what, when inventory |
-| **CISA Framing** | Maturity model | Minimum → Aspirational elements |
+| Standard         | Format           | Purpose                         |
+| ---------------- | ---------------- | ------------------------------- |
+| **SPDX**         | Machine-readable | Linux Foundation standard       |
+| **CycloneDX**    | Machine-readable | OWASP standard                  |
+| **NTIA Minimum** | Baseline         | Who, what, when inventory       |
+| **CISA Framing** | Maturity model   | Minimum → Aspirational elements |
 
 #### SBOM Maturity Levels
 
@@ -312,11 +316,11 @@ Level 3 (Aspirational): + Provenance, vulnerability status, EOL info
 
 #### Security Levels
 
-| Level | Requirements |
-|-------|--------------|
-| **L0** | No SLSA (dev/test only) |
-| **L1** | Auto-generated provenance |
-| **L2** | Hosted, isolated builds; pinned inputs |
+| Level  | Requirements                                                |
+| ------ | ----------------------------------------------------------- |
+| **L0** | No SLSA (dev/test only)                                     |
+| **L1** | Auto-generated provenance                                   |
+| **L2** | Hosted, isolated builds; pinned inputs                      |
 | **L3** | Hardened builders; ephemeral, reproducible; 2-person review |
 
 #### Sigstore Integration
@@ -341,15 +345,15 @@ cosign verify --certificate-identity user@example.com \
 
 #### Platform Comparison
 
-| Platform | Type | Key Feature |
-|----------|------|-------------|
-| **OpenBao** | Open Source | Vault fork (Linux Foundation) |
-| **Infisical** | Open Source (MIT) | End-to-end encrypted, 10K+ dev community |
-| **Mozilla SOPS** | Tool | Encrypt files, integrates with cloud KMS |
-| **AWS Secrets Manager** | Cloud | Auto-rotation, AWS-native |
-| **Azure Key Vault** | Cloud | HSM support, Azure-native |
-| **Akeyless** | SaaS | Zero-trust DFC, no third-party access |
-| **CyberArk** | Enterprise | PAM + secrets, hybrid support |
+| Platform                | Type              | Key Feature                              |
+| ----------------------- | ----------------- | ---------------------------------------- |
+| **OpenBao**             | Open Source       | Vault fork (Linux Foundation)            |
+| **Infisical**           | Open Source (MIT) | End-to-end encrypted, 10K+ dev community |
+| **Mozilla SOPS**        | Tool              | Encrypt files, integrates with cloud KMS |
+| **AWS Secrets Manager** | Cloud             | Auto-rotation, AWS-native                |
+| **Azure Key Vault**     | Cloud             | HSM support, Azure-native                |
+| **Akeyless**            | SaaS              | Zero-trust DFC, no third-party access    |
+| **CyberArk**            | Enterprise        | PAM + secrets, hybrid support            |
 
 #### Best Practices
 
@@ -388,23 +392,24 @@ Code → SAST → SCA → Build → Sign → DAST/IAST → Deploy → Runtime
 **2026**: "Shift smart" - intelligent, contextual, actionable feedback
 
 Key principles:
+
 - Don't flood developers with low-impact alerts
 - Security feedback in developer workspace (IDE)
 - Prioritize by exploitability, not just severity
 
 ### Tool Stack Recommendations
 
-| Stage | Tools |
-|-------|-------|
-| **Pre-commit** | gitleaks, pre-commit, husky |
-| **SAST** | Semgrep, CodeQL, Checkmarx |
-| **SCA** | Snyk, Trivy, Dependabot |
-| **Secrets** | trufflehog, gitleaks, detect-secrets |
-| **Container** | Trivy, Grype, Clair |
-| **IaC** | Checkov, tfsec, KICS |
-| **DAST** | OWASP ZAP, Nuclei, Burp |
-| **Policy** | OPA, Kyverno, Falco |
-| **Signing** | Cosign, Sigstore |
+| Stage          | Tools                                |
+| -------------- | ------------------------------------ |
+| **Pre-commit** | gitleaks, pre-commit, husky          |
+| **SAST**       | Semgrep, CodeQL, Checkmarx           |
+| **SCA**        | Snyk, Trivy, Dependabot              |
+| **Secrets**    | trufflehog, gitleaks, detect-secrets |
+| **Container**  | Trivy, Grype, Clair                  |
+| **IaC**        | Checkov, tfsec, KICS                 |
+| **DAST**       | OWASP ZAP, Nuclei, Burp              |
+| **Policy**     | OPA, Kyverno, Falco                  |
+| **Signing**    | Cosign, Sigstore                     |
 
 ---
 
@@ -447,6 +452,7 @@ Key principles:
 **Warning**: AI agents are the new insider threat (Palo Alto Networks, 2026)
 
 Risks to mitigate:
+
 - Prompt injection and manipulation
 - Tool misuse and privilege escalation
 - Memory poisoning
@@ -490,36 +496,42 @@ Risks to mitigate:
 ## Sources
 
 ### Penetration Testing
+
 - [EC-Council: 35+ Pentesting & AI Pentesting Tools](https://www.eccouncil.org/cybersecurity-exchange/penetration-testing/35-pentesting-tools-and-ai-pentesting-tools-for-cybersecurity/)
 - [PlexTrac: Most Popular Penetration Testing Tools 2026](https://plextrac.com/the-most-popular-penetration-testing-tools-this-year/)
 - [Penligent: Ultimate Guide to AI Penetration Testing 2026](https://www.penligent.ai/hackinglabs/the-2026-ultimate-guide-to-ai-penetration-testing-the-era-of-agentic-red-teaming/)
 - [OWASP Testing Methodologies](https://owasp.org/www-project-web-security-testing-guide/latest/3-The_OWASP_Testing_Framework/1-Penetration_Testing_Methodologies)
 
 ### Code Review Automation
+
 - [Qodo: Best Automated Code Review Tools 2026](https://www.qodo.ai/blog/best-automated-code-review-tools-2026/)
 - [CodeRabbit AI](https://www.coderabbit.ai/)
 - [CodeAnt AI: Secure Code Review Platforms](https://www.codeant.ai/blogs/ai-secure-code-review-platforms)
 - [Aikido: Best Code Review Tools](https://www.aikido.dev/blog/best-code-review-tools)
 
 ### Threat Hunting
+
 - [Palo Alto Networks: AI in Threat Detection](https://www.paloaltonetworks.com/cyberpedia/ai-in-threat-detection)
 - [Kaspersky Securelist: Machine Learning in Threat Hunting](https://securelist.com/machine-learning-in-threat-hunting/114016/)
 - [RSA Conference: AI-Powered Threat Hunting](https://www.rsaconference.com/library/blog/ai-powered-threat-hunting)
 - [SANS SEC595: Applied Data Science for Cybersecurity](https://www.sans.org/cyber-security-courses/applied-data-science-machine-learning)
 
 ### Compliance Automation
+
 - [Vanta](https://www.vanta.com)
 - [Zluri: Top Compliance Automation Tools 2026](https://www.zluri.com/blog/compliance-automation-tools)
 - [Technology.org: Best Compliance Tools for SOC 2 Audits 2026](https://www.technology.org/2026/01/07/10-best-compliance-tools-teams-rely-on-during-soc-2-audits-in-2026/)
 - [Scytale: Best SOC 2 Compliance Software 2026](https://scytale.ai/center/soc-2/best-soc-2-compliance-software/)
 
 ### Incident Response
+
 - [Swimlane: Incident Response Playbook Guide](https://swimlane.com/blog/incident-response-playbook/)
 - [Gartner: SOAR Solutions Reviews](https://www.gartner.com/reviews/market/security-orchestration-automation-and-response-solutions)
 - [Cyware: Applying SOAR to NIST IR Playbook](https://www.cyware.com/resources/security-guides/incident-response/applying-soar-to-nists-incident-response-playbook)
 - [Palo Alto Networks: Incident Response Playbooks](https://www.paloaltonetworks.com/cyberpedia/what-is-an-incident-response-playbook)
 
 ### Zero Trust
+
 - [NSA Zero Trust Implementation Guidelines](https://www.nsa.gov/Press-Room/Press-Releases-Statements/Press-Release-View/Article/4378980/nsa-releases-first-in-series-of-zero-trust-implementation-guidelines/)
 - [Microsoft Zero Trust Strategy](https://www.microsoft.com/en-us/security/business/zero-trust)
 - [NIST SP 800-207](https://nvlpubs.nist.gov/nistpubs/specialpublications/NIST.SP.800-207.pdf)
@@ -527,6 +539,7 @@ Risks to mitigate:
 - [Seraphic: Top 4 Zero Trust Frameworks 2026](https://seraphicsecurity.com/learn/zero-trust/top-4-zero-trust-frameworks-in-2026-and-how-to-choose/)
 
 ### Supply Chain Security
+
 - [SLSA Framework](https://slsa.dev/)
 - [CISA SBOM](https://www.cisa.gov/sbom)
 - [OpenSSF: Software Supply Chain Security](https://openssf.org/tag/software-supply-chain-security/)
@@ -534,18 +547,21 @@ Risks to mitigate:
 - [Chainguard: Introduction to SLSA](https://edu.chainguard.dev/compliance/slsa/what-is-slsa/)
 
 ### Secrets Management
+
 - [OpenBao](https://openbao.org/)
 - [StrongDM: Vault Alternatives](https://www.strongdm.com/blog/alternatives-to-hashicorp-vault)
 - [Infisical: HashiCorp Vault Alternatives](https://infisical.com/blog/hashicorp-vault-alternatives)
 - [Cycode: Best Secrets Management Tools 2026](https://cycode.com/blog/best-secrets-management-tools/)
 
 ### DevSecOps
+
 - [Wiz: DevSecOps Pipeline Best Practices 2026](https://www.wiz.io/academy/application-security/devsecops-pipeline-best-practices)
 - [Practical DevSecOps: Trends 2026](https://www.practical-devsecops.com/devsecops-trends-2026/)
 - [Practical DevSecOps: Top 15 Best Practices 2026](https://www.practical-devsecops.com/devsecops-best-practices/)
 - [Checkmarx: Shift-Left Security](https://checkmarx.com/learn/sast/shift-left-security-integrate-sast-into-devsecops-pipeline/)
 
 ### Agentic SOC
+
 - [Splunk: Security Predictions 2026 - Agentic AI](https://www.splunk.com/en_us/blog/leadership/security-predictions-2026-what-agentic-ai-means-for-the-people-running-the-soc.html)
 - [SOCRadar: Top 10 Agentic SOC Platforms 2026](https://socradar.io/blog/top-10-agentic-soc-platforms-2026/)
 - [IBM: Agentic AI Enables Autonomous SOC](https://www.ibm.com/think/insights/agentic-ai-enables-autonomous-soc)

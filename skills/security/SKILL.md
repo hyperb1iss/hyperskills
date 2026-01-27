@@ -12,6 +12,7 @@ Secure systems from design through deployment and incident response.
 ### Security Architecture Principles
 
 **Zero Trust Model:**
+
 1. Never trust, always verify
 2. Assume breach
 3. Verify explicitly
@@ -19,6 +20,7 @@ Secure systems from design through deployment and incident response.
 5. Micro-segmentation
 
 **SLSA Framework (Supply Chain):**
+
 - Level 1: Documentation
 - Level 2: Hosted build, signed provenance
 - Level 3: Hardened builds, 2-person review
@@ -26,19 +28,20 @@ Secure systems from design through deployment and incident response.
 
 ### Threat Modeling (STRIDE)
 
-| Threat | Example | Mitigation |
-|--------|---------|------------|
-| **S**poofing | Fake identity | Strong auth, MFA |
-| **T**ampering | Modified data | Integrity checks, signing |
-| **R**epudiation | Deny actions | Audit logs, non-repudiation |
-| **I**nformation Disclosure | Data leak | Encryption, access control |
-| **D**enial of Service | Overload | Rate limiting, scaling |
-| **E**levation of Privilege | Unauthorized access | Least privilege, RBAC |
+| Threat                     | Example             | Mitigation                  |
+| -------------------------- | ------------------- | --------------------------- |
+| **S**poofing               | Fake identity       | Strong auth, MFA            |
+| **T**ampering              | Modified data       | Integrity checks, signing   |
+| **R**epudiation            | Deny actions        | Audit logs, non-repudiation |
+| **I**nformation Disclosure | Data leak           | Encryption, access control  |
+| **D**enial of Service      | Overload            | Rate limiting, scaling      |
+| **E**levation of Privilege | Unauthorized access | Least privilege, RBAC       |
 
 ### Code Security Review Checklist
 
 ```markdown
 ## OWASP Top 10 (2021)
+
 - [ ] A01: Broken Access Control
 - [ ] A02: Cryptographic Failures
 - [ ] A03: Injection (SQL, NoSQL, OS, LDAP)
@@ -103,6 +106,7 @@ CMD ["node", "server.js"]
 ```
 
 **Scan images:**
+
 ```bash
 trivy image myapp:latest --severity HIGH,CRITICAL
 ```
@@ -110,6 +114,7 @@ trivy image myapp:latest --severity HIGH,CRITICAL
 ### Runtime Security (eBPF)
 
 **Tetragon** for kernel-level enforcement:
+
 ```yaml
 apiVersion: cilium.io/v1alpha1
 kind: TracingPolicy
@@ -127,6 +132,7 @@ spec:
 ```
 
 **Falco** for threat detection:
+
 ```yaml
 - rule: Shell Spawned in Container
   desc: Detect shell spawned in a container
@@ -142,11 +148,13 @@ spec:
 ### Compliance Automation
 
 **Vanta/Drata Integration:**
+
 - Continuous monitoring of 35+ frameworks
 - Automated evidence collection
 - Risk flagging and remediation tracking
 
 **Key Frameworks:**
+
 - SOC 2 Type II
 - ISO 27001
 - HIPAA
@@ -157,30 +165,35 @@ spec:
 
 ```markdown
 ## Phase 1: Detection & Analysis (MTTD < 5 min)
+
 1. Alert triggered → Acknowledge in SOAR
 2. Gather initial IOCs (IPs, hashes, usernames)
 3. Determine scope and severity
 4. Escalate if P1/P2
 
 ## Phase 2: Containment (MTTR < 1 hour)
+
 1. Isolate affected systems
 2. Block malicious IPs/domains
 3. Disable compromised accounts
 4. Preserve evidence (disk images, logs)
 
 ## Phase 3: Eradication
+
 1. Remove malware/backdoors
 2. Patch vulnerabilities
 3. Reset credentials
 4. Verify clean state
 
 ## Phase 4: Recovery
+
 1. Restore from clean backups
 2. Monitor for re-infection
 3. Gradual service restoration
 4. Validate functionality
 
 ## Phase 5: Lessons Learned
+
 1. Timeline reconstruction
 2. Root cause analysis
 3. Update playbooks
@@ -191,12 +204,14 @@ spec:
 
 ```markdown
 ## Reconnaissance
+
 - [ ] DNS enumeration
 - [ ] Subdomain discovery
 - [ ] Port scanning
 - [ ] Service fingerprinting
 
 ## Web Application
+
 - [ ] Authentication bypass
 - [ ] Session management
 - [ ] Input validation
@@ -204,6 +219,7 @@ spec:
 - [ ] Business logic
 
 ## Infrastructure
+
 - [ ] Network segmentation
 - [ ] Privilege escalation
 - [ ] Lateral movement

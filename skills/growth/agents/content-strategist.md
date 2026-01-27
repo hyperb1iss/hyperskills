@@ -73,9 +73,11 @@ Thread  Post    Carousel
 ## FAQ
 
 ### [Question with long-tail keyword?]
+
 [Concise answer - great for featured snippets]
 
 ---
+
 **Next Steps:** [CTA with internal link]
 ```
 
@@ -99,31 +101,41 @@ Thread  Post    Carousel
 
 ```markdown
 ## HOOK (0:00-0:30)
+
 [Bold statement or question that creates curiosity]
 "Did you know [surprising fact]?"
 
 ## INTRO (0:30-1:00)
+
 [Brief context + promise of value]
 "In this video, you'll learn exactly how to [outcome]"
 
 ## CONTENT SECTION 1 (1:00-4:00)
+
 [First main point with examples]
+
 - Visual: [B-roll/screen share description]
 - Pattern interrupt at 2:00
 
 ## CONTENT SECTION 2 (4:00-7:00)
+
 [Second main point]
+
 - Visual: [Description]
 
 ## CONTENT SECTION 3 (7:00-10:00)
+
 [Third main point]
+
 - Visual: [Description]
 
 ## SUMMARY (10:00-11:00)
+
 [Recap key points]
 "So remember: [3 takeaways]"
 
 ## CTA (11:00-end)
+
 [Subscribe, comment, related video]
 "If this helped, hit subscribe and check out [related video]"
 ```
@@ -132,18 +144,23 @@ Thread  Post    Carousel
 
 ```markdown
 ## HOOK (0:00-0:03)
+
 [Text on screen + immediate visual interest]
 "Stop doing [common mistake]"
 
 ## CONTEXT (0:03-0:10)
+
 [Quick setup - why this matters]
 
 ## VALUE (0:10-0:45)
+
 [The actual tip/content]
+
 - Quick cuts every 2-3 seconds
 - Text overlays for key points
 
 ## CTA (0:45-0:60)
+
 [Follow for more, save this, comment]
 ```
 
@@ -151,9 +168,11 @@ Thread  Post    Carousel
 
 ```markdown
 ## Subject Line (< 50 chars)
+
 [Curiosity gap or clear benefit]
 
 ## Preview Text (< 100 chars)
+
 [Complements subject, doesn't repeat]
 
 ---
@@ -167,6 +186,7 @@ Hey [Name],
 [Main content piece - 200-400 words]
 
 ### Key Takeaway
+
 [Bold the most important point]
 
 ## Quick Hits
@@ -191,18 +211,21 @@ P.S. [Soft CTA or bonus tip]
 ## Monthly Theme: [Topic]
 
 ### Week 1
-| Day | Platform | Content Type | Topic | Status |
-|-----|----------|--------------|-------|--------|
-| Mon | Blog | Pillar Post | [Topic] | Draft |
-| Tue | Twitter | Thread | [Topic] | Scheduled |
-| Wed | LinkedIn | Carousel | [Topic] | Scheduled |
-| Thu | YouTube | Tutorial | [Topic] | Filming |
-| Fri | Newsletter | Weekly | [Topic] | Draft |
+
+| Day | Platform   | Content Type | Topic   | Status    |
+| --- | ---------- | ------------ | ------- | --------- |
+| Mon | Blog       | Pillar Post  | [Topic] | Draft     |
+| Tue | Twitter    | Thread       | [Topic] | Scheduled |
+| Wed | LinkedIn   | Carousel     | [Topic] | Scheduled |
+| Thu | YouTube    | Tutorial     | [Topic] | Filming   |
+| Fri | Newsletter | Weekly       | [Topic] | Draft     |
 
 ### Week 2
+
 [Continue pattern...]
 
 ## Content Pillars (Rotating)
+
 1. Educational (how-to, tutorials)
 2. Inspirational (case studies, success stories)
 3. Entertaining (trends, memes, behind-scenes)
@@ -213,14 +236,14 @@ P.S. [Soft CTA or bonus tip]
 
 ## Platform Optimization
 
-| Platform | Optimal Length | Best Times | Format |
-|----------|---------------|------------|--------|
-| Blog | 1,500-2,500 words | Tue-Thu morning | Long-form |
-| YouTube | 8-15 min | Sat-Sun | Tutorial |
-| TikTok | 15-60 sec | 7-9 PM | Entertainment |
-| Twitter | 1-4 tweets | 8-10 AM | Threads |
-| LinkedIn | 1,300 chars | Tue-Thu 8 AM | Carousel |
-| Newsletter | 500-800 words | Tue-Thu 10 AM | Personal |
+| Platform   | Optimal Length    | Best Times      | Format        |
+| ---------- | ----------------- | --------------- | ------------- |
+| Blog       | 1,500-2,500 words | Tue-Thu morning | Long-form     |
+| YouTube    | 8-15 min          | Sat-Sun         | Tutorial      |
+| TikTok     | 15-60 sec         | 7-9 PM          | Entertainment |
+| Twitter    | 1-4 tweets        | 8-10 AM         | Threads       |
+| LinkedIn   | 1,300 chars       | Tue-Thu 8 AM    | Carousel      |
+| Newsletter | 500-800 words     | Tue-Thu 10 AM   | Personal      |
 
 ## Repurposing Workflow
 

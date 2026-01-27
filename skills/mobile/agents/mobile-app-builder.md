@@ -23,6 +23,7 @@ You are an expert mobile developer specializing in React Native and Expo.
 ### New Architecture (Default in Expo 53+)
 
 The New Architecture includes:
+
 - **Fabric**: New rendering system (faster, synchronous)
 - **Turbo Modules**: Faster native module access
 - **Codegen**: Type-safe native interfaces
@@ -31,20 +32,21 @@ The New Architecture includes:
 ```tsx
 // Turbo Module definition (codegen generates native code)
 // specs/NativeCalculator.ts
-import type { TurboModule } from 'react-native';
-import { TurboModuleRegistry } from 'react-native';
+import type { TurboModule } from "react-native";
+import { TurboModuleRegistry } from "react-native";
 
 export interface Spec extends TurboModule {
   multiply(a: number, b: number): number;
   multiplyAsync(a: number, b: number): Promise<number>;
 }
 
-export default TurboModuleRegistry.getEnforcing<Spec>('Calculator');
+export default TurboModuleRegistry.getEnforcing<Spec>("Calculator");
 ```
 
 ### Expo Router Patterns
 
 **File-based routing:**
+
 ```
 app/
 ├── (tabs)/              # Tab group
@@ -59,10 +61,11 @@ app/
 ```
 
 **Layouts:**
+
 ```tsx
 // app/(tabs)/_layout.tsx
-import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Tabs } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function TabLayout() {
   return (
@@ -70,19 +73,15 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="home" size={24} color={color} />
-          ),
+          title: "Home",
+          tabBarIcon: ({ color }) => <Ionicons name="home" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="person" size={24} color={color} />
-          ),
+          title: "Profile",
+          tabBarIcon: ({ color }) => <Ionicons name="person" size={24} color={color} />,
         }}
       />
     </Tabs>
@@ -91,16 +90,17 @@ export default function TabLayout() {
 ```
 
 **Navigation:**
+
 ```tsx
-import { router, useLocalSearchParams, Link } from 'expo-router';
+import { router, useLocalSearchParams, Link } from "expo-router";
 
 // Programmatic navigation
-router.push('/profile/123');
-router.replace('/home');
+router.push("/profile/123");
+router.replace("/home");
 router.back();
 
 // Link component
-<Link href="/profile/123">View Profile</Link>
+<Link href="/profile/123">View Profile</Link>;
 
 // Get params
 const { id } = useLocalSearchParams<{ id: string }>();
@@ -111,25 +111,20 @@ const { id } = useLocalSearchParams<{ id: string }>();
 ```tsx
 // tailwind.config.js
 module.exports = {
-  content: ['./app/**/*.{js,jsx,ts,tsx}'],
-  presets: [require('nativewind/preset')],
+  content: ["./app/**/*.{js,jsx,ts,tsx}"],
+  presets: [require("nativewind/preset")],
   theme: {
     extend: {},
   },
 };
 
 // Usage
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable } from "react-native";
 
 export function Card({ title, onPress }) {
   return (
-    <Pressable
-      onPress={onPress}
-      className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg active:scale-95"
-    >
-      <Text className="text-lg font-bold text-gray-900 dark:text-white">
-        {title}
-      </Text>
+    <Pressable onPress={onPress} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg active:scale-95">
+      <Text className="text-lg font-bold text-gray-900 dark:text-white">{title}</Text>
     </Pressable>
   );
 }
@@ -138,8 +133,9 @@ export function Card({ title, onPress }) {
 ### Performance Patterns
 
 **Use FlashList for long lists:**
+
 ```tsx
-import { FlashList } from '@shopify/flash-list';
+import { FlashList } from "@shopify/flash-list";
 
 function UserList({ users }) {
   return (
@@ -154,8 +150,9 @@ function UserList({ users }) {
 ```
 
 **Memoize expensive components:**
+
 ```tsx
-import { memo, useMemo } from 'react';
+import { memo, useMemo } from "react";
 
 const ExpensiveChart = memo(function ExpensiveChart({ data }) {
   const processedData = useMemo(() => processData(data), [data]);
@@ -164,23 +161,24 @@ const ExpensiveChart = memo(function ExpensiveChart({ data }) {
 ```
 
 **Use expo-image for images:**
+
 ```tsx
-import { Image } from 'expo-image';
+import { Image } from "expo-image";
 
 <Image
-  source={{ uri: 'https://example.com/image.jpg' }}
+  source={{ uri: "https://example.com/image.jpg" }}
   style={{ width: 200, height: 200 }}
   contentFit="cover"
   transition={200}
   placeholder={blurhash}
-/>
+/>;
 ```
 
 ### Push Notifications
 
 ```tsx
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
 
 // Configure handler
 Notifications.setNotificationHandler({
@@ -194,19 +192,19 @@ Notifications.setNotificationHandler({
 // Register for push notifications
 async function registerForPushNotifications() {
   if (!Device.isDevice) {
-    console.log('Push notifications require a physical device');
+    console.log("Push notifications require a physical device");
     return;
   }
 
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
 
-  if (existingStatus !== 'granted') {
+  if (existingStatus !== "granted") {
     const { status } = await Notifications.requestPermissionsAsync();
     finalStatus = status;
   }
 
-  if (finalStatus !== 'granted') {
+  if (finalStatus !== "granted") {
     return;
   }
 
@@ -221,34 +219,34 @@ async function registerForPushNotifications() {
 ### Secure Storage
 
 ```tsx
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from "expo-secure-store";
 
 // Store sensitive data
-await SecureStore.setItemAsync('auth_token', token);
+await SecureStore.setItemAsync("auth_token", token);
 
 // Retrieve
-const token = await SecureStore.getItemAsync('auth_token');
+const token = await SecureStore.getItemAsync("auth_token");
 
 // Delete
-await SecureStore.deleteItemAsync('auth_token');
+await SecureStore.deleteItemAsync("auth_token");
 ```
 
 ### Biometric Authentication
 
 ```tsx
-import * as LocalAuthentication from 'expo-local-authentication';
+import * as LocalAuthentication from "expo-local-authentication";
 
 async function authenticateWithBiometrics() {
   const hasHardware = await LocalAuthentication.hasHardwareAsync();
   const isEnrolled = await LocalAuthentication.isEnrolledAsync();
 
   if (!hasHardware || !isEnrolled) {
-    return { success: false, error: 'Biometrics not available' };
+    return { success: false, error: "Biometrics not available" };
   }
 
   const result = await LocalAuthentication.authenticateAsync({
-    promptMessage: 'Authenticate to continue',
-    fallbackLabel: 'Use passcode',
+    promptMessage: "Authenticate to continue",
+    fallbackLabel: "Use passcode",
   });
 
   return result;
@@ -273,6 +271,7 @@ eas update --branch production --message "Bug fixes"
 ```
 
 **eas.json:**
+
 ```json
 {
   "build": {

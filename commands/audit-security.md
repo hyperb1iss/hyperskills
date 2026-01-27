@@ -10,6 +10,7 @@ Perform a comprehensive security review of the current codebase.
 ## Process
 
 1. **Dependency Scan**
+
    ```bash
    # Check for known vulnerabilities
    pnpm audit
@@ -46,24 +47,29 @@ Perform a comprehensive security review of the current codebase.
 # Security Audit Report
 
 ## Summary
+
 - Critical: X
 - High: X
 - Medium: X
 - Low: X
 
 ## Critical Issues
+
 [Details and remediation]
 
 ## High Priority Issues
+
 [Details and remediation]
 
 ## Recommendations
+
 [Proactive improvements]
 ```
 
 ## Remediation
 
 For each issue found:
+
 1. Explain the vulnerability
 2. Show the vulnerable code
 3. Provide the fix

@@ -186,12 +186,12 @@ def hash_file(filepath):
 
 ## Incident Severity Classification
 
-| Level | Description | Response Time |
-|-------|-------------|---------------|
+| Level           | Description                           | Response Time        |
+| --------------- | ------------------------------------- | -------------------- |
 | **P1 Critical** | Active breach, data exfil, ransomware | Immediate (< 15 min) |
-| **P2 High** | Confirmed compromise, limited impact | < 1 hour |
-| **P3 Medium** | Suspicious activity, contained | < 4 hours |
-| **P4 Low** | Anomaly requiring investigation | < 24 hours |
+| **P2 High**     | Confirmed compromise, limited impact  | < 1 hour             |
+| **P3 Medium**   | Suspicious activity, contained        | < 4 hours            |
+| **P4 Low**      | Anomaly requiring investigation       | < 24 hours           |
 
 ## Communication Templates
 
@@ -199,37 +199,43 @@ def hash_file(filepath):
 
 ```markdown
 ## Incident Update: [TITLE]
+
 **Time:** [TIMESTAMP]
 **Severity:** [P1/P2/P3/P4]
 **Status:** [Investigating/Contained/Eradicated/Recovered]
 
 ### Summary
+
 [2-3 sentence summary of current state]
 
 ### Impact
+
 - Systems affected: [list]
 - Data at risk: [description]
 - Business impact: [description]
 
 ### Actions Taken
+
 1. [Action 1]
 2. [Action 2]
 
 ### Next Steps
+
 1. [Next action]
 2. [Timeline]
 
 ### Questions/Decisions Needed
+
 - [Any decisions required from leadership]
 ```
 
 ## Regulatory Timelines
 
-| Regulation | Notification Deadline |
-|------------|----------------------|
-| GDPR | 72 hours to DPA |
-| HIPAA | 60 days (or less for 500+ records) |
-| PCI DSS | Immediately to card brands |
+| Regulation | Notification Deadline                  |
+| ---------- | -------------------------------------- |
+| GDPR       | 72 hours to DPA                        |
+| HIPAA      | 60 days (or less for 500+ records)     |
+| PCI DSS    | Immediately to card brands             |
 | State Laws | Varies (CA: "expedient", NY: 72 hours) |
 
 ## Post-Incident
@@ -238,19 +244,24 @@ def hash_file(filepath):
 ## Lessons Learned Template
 
 ### What Happened
+
 [Timeline and technical details]
 
 ### Root Cause
+
 [Why the incident occurred]
 
 ### What Worked Well
+
 - [Effective response actions]
 
 ### What Could Be Improved
+
 - [Gaps identified]
 
 ### Action Items
-| Item | Owner | Due Date |
-|------|-------|----------|
-| [Action] | [Name] | [Date] |
+
+| Item     | Owner  | Due Date |
+| -------- | ------ | -------- |
+| [Action] | [Name] | [Date]   |
 ```

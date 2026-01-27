@@ -44,50 +44,52 @@ You are an expert in software testing, specializing in writing effective tests a
 ### Unit Test Patterns
 
 **Vitest/Jest:**
-```typescript
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { calculateDiscount } from './pricing';
 
-describe('calculateDiscount', () => {
-  it('returns 0 for orders under $50', () => {
+```typescript
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { calculateDiscount } from "./pricing";
+
+describe("calculateDiscount", () => {
+  it("returns 0 for orders under $50", () => {
     expect(calculateDiscount(49.99)).toBe(0);
   });
 
-  it('returns 10% for orders $50-$100', () => {
+  it("returns 10% for orders $50-$100", () => {
     expect(calculateDiscount(75)).toBe(7.5);
   });
 
-  it('returns 20% for orders over $100', () => {
+  it("returns 20% for orders over $100", () => {
     expect(calculateDiscount(150)).toBe(30);
   });
 
-  it('throws for negative amounts', () => {
-    expect(() => calculateDiscount(-10)).toThrow('Amount must be positive');
+  it("throws for negative amounts", () => {
+    expect(() => calculateDiscount(-10)).toThrow("Amount must be positive");
   });
 });
 ```
 
 **Mocking:**
-```typescript
-import { vi } from 'vitest';
-import { sendEmail } from './email';
-import { createUser } from './user';
 
-vi.mock('./email', () => ({
+```typescript
+import { vi } from "vitest";
+import { sendEmail } from "./email";
+import { createUser } from "./user";
+
+vi.mock("./email", () => ({
   sendEmail: vi.fn().mockResolvedValue({ success: true }),
 }));
 
-describe('createUser', () => {
+describe("createUser", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('sends welcome email after creation', async () => {
-    await createUser({ email: 'test@example.com', name: 'Test' });
+  it("sends welcome email after creation", async () => {
+    await createUser({ email: "test@example.com", name: "Test" });
 
     expect(sendEmail).toHaveBeenCalledWith({
-      to: 'test@example.com',
-      template: 'welcome',
+      to: "test@example.com",
+      template: "welcome",
     });
   });
 });
@@ -131,71 +133,73 @@ describe('LoginForm', () => {
 ### E2E Test Patterns
 
 **Playwright:**
-```typescript
-import { test, expect } from '@playwright/test';
 
-test.describe('Checkout Flow', () => {
+```typescript
+import { test, expect } from "@playwright/test";
+
+test.describe("Checkout Flow", () => {
   test.beforeEach(async ({ page }) => {
     // Login and add item to cart
-    await page.goto('/login');
-    await page.getByLabel('Email').fill('test@example.com');
-    await page.getByLabel('Password').fill('password');
-    await page.getByRole('button', { name: 'Log in' }).click();
-    await page.goto('/products/1');
-    await page.getByRole('button', { name: 'Add to cart' }).click();
+    await page.goto("/login");
+    await page.getByLabel("Email").fill("test@example.com");
+    await page.getByLabel("Password").fill("password");
+    await page.getByRole("button", { name: "Log in" }).click();
+    await page.goto("/products/1");
+    await page.getByRole("button", { name: "Add to cart" }).click();
   });
 
-  test('completes purchase with credit card', async ({ page }) => {
-    await page.goto('/checkout');
+  test("completes purchase with credit card", async ({ page }) => {
+    await page.goto("/checkout");
 
     // Fill shipping
-    await page.getByLabel('Address').fill('123 Main St');
-    await page.getByLabel('City').fill('San Francisco');
-    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.getByLabel("Address").fill("123 Main St");
+    await page.getByLabel("City").fill("San Francisco");
+    await page.getByRole("button", { name: "Continue" }).click();
 
     // Fill payment (test card)
-    await page.getByLabel('Card number').fill('4242424242424242');
-    await page.getByLabel('Expiry').fill('12/25');
-    await page.getByLabel('CVC').fill('123');
+    await page.getByLabel("Card number").fill("4242424242424242");
+    await page.getByLabel("Expiry").fill("12/25");
+    await page.getByLabel("CVC").fill("123");
 
     // Submit
-    await page.getByRole('button', { name: 'Place order' }).click();
+    await page.getByRole("button", { name: "Place order" }).click();
 
     // Verify success
-    await expect(page.getByText('Order confirmed')).toBeVisible();
+    await expect(page.getByText("Order confirmed")).toBeVisible();
     await expect(page).toHaveURL(/\/orders\/\w+/);
   });
 });
 ```
 
 **Page Object Model:**
+
 ```typescript
 // pages/CheckoutPage.ts
 export class CheckoutPage {
   constructor(private page: Page) {}
 
   async fillShipping(address: string, city: string) {
-    await this.page.getByLabel('Address').fill(address);
-    await this.page.getByLabel('City').fill(city);
-    await this.page.getByRole('button', { name: 'Continue' }).click();
+    await this.page.getByLabel("Address").fill(address);
+    await this.page.getByLabel("City").fill(city);
+    await this.page.getByRole("button", { name: "Continue" }).click();
   }
 
   async fillPayment(card: string, expiry: string, cvc: string) {
-    await this.page.getByLabel('Card number').fill(card);
-    await this.page.getByLabel('Expiry').fill(expiry);
-    await this.page.getByLabel('CVC').fill(cvc);
+    await this.page.getByLabel("Card number").fill(card);
+    await this.page.getByLabel("Expiry").fill(expiry);
+    await this.page.getByLabel("CVC").fill(cvc);
   }
 
   async placeOrder() {
-    await this.page.getByRole('button', { name: 'Place order' }).click();
+    await this.page.getByRole("button", { name: "Place order" }).click();
   }
 }
 
 // Usage in test
-test('checkout', async ({ page }) => {
+test("checkout", async ({ page }) => {
   const checkout = new CheckoutPage(page);
-  await checkout.fillShipping('123 Main St', 'SF');
-  await checkout.fillPayment('4242424242424242', '12/25', '123');
+  await checkout.fillShipping("123 Main St", "SF");
+  await checkout.fillPayment("4242424242424242", "12/25", "123");
   await checkout.placeOrder();
 });
 ```
@@ -203,71 +207,75 @@ test('checkout', async ({ page }) => {
 ### Fixing Flaky Tests
 
 **Common Causes:**
+
 1. **Race conditions** → Use proper waits
 2. **Shared state** → Isolate tests
 3. **Time-dependent** → Mock time
 4. **Network issues** → Mock APIs or use retries
 
 **Solutions:**
+
 ```typescript
 // ❌ Flaky: Fixed timeout
 await page.waitForTimeout(1000);
 
 // ✅ Better: Wait for specific condition
 await page.waitForSelector('[data-loaded="true"]');
-await expect(page.getByText('Loaded')).toBeVisible();
+await expect(page.getByText("Loaded")).toBeVisible();
 
 // ❌ Flaky: Assumes order
-const items = await page.getByRole('listitem').all();
-expect(items[0]).toHaveText('First');
+const items = await page.getByRole("listitem").all();
+expect(items[0]).toHaveText("First");
 
 // ✅ Better: Find specific item
-await expect(page.getByRole('listitem', { name: 'First' })).toBeVisible();
+await expect(page.getByRole("listitem", { name: "First" })).toBeVisible();
 ```
 
 ### Test Configuration
 
 **Vitest:**
+
 ```typescript
 // vitest.config.ts
 export default defineConfig({
   test: {
     globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./tests/setup.ts'],
+    environment: "jsdom",
+    setupFiles: ["./tests/setup.ts"],
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      provider: "v8",
+      reporter: ["text", "json", "html"],
       thresholds: {
         lines: 80,
         functions: 80,
         branches: 80,
       },
     },
-    include: ['**/*.test.ts', '**/*.test.tsx'],
-    exclude: ['node_modules', 'dist', 'e2e'],
+    include: ["**/*.test.ts", "**/*.test.tsx"],
+    exclude: ["node_modules", "dist", "e2e"],
   },
 });
 ```
 
 **Playwright:**
+
 ```typescript
 // playwright.config.ts
 export default defineConfig({
-  testDir: './e2e',
+  testDir: "./e2e",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: [['html'], ['json', { outputFile: 'results.json' }]],
+  reporter: [["html"], ["json", { outputFile: "results.json" }]],
   use: {
-    baseURL: 'http://localhost:3000',
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
+    baseURL: "http://localhost:3000",
+    trace: "on-first-retry",
+    screenshot: "only-on-failure",
   },
   webServer: {
-    command: 'pnpm dev',
-    url: 'http://localhost:3000',
+    command: "pnpm dev",
+    url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
   },
 });

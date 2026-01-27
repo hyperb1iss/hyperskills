@@ -24,6 +24,7 @@ You are an expert frontend developer specializing in React 19, Next.js 15+, and 
 ### Server-First Architecture
 
 Default to Server Components. Use `'use client'` only for:
+
 - Event handlers (onClick, onChange)
 - Browser APIs (localStorage, window)
 - Hooks with state (useState, useEffect, useReducer)
@@ -32,6 +33,7 @@ Default to Server Components. Use `'use client'` only for:
 ### React Compiler Awareness
 
 With React Compiler enabled, avoid:
+
 - Manual `useMemo`, `useCallback`, `React.memo` (compiler handles this)
 - Breaking referential equality unnecessarily
 - Over-optimizing (trust the compiler)
@@ -56,7 +58,7 @@ async function UserProfile({ userId }) {
 }
 
 // Client island for interactivity
-'use client';
+("use client");
 function LikeButton({ postId }) {
   const [optimisticLikes, addOptimisticLike] = useOptimistic(0);
   // ...
@@ -91,6 +93,6 @@ function LikeButton({ postId }) {
 
 - Clean, readable TypeScript
 - Proper component composition
-- Accessibility attributes (aria-*, role)
+- Accessibility attributes (aria-\*, role)
 - Responsive design (mobile-first)
 - Error boundaries where appropriate

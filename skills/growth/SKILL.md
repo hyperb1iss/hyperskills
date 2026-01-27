@@ -14,6 +14,7 @@ Ship features that grow and retain users.
 **Time to Value < 15 minutes** - Users should hit their "aha" moment fast.
 
 **PLG Pillars:**
+
 1. **Freemium or free trial** - Let them try before buying
 2. **Self-serve onboarding** - No sales call required
 3. **Usage-based expansion** - Pay for what you use
@@ -31,6 +32,7 @@ Ship features that grow and retain users.
 ### Viral Loop Mechanics
 
 **K-Factor Formula:** K = i × c
+
 - i = invitations per user
 - c = conversion rate of invites
 - K > 1 = exponential growth
@@ -53,21 +55,25 @@ Ship features that grow and retain users.
 ### App Store Optimization (ASO)
 
 **Title** (most important):
+
 - Include primary keyword
 - Brand name + value prop
 - iOS: 30 chars, Android: 50 chars
 
 **Keywords:**
+
 - Long-tail > broad ("meditation for anxiety" > "meditation")
 - Competitor names work but risky
 - Update every 4-6 weeks based on performance
 
 **Screenshots:**
+
 - First 2-3 visible without scrolling
 - Show core features, not onboarding
 - Include social proof (ratings, awards)
 
 **Conversion Factors:**
+
 - Apps > 4.5 stars rank better
 - Review velocity matters
 - Reply to reviews (improves visibility)
@@ -104,11 +110,13 @@ One piece of content → 10+ distribution points.
 
 **5-Second Test:**
 Show screenshot for 5 seconds, ask:
+
 - What does this app do?
 - Who is it for?
 - What would you do first?
 
 **Jobs-to-be-Done Interview:**
+
 - "Tell me about the last time you [task]"
 - "What were you trying to accomplish?"
 - "What did you do before finding our product?"
@@ -120,16 +128,19 @@ Add button/feature that doesn't exist yet, track clicks.
 
 ```markdown
 ## Direct Competitors
-| Feature | Us | Comp A | Comp B |
-|---------|-----|--------|--------|
-| Core feature | ✅ | ✅ | ❌ |
-| Pricing | $X | $Y | $Z |
-| Unique value | ... | ... | ... |
+
+| Feature      | Us  | Comp A | Comp B |
+| ------------ | --- | ------ | ------ |
+| Core feature | ✅  | ✅     | ❌     |
+| Pricing      | $X  | $Y     | $Z     |
+| Unique value | ... | ...    | ...    |
 
 ## Indirect Competitors
+
 [Alternative solutions to same problem]
 
 ## Positioning Opportunity
+
 [Gap in market we can own]
 ```
 
@@ -141,6 +152,7 @@ Add button/feature that doesn't exist yet, track clicks.
 4. **Document everything** - Hypothesis → result → learning
 
 **Sample Size Calculator:**
+
 - 5% baseline conversion
 - 20% minimum detectable effect
 - 95% confidence
@@ -150,6 +162,7 @@ Add button/feature that doesn't exist yet, track clicks.
 
 ```markdown
 ## Experiment: [Name]
+
 **Hypothesis:** If we [change], then [metric] will [improve/decrease] by [amount] because [reasoning].
 
 **Metric:** [Primary metric to measure]
@@ -157,6 +170,7 @@ Add button/feature that doesn't exist yet, track clicks.
 **Traffic:** [% of users]
 
 **Results:**
+
 - Control: X%
 - Variant: Y%
 - Lift: Z%
@@ -168,11 +182,11 @@ Add button/feature that doesn't exist yet, track clicks.
 
 ### Micro-Influencer Strategy
 
-| Tier | Followers | Engagement | Cost/Post |
-|------|-----------|------------|-----------|
-| Nano | < 5K | 3-5% | $0-100 |
-| Micro | 5K-50K | 2-3% | $100-500 |
-| Mid | 50K-500K | 1.5-2% | $500-5K |
+| Tier  | Followers | Engagement | Cost/Post |
+| ----- | --------- | ---------- | --------- |
+| Nano  | < 5K      | 3-5%       | $0-100    |
+| Micro | 5K-50K    | 2-3%       | $100-500  |
+| Mid   | 50K-500K  | 1.5-2%     | $500-5K   |
 
 **5 nano-influencers > 1 mid-tier influencer** (same cost, 2x engagement)
 

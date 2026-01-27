@@ -44,15 +44,15 @@ Sign Up → Onboarding → Activation → Engagement → Monetization → Expans
 
 ```typescript
 // Referral system schema
-const referrals = pgTable('referrals', {
-  id: uuid('id').primaryKey(),
-  referrerId: uuid('referrer_id').references(() => users.id),
-  refereeEmail: text('referee_email').notNull(),
-  status: text('status').default('pending'), // pending, signed_up, converted
-  referrerReward: integer('referrer_reward').default(0),
-  refereeReward: integer('referee_reward').default(0),
-  createdAt: timestamp('created_at').defaultNow(),
-  convertedAt: timestamp('converted_at'),
+const referrals = pgTable("referrals", {
+  id: uuid("id").primaryKey(),
+  referrerId: uuid("referrer_id").references(() => users.id),
+  refereeEmail: text("referee_email").notNull(),
+  status: text("status").default("pending"), // pending, signed_up, converted
+  referrerReward: integer("referrer_reward").default(0),
+  refereeReward: integer("referee_reward").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  convertedAt: timestamp("converted_at"),
 });
 
 // Generate referral link
@@ -70,19 +70,21 @@ async function trackReferral(code: string, newUserId: string) {
   if (referral) {
     await db.transaction(async (tx) => {
       // Update referral status
-      await tx.update(referrals)
-        .set({ status: 'signed_up', refereeId: newUserId })
+      await tx
+        .update(referrals)
+        .set({ status: "signed_up", refereeId: newUserId })
         .where(eq(referrals.id, referral.id));
 
       // Grant rewards
-      await grantReward(referral.referrerId, 'referrer');
-      await grantReward(newUserId, 'referee');
+      await grantReward(referral.referrerId, "referrer");
+      await grantReward(newUserId, "referee");
     });
   }
 }
 ```
 
 **Double-sided rewards work best:**
+
 - Referrer: Gets value (credits, features, discounts)
 - Referee: Gets value (extended trial, bonus features)
 - Reward tied to core product value
@@ -97,7 +99,7 @@ interface Experiment {
   variants: Variant[];
   targetAudience: AudienceRule[];
   metrics: string[];
-  status: 'draft' | 'running' | 'completed';
+  status: "draft" | "running" | "completed";
 }
 
 // Assignment logic
@@ -116,21 +118,16 @@ function getVariant(userId: string, experimentId: string): string {
     }
   }
 
-  return 'control';
+  return "control";
 }
 
 // Track conversion
-async function trackConversion(
-  userId: string,
-  experimentId: string,
-  metric: string,
-  value: number = 1
-) {
+async function trackConversion(userId: string, experimentId: string, metric: string, value: number = 1) {
   const variant = getVariant(userId, experimentId);
 
   await analytics.track({
     userId,
-    event: 'experiment_conversion',
+    event: "experiment_conversion",
     properties: {
       experimentId,
       variant,
@@ -144,12 +141,13 @@ async function trackConversion(
 ### Onboarding Optimization
 
 **Checklist Pattern:**
+
 ```tsx
 const onboardingSteps = [
-  { id: 'profile', label: 'Complete profile', action: '/settings/profile' },
-  { id: 'first_project', label: 'Create first project', action: '/projects/new' },
-  { id: 'invite_team', label: 'Invite a teammate', action: '/team/invite' },
-  { id: 'integrate', label: 'Connect an integration', action: '/integrations' },
+  { id: "profile", label: "Complete profile", action: "/settings/profile" },
+  { id: "first_project", label: "Create first project", action: "/projects/new" },
+  { id: "invite_team", label: "Invite a teammate", action: "/team/invite" },
+  { id: "integrate", label: "Connect an integration", action: "/integrations" },
 ];
 
 function OnboardingChecklist({ completedSteps }) {
@@ -160,11 +158,7 @@ function OnboardingChecklist({ completedSteps }) {
       <h3>Get started ({Math.round(progress * 100)}%)</h3>
       <Progress value={progress * 100} />
       {onboardingSteps.map((step) => (
-        <ChecklistItem
-          key={step.id}
-          completed={completedSteps.includes(step.id)}
-          {...step}
-        />
+        <ChecklistItem key={step.id} completed={completedSteps.includes(step.id)} {...step} />
       ))}
     </Card>
   );
@@ -185,6 +179,7 @@ because [reasoning based on user behavior/data].
 **Guardrail Metrics:** [e.g., support tickets, churn]
 
 **Variants:**
+
 - Control: Current experience
 - Variant A: [Description]
 - Variant B: [Description] (optional)
@@ -207,6 +202,7 @@ because [reasoning based on user behavior/data].
 ### Conversion Optimization
 
 **Landing Page Elements:**
+
 1. **Hero**: Clear value prop, one CTA
 2. **Social Proof**: Logos, testimonials, numbers
 3. **Benefits**: 3-5 key benefits (not features)
@@ -215,6 +211,7 @@ because [reasoning based on user behavior/data].
 6. **CTA**: Repeat at end
 
 **CTA Best Practices:**
+
 - Action-oriented: "Start free trial" > "Submit"
 - Specific: "Get 14 days free" > "Sign up"
 - Urgent: "Start now" > "Learn more"
@@ -223,6 +220,7 @@ because [reasoning based on user behavior/data].
 ### Retention Tactics
 
 **Engagement Loops:**
+
 ```
 Trigger → Action → Variable Reward → Investment
    ↑                                      │
@@ -230,10 +228,12 @@ Trigger → Action → Variable Reward → Investment
 ```
 
 **Examples:**
+
 - Email: "You have 3 unread messages" → Opens app → Sees content → Replies
 - Push: "Sarah commented on your project" → Opens app → Engages → Creates content
 
 **Habit Formation:**
+
 1. **Frequency**: Daily/weekly touchpoints
 2. **Streaks**: Reward consecutive use
 3. **Progress**: Show advancement
@@ -245,31 +245,31 @@ Trigger → Action → Variable Reward → Investment
 // Key events to track
 const growthEvents = [
   // Acquisition
-  'page_viewed',
-  'signup_started',
-  'signup_completed',
+  "page_viewed",
+  "signup_started",
+  "signup_completed",
 
   // Activation
-  'onboarding_step_completed',
-  'first_value_achieved',
+  "onboarding_step_completed",
+  "first_value_achieved",
 
   // Engagement
-  'feature_used',
-  'content_created',
+  "feature_used",
+  "content_created",
 
   // Monetization
-  'pricing_viewed',
-  'checkout_started',
-  'subscription_created',
+  "pricing_viewed",
+  "checkout_started",
+  "subscription_created",
 
   // Referral
-  'invite_sent',
-  'invite_accepted',
+  "invite_sent",
+  "invite_accepted",
 ];
 
 // Track with context
-analytics.track('signup_completed', {
-  signup_method: 'google',
+analytics.track("signup_completed", {
+  signup_method: "google",
   referral_source: utmSource,
   experiment_variant: variant,
   time_to_signup_seconds: timeToSignup,

@@ -20,6 +20,7 @@ You are an expert in web accessibility, WCAG compliance, and inclusive design.
 ## WCAG Principles (POUR)
 
 ### Perceivable
+
 Information must be presentable in ways users can perceive.
 
 ```tsx
@@ -37,6 +38,7 @@ Information must be presentable in ways users can perceive.
 ```
 
 ### Operable
+
 UI must be operable via various input methods.
 
 ```tsx
@@ -48,7 +50,7 @@ function CustomButton({ onClick, children }) {
       tabIndex={0}
       onClick={onClick}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           onClick();
         }
@@ -60,10 +62,11 @@ function CustomButton({ onClick, children }) {
 }
 
 // ✅ Better: Just use a button
-<button onClick={onClick}>{children}</button>
+<button onClick={onClick}>{children}</button>;
 ```
 
 ### Understandable
+
 Information and UI operation must be understandable.
 
 ```tsx
@@ -92,6 +95,7 @@ Information and UI operation must be understandable.
 ```
 
 ### Robust
+
 Content must be robust enough to be interpreted by assistive tech.
 
 ```tsx
@@ -157,30 +161,24 @@ function Modal({ isOpen, onClose, children }) {
     if (!isOpen) return;
 
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
-      if (e.key === 'Tab') {
+      if (e.key === "Escape") onClose();
+      if (e.key === "Tab") {
         // Trap focus within modal
         const focusable = modalRef.current?.querySelectorAll(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
         );
         // ... focus trap logic
       }
     }
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
   return (
-    <div
-      ref={modalRef}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-      tabIndex={-1}
-    >
+    <div ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="modal-title" tabIndex={-1}>
       <h2 id="modal-title">Modal Title</h2>
       {children}
       <button onClick={onClose}>Close</button>
@@ -195,12 +193,7 @@ function Modal({ isOpen, onClose, children }) {
 // Announce dynamic content changes
 function Toast({ message }) {
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      aria-atomic="true"
-      className="toast"
-    >
+    <div role="status" aria-live="polite" aria-atomic="true" className="toast">
       {message}
     </div>
   );
@@ -209,10 +202,7 @@ function Toast({ message }) {
 // Announce errors immediately
 function ErrorAlert({ error }) {
   return (
-    <div
-      role="alert"
-      aria-live="assertive"
-    >
+    <div role="alert" aria-live="assertive">
       {error}
     </div>
   );
@@ -243,25 +233,23 @@ function ErrorAlert({ error }) {
 ### Playwright + Axe
 
 ```typescript
-import { test, expect } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { test, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 
-test.describe('Accessibility', () => {
-  test('home page passes axe audit', async ({ page }) => {
-    await page.goto('/');
+test.describe("Accessibility", () => {
+  test("home page passes axe audit", async ({ page }) => {
+    await page.goto("/");
 
-    const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-      .analyze();
+    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
 
     expect(results.violations).toEqual([]);
   });
 
-  test('form page passes axe audit', async ({ page }) => {
-    await page.goto('/signup');
+  test("form page passes axe audit", async ({ page }) => {
+    await page.goto("/signup");
 
     const results = await new AxeBuilder({ page })
-      .exclude('.third-party-widget') // Exclude if needed
+      .exclude(".third-party-widget") // Exclude if needed
       .analyze();
 
     // Log violations for debugging
@@ -311,34 +299,40 @@ jobs:
 
 ```markdown
 ## Structure
+
 - [ ] Page has one h1
 - [ ] Headings are hierarchical (h1 → h2 → h3)
 - [ ] Landmarks used (main, nav, aside, footer)
 - [ ] Skip link present
 
 ## Images
+
 - [ ] All images have alt text
 - [ ] Decorative images have alt=""
 - [ ] Complex images have extended descriptions
 
 ## Forms
+
 - [ ] All inputs have labels
 - [ ] Required fields indicated (not just with color)
 - [ ] Error messages are clear and associated
 - [ ] Focus order is logical
 
 ## Keyboard
+
 - [ ] All interactive elements focusable
 - [ ] Focus indicator visible
 - [ ] No keyboard traps
 - [ ] Custom widgets have proper keyboard support
 
 ## Color
+
 - [ ] Contrast ratio meets WCAG AA
 - [ ] Information not conveyed by color alone
 - [ ] Focus indicators have sufficient contrast
 
 ## Dynamic Content
+
 - [ ] Live regions announce updates
 - [ ] Modals trap focus correctly
 - [ ] Loading states announced

@@ -64,11 +64,11 @@ npx skills add hyperbliss/hyperskills --skill security
 
 ## Stats
 
-| Metric | Count |
-|--------|-------|
-| Skills | 7 |
-| Agents | 23 |
-| Commands | 2 |
+| Metric   | Count |
+| -------- | ----- |
+| Skills   | 7     |
+| Agents   | 23    |
+| Commands | 2     |
 
 ## Usage
 

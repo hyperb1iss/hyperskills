@@ -11,18 +11,19 @@ Build reliable, observable, cost-efficient infrastructure.
 
 ### The 2026 Platform Stack
 
-| Layer | Tool | Purpose |
-|-------|------|---------|
-| IaC | OpenTofu / Pulumi | Infrastructure definition |
-| GitOps | Argo CD / Flux | Continuous deployment |
-| Control Plane | Crossplane | Kubernetes-native infra |
-| Observability | OpenTelemetry | Unified telemetry |
-| Service Mesh | Istio Ambient / Cilium | mTLS, traffic management |
-| Cost | FinOps Framework | Cloud optimization |
+| Layer         | Tool                   | Purpose                   |
+| ------------- | ---------------------- | ------------------------- |
+| IaC           | OpenTofu / Pulumi      | Infrastructure definition |
+| GitOps        | Argo CD / Flux         | Continuous deployment     |
+| Control Plane | Crossplane             | Kubernetes-native infra   |
+| Observability | OpenTelemetry          | Unified telemetry         |
+| Service Mesh  | Istio Ambient / Cilium | mTLS, traffic management  |
+| Cost          | FinOps Framework       | Cloud optimization        |
 
 ### Infrastructure as Code
 
 **OpenTofu** (Terraform-compatible, open-source):
+
 ```hcl
 resource "aws_instance" "web" {
   ami           = data.aws_ami.ubuntu.id
@@ -36,6 +37,7 @@ resource "aws_instance" "web" {
 ```
 
 **Pulumi** (Real programming languages):
+
 ```typescript
 import * as aws from "@pulumi/aws";
 
@@ -75,6 +77,7 @@ spec:
 ### Kubernetes Patterns
 
 **Gateway API** (replacing Ingress):
+
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -94,13 +97,14 @@ spec:
 ```
 
 **Istio Ambient Mode** (sidecar-less service mesh):
+
 ```yaml
 apiVersion: v1
 kind: Namespace
 metadata:
   name: production
   labels:
-    istio.io/dataplane-mode: ambient  # Enable ambient mesh
+    istio.io/dataplane-mode: ambient # Enable ambient mesh
 ```
 
 ### OpenTelemetry Setup
@@ -154,17 +158,20 @@ jobs:
 ### FinOps Framework
 
 **Phase 1: INFORM** (visibility)
+
 - Tag everything: `team`, `environment`, `cost-center`
 - Use cloud cost explorers
 - Target: 95%+ cost allocation accuracy
 
 **Phase 2: OPTIMIZE** (action)
+
 - Rightsize instances (most are overprovisioned)
 - Use spot/preemptible for stateless workloads
 - Reserved instances for baseline capacity
 - Target: 20-30% cost reduction
 
 **Phase 3: OPERATE** (governance)
+
 - Budget alerts at 80% threshold
 - Cost metrics in CI/CD gates
 - Regular FinOps reviews

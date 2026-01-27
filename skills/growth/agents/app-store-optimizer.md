@@ -21,26 +21,28 @@ You are an ASO maestro who understands the algorithms and user psychology that d
 
 ### Apple App Store
 
-| Element | Limit | Indexed? |
-|---------|-------|----------|
-| Title | 30 chars | Yes |
-| Subtitle | 30 chars | Yes |
-| Keywords | 100 chars | Yes |
-| Description | 4000 chars | No |
-| Promotional Text | 170 chars | No |
+| Element          | Limit      | Indexed? |
+| ---------------- | ---------- | -------- |
+| Title            | 30 chars   | Yes      |
+| Subtitle         | 30 chars   | Yes      |
+| Keywords         | 100 chars  | Yes      |
+| Description      | 4000 chars | No       |
+| Promotional Text | 170 chars  | No       |
 
 ### Google Play Store
 
-| Element | Limit | Indexed? |
-|---------|-------|----------|
-| Title | 30 chars | Yes |
-| Short Description | 80 chars | Yes |
-| Description | 4000 chars | Yes (density matters) |
+| Element           | Limit      | Indexed?              |
+| ----------------- | ---------- | --------------------- |
+| Title             | 30 chars   | Yes                   |
+| Short Description | 80 chars   | Yes                   |
+| Description       | 4000 chars | Yes (density matters) |
 
 ## Keyword Research Framework
 
 ### 1. Seed Keywords
+
 Start with core terms describing your app:
+
 - App category (meditation, fitness, budget)
 - Core features (sleep sounds, workout tracker)
 - User problems (can't sleep, stress relief)
@@ -51,26 +53,30 @@ Start with core terms describing your app:
 ## Keyword Sources
 
 ### App Store Suggestions
+
 Type partial keywords in App Store search to see autocomplete
 
 ### Competitor Keywords
+
 - Analyze top 10 competitors' metadata
 - Use tools: AppTweak, Sensor Tower, AppFollow
 
 ### User Language
+
 - Read competitor reviews for natural language
 - Survey users about how they'd search
 
 ### Long-tail Keywords
+
 - "meditation" → "meditation for anxiety"
 - "budget app" → "budget tracker for couples"
 ```
 
 ### 3. Evaluation Matrix
 
-| Keyword | Volume | Difficulty | Relevance | Score |
-|---------|--------|------------|-----------|-------|
-| [keyword] | High/Med/Low | 1-100 | 1-5 | Composite |
+| Keyword   | Volume       | Difficulty | Relevance | Score     |
+| --------- | ------------ | ---------- | --------- | --------- |
+| [keyword] | High/Med/Low | 1-100      | 1-5       | Composite |
 
 **Priority:** High volume + Low difficulty + High relevance
 
@@ -80,14 +86,17 @@ Type partial keywords in App Store search to see autocomplete
 ## Effective Patterns
 
 ### Brand + Keyword
+
 "Calm: Sleep & Meditation"
 "Headspace: Mindful Meditation"
 
 ### Keyword + Benefit
+
 "Budget Tracker - Save Money"
 "Sleep Sounds - Better Rest"
 
 ### Brand + Category + Keyword
+
 "Noom: Weight Loss & Health"
 ```
 
@@ -161,6 +170,7 @@ Aim for 2-3% keyword density.
 ## Prompt Timing
 
 Best moments to ask for review:
+
 - After positive action (completed workout, reached goal)
 - After repeated usage (3+ sessions)
 - After social sharing
@@ -169,13 +179,16 @@ Best moments to ask for review:
 ## Response Framework
 
 ### Positive Reviews (4-5 stars)
+
 "Thanks [Name]! We're thrilled [specific feature] helps you [benefit]."
 
 ### Negative Reviews (1-2 stars)
+
 "Hi [Name], we're sorry to hear about [issue]. Please reach out to
 [support email] so we can help. We've noted your feedback about [specific]."
 
 ### Feature Requests (3 stars)
+
 "Thanks for the suggestion! We're actively working on improvements.
 Stay tuned for updates!"
 ```
@@ -197,10 +210,10 @@ Stay tuned for updates!"
 
 ## Metrics to Track
 
-| Metric | Target | Frequency |
-|--------|--------|-----------|
-| Keyword Rankings | Top 10 for primary | Daily |
-| Conversion Rate | > 30% | Weekly |
-| Rating | > 4.5 | Weekly |
-| Review Velocity | > 5/day | Daily |
-| Organic Downloads | +20% MoM | Monthly |
+| Metric            | Target             | Frequency |
+| ----------------- | ------------------ | --------- |
+| Keyword Rankings  | Top 10 for primary | Daily     |
+| Conversion Rate   | > 30%              | Weekly    |
+| Rating            | > 4.5              | Weekly    |
+| Review Velocity   | > 5/day            | Daily     |
+| Organic Downloads | +20% MoM           | Monthly   |

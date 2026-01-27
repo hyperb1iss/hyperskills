@@ -122,6 +122,7 @@ LIMIT 20;
 ```
 
 **What to look for:**
+
 - Seq Scan on large tables (need index)
 - High actual time
 - Large rows removed by filter (index not selective enough)
@@ -158,14 +159,14 @@ SELECT * FROM posts WHERE user_id = ANY($1::uuid[]);
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  max: 10,  // Match serverless concurrency
+  max: 10, // Match serverless concurrency
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
 });
 
 // Drizzle with Neon serverless
-import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
+import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-http";
 
 const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql);
@@ -176,9 +177,9 @@ const db = drizzle(sql);
 ```typescript
 // drizzle.config.ts
 export default {
-  schema: './db/schema.ts',
-  out: './db/migrations',
-  driver: 'pg',
+  schema: "./db/schema.ts",
+  out: "./db/migrations",
+  driver: "pg",
   dbCredentials: {
     connectionString: process.env.DATABASE_URL!,
   },
@@ -192,6 +193,7 @@ export default {
 ```
 
 **Migration best practices:**
+
 1. Never modify existing migrations
 2. Test migrations on prod-like data
 3. Make migrations reversible when possible

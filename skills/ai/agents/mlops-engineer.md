@@ -130,6 +130,7 @@ class RAGService:
 ```
 
 **Build and deploy:**
+
 ```bash
 bentoml build
 bentoml containerize rag-service:latest
@@ -232,8 +233,8 @@ name: ML Pipeline
 on:
   push:
     paths:
-      - 'models/**'
-      - 'data/**'
+      - "models/**"
+      - "data/**"
 
 jobs:
   train:
@@ -244,7 +245,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Train model
         env:

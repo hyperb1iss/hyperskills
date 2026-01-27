@@ -76,110 +76,116 @@ ln -s $(pwd)/hyperskills/skills ~/.claude/skills/hyperskills
 
 Skills are contextual knowledge bundles that auto-activate when relevant. Working on React code? The fullstack skill loads. Mention "Kubernetes deployment"? Platform skill activates.
 
-| Skill | Domain | Agents | Triggers |
-|-------|--------|--------|----------|
-| **fullstack** | Web Development | 4 | React, Next.js, APIs, databases, Tailwind |
-| **mobile** | Mobile Apps | 1 | React Native, Expo, iOS, Android |
-| **ai** | AI/ML Engineering | 5 | LLMs, RAG, embeddings, MLOps, computer vision |
-| **platform** | Infrastructure | 4 | Kubernetes, GitOps, CI/CD, data pipelines |
-| **security** | Security Ops | 2 | Pentesting, incidents, compliance, threat modeling |
-| **quality** | Testing & A11y | 2 | Tests, accessibility, performance, code review |
-| **growth** | Growth & Product | 5 | ASO, viral loops, content, market research |
+| Skill         | Domain            | Agents | Triggers                                           |
+| ------------- | ----------------- | ------ | -------------------------------------------------- |
+| **fullstack** | Web Development   | 4      | React, Next.js, APIs, databases, Tailwind          |
+| **mobile**    | Mobile Apps       | 1      | React Native, Expo, iOS, Android                   |
+| **ai**        | AI/ML Engineering | 5      | LLMs, RAG, embeddings, MLOps, computer vision      |
+| **platform**  | Infrastructure    | 4      | Kubernetes, GitOps, CI/CD, data pipelines          |
+| **security**  | Security Ops      | 2      | Pentesting, incidents, compliance, threat modeling |
+| **quality**   | Testing & A11y    | 2      | Tests, accessibility, performance, code review     |
+| **growth**    | Growth & Product  | 5      | ASO, viral loops, content, market research         |
 
 ## 🦋 Agents
 
 ### Fullstack Development
 
-| Agent | Specialty |
-|-------|-----------|
-| **frontend-developer** | React 19, Server Components, React Compiler, TanStack Query, shadcn/ui |
-| **backend-architect** | API design, system architecture, auth patterns, database modeling |
-| **rapid-prototyper** | MVP scaffolding, 6-day sprint delivery, trend integration |
-| **database-specialist** | Schema design, query optimization, migrations, replication |
+| Agent                   | Specialty                                                              |
+| ----------------------- | ---------------------------------------------------------------------- |
+| **frontend-developer**  | React 19, Server Components, React Compiler, TanStack Query, shadcn/ui |
+| **backend-architect**   | API design, system architecture, auth patterns, database modeling      |
+| **rapid-prototyper**    | MVP scaffolding, 6-day sprint delivery, trend integration              |
+| **database-specialist** | Schema design, query optimization, migrations, replication             |
 
 ### Mobile Development
 
-| Agent | Specialty |
-|-------|-----------|
+| Agent                  | Specialty                                                    |
+| ---------------------- | ------------------------------------------------------------ |
 | **mobile-app-builder** | React Native New Architecture, Expo SDK 53+, NativeWind, EAS |
 
 ### AI/ML Engineering
 
-| Agent | Specialty |
-|-------|-----------|
-| **ai-engineer** | LLM integration, RAG pipelines, MCP servers, DSPy programmatic prompting |
+| Agent              | Specialty                                                                |
+| ------------------ | ------------------------------------------------------------------------ |
+| **ai-engineer**    | LLM integration, RAG pipelines, MCP servers, DSPy programmatic prompting |
 | **mlops-engineer** | Model deployment, monitoring, feature stores, A/B testing infrastructure |
 | **data-scientist** | Statistical analysis, A/B testing, predictive modeling, causal inference |
-| **ml-researcher** | Paper implementation, novel architectures, Flash Attention, MoE |
-| **cv-engineer** | Object detection (YOLO, RT-DETR), segmentation (SAM), video analysis |
+| **ml-researcher**  | Paper implementation, novel architectures, Flash Attention, MoE          |
+| **cv-engineer**    | Object detection (YOLO, RT-DETR), segmentation (SAM), video analysis     |
 
 ### Platform Engineering
 
-| Agent | Specialty |
-|-------|-----------|
-| **platform-engineer** | GitOps (Argo CD/Flux), OpenTofu, Crossplane v2, OpenTelemetry |
-| **data-engineer** | ETL/ELT pipelines, dbt, Airflow, Flink streaming, data quality |
-| **finops-engineer** | Cloud cost optimization, FinOps framework, right-sizing, reservations |
-| **git-wizard** | Complex rebases, merge conflicts, lock files, encrypted secrets |
+| Agent                 | Specialty                                                             |
+| --------------------- | --------------------------------------------------------------------- |
+| **platform-engineer** | GitOps (Argo CD/Flux), OpenTofu, Crossplane v2, OpenTelemetry         |
+| **data-engineer**     | ETL/ELT pipelines, dbt, Airflow, Flink streaming, data quality        |
+| **finops-engineer**   | Cloud cost optimization, FinOps framework, right-sizing, reservations |
+| **git-wizard**        | Complex rebases, merge conflicts, lock files, encrypted secrets       |
 
 ### Security Operations
 
-| Agent | Specialty |
-|-------|-----------|
+| Agent                  | Specialty                                                                 |
+| ---------------------- | ------------------------------------------------------------------------- |
 | **security-architect** | Threat modeling, Zero Trust, SBOM/SLSA, eBPF (Tetragon/Falco), compliance |
 | **incident-responder** | NIST IR framework, digital forensics, log analysis, recovery coordination |
 
 ### Quality Engineering
 
-| Agent | Specialty |
-|-------|-----------|
-| **test-writer-fixer** | Test creation, failure analysis, CI integration, coverage optimization |
-| **accessibility-specialist** | WCAG 2.2, Playwright + Axe automation, screen reader testing |
+| Agent                        | Specialty                                                              |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| **test-writer-fixer**        | Test creation, failure analysis, CI integration, coverage optimization |
+| **accessibility-specialist** | WCAG 2.2, Playwright + Axe automation, screen reader testing           |
 
 ### Growth & Product
 
-| Agent | Specialty |
-|-------|-----------|
-| **growth-hacker** | Viral loops, PLG patterns, referral systems, conversion optimization |
+| Agent                   | Specialty                                                            |
+| ----------------------- | -------------------------------------------------------------------- |
+| **growth-hacker**       | Viral loops, PLG patterns, referral systems, conversion optimization |
 | **app-store-optimizer** | ASO strategy, keyword research, screenshot optimization, A/B testing |
-| **content-strategist** | Multi-platform content, SEO, repurposing workflows, video scripts |
-| **trend-researcher** | TikTok trends, app store intelligence, competitive analysis |
-| **product-strategist** | Feature prioritization, competitive intel, user feedback synthesis |
+| **content-strategist**  | Multi-platform content, SEO, repurposing workflows, video scripts    |
+| **trend-researcher**    | TikTok trends, app store intelligence, competitive analysis          |
+| **product-strategist**  | Feature prioritization, competitive intel, user feedback synthesis   |
 
 ## 🧪 SOTA Knowledge
 
 Every skill is enhanced with cutting-edge techniques (research-backed, 2025-2026):
 
 ### Fullstack
+
 - **React 19** — Server Components, React Compiler, `use()` hook
 - **State** — TanStack Query v5, Zustand, jotai for atoms
 - **UI** — shadcn/ui + Radix primitives, Tailwind v4, Base UI
 - **Forms** — React Hook Form + Zod, Conform for progressive enhancement
 
 ### AI/ML
+
 - **Prompting** — DSPy programmatic prompting (manual prompts are dead)
 - **RAG** — Hybrid search, RAGAS evaluation, ColBERT late interaction
 - **Fine-tuning** — LoRA/QLoRA, Unsloth, PEFT adapters
 - **Serving** — vLLM, TensorRT-LLM, speculative decoding
 
 ### Platform
+
 - **GitOps** — Argo CD, Flux v2, ApplicationSets, progressive delivery
 - **IaC** — OpenTofu (not Terraform), Pulumi, Crossplane compositions
 - **Observability** — OpenTelemetry everywhere, Grafana stack, eBPF tracing
 - **Data** — dbt for transforms, Great Expectations for quality, Polars for speed
 
 ### Security
+
 - **Runtime** — eBPF-based detection (Tetragon, Falco), runtime policies
 - **Supply Chain** — SBOM generation, SLSA attestations, Sigstore signing
 - **Compliance** — Automated evidence collection (Vanta/Drata patterns)
 - **Zero Trust** — Identity-aware proxies, microsegmentation, SPIFFE/SPIRE
 
 ### Quality
+
 - **Testing** — Playwright for E2E, Component Testing, Axe for a11y
 - **Performance** — Core Web Vitals (INP focus), bundle analysis, edge caching
 - **Code Review** — AI-assisted review patterns, semantic diff analysis
 
 ### Growth
+
 - **PLG** — Product-led growth funnels, self-serve onboarding, usage-based pricing
 - **Viral** — K-factor optimization, referral mechanics, UGC loops
 - **Content** — Multi-platform repurposing, short-form video hooks, SEO clusters
@@ -217,25 +223,25 @@ hyperskills/
 
 ## 🌐 Compatibility
 
-| Platform | Installation |
-|----------|--------------|
-| **Claude Code** | `/plugin install hyperskills` |
-| **Codex CLI** | `npx skills add hyperb1iss/hyperskills -a codex` |
-| **Cursor** | `npx skills add hyperb1iss/hyperskills -a cursor` |
+| Platform           | Installation                                       |
+| ------------------ | -------------------------------------------------- |
+| **Claude Code**    | `/plugin install hyperskills`                      |
+| **Codex CLI**      | `npx skills add hyperb1iss/hyperskills -a codex`   |
+| **Cursor**         | `npx skills add hyperb1iss/hyperskills -a cursor`  |
 | **GitHub Copilot** | `npx skills add hyperb1iss/hyperskills -a copilot` |
-| **Gemini CLI** | `npx skills add hyperb1iss/hyperskills -a gemini` |
+| **Gemini CLI**     | `npx skills add hyperb1iss/hyperskills -a gemini`  |
 
 ## 🦋 Philosophy
 
 These skills embody the Contains Studio methodology:
 
-| Principle | What It Means |
-|-----------|---------------|
-| **Ship in 6 days** | Every feature fits a sprint. No multi-month projects. |
-| **Research first** | SOTA techniques, not outdated tutorials. Web search beats training data. |
-| **Specialists over generalists** | Deep expertise wins. One agent per domain. |
-| **Automate the boring** | CI/CD, testing, security—if it can run automatically, it should. |
-| **Delight users** | Whimsy matters. Error messages can be fun. Loading states can spark joy. |
+| Principle                        | What It Means                                                            |
+| -------------------------------- | ------------------------------------------------------------------------ |
+| **Ship in 6 days**               | Every feature fits a sprint. No multi-month projects.                    |
+| **Research first**               | SOTA techniques, not outdated tutorials. Web search beats training data. |
+| **Specialists over generalists** | Deep expertise wins. One agent per domain.                               |
+| **Automate the boring**          | CI/CD, testing, security—if it can run automatically, it should.         |
+| **Delight users**                | Whimsy matters. Error messages can be fun. Loading states can spark joy. |
 
 ## 🧪 Development
 

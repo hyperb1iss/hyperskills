@@ -11,16 +11,16 @@ Build production AI systems with modern patterns and tools.
 
 ### The 2026 AI Stack
 
-| Layer | Tool | Purpose |
-|-------|------|---------|
-| Prompting | DSPy | Programmatic prompt optimization |
-| Orchestration | LangGraph | Stateful multi-agent workflows |
-| RAG | LlamaIndex | Document ingestion and retrieval |
-| Vectors | Qdrant / Pinecone | Embedding storage and search |
-| Evaluation | RAGAS | RAG quality metrics |
-| Experiment Tracking | MLflow / W&B | Logging, versioning, comparison |
-| Serving | BentoML / vLLM | Model deployment |
-| Protocol | MCP | Tool and context integration |
+| Layer               | Tool              | Purpose                          |
+| ------------------- | ----------------- | -------------------------------- |
+| Prompting           | DSPy              | Programmatic prompt optimization |
+| Orchestration       | LangGraph         | Stateful multi-agent workflows   |
+| RAG                 | LlamaIndex        | Document ingestion and retrieval |
+| Vectors             | Qdrant / Pinecone | Embedding storage and search     |
+| Evaluation          | RAGAS             | RAG quality metrics              |
+| Experiment Tracking | MLflow / W&B      | Logging, versioning, comparison  |
+| Serving             | BentoML / vLLM    | Model deployment                 |
+| Protocol            | MCP               | Tool and context integration     |
 
 ### DSPy: Programmatic Prompting
 
@@ -43,6 +43,7 @@ print(result.answer)  # "Paris"
 ```
 
 **Optimize with real data:**
+
 ```python
 from dspy.teleprompt import BootstrapFewShot
 
@@ -60,6 +61,7 @@ Query → Rewrite → Hybrid Retrieval → Rerank → Generate → Cite
 ```
 
 **LlamaIndex + LangGraph Pattern:**
+
 ```python
 from llama_index.core import VectorStoreIndex
 from langgraph.graph import StateGraph
@@ -97,11 +99,11 @@ async def search_docs(query: str) -> str:
 
 ### Embeddings (2026)
 
-| Model | Dimensions | Best For |
-|-------|------------|----------|
-| text-embedding-3-large | 3072 | General purpose |
-| BGE-M3 | 1024 | Multilingual RAG |
-| Qwen3-Embedding | Flexible | Custom domains |
+| Model                  | Dimensions | Best For         |
+| ---------------------- | ---------- | ---------------- |
+| text-embedding-3-large | 3072       | General purpose  |
+| BGE-M3                 | 1024       | Multilingual RAG |
+| Qwen3-Embedding        | Flexible   | Custom domains   |
 
 ### Fine-Tuning with LoRA/QLoRA
 
@@ -146,12 +148,12 @@ print(results)  # {'faithfulness': 0.92, 'answer_relevancy': 0.88, ...}
 
 ### Vector Database Selection
 
-| DB | Best For | Pricing |
-|----|----------|---------|
-| Qdrant | Self-hosted, filtering | 1GB free forever |
-| Pinecone | Managed, zero-ops | Free tier available |
-| Weaviate | Knowledge graphs | 14-day trial |
-| Milvus | Billion-scale | Self-hosted |
+| DB       | Best For               | Pricing             |
+| -------- | ---------------------- | ------------------- |
+| Qdrant   | Self-hosted, filtering | 1GB free forever    |
+| Pinecone | Managed, zero-ops      | Free tier available |
+| Weaviate | Knowledge graphs       | 14-day trial        |
+| Milvus   | Billion-scale          | Self-hosted         |
 
 ## Agents
 

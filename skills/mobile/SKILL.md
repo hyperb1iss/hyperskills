@@ -21,6 +21,7 @@ npx expo start
 ```
 
 **Key Changes:**
+
 - Hermes engine default (JSC deprecated)
 - Fabric renderer + Bridgeless mode
 - All `expo-*` packages support New Architecture
@@ -44,24 +45,25 @@ app/
 
 ```tsx
 // app/_layout.tsx
-import { Stack } from 'expo-router';
+import { Stack } from "expo-router";
 
 export default function Layout() {
   return (
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="modal" options={{ presentation: "modal" }} />
     </Stack>
   );
 }
 ```
 
 **Deep Linking**
+
 ```tsx
 // Navigate programmatically
-import { router } from 'expo-router';
-router.push('/profile/123');
-router.replace('/home');
+import { router } from "expo-router";
+router.push("/profile/123");
+router.replace("/home");
 router.back();
 ```
 
@@ -71,21 +73,22 @@ router.back();
 
 ```tsx
 // specs/NativeCalculator.ts
-import type { TurboModule } from 'react-native';
-import { TurboModuleRegistry } from 'react-native';
+import type { TurboModule } from "react-native";
+import { TurboModuleRegistry } from "react-native";
 
 export interface Spec extends TurboModule {
   multiply(a: number, b: number): number;
 }
 
-export default TurboModuleRegistry.getEnforcing<Spec>('Calculator');
+export default TurboModuleRegistry.getEnforcing<Spec>("Calculator");
 ```
 
 ### Styling
 
 **NativeWind (Tailwind for RN)**
+
 ```tsx
-import { View, Text } from 'react-native';
+import { View, Text } from "react-native";
 
 export function Card() {
   return (
@@ -101,11 +104,11 @@ export function Card() {
 Same as web - TanStack Query for server state, Zustand for client:
 
 ```tsx
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 
 function ProfileScreen() {
   const { data: user } = useQuery({
-    queryKey: ['user'],
+    queryKey: ["user"],
     queryFn: fetchUser,
   });
   return <UserProfile user={user} />;
@@ -119,11 +122,11 @@ function ProfileScreen() {
 export default {
   expo: {
     updates: {
-      url: 'https://u.expo.dev/your-project-id',
+      url: "https://u.expo.dev/your-project-id",
       fallbackToCacheTimeout: 0,
     },
     runtimeVersion: {
-      policy: 'appVersion',
+      policy: "appVersion",
     },
   },
 };
@@ -132,19 +135,19 @@ export default {
 ### Push Notifications
 
 ```tsx
-import * as Notifications from 'expo-notifications';
+import * as Notifications from "expo-notifications";
 
 // Request permissions
 const { status } = await Notifications.requestPermissionsAsync();
 
 // Get push token
 const token = await Notifications.getExpoPushTokenAsync({
-  projectId: 'your-project-id',
+  projectId: "your-project-id",
 });
 
 // Schedule local notification
 await Notifications.scheduleNotificationAsync({
-  content: { title: 'Reminder', body: 'Check the app!' },
+  content: { title: "Reminder", body: "Check the app!" },
   trigger: { seconds: 60 },
 });
 ```

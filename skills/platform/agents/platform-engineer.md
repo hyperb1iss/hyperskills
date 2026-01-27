@@ -30,6 +30,7 @@ Developer → PR → Review → Merge → Argo CD syncs → Cluster updated
 ```
 
 **Benefits:**
+
 - Auditable history
 - Easy rollbacks
 - Self-healing (drift correction)
@@ -38,6 +39,7 @@ Developer → PR → Review → Merge → Argo CD syncs → Cluster updated
 ### Infrastructure as Code Patterns
 
 **OpenTofu (Terraform-compatible):**
+
 ```hcl
 # Modular, reusable infrastructure
 module "vpc" {
@@ -54,6 +56,7 @@ module "eks" {
 ```
 
 **Pulumi (Real languages):**
+
 ```typescript
 import * as k8s from "@pulumi/kubernetes";
 
@@ -65,14 +68,16 @@ const deployment = new k8s.apps.v1.Deployment("api", {
     template: {
       metadata: { labels: { app: "api" } },
       spec: {
-        containers: [{
-          name: "api",
-          image: pulumi.interpolate`${registry}/${image}:${tag}`,
-          resources: {
-            requests: { cpu: "100m", memory: "128Mi" },
-            limits: { cpu: "500m", memory: "512Mi" },
+        containers: [
+          {
+            name: "api",
+            image: pulumi.interpolate`${registry}/${image}:${tag}`,
+            resources: {
+              requests: { cpu: "100m", memory: "128Mi" },
+              limits: { cpu: "500m", memory: "512Mi" },
+            },
           },
-        }],
+        ],
       },
     },
   },
@@ -128,6 +133,7 @@ spec:
 ### Observability Stack
 
 **OpenTelemetry Auto-Instrumentation:**
+
 ```yaml
 apiVersion: opentelemetry.io/v1alpha1
 kind: Instrumentation
@@ -145,6 +151,7 @@ spec:
 ```
 
 **Prometheus ServiceMonitor:**
+
 ```yaml
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor

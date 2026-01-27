@@ -34,6 +34,7 @@ git checkout HEAD@{5}  # Go back 5 operations
 ### Rebase Workflow
 
 **Basic rebase onto main:**
+
 ```bash
 git fetch origin
 git rebase origin/main
@@ -47,6 +48,7 @@ git rebase --abort
 ```
 
 **Interactive rebase (clean up commits):**
+
 ```bash
 git rebase -i HEAD~5
 
@@ -58,6 +60,7 @@ git rebase -i HEAD~5
 ```
 
 **Autosquash pattern:**
+
 ```bash
 git commit --fixup=<commit-hash>
 git rebase -i --autosquash origin/main
@@ -81,6 +84,7 @@ git rebase --continue
 ### Lock File Conflicts
 
 **Never manually resolve - regenerate:**
+
 ```bash
 # pnpm
 git checkout --theirs pnpm-lock.yaml

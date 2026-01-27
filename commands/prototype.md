@@ -41,18 +41,21 @@ Create a new prototype application quickly.
 ## Templates
 
 ### Next.js + Supabase (Default)
+
 - Next.js 15 App Router
 - Supabase Auth + Database
 - Tailwind + shadcn/ui
 - Drizzle ORM
 
 ### API Only
+
 - Hono framework
 - Drizzle + PostgreSQL
 - OpenAPI spec
 - Deploy to Cloudflare Workers
 
 ### Mobile
+
 - Expo SDK 53
 - Expo Router
 - NativeWind
@@ -61,6 +64,7 @@ Create a new prototype application quickly.
 ## Output
 
 Return a working prototype with:
+
 - Deployed URL
 - GitHub repo (if requested)
 - Key files overview
