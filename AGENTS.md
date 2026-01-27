@@ -2,44 +2,82 @@
 
 Compatible with the [skills.sh](https://skills.sh) open ecosystem.
 
+## Installation
+
+```bash
+npx skills add hyperbliss/hyperskills --all
+```
+
+Or install specific skills:
+
+```bash
+npx skills add hyperbliss/hyperskills --skill ai
+npx skills add hyperbliss/hyperskills --skill fullstack
+npx skills add hyperbliss/hyperskills --skill security
+```
+
 ## Agent Registry
 
-### Fullstack Development
-- `fullstack:frontend-developer` - React 19, Next.js, RSC patterns
-- `fullstack:backend-architect` - APIs, databases, system design
-- `fullstack:rapid-prototyper` - MVP development in days
-- `fullstack:database-specialist` - Schema design, optimization, migrations
+### Fullstack Development (`fullstack`)
 
-### Mobile Development
-- `mobile:mobile-app-builder` - React Native, Expo, cross-platform
+- `frontend-developer` - React 19, Next.js, RSC patterns, Tailwind
+- `backend-architect` - APIs, databases, system design, auth
+- `rapid-prototyper` - MVP development in 6-day sprints
+- `database-specialist` - Schema design, optimization, migrations
 
-### AI/ML Engineering
-- `ai:ai-engineer` - LLM integration, RAG, MCP, DSPy
-- `ai:mlops-engineer` - Model deployment, monitoring, pipelines
-- `ai:data-scientist` - Analysis, modeling, experimentation
-- `ai:ml-researcher` - Cutting-edge architectures, paper implementation
-- `ai:cv-engineer` - Computer vision, VLMs, image processing
+### Mobile Development (`mobile`)
 
-### Platform Engineering
-- `platform:platform-engineer` - GitOps, IaC, Kubernetes, observability
-- `platform:data-engineer` - Pipelines, ETL, data infrastructure
-- `platform:finops-engineer` - Cloud cost optimization, FinOps framework
+- `mobile-app-builder` - React Native, Expo SDK 53, cross-platform
 
-### Security Operations
-- `security:security-architect` - Threat modeling, secure design, compliance
-- `security:incident-responder` - Incident handling, forensics, recovery
+### AI/ML Engineering (`ai`)
 
-### Quality Engineering
-- `quality:test-writer-fixer` - Test creation, maintenance, CI integration
-- `quality:accessibility-specialist` - WCAG compliance, inclusive design
+- `ai-engineer` - LLM integration, RAG, MCP, DSPy
+- `mlops-engineer` - Model deployment, monitoring, pipelines
+- `data-scientist` - Analysis, A/B testing, predictive models
+- `ml-researcher` - Paper implementation, novel architectures
+- `cv-engineer` - Computer vision, object detection, segmentation
 
-### Growth & Product
-- `growth:growth-hacker` - Viral loops, PLG, acquisition experiments
-- `growth:app-store-optimizer` - ASO strategy, keyword optimization
-- `growth:content-strategist` - Multi-platform content, SEO
-- `growth:trend-researcher` - Market research, opportunity identification
-- `growth:product-strategist` - Competitive intel, feature prioritization
+### Platform Engineering (`platform`)
+
+- `platform-engineer` - GitOps, IaC, Kubernetes, observability
+- `data-engineer` - Pipelines, ETL, data infrastructure
+- `finops-engineer` - Cloud cost optimization, FinOps framework
+- `git-wizard` - Complex rebases, merge conflicts, git archaeology
+
+### Security Operations (`security`)
+
+- `security-architect` - Threat modeling, secure design, compliance
+- `incident-responder` - Incident handling, forensics, recovery
+
+### Quality Engineering (`quality`)
+
+- `test-writer-fixer` - Test creation, maintenance, CI integration
+- `accessibility-specialist` - WCAG compliance, Playwright + Axe
+
+### Growth & Product (`growth`)
+
+- `growth-hacker` - Viral loops, PLG, acquisition experiments
+- `app-store-optimizer` - ASO strategy, keyword research
+- `content-strategist` - Multi-platform content, SEO, repurposing
+- `trend-researcher` - Market research, viral opportunity identification
+- `product-strategist` - Competitive intel, feature prioritization
+
+## Stats
+
+| Metric | Count |
+|--------|-------|
+| Skills | 7 |
+| Agents | 22 |
+| Commands | 2 |
 
 ## Usage
 
-Agents can be invoked via the Task tool with the appropriate subagent_type, or through skill activation which automatically selects the right agent for the task.
+Skills auto-activate based on context. Agents are invoked via the Task tool:
+
+```
+Task(subagent_type="ai-engineer", prompt="Implement RAG pipeline...")
+```
+
+## License
+
+MIT
