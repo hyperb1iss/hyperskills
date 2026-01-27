@@ -213,10 +213,10 @@ hyperskills/
 ├── .claude-plugin/
 │   ├── plugin.json           # Claude Code manifest
 │   └── marketplace.json      # Distribution index
+├── agents/                    # 23 specialized subagents
 ├── skills/
 │   ├── fullstack/
 │   │   ├── SKILL.md          # Quick reference + triggers
-│   │   ├── agents/           # Specialized subagents
 │   │   ├── references/       # Deep documentation
 │   │   └── examples/         # Production configs
 │   ├── mobile/
