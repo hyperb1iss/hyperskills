@@ -72,79 +72,95 @@ git clone https://github.com/hyperb1iss/hyperskills.git
 ln -s $(pwd)/hyperskills/skills ~/.claude/skills/hyperskills
 ```
 
+## 🎯 Usage
+
+Invoke skills with `/hyperskills:<skill>`:
+
+```bash
+/hyperskills:fullstack    # Web development patterns
+/hyperskills:ai           # AI/ML engineering
+/hyperskills:security     # Security architecture
+```
+
+We recommend adding this to your `CLAUDE.md`:
+
+> When working on this project, invoke the relevant `/hyperskills:<skill>` to ensure best practices are followed.
+
 ## 🔮 Skills
 
 Skills are contextual knowledge bundles that auto-activate when relevant. Working on React code? The fullstack skill loads. Mention "Kubernetes deployment"? Platform skill activates.
 
-| Skill         | Domain            | Agents | Triggers                                           |
-| ------------- | ----------------- | ------ | -------------------------------------------------- |
-| **fullstack** | Web Development   | 4      | React, Next.js, APIs, databases, Tailwind          |
-| **mobile**    | Mobile Apps       | 1      | React Native, Expo, iOS, Android                   |
-| **ai**        | AI/ML Engineering | 5      | LLMs, RAG, embeddings, MLOps, computer vision      |
-| **platform**  | Infrastructure    | 4      | Kubernetes, GitOps, CI/CD, data pipelines          |
-| **security**  | Security Ops      | 2      | Pentesting, incidents, compliance, threat modeling |
-| **quality**   | Testing & A11y    | 2      | Tests, accessibility, performance, code review     |
-| **growth**    | Growth & Product  | 5      | ASO, viral loops, content, market research         |
+| Skill                   | Domain            | Agents | Triggers                                           |
+| ----------------------- | ----------------- | ------ | -------------------------------------------------- |
+| `hyperskills:fullstack` | Web Development   | 4      | React, Next.js, APIs, databases, Tailwind          |
+| `hyperskills:mobile`    | Mobile Apps       | 1      | React Native, Expo, iOS, Android                   |
+| `hyperskills:ai`        | AI/ML Engineering | 5      | LLMs, RAG, embeddings, MLOps, computer vision      |
+| `hyperskills:platform`  | Infrastructure    | 4      | Kubernetes, GitOps, CI/CD, data pipelines          |
+| `hyperskills:security`  | Security Ops      | 2      | Pentesting, incidents, compliance, threat modeling |
+| `hyperskills:quality`   | Testing & A11y    | 2      | Tests, accessibility, performance, code review     |
+| `hyperskills:growth`    | Growth & Product  | 5      | ASO, viral loops, content, market research         |
 
 ## 🦋 Agents
 
+Agents are invoked via the Task tool with `subagent_type="hyperskills:agent-name"`.
+
 ### Fullstack Development
 
-| Agent                   | Specialty                                                              |
-| ----------------------- | ---------------------------------------------------------------------- |
-| **frontend-developer**  | React 19, Server Components, React Compiler, TanStack Query, shadcn/ui |
-| **backend-architect**   | API design, system architecture, auth patterns, database modeling      |
-| **rapid-prototyper**    | MVP scaffolding, 6-day sprint delivery, trend integration              |
-| **database-specialist** | Schema design, query optimization, migrations, replication             |
+| Agent                             | Specialty                                                              |
+| --------------------------------- | ---------------------------------------------------------------------- |
+| `hyperskills:frontend-developer`  | React 19, Server Components, React Compiler, TanStack Query, shadcn/ui |
+| `hyperskills:backend-architect`   | API design, system architecture, auth patterns, database modeling      |
+| `hyperskills:rapid-prototyper`    | MVP scaffolding, 6-day sprint delivery, trend integration              |
+| `hyperskills:database-specialist` | Schema design, query optimization, migrations, replication             |
 
 ### Mobile Development
 
-| Agent                  | Specialty                                                    |
-| ---------------------- | ------------------------------------------------------------ |
-| **mobile-app-builder** | React Native New Architecture, Expo SDK 53+, NativeWind, EAS |
+| Agent                            | Specialty                                                    |
+| -------------------------------- | ------------------------------------------------------------ |
+| `hyperskills:mobile-app-builder` | React Native New Architecture, Expo SDK 53+, NativeWind, EAS |
 
 ### AI/ML Engineering
 
-| Agent              | Specialty                                                                |
-| ------------------ | ------------------------------------------------------------------------ |
-| **ai-engineer**    | LLM integration, RAG pipelines, MCP servers, DSPy programmatic prompting |
-| **mlops-engineer** | Model deployment, monitoring, feature stores, A/B testing infrastructure |
-| **data-scientist** | Statistical analysis, A/B testing, predictive modeling, causal inference |
-| **ml-researcher**  | Paper implementation, novel architectures, Flash Attention, MoE          |
-| **cv-engineer**    | Object detection (YOLO, RT-DETR), segmentation (SAM), video analysis     |
+| Agent                        | Specialty                                                                |
+| ---------------------------- | ------------------------------------------------------------------------ |
+| `hyperskills:ai-engineer`    | LLM integration, RAG pipelines, MCP servers, DSPy programmatic prompting |
+| `hyperskills:mlops-engineer` | Model deployment, monitoring, feature stores, A/B testing infrastructure |
+| `hyperskills:data-scientist` | Statistical analysis, A/B testing, predictive modeling, causal inference |
+| `hyperskills:ml-researcher`  | Paper implementation, novel architectures, Flash Attention, MoE          |
+| `hyperskills:cv-engineer`    | Object detection (YOLO, RT-DETR), segmentation (SAM), video analysis     |
 
 ### Platform Engineering
 
-| Agent                 | Specialty                                                             |
-| --------------------- | --------------------------------------------------------------------- |
-| **platform-engineer** | GitOps (Argo CD/Flux), OpenTofu, Crossplane v2, OpenTelemetry         |
-| **data-engineer**     | ETL/ELT pipelines, dbt, Airflow, Flink streaming, data quality        |
-| **finops-engineer**   | Cloud cost optimization, FinOps framework, right-sizing, reservations |
-| **git-wizard**        | Complex rebases, merge conflicts, lock files, encrypted secrets       |
+| Agent                           | Specialty                                                             |
+| ------------------------------- | --------------------------------------------------------------------- |
+| `hyperskills:platform-engineer` | GitOps (Argo CD/Flux), OpenTofu, Crossplane v2, OpenTelemetry         |
+| `hyperskills:data-engineer`     | ETL/ELT pipelines, dbt, Airflow, Flink streaming, data quality        |
+| `hyperskills:finops-engineer`   | Cloud cost optimization, FinOps framework, right-sizing, reservations |
+| `hyperskills:git-wizard`        | Complex rebases, merge conflicts, lock files, encrypted secrets       |
 
 ### Security Operations
 
-| Agent                  | Specialty                                                                 |
-| ---------------------- | ------------------------------------------------------------------------- |
-| **security-architect** | Threat modeling, Zero Trust, SBOM/SLSA, eBPF (Tetragon/Falco), compliance |
-| **incident-responder** | NIST IR framework, digital forensics, log analysis, recovery coordination |
+| Agent                            | Specialty                                                                 |
+| -------------------------------- | ------------------------------------------------------------------------- |
+| `hyperskills:security-architect` | Threat modeling, Zero Trust, SBOM/SLSA, eBPF (Tetragon/Falco), compliance |
+| `hyperskills:incident-responder` | NIST IR framework, digital forensics, log analysis, recovery coordination |
 
 ### Quality Engineering
 
-| Agent                        | Specialty                                                              |
-| ---------------------------- | ---------------------------------------------------------------------- |
-| **test-writer-fixer**        | Test creation, failure analysis, CI integration, coverage optimization |
-| **accessibility-specialist** | WCAG 2.2, Playwright + Axe automation, screen reader testing           |
+| Agent                                  | Specialty                                                              |
+| -------------------------------------- | ---------------------------------------------------------------------- |
+| `hyperskills:test-writer-fixer`        | Test creation, failure analysis, CI integration, coverage optimization |
+| `hyperskills:accessibility-specialist` | WCAG 2.2, Playwright + Axe automation, screen reader testing           |
 
 ### Growth & Product
 
-| Agent                   | Specialty                                                            |
-| ----------------------- | -------------------------------------------------------------------- |
-| **growth-hacker**       | Viral loops, PLG patterns, referral systems, conversion optimization |
-| **app-store-optimizer** | ASO strategy, keyword research, screenshot optimization, A/B testing |
-| **content-strategist**  | Multi-platform content, SEO, repurposing workflows, video scripts    |
-| **trend-researcher**    | TikTok trends, app store intelligence, competitive analysis          |
-| **product-strategist**  | Feature prioritization, competitive intel, user feedback synthesis   |
+| Agent                             | Specialty                                                            |
+| --------------------------------- | -------------------------------------------------------------------- |
+| `hyperskills:growth-hacker`       | Viral loops, PLG patterns, referral systems, conversion optimization |
+| `hyperskills:app-store-optimizer` | ASO strategy, keyword research, screenshot optimization, A/B testing |
+| `hyperskills:content-strategist`  | Multi-platform content, SEO, repurposing workflows, video scripts    |
+| `hyperskills:trend-researcher`    | TikTok trends, app store intelligence, competitive analysis          |
+| `hyperskills:product-strategist`  | Feature prioritization, competitive intel, user feedback synthesis   |
 
 ## 🧪 SOTA Knowledge
 
@@ -217,8 +233,8 @@ hyperskills/
 ## 🪄 Commands
 
 ```bash
-/prototype    # Scaffold a new project with best practices
-/audit-security  # Run security audit on codebase
+/hyperskills:prototype       # Scaffold a new project with best practices
+/hyperskills:audit-security  # Run security audit on codebase
 ```
 
 ## 🌐 Compatibility

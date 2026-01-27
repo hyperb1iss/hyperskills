@@ -18,49 +18,49 @@ npx skills add hyperbliss/hyperskills --skill security
 
 ## Agent Registry
 
-### Fullstack Development (`fullstack`)
+### Fullstack Development (`hyperskills:fullstack`)
 
-- `frontend-developer` - React 19, Next.js, RSC patterns, Tailwind
-- `backend-architect` - APIs, databases, system design, auth
-- `rapid-prototyper` - MVP development in 6-day sprints
-- `database-specialist` - Schema design, optimization, migrations
+- `hyperskills:frontend-developer` - React 19, Next.js, RSC patterns, Tailwind
+- `hyperskills:backend-architect` - APIs, databases, system design, auth
+- `hyperskills:rapid-prototyper` - MVP development in 6-day sprints
+- `hyperskills:database-specialist` - Schema design, optimization, migrations
 
-### Mobile Development (`mobile`)
+### Mobile Development (`hyperskills:mobile`)
 
-- `mobile-app-builder` - React Native, Expo SDK 53, cross-platform
+- `hyperskills:mobile-app-builder` - React Native, Expo SDK 53, cross-platform
 
-### AI/ML Engineering (`ai`)
+### AI/ML Engineering (`hyperskills:ai`)
 
-- `ai-engineer` - LLM integration, RAG, MCP, DSPy
-- `mlops-engineer` - Model deployment, monitoring, pipelines
-- `data-scientist` - Analysis, A/B testing, predictive models
-- `ml-researcher` - Paper implementation, novel architectures
-- `cv-engineer` - Computer vision, object detection, segmentation
+- `hyperskills:ai-engineer` - LLM integration, RAG, MCP, DSPy
+- `hyperskills:mlops-engineer` - Model deployment, monitoring, pipelines
+- `hyperskills:data-scientist` - Analysis, A/B testing, predictive models
+- `hyperskills:ml-researcher` - Paper implementation, novel architectures
+- `hyperskills:cv-engineer` - Computer vision, object detection, segmentation
 
-### Platform Engineering (`platform`)
+### Platform Engineering (`hyperskills:platform`)
 
-- `platform-engineer` - GitOps, IaC, Kubernetes, observability
-- `data-engineer` - Pipelines, ETL/ELT, dbt, Airflow, streaming
-- `finops-engineer` - Cloud cost optimization, FinOps framework
-- `git-wizard` - Complex rebases, merge conflicts, git archaeology
+- `hyperskills:platform-engineer` - GitOps, IaC, Kubernetes, observability
+- `hyperskills:data-engineer` - Pipelines, ETL/ELT, dbt, Airflow, streaming
+- `hyperskills:finops-engineer` - Cloud cost optimization, FinOps framework
+- `hyperskills:git-wizard` - Complex rebases, merge conflicts, git archaeology
 
-### Security Operations (`security`)
+### Security Operations (`hyperskills:security`)
 
-- `security-architect` - Threat modeling, secure design, compliance
-- `incident-responder` - Incident handling, forensics, recovery
+- `hyperskills:security-architect` - Threat modeling, secure design, compliance
+- `hyperskills:incident-responder` - Incident handling, forensics, recovery
 
-### Quality Engineering (`quality`)
+### Quality Engineering (`hyperskills:quality`)
 
-- `test-writer-fixer` - Test creation, maintenance, CI integration
-- `accessibility-specialist` - WCAG compliance, Playwright + Axe
+- `hyperskills:test-writer-fixer` - Test creation, maintenance, CI integration
+- `hyperskills:accessibility-specialist` - WCAG compliance, Playwright + Axe
 
-### Growth & Product (`growth`)
+### Growth & Product (`hyperskills:growth`)
 
-- `growth-hacker` - Viral loops, PLG, acquisition experiments
-- `app-store-optimizer` - ASO strategy, keyword research
-- `content-strategist` - Multi-platform content, SEO, repurposing
-- `trend-researcher` - Market research, viral opportunity identification
-- `product-strategist` - Competitive intel, feature prioritization
+- `hyperskills:growth-hacker` - Viral loops, PLG, acquisition experiments
+- `hyperskills:app-store-optimizer` - ASO strategy, keyword research
+- `hyperskills:content-strategist` - Multi-platform content, SEO, repurposing
+- `hyperskills:trend-researcher` - Market research, viral opportunity identification
+- `hyperskills:product-strategist` - Competitive intel, feature prioritization
 
 ## Stats
 
@@ -72,12 +72,20 @@ npx skills add hyperbliss/hyperskills --skill security
 
 ## Usage
 
-Skills auto-activate based on context. Agents are invoked via the Task tool:
+Invoke skills with `/hyperskills:<skill>`:
+
+```bash
+/hyperskills:fullstack
+/hyperskills:ai
+/hyperskills:security
+```
+
+Agents are invoked via the Task tool:
 
 ```
-Task(subagent_type="ai-engineer", prompt="Implement RAG pipeline...")
+Task(subagent_type="hyperskills:ai-engineer", prompt="Implement RAG pipeline...")
 ```
 
 ## License
 
-MIT
+Apache-2.0

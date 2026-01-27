@@ -1,5 +1,5 @@
 {
-  "name": "hyperb1iss-skills",
+  "name": "hyperb1iss",
   "owner": {
     "name": "Stefanie Jane",
     "url": "https://hyperbliss.tech"
@@ -8,28 +8,7 @@
     {
       "name": "hyperskills",
       "source": "./",
-      "description": "Elite AI agent skills for rapid product development - 7 skill domains, 23 specialized agents for fullstack, mobile, AI/ML, platform, security, quality, and growth",
-      "version": "1.0.0",
-      "author": {
-        "name": "Stefanie Jane",
-        "url": "https://hyperbliss.tech"
-      },
-      "homepage": "https://github.com/hyperb1iss/hyperskills",
-      "repository": "https://github.com/hyperb1iss/hyperskills",
-      "license": "Apache-2.0",
-      "keywords": [
-        "claude-code",
-        "codex",
-        "ai-agents",
-        "fullstack",
-        "mobile",
-        "ai-ml",
-        "platform",
-        "security",
-        "quality",
-        "growth"
-      ],
-      "category": "development-tools"
+      "description": "Elite AI agent skills for rapid product development - 7 skill domains, 23 specialized agents"
     }
   ]
 }
