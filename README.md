@@ -15,7 +15,7 @@
 
 <p align="center">
   <a href="https://github.com/hyperb1iss/hyperskills/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/hyperb1iss/hyperskills?style=flat-square&logo=apache&logoColor=white" alt="License">
+    <img src="https://img.shields.io/github/license/hyperb1iss/hyperskills?style=flat-square&logo=opensourceinitiative&logoColor=white" alt="License">
   </a>
   <a href="https://github.com/hyperb1iss/hyperskills/releases">
     <img src="https://img.shields.io/github/v/release/hyperb1iss/hyperskills?style=flat-square&logo=github&logoColor=white" alt="Release">
@@ -34,7 +34,7 @@
 
 ## 💎 What This Is
 
-**hyperskills** is a collection of 23 specialized AI agents across 7 skill domains, designed for teams that ship fast. Originally developed as the agent ecosystem for [Contains Studio](https://github.com/hyperb1iss/agents)—a rapid app development framework built around 6-day sprint cycles—these agents have been battle-tested, consolidated, and enhanced with cutting-edge 2026 techniques.
+**hyperskills** is a collection of 23 specialized AI agents across 7 skill domains, designed for teams that ship fast. Originally developed as the agent ecosystem for [Contains Studio](https://github.com/hyperb1iss/agents), these agents have been battle-tested, consolidated, and enhanced with cutting-edge 2026 techniques.
 
 Instead of one generalist agent fumbling through everything, you get **specialists**:
 
@@ -110,7 +110,7 @@ Agents are invoked via the Task tool with `subagent_type="hyperskills:agent-name
 | --------------------------------- | ---------------------------------------------------------------------- |
 | `hyperskills:frontend-developer`  | React 19, Server Components, React Compiler, TanStack Query, shadcn/ui |
 | `hyperskills:backend-architect`   | API design, system architecture, auth patterns, database modeling      |
-| `hyperskills:rapid-prototyper`    | MVP scaffolding, 6-day sprint delivery, trend integration              |
+| `hyperskills:rapid-prototyper`    | MVP scaffolding, rapid delivery, trend integration                     |
 | `hyperskills:database-specialist` | Schema design, query optimization, migrations, replication             |
 
 ### Mobile Development
@@ -253,7 +253,7 @@ These skills embody the Contains Studio methodology:
 
 | Principle                        | What It Means                                                            |
 | -------------------------------- | ------------------------------------------------------------------------ |
-| **Ship in 6 days**               | Every feature fits a sprint. No multi-month projects.                    |
+| **Ship fast**                    | Features ship in hours, not months. Agentic speed.                       |
 | **Research first**               | SOTA techniques, not outdated tutorials. Web search beats training data. |
 | **Specialists over generalists** | Deep expertise wins. One agent per domain.                               |
 | **Automate the boring**          | CI/CD, testing, security—if it can run automatically, it should.         |
@@ -281,17 +281,13 @@ claude --plugin-dir .
 
 hyperskills evolved from the [Contains Studio agent ecosystem](https://github.com/hyperb1iss/agents)—59 specialized agents built for rapid app development. We consolidated them down to 23 essential agents, dropped the outdated ones (manual prompt engineering is dead, platform-specific social media bots are pointless), and enhanced everything with 2025-2026 SOTA techniques.
 
-The original agents powered 6-day sprint cycles for shipping apps fast. Now they're available for everyone.
+The original agents were built for shipping apps fast. Now they're available for everyone.
 
 ## License
 
-Apache-2.0 — See [LICENSE](LICENSE)
+Licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ---
-
-<p align="center">
-  Created by <a href="https://hyperbliss.tech">Stefanie Jane</a>
-</p>
 
 <p align="center">
   <a href="https://github.com/hyperb1iss">
@@ -300,4 +296,10 @@ Apache-2.0 — See [LICENSE](LICENSE)
   <a href="https://bsky.app/profile/hyperbliss.tech">
     <img src="https://img.shields.io/badge/Bluesky-@hyperbliss.tech-1185fe?style=for-the-badge&logo=bluesky" alt="Bluesky">
   </a>
+</p>
+
+<p align="center">
+  <sub>
+    ✦ Built with obsession by <a href="https://hyperbliss.tech"><strong>Hyperbliss Technologies</strong></a> ✦
+  </sub>
 </p>

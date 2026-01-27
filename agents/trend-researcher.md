@@ -99,7 +99,7 @@ Target Window: Growth phase (1-4 weeks momentum)
 
 ### Technical Feasibility
 
-- Can MVP ship in 6 days?
+- Can MVP ship quickly?
 - Existing APIs/services available?
 - No complex infrastructure needed?
   Score: \_\_/5

@@ -22,7 +22,7 @@ npx skills add hyperbliss/hyperskills --skill security
 
 - `hyperskills:frontend-developer` - React 19, Next.js, RSC patterns, Tailwind
 - `hyperskills:backend-architect` - APIs, databases, system design, auth
-- `hyperskills:rapid-prototyper` - MVP development in 6-day sprints
+- `hyperskills:rapid-prototyper` - Rapid MVP development
 - `hyperskills:database-specialist` - Schema design, optimization, migrations
 
 ### Mobile Development (`hyperskills:mobile`)
@@ -88,4 +88,4 @@ Task(subagent_type="hyperskills:ai-engineer", prompt="Implement RAG pipeline..."
 
 ## License
 
-Apache-2.0
+MIT
