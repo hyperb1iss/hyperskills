@@ -62,11 +62,15 @@ npx skills add hyperbliss/hyperskills --skill security
 - `hyperskills:trend-researcher` - Market research, viral opportunity identification
 - `hyperskills:product-strategist` - Competitive intel, feature prioritization
 
+### Multi-Agent Orchestration (`hyperskills:orchestrate`)
+
+Meta-orchestration patterns for scaling agent work: research swarms, epic parallel builds, wave dispatch, build-review-fix pipelines, multi-dimensional audits, and full project lifecycles.
+
 ## Stats
 
 | Metric   | Count |
 | -------- | ----- |
-| Skills   | 7     |
+| Skills   | 8     |
 | Agents   | 23    |
 | Commands | 2     |
 
@@ -78,6 +82,7 @@ Invoke skills with `/hyperskills:<skill>`:
 /hyperskills:fullstack
 /hyperskills:ai
 /hyperskills:security
+/hyperskills:orchestrate
 ```
 
 Agents are invoked via the Task tool:
