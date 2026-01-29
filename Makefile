@@ -86,7 +86,7 @@ validate-structure:
 
 validate-frontmatter:
 	@echo "$(CYAN)→ Validating frontmatter...$(RESET)"
-	@for f in commands/*.md skills/*/SKILL.md skills/*/agents/*.md; do \
+	@for f in skills/*/SKILL.md; do \
 		if [ -f "$$f" ]; then \
 			head -1 "$$f" | grep -q "^---$$" || (echo "$(RED)✗ Missing frontmatter in $$f$(RESET)" && exit 1); \
 		fi \
@@ -107,15 +107,12 @@ stats:
 	@echo ""
 	@echo "$(PURPLE)Hyperskills Stats$(RESET)"
 	@echo "$(CYAN)─────────────────────────────────────$(RESET)"
-	@echo "$(CYAN)Skills:$(RESET)   $$(find skills -maxdepth 1 -type d | tail -n +2 | wc -l | tr -d ' ')"
-	@echo "$(CYAN)Agents:$(RESET)   $$(find skills -name "*.md" -path "*/agents/*" | wc -l | tr -d ' ')"
-	@echo "$(CYAN)Commands:$(RESET) $$(find commands -name "*.md" 2>/dev/null | wc -l | tr -d ' ')"
+	@echo "$(CYAN)Skills:$(RESET) $$(find skills -maxdepth 1 -type d | tail -n +2 | wc -l | tr -d ' ')"
 	@echo ""
-	@echo "$(CYAN)By skill:$(RESET)"
+	@echo "$(CYAN)Skill list:$(RESET)"
 	@for skill in skills/*/; do \
 		name=$$(basename $$skill); \
-		count=$$(find $$skill/agents -name "*.md" 2>/dev/null | wc -l | tr -d ' '); \
-		echo "  $(GREEN)$$name$(RESET): $$count agents"; \
+		echo "  $(GREEN)$$name$(RESET)"; \
 	done
 	@echo ""
 

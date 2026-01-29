@@ -46,14 +46,14 @@ digraph strategy_selection {
 }
 ```
 
-| Strategy | When | Agents | Background | Key Pattern |
-|----------|------|--------|------------|-------------|
-| **Research Swarm** | Knowledge gathering, docs, SOTA research | 10-60+ | Yes (100%) | Fan-out, each writes own doc |
-| **Epic Parallel Build** | Plan with independent epics/features | 20-60+ | Yes (90%+) | Wave dispatch by subsystem |
-| **Sequential Pipeline** | Dependent tasks, shared files | 3-15 | No (0%) | Implement -> Review -> Fix chain |
-| **Parallel Sweep** | Same fix/transform across modules | 4-10 | No (0%) | Partition by directory, fan-out |
-| **Multi-Dimensional Audit** | Quality gates, deep assessment | 6-9 | No (0%) | Same code, different review lenses |
-| **Full Lifecycle** | New project from scratch | All above | Mixed | Research -> Plan -> Build -> Review -> Harden |
+| Strategy                    | When                                     | Agents    | Background | Key Pattern                                   |
+| --------------------------- | ---------------------------------------- | --------- | ---------- | --------------------------------------------- |
+| **Research Swarm**          | Knowledge gathering, docs, SOTA research | 10-60+    | Yes (100%) | Fan-out, each writes own doc                  |
+| **Epic Parallel Build**     | Plan with independent epics/features     | 20-60+    | Yes (90%+) | Wave dispatch by subsystem                    |
+| **Sequential Pipeline**     | Dependent tasks, shared files            | 3-15      | No (0%)    | Implement -> Review -> Fix chain              |
+| **Parallel Sweep**          | Same fix/transform across modules        | 4-10      | No (0%)    | Partition by directory, fan-out               |
+| **Multi-Dimensional Audit** | Quality gates, deep assessment           | 6-9       | No (0%)    | Same code, different review lenses            |
+| **Full Lifecycle**          | New project from scratch                 | All above | Mixed      | Research -> Plan -> Build -> Review -> Harden |
 
 ---
 
@@ -62,6 +62,7 @@ digraph strategy_selection {
 Mass-deploy background agents to build a knowledge corpus. Each agent researches one topic and writes one markdown document. Zero dependencies between agents.
 
 ### When to Use
+
 - Kicking off a new project (need SOTA for all technologies)
 - Building a skill/plugin (need comprehensive domain knowledge)
 - Technology evaluation (compare multiple options in parallel)
@@ -91,6 +92,7 @@ Phase 3: Synthesize
 Research [TECHNOLOGY] for [PROJECT]'s [USE CASE].
 
 Create a comprehensive research doc at [OUTPUT_PATH]/[filename].md covering:
+
 1. Latest [TECH] version and features (search "[TECH] 2026" or "[TECH] latest")
 2. [Specific feature relevant to project]
 3. [Another relevant feature]
@@ -104,12 +106,14 @@ Include code examples where possible. Use WebSearch and WebFetch to get current 
 ```
 
 **Key rules:**
+
 - Every agent gets an explicit output file path (no ambiguity)
 - Include search hints: "search [TECH] 2026" (agents need recency guidance)
 - Numbered coverage list (8-12 items) scopes the research precisely
 - ALL agents run in background -- no dependencies between research topics
 
 ### Dispatch Cadence
+
 - 3-4 seconds between agent dispatches
 - Group into thematic waves of 10-20 agents
 - 15-25 minute gaps between waves for gap analysis
@@ -121,6 +125,7 @@ Include code examples where possible. Use WebSearch and WebFetch to get current 
 Deploy background agents to implement independent features/epics simultaneously. Each agent builds one feature in its own directory/module. No two agents touch the same files.
 
 ### When to Use
+
 - Implementation plan with 10+ independent tasks
 - Monorepo with isolated packages/modules
 - Sprint backlog with non-overlapping features
@@ -156,15 +161,17 @@ Phase 4: Review and harden (FOREGROUND)
 ### Prompt Template: Feature Build Agent
 
 ```markdown
-**Task: [DESCRIPTIVE TITLE]** (task_[ID])
+**Task: [DESCRIPTIVE TITLE]** (task\_[ID])
 
 Work in /path/to/project/[SPECIFIC_DIRECTORY]
 
 ## Context
+
 [What already exists. Reference specific files, patterns, infrastructure.]
 [e.g., "Redis is available at `app.state.redis`", "Follow pattern from `src/auth/`"]
 
 ## Your Job
+
 1. Create `src/path/to/module/` with:
    - `file.py` -- [Description]
    - `routes.py` -- [Description]
@@ -182,12 +189,14 @@ Work in /path/to/project/[SPECIFIC_DIRECTORY]
    - Register routes at [path]
 
 ## Git
+
 Commit with message: "feat([module]): [description]"
 Only stage files YOU created. Check `git status` before committing.
 Do NOT stage files from other agents.
 ```
 
 **Key rules:**
+
 - Every agent gets its own directory scope -- NO OVERLAP
 - Provide existing patterns to follow ("Follow pattern from X")
 - Include infrastructure context ("Redis available at X")
@@ -211,6 +220,7 @@ When running 10+ agents concurrently:
 Execute dependent tasks one at a time with review gates. Each task builds on the previous task's output. Use `superpowers:subagent-driven-development` for the full pipeline.
 
 ### When to Use
+
 - Tasks that modify shared files
 - Integration boundary work (JNI bridges, auth chains)
 - Review-then-fix cycles where each fix depends on review findings
@@ -236,12 +246,12 @@ Trust Gradient (adapt over time):
 
 As the session progresses and patterns prove reliable, progressively lighten review overhead:
 
-| Phase | Review Overhead | When |
-|-------|----------------|------|
-| **Full ceremony** | Implement + Spec Review + Code Review | First 3-4 tasks |
-| **Standard** | Implement + Spec Review | Tasks 5-8, or after patterns stabilize |
-| **Light** | Implement + quick spot-check | Late tasks with established patterns |
-| **Cost-optimized** | Use `model: "haiku"` for reviews | Formulaic review passes |
+| Phase              | Review Overhead                       | When                                   |
+| ------------------ | ------------------------------------- | -------------------------------------- |
+| **Full ceremony**  | Implement + Spec Review + Code Review | First 3-4 tasks                        |
+| **Standard**       | Implement + Spec Review               | Tasks 5-8, or after patterns stabilize |
+| **Light**          | Implement + quick spot-check          | Late tasks with established patterns   |
+| **Cost-optimized** | Use `model: "haiku"` for reviews      | Formulaic review passes                |
 
 This is NOT cutting corners -- it's earned confidence. If a late task deviates from the pattern, escalate back to full ceremony.
 
@@ -252,6 +262,7 @@ This is NOT cutting corners -- it's earned confidence. If a late task deviates f
 Apply the same transformation across partitioned areas of the codebase. Every agent does the same TYPE of work but on different FILES.
 
 ### When to Use
+
 - Lint/format fixes across modules
 - Type annotation additions across packages
 - Test writing for multiple modules
@@ -283,6 +294,7 @@ Phase 3: Verify and repeat
 Fix all [TOOL] issues in the [MODULE_NAME] directory ([PATH]).
 
 Current issues ([COUNT] total):
+
 - [RULE_CODE]: [description] ([count]) -- [domain-specific fix guidance]
 - [RULE_CODE]: [description] ([count]) -- [domain-specific fix guidance]
 
@@ -295,6 +307,7 @@ After fixing, run `[TOOL_COMMAND] [PATH]` to verify zero issues remain.
 ```
 
 **Key rules:**
+
 - Provide issue counts by category (not just "fix everything")
 - Include domain-specific guidance (agents need to know WHY patterns exist)
 - Partition by directory to prevent overlap
@@ -307,6 +320,7 @@ After fixing, run `[TOOL_COMMAND] [PATH]` to verify zero issues remain.
 Deploy multiple reviewers to examine the same code from different angles simultaneously. Each reviewer has a different focus lens.
 
 ### When to Use
+
 - Major feature complete, need comprehensive review
 - Pre-release quality gate
 - Security audit
@@ -335,16 +349,19 @@ Wait for all to complete, then:
 [DIMENSION] review of [COMPONENT] implementation.
 
 **Files to review:**
+
 - [file1.ext]
 - [file2.ext]
 - [file3.ext]
 
 **Analyze:**
+
 1. [Specific question for this dimension]
 2. [Specific question for this dimension]
 3. [Specific question for this dimension]
 
 **Report format:**
+
 - Findings: numbered list with severity (Critical/Important/Minor)
 - Assessment: Approved / Needs Changes
 - Recommendations: prioritized action items
@@ -416,6 +433,7 @@ digraph bg_fg {
 ```
 
 **Rules observed from 597+ dispatches:**
+
 - Research agents with no immediate dependency -> BACKGROUND (100% of the time)
 - Code-writing agents -> FOREGROUND (even if parallel)
 - Review/validation gates -> FOREGROUND (blocks pipeline)
@@ -433,9 +451,10 @@ You are researching [DOMAIN] to create comprehensive documentation for [PROJECT]
 Your mission: Create an exhaustive reference document covering ALL [TOPIC] capabilities.
 
 Cover these areas in depth:
+
 1. **[Category]** -- specific items
 2. **[Category]** -- specific items
-...
+   ...
 
 Use WebSearch and WebFetch to find blog posts, GitHub repos, and official docs.
 ```
@@ -443,20 +462,23 @@ Use WebSearch and WebFetch to find blog posts, GitHub repos, and official docs.
 ### Pattern B: Task + Context + Files + Spec (Feature Build)
 
 ```markdown
-**Task: [TITLE]** (task_[ID])
+**Task: [TITLE]** (task\_[ID])
 
 Work in /absolute/path/to/[directory]
 
 ## Context
+
 [What exists, what to read, what infrastructure is available]
 
 ## Your Job
+
 1. Create `path/to/file` with [description]
 2. [Detailed implementation spec]
 3. [Test requirements]
 4. [Integration requirements]
 
 ## Git
+
 Commit with: "feat([scope]): [message]"
 Only stage YOUR files.
 ```
@@ -467,14 +489,16 @@ Only stage YOUR files.
 Comprehensive audit of [SCOPE] for [DIMENSION].
 
 Look for:
+
 1. [Specific thing #1]
 2. [Specific thing #2]
-...
-10. [Specific thing #10]
+   ...
+3. [Specific thing #10]
 
 [Scope boundaries -- which directories/files]
 
 Report format:
+
 - Findings: numbered with severity
 - Assessment: Pass / Needs Work
 - Action items: prioritized
@@ -489,10 +513,12 @@ Report format:
 **Location:** [Exact file path]
 
 **Fix Required:**
+
 1. [Specific change]
 2. [Specific change]
 
 **Verify:**
+
 1. Run [command] to confirm fix
 2. Run tests: [test command]
 ```
@@ -504,6 +530,7 @@ Report format:
 Agents can work independently BECAUSE the orchestrator pre-loads them with all context they need. Without this, agents would need to explore first, serializing the work.
 
 **Always inject:**
+
 - Absolute file paths (never relative)
 - Existing patterns to follow ("Follow pattern from `src/auth/jwt.py`")
 - Available infrastructure ("Redis at `app.state.redis`")
@@ -512,6 +539,7 @@ Agents can work independently BECAUSE the orchestrator pre-loads them with all c
 - Git instructions ("Only stage YOUR files")
 
 **For parallel agents, duplicate shared context:**
+
 - Copy the same context block into each agent's prompt
 - Explicit exclusion notes ("11-Sibyl is handled by another agent")
 - Shared utilities described identically
@@ -575,12 +603,12 @@ When running 10+ background agents:
 
 ## Integration with Other Skills
 
-| Skill | Use With | When |
-|-------|----------|------|
-| `superpowers:subagent-driven-development` | Sequential Pipeline | Single-task implement-review cycles |
-| `superpowers:dispatching-parallel-agents` | Parallel Sweep | Independent bug fixes |
-| `superpowers:writing-plans` | Full Lifecycle | Create the plan before Phase 2 |
-| `superpowers:executing-plans` | Sequential Pipeline | Batch execution in separate session |
-| `superpowers:brainstorming` | Full Lifecycle | Before research phase |
-| `superpowers:requesting-code-review` | All strategies | Quality gates between phases |
-| `superpowers:verification-before-completion` | All strategies | Final validation |
+| Skill                                        | Use With            | When                                |
+| -------------------------------------------- | ------------------- | ----------------------------------- |
+| `superpowers:subagent-driven-development`    | Sequential Pipeline | Single-task implement-review cycles |
+| `superpowers:dispatching-parallel-agents`    | Parallel Sweep      | Independent bug fixes               |
+| `superpowers:writing-plans`                  | Full Lifecycle      | Create the plan before Phase 2      |
+| `superpowers:executing-plans`                | Sequential Pipeline | Batch execution in separate session |
+| `superpowers:brainstorming`                  | Full Lifecycle      | Before research phase               |
+| `superpowers:requesting-code-review`         | All strategies      | Quality gates between phases        |
+| `superpowers:verification-before-completion` | All strategies      | Final validation                    |
