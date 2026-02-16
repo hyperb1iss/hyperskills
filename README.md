@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Skills-3-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="3 Skills">
+  <img src="https://img.shields.io/badge/Skills-4-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="4 Skills">
   <img src="https://img.shields.io/badge/skills.sh-Compatible-ff6ac1?style=for-the-badge&logo=vercel&logoColor=white" alt="skills.sh">
 </p>
 
@@ -31,8 +31,9 @@ Modern models already know how to write React components, Kubernetes manifests, 
 - **Orchestrating dozens of agents** without stepping on each other's work
 - **Security frameworks** that are easy to forget under pressure
 - **Git decision trees** for the operations that actually trip people up
+- **Tilt dev workflows** — CLI operations, Tiltfile authoring, and live update patterns that models don't know
 
-Three skills. Zero bloat.
+Four skills. Zero bloat.
 
 ## Installation
 
@@ -52,6 +53,7 @@ npx skills add hyperbliss/hyperskills --all
 npx skills add hyperbliss/hyperskills --skill orchestrate
 npx skills add hyperbliss/hyperskills --skill security
 npx skills add hyperbliss/hyperskills --skill git
+npx skills add hyperbliss/hyperskills --skill tilt
 ```
 
 ### Manual
@@ -77,12 +79,17 @@ Frameworks and checklists for secure systems. Zero Trust principles, STRIDE thre
 
 Decision trees for the git operations that actually cause problems. When to rebase vs merge, how to handle lock file conflicts, SOPS encrypted file resolution, undo operations by scenario, and repository archaeology commands.
 
+### `hyperskills:tilt`
+
+Complete Tilt (Kubernetes dev toolkit) operational reference. CLI commands for log viewing, resource management, and debugging. Tiltfile authoring with build strategy selectors, live update decision trees, and resource configuration. Progressive disclosure: core operations in SKILL.md, full API catalog and power patterns in references.
+
 ## Usage
 
 ```bash
 /hyperskills:orchestrate   # Multi-agent coordination
 /hyperskills:security      # Security frameworks & checklists
 /hyperskills:git           # Complex git operations
+/hyperskills:tilt          # Tilt Kubernetes dev workflows
 ```
 
 ## Compatibility

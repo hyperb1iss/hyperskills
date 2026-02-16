@@ -1,7 +1,7 @@
 {
   "name": "hyperskills",
   "version": "2.0.0",
-  "description": "Focused AI agent skills: orchestration, security, and git operations",
+  "description": "Focused AI agent skills: orchestration, security, git operations, and Tilt Kubernetes development",
   "author": {
     "name": "Stefanie Jane",
     "url": "https://hyperbliss.tech"
@@ -17,6 +17,10 @@
     "security",
     "threat-modeling",
     "git",
+    "tilt",
+    "kubernetes",
+    "tiltfile",
+    "live-update",
     "skills"
   ]
 }
