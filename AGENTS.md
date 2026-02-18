@@ -15,6 +15,7 @@ npx skills add hyperbliss/hyperskills --skill orchestrate
 npx skills add hyperbliss/hyperskills --skill security
 npx skills add hyperbliss/hyperskills --skill git
 npx skills add hyperbliss/hyperskills --skill tilt
+npx skills add hyperbliss/hyperskills --skill tui-design
 ```
 
 ## Skills
@@ -35,6 +36,10 @@ Decision trees for conflict resolution, rebase vs merge, undo operations. Lock f
 
 CLI operations, Tiltfile authoring, live update patterns, build strategy selectors, debugging flows. Complete API reference and power patterns in progressive disclosure references.
 
+### TUI Design System (`hyperskills:tui-design`)
+
+Universal design patterns for building exceptional terminal user interfaces. Layout paradigm selector, interaction model decision trees, terminal color theory, visual hierarchy techniques, data visualization, animation patterns, and anti-pattern checklists. Framework-agnostic — works with Ratatui, Ink, Textual, Bubbletea, or any TUI toolkit. Includes a visual catalog of Unicode characters and a gallery of real TUI app design patterns.
+
 ## Usage
 
 Invoke skills with `/hyperskills:<skill>`:
@@ -44,6 +49,7 @@ Invoke skills with `/hyperskills:<skill>`:
 /hyperskills:security
 /hyperskills:git
 /hyperskills:tilt
+/hyperskills:tui-design
 ```
 
 ## License

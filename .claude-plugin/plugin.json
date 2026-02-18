@@ -1,7 +1,7 @@
 {
   "name": "hyperskills",
   "version": "2.0.0",
-  "description": "Focused AI agent skills: orchestration, security, git operations, and Tilt Kubernetes development",
+  "description": "Focused AI agent skills: orchestration, security, git operations, Tilt Kubernetes development, and TUI design",
   "author": {
     "name": "Stefanie Jane",
     "url": "https://hyperbliss.tech"
@@ -21,6 +21,13 @@
     "kubernetes",
     "tiltfile",
     "live-update",
+    "tui",
+    "tui-design",
+    "terminal-ui",
+    "ratatui",
+    "bubbletea",
+    "textual",
+    "ink",
     "skills"
   ]
 }
