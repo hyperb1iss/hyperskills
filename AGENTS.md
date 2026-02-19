@@ -32,10 +32,14 @@ hyperskills/
 │   │   └── references/
 │   │       ├── visual-catalog.md
 │   │       └── app-patterns.md
-│   └── codex-review/
+│   ├── codex-review/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── prompts.md
+│   └── implement/
 │       ├── SKILL.md
 │       └── references/
-│           └── prompts.md
+│           └── benchmarks.md
 ├── CLAUDE.md                # Project instructions for Claude sessions
 ├── AGENTS.md                # This file — contributor guide
 ├── LICENSE
@@ -254,13 +258,14 @@ Before committing, verify:
 | `tilt` | ~2,500 | 2 files | Domain — Kubernetes dev |
 | `tui-design` | ~3,000 | 2 files | Domain — terminal UI |
 | `codex-review` | ~2,000 | 1 file | Process — cross-model review |
+| `implement` | ~2,500 | 1 file | Process — implementation |
 
 ## Skill Categories
 
 When adding a new skill, it should fit one of these categories:
 
 **Process skills** — HOW to approach a class of work:
-- `brainstorm`, `plan`, `research`, `orchestrate`, `codex-review`
+- `brainstorm`, `plan`, `research`, `orchestrate`, `codex-review`, `implement`
 - These tend to be workflow-heavy with phases and decision gates
 
 **Domain skills** — specialized knowledge for a specific technology or practice:
