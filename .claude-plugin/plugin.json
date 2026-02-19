@@ -1,7 +1,7 @@
 {
   "name": "hyperskills",
-  "version": "2.0.0",
-  "description": "Focused AI agent skills: orchestration, security, git operations, Tilt Kubernetes development, and TUI design",
+  "version": "3.1.0",
+  "description": "Focused AI agent skills: brainstorming, planning, research, orchestration, security, git operations, Tilt Kubernetes development, TUI design, and cross-model code review",
   "author": {
     "name": "Stefanie Jane",
     "url": "https://hyperbliss.tech"
@@ -11,6 +11,12 @@
   "license": "MIT",
   "keywords": [
     "claude-code",
+    "brainstorming",
+    "ideation",
+    "planning",
+    "task-decomposition",
+    "research",
+    "knowledge-gathering",
     "multi-agent",
     "orchestration",
     "agent-swarm",
@@ -28,6 +34,10 @@
     "bubbletea",
     "textual",
     "ink",
+    "code-review",
+    "codex",
+    "cross-model",
+    "peer-review",
     "skills"
   ]
 }

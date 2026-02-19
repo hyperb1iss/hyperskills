@@ -12,6 +12,38 @@ Thumbs.db
 # Node (for prettier)
 node_modules/
 
+# AI tool configs (created by npx skills add)
+.adal/
+.agent/
+.agents/
+.augment/
+.cline/
+.codebuddy/
+.commandcode/
+.continue/
+.crush/
+.cursor/
+.factory/
+.goose/
+.iflow/
+.junie/
+.kilocode/
+.kiro/
+.kode/
+.mcpjam/
+.mux/
+.neovate/
+.openhands/
+.pi/
+.pochi/
+.qoder/
+.qwen/
+.roo/
+.trae/
+.vibe/
+.windsurf/
+.zencoder/
+
 # Temp
 *.bak
 *.tmp
