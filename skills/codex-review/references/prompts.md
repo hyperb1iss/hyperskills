@@ -1,13 +1,25 @@
 # Codex Review Prompt Templates
 
-Copy-paste ready prompt templates for each review pass. All designed for `gpt-5.3-codex` at `reasoningEffort: "xhigh"`.
+Ready-to-use prompts for each review pass. Pass these directly to `codex -q` via Bash. All designed for `gpt-5.4` at `--reasoning-effort xhigh`.
 
-## General Review (for `review` tool)
+## Usage
 
-Use as the `prompt` parameter with the Codex **review** tool:
+Pass prompts as the final argument to `codex -q`:
+
+```bash
+codex -q -m gpt-5.4 --approval-mode full-auto \
+  --reasoning-effort xhigh \
+  "PROMPT_TEXT_HERE"
+```
+
+For the structured `codex review` command, prompts aren't needed — it has its own review format.
+
+## General Review
+
+Best as the first pass. Broad coverage across all dimensions.
 
 ```
-Review this change with extreme thoroughness. Prioritize:
+Review the changes between main and HEAD with extreme thoroughness. Prioritize:
 1. Correctness — logic errors, edge cases, null handling, race conditions
 2. Security — injection, auth gaps, secrets exposure, OWASP Top 10
 3. Performance — algorithmic complexity, N+1 queries, memory leaks
@@ -23,7 +35,7 @@ Skip: formatting, naming style, minor documentation gaps.
 Overall verdict: "patch is correct" or "patch is incorrect" with justification.
 ```
 
-## Security Deep-Dive (for `codex` tool)
+## Security Deep-Dive
 
 ```
 You are a senior application security engineer reviewing a code change.
@@ -49,7 +61,7 @@ If no security issues found, state that explicitly with your confidence level.
 Do NOT flag style or non-security concerns.
 ```
 
-## Architecture Review (for `codex` tool)
+## Architecture Review
 
 ```
 You are a principal software architect reviewing a code change for design quality.
@@ -73,7 +85,7 @@ For each concern:
 Skip: implementation details, performance micro-optimizations, style.
 ```
 
-## Performance Review (for `codex` tool)
+## Performance Review
 
 ```
 You are a performance engineer reviewing a code change for efficiency.
@@ -97,7 +109,7 @@ For each finding:
 Skip: premature optimization, style preferences, sub-millisecond concerns in cold paths.
 ```
 
-## Error Handling Review (for `codex` tool)
+## Error Handling Review
 
 ```
 You are reviewing a code change specifically for error handling correctness.
@@ -118,7 +130,7 @@ For each finding:
 - Confidence: 0.0-1.0
 ```
 
-## Concurrency Review (for `codex` tool)
+## Concurrency Review
 
 ```
 You are reviewing a code change for concurrency correctness.

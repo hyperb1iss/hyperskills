@@ -1,27 +1,38 @@
 ---
 name: codex-review
-description: Use this skill for cross-model code reviews using OpenAI Codex CLI via MCP. Activates on mentions of codex review, cross-model review, code review with codex, peer review, review my code, review this PR, review changes, codex check, second opinion, or gpt review.
+description: Use this skill for cross-model code reviews using the Codex CLI. Activates on mentions of codex review, cross-model review, code review with codex, peer review, review my code, review this PR, review changes, codex check, second opinion, or gpt review.
 ---
 
-# Cross-Model Code Review with Codex
+# Cross-Model Code Review with Codex CLI
 
-Cross-model validation using Codex CLI's MCP tools. Claude writes code, Codex reviews it — different architecture, different training distribution, no self-approval bias.
+Cross-model validation using the `codex` binary directly. Claude writes code, Codex reviews it — different architecture, different training distribution, no self-approval bias.
 
 **Core insight:** Single-model self-review is systematically biased. Cross-model review catches different bug classes because the reviewer has fundamentally different blind spots than the author.
 
-## The Two Codex Tools
+**Prerequisite:** The `codex` CLI must be installed and authenticated. Verify with `codex --help`. Configure defaults in `~/.codex/config.toml`:
 
-The Codex CLI MCP server exposes two tools relevant for reviews:
+```toml
+model = "gpt-5.4"
+review_model = "gpt-5.4"
+# Note: review_model overrides model for codex review specifically
+model_reasoning_effort = "high"
+```
 
-| Tool | Best For | Key Constraint |
-|------|----------|----------------|
-| Codex **review** | Structured diff review with prioritized findings | `prompt` cannot combine with `uncommitted: true` |
-| Codex **codex** | Freeform deep-dive on specific concerns | Requires explicit diff context in prompt |
+## Two Ways to Invoke Codex
 
-**Always pass these parameters:**
-- `model: "gpt-5.3-codex"` — most capable coding model
-- `reasoningEffort: "xhigh"` — maximum depth (on `codex` tool)
-- `sandbox: "read-only"` — reviewer must never modify the working tree (on `codex` tool)
+| Mode | Command | Best For |
+|------|---------|----------|
+| `codex review` | Structured diff review with prioritized findings | Pre-PR reviews, commit reviews, WIP checks |
+| `codex -q` | Freeform deep-dive with full prompt control | Security audits, architecture review, focused investigation |
+
+**Key flags:**
+
+| Flag | Purpose |
+|------|---------|
+| `--model`, `-m` | Model selection (use `gpt-5.4`) |
+| `--quiet`, `-q` | Non-interactive output only — essential for Bash tool usage |
+| `--approval-mode full-auto` | No interactive prompts (for freeform mode) |
+| `--reasoning-effort` | `low` / `medium` / `high` / `xhigh` |
 
 ## Review Patterns
 
@@ -31,68 +42,47 @@ The standard review before opening a PR. Use for any non-trivial change.
 
 ```
 Step 1 — Structured review (catches correctness + general issues):
-  Codex review(
-    base: "main",
-    model: "gpt-5.3-codex",
-    title: "Pre-PR Review"
-  )
+  Run via Bash:
+    codex review --base main -m gpt-5.4
 
 Step 2 — Security deep-dive (if code touches auth, input handling, or APIs):
-  Codex codex(
-    prompt: <security template from references/prompts.md>,
-    model: "gpt-5.3-codex",
-    reasoningEffort: "xhigh",
-    sandbox: "read-only"
-  )
+  Run via Bash:
+    codex -q -m gpt-5.4 --approval-mode full-auto \
+      --reasoning-effort xhigh \
+      "<security prompt from references/prompts.md>"
 
 Step 3 — Fix findings, then re-review:
-  Codex review(
-    base: "main",
-    model: "gpt-5.3-codex",
-    title: "Re-review after fixes"
-  )
+  Run via Bash:
+    codex review --base main -m gpt-5.4
 ```
 
 ### Pattern 2: Commit-Level Review
 
-Quick check after each meaningful commit. Good for iterative development.
+Quick check after each meaningful commit.
 
-```
-Codex review(
-  commit: "<SHA>",
-  model: "gpt-5.3-codex",
-  title: "Commit review"
-)
+```bash
+codex review --commit <SHA> -m gpt-5.4
 ```
 
 ### Pattern 3: WIP Check
 
 Review uncommitted work mid-development. Catches issues before they're baked in.
 
+```bash
+codex review --uncommitted -m gpt-5.4
 ```
-Codex review(
-  uncommitted: true,
-  model: "gpt-5.3-codex",
-  title: "WIP check"
-)
-```
-
-Note: `uncommitted: true` cannot combine with a custom `prompt`.
 
 ### Pattern 4: Focused Investigation
 
 Surgical deep-dive on a specific concern (error handling, concurrency, data flow).
 
-```
-Codex codex(
-  prompt: "Analyze [specific concern] in the changes between main and HEAD.
-           For each issue found: cite file and line, explain the risk,
-           suggest a concrete fix. Confidence threshold: only flag issues
-           you are >=70% confident about.",
-  model: "gpt-5.3-codex",
-  reasoningEffort: "xhigh",
-  sandbox: "read-only"
-)
+```bash
+codex -q -m gpt-5.4 --approval-mode full-auto \
+  --reasoning-effort xhigh \
+  "Analyze [specific concern] in the changes between main and HEAD.
+   For each issue found: cite file and line, explain the risk,
+   suggest a concrete fix. Confidence threshold: only flag issues
+   you are >=70% confident about."
 ```
 
 ### Pattern 5: Ralph Loop (Implement-Review-Fix)
@@ -101,16 +91,16 @@ Iterative quality enforcement — implement, review, fix, repeat. Max 3 iteratio
 
 ```
 Iteration 1:
-  Claude → implement feature
-  Codex → review(base: "main") → findings
-  Claude → fix critical/high findings
+  Claude -> implement feature
+  Bash: codex review --base main -m gpt-5.4 -> findings
+  Claude -> fix critical/high findings
 
 Iteration 2:
-  Codex → review(base: "main") → verify fixes + catch remaining
-  Claude → fix remaining issues
+  Bash: codex review --base main -m gpt-5.4 -> verify fixes + catch remaining
+  Claude -> fix remaining issues
 
 Iteration 3 (final):
-  Codex → review(base: "main") → clean bill of health
+  Bash: codex review --base main -m gpt-5.4 -> clean bill of health
   (or accept known trade-offs and document them)
 
 STOP after 3 iterations. Diminishing returns beyond this.
@@ -120,12 +110,12 @@ STOP after 3 iterations. Diminishing returns beyond this.
 
 For thorough reviews, run multiple focused passes instead of one vague pass. Each pass gets a specific persona and concern domain.
 
-| Pass | Focus | Tool | Reasoning |
+| Pass | Focus | Mode | Reasoning |
 |------|-------|------|-----------|
-| **Correctness** | Bugs, logic, edge cases, race conditions | `review` | `xhigh` |
-| **Security** | OWASP Top 10, injection, auth, secrets | `codex` | `xhigh` |
-| **Architecture** | Coupling, abstractions, API consistency | `codex` | `xhigh` |
-| **Performance** | O(n^2), N+1 queries, memory leaks | `codex` | `xhigh` |
+| **Correctness** | Bugs, logic, edge cases, race conditions | `codex review` | default |
+| **Security** | OWASP Top 10, injection, auth, secrets | `codex -q` with security prompt | `xhigh` |
+| **Architecture** | Coupling, abstractions, API consistency | `codex -q` with architecture prompt | `xhigh` |
+| **Performance** | O(n^2), N+1 queries, memory leaks | `codex -q` with performance prompt | `high` |
 
 Run passes sequentially. Fix critical findings between passes to avoid noise compounding.
 
@@ -133,8 +123,8 @@ When to use multi-pass vs single-pass:
 
 | Change Size | Strategy |
 |-------------|----------|
-| < 50 lines, single concern | Single `review` call |
-| 50-300 lines, feature work | `review` + security `codex` pass |
+| < 50 lines, single concern | Single `codex review` |
+| 50-300 lines, feature work | `codex review` + security pass |
 | 300+ lines or architecture change | Full 4-pass |
 | Security-sensitive (auth, payments, crypto) | Always include security pass |
 
@@ -184,6 +174,7 @@ Ready-to-use prompt templates are in `references/prompts.md`.
 | Style comments in review | LLMs default to bikeshedding without explicit skip directives | "Skip: formatting, naming, minor docs" |
 | > 3 review iterations | Diminishing returns, increasing noise, overbaking | Stop at 3. Accept trade-offs. |
 | Review without project context | Generic advice disconnected from codebase conventions | Codex reads CLAUDE.md/AGENTS.md automatically |
+| Using an MCP wrapper | Unnecessary indirection over a CLI binary | Call `codex` directly via Bash |
 
 ## What This Skill is NOT
 
