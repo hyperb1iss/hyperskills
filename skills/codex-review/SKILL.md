@@ -23,16 +23,18 @@ model_reasoning_effort = "high"
 | Mode | Command | Best For |
 |------|---------|----------|
 | `codex review` | Structured diff review with prioritized findings | Pre-PR reviews, commit reviews, WIP checks |
-| `codex -q` | Freeform deep-dive with full prompt control | Security audits, architecture review, focused investigation |
+| `codex exec` | Freeform non-interactive deep-dive with full prompt control | Security audits, architecture review, focused investigation |
 
 **Key flags:**
 
-| Flag | Purpose |
-|------|---------|
-| `--model`, `-m` | Model selection (use `gpt-5.4`) |
-| `--quiet`, `-q` | Non-interactive output only — essential for Bash tool usage |
-| `--approval-mode full-auto` | No interactive prompts (for freeform mode) |
-| `--reasoning-effort` | `low` / `medium` / `high` / `xhigh` |
+| Flag | Applies To | Purpose |
+|------|-----------|---------|
+| `-c model="gpt-5.4"` | both | Model selection (review has no `-m` flag) |
+| `-m`, `--model` | `exec` only | Model selection shorthand |
+| `-c model_reasoning_effort="xhigh"` | both | Reasoning depth: `low` / `medium` / `high` / `xhigh` |
+| `--base <BRANCH>` | `review` only | Diff against base branch |
+| `--commit <SHA>` | `review` only | Review a specific commit |
+| `--uncommitted` | `review` only | Review working tree changes |
 
 ## Review Patterns
 
@@ -43,17 +45,17 @@ The standard review before opening a PR. Use for any non-trivial change.
 ```
 Step 1 — Structured review (catches correctness + general issues):
   Run via Bash:
-    codex review --base main -m gpt-5.4
+    codex review --base main -c model="gpt-5.4"
 
 Step 2 — Security deep-dive (if code touches auth, input handling, or APIs):
   Run via Bash:
-    codex -q -m gpt-5.4 --approval-mode full-auto \
-      --reasoning-effort xhigh \
+    codex exec -m gpt-5.4 \
+      -c model_reasoning_effort="xhigh" \
       "<security prompt from references/prompts.md>"
 
 Step 3 — Fix findings, then re-review:
   Run via Bash:
-    codex review --base main -m gpt-5.4
+    codex review --base main -c model="gpt-5.4"
 ```
 
 ### Pattern 2: Commit-Level Review
@@ -61,7 +63,7 @@ Step 3 — Fix findings, then re-review:
 Quick check after each meaningful commit.
 
 ```bash
-codex review --commit <SHA> -m gpt-5.4
+codex review --commit <SHA> -c model="gpt-5.4"
 ```
 
 ### Pattern 3: WIP Check
@@ -69,7 +71,7 @@ codex review --commit <SHA> -m gpt-5.4
 Review uncommitted work mid-development. Catches issues before they're baked in.
 
 ```bash
-codex review --uncommitted -m gpt-5.4
+codex review --uncommitted -c model="gpt-5.4"
 ```
 
 ### Pattern 4: Focused Investigation
@@ -77,8 +79,8 @@ codex review --uncommitted -m gpt-5.4
 Surgical deep-dive on a specific concern (error handling, concurrency, data flow).
 
 ```bash
-codex -q -m gpt-5.4 --approval-mode full-auto \
-  --reasoning-effort xhigh \
+codex exec -m gpt-5.4 \
+  -c model_reasoning_effort="xhigh" \
   "Analyze [specific concern] in the changes between main and HEAD.
    For each issue found: cite file and line, explain the risk,
    suggest a concrete fix. Confidence threshold: only flag issues
@@ -92,15 +94,15 @@ Iterative quality enforcement — implement, review, fix, repeat. Max 3 iteratio
 ```
 Iteration 1:
   Claude -> implement feature
-  Bash: codex review --base main -m gpt-5.4 -> findings
+  Bash: codex review --base main -c model="gpt-5.4" -> findings
   Claude -> fix critical/high findings
 
 Iteration 2:
-  Bash: codex review --base main -m gpt-5.4 -> verify fixes + catch remaining
+  Bash: codex review --base main -c model="gpt-5.4" -> verify fixes + catch remaining
   Claude -> fix remaining issues
 
 Iteration 3 (final):
-  Bash: codex review --base main -m gpt-5.4 -> clean bill of health
+  Bash: codex review --base main -c model="gpt-5.4" -> clean bill of health
   (or accept known trade-offs and document them)
 
 STOP after 3 iterations. Diminishing returns beyond this.
@@ -113,9 +115,9 @@ For thorough reviews, run multiple focused passes instead of one vague pass. Eac
 | Pass | Focus | Mode | Reasoning |
 |------|-------|------|-----------|
 | **Correctness** | Bugs, logic, edge cases, race conditions | `codex review` | default |
-| **Security** | OWASP Top 10, injection, auth, secrets | `codex -q` with security prompt | `xhigh` |
-| **Architecture** | Coupling, abstractions, API consistency | `codex -q` with architecture prompt | `xhigh` |
-| **Performance** | O(n^2), N+1 queries, memory leaks | `codex -q` with performance prompt | `high` |
+| **Security** | OWASP Top 10, injection, auth, secrets | `codex exec` with security prompt | `xhigh` |
+| **Architecture** | Coupling, abstractions, API consistency | `codex exec` with architecture prompt | `xhigh` |
+| **Performance** | O(n^2), N+1 queries, memory leaks | `codex exec` with performance prompt | `high` |
 
 Run passes sequentially. Fix critical findings between passes to avoid noise compounding.
 

@@ -1,14 +1,14 @@
 # Codex Review Prompt Templates
 
-Ready-to-use prompts for each review pass. Pass these directly to `codex -q` via Bash. All designed for `gpt-5.4` at `--reasoning-effort xhigh`.
+Ready-to-use prompts for each review pass. Pass these directly to `codex exec` via Bash. All designed for `gpt-5.4` at `model_reasoning_effort = "xhigh"`.
 
 ## Usage
 
-Pass prompts as the final argument to `codex -q`:
+Pass prompts as the final argument to `codex exec`:
 
 ```bash
-codex -q -m gpt-5.4 --approval-mode full-auto \
-  --reasoning-effort xhigh \
+codex exec -m gpt-5.4 \
+  -c model_reasoning_effort="xhigh" \
   "PROMPT_TEXT_HERE"
 ```
 
