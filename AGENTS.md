@@ -36,10 +36,28 @@ hyperskills/
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │       └── prompts.md
-│   └── implement/
-│       ├── SKILL.md
-│       └── references/
-│           └── benchmarks.md
+│   ├── implement/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── benchmarks.md
+│   ├── uv/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── docker-ci.md
+│   │       ├── resolution.md
+│   │       └── configuration.md
+│   ├── ruff/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── rules.md
+│   │       └── configuration.md
+│   ├── ty/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── type-system.md
+│   │       └── migration.md
+│   └── uv-build/
+│       └── SKILL.md
 ├── CLAUDE.md                # Project instructions for Claude sessions
 ├── AGENTS.md                # This file — contributor guide
 ├── LICENSE
@@ -259,6 +277,10 @@ Before committing, verify:
 | `tui-design` | ~3,000 | 2 files | Domain — terminal UI |
 | `codex-review` | ~2,000 | 1 file | Process — cross-model review |
 | `implement` | ~2,500 | 1 file | Process — implementation |
+| `uv` | ~3,000 | 3 files | Domain — Python package management |
+| `ruff` | ~2,800 | 2 files | Domain — Python linting & formatting |
+| `ty` | ~2,500 | 2 files | Domain — Python type checking |
+| `uv-build` | ~2,500 | none | Domain — Python build backend |
 
 ## Skill Categories
 
@@ -269,7 +291,7 @@ When adding a new skill, it should fit one of these categories:
 - These tend to be workflow-heavy with phases and decision gates
 
 **Domain skills** — specialized knowledge for a specific technology or practice:
-- `security`, `git`, `tilt`, `tui-design`
+- `security`, `git`, `tilt`, `tui-design`, `uv`, `ruff`, `ty`, `uv-build`
 - These tend to be reference-heavy with decision trees and lookup tables
 
 ## Writing Style

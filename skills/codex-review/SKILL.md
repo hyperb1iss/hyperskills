@@ -177,6 +177,8 @@ Ready-to-use prompt templates are in `references/prompts.md`.
 | > 3 review iterations | Diminishing returns, increasing noise, overbaking | Stop at 3. Accept trade-offs. |
 | Review without project context | Generic advice disconnected from codebase conventions | Codex reads CLAUDE.md/AGENTS.md automatically |
 | Using an MCP wrapper | Unnecessary indirection over a CLI binary | Call `codex` directly via Bash |
+| Specifying legacy/deprecated models (o1, o3, gpt-4o) | These models are ancient history and may not be available on the user's account | Use the defaults from `~/.codex/config.toml` or the model shown in `codex --help`. Never guess model names |
+| Overcomplicating the invocation | Adding unnecessary flags, custom reasoning efforts, or exotic configs | Use `codex review` with simple flags (`--uncommitted`, `--base main`). The defaults are good |
 
 ## What This Skill is NOT
 
