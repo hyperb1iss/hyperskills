@@ -2,11 +2,11 @@
 
 ## Resolution Strategies
 
-| Strategy | Flag | Behavior |
-|----------|------|----------|
-| `highest` (default) | — | Latest compatible versions |
-| `lowest` | `--resolution lowest` | Minimum versions for all deps |
-| `lowest-direct` | `--resolution lowest-direct` | Minimum for direct, highest for transitive |
+| Strategy            | Flag                         | Behavior                                   |
+| ------------------- | ---------------------------- | ------------------------------------------ |
+| `highest` (default) | —                            | Latest compatible versions                 |
+| `lowest`            | `--resolution lowest`        | Minimum versions for all deps              |
+| `lowest-direct`     | `--resolution lowest-direct` | Minimum for direct, highest for transitive |
 
 ## Universal vs Platform-Specific
 
@@ -35,12 +35,12 @@ required-environments = ["sys_platform == 'linux' and platform_machine == 'aarch
 
 ## Overrides vs Constraints
 
-| Feature | Overrides | Constraints |
-|---------|-----------|-------------|
-| Purpose | Replace declared deps | Narrow acceptable versions |
-| Adds packages? | No | No |
-| Can expand versions? | **Yes** | No |
-| Affects undeclared deps? | No | No |
+| Feature                  | Overrides             | Constraints                |
+| ------------------------ | --------------------- | -------------------------- |
+| Purpose                  | Replace declared deps | Narrow acceptable versions |
+| Adds packages?           | No                    | No                         |
+| Can expand versions?     | **Yes**               | No                         |
+| Affects undeclared deps? | No                    | No                         |
 
 ```toml
 [tool.uv]
@@ -89,6 +89,7 @@ Per-package: `exclude-newer-package` setting.
 ## Pre-release Handling
 
 Pre-releases accepted only when:
+
 1. Directly specified with pre-release qualifier (e.g., `flask>=2.0.0rc1`)
 2. All published versions are pre-releases
 3. `--prerelease allow` flag used
@@ -136,13 +137,14 @@ url = "https://download.pytorch.org/whl/cpu"
 explicit = true         # Only used when explicitly referenced in sources
 ```
 
-| Setting | Behavior |
-|---------|----------|
-| `default = true` | Replaces PyPI as the default index |
+| Setting           | Behavior                                                |
+| ----------------- | ------------------------------------------------------- |
+| `default = true`  | Replaces PyPI as the default index                      |
 | `explicit = true` | Only packages explicitly sourced from this index use it |
-| Neither | Searched after default index |
+| Neither           | Searched after default index                            |
 
 **`index-strategy`** controls multi-index search:
+
 - `first-index` (default): Use first index that has the package
 - `unsafe-first-match`: Search all indexes, use first match
 - `unsafe-best-match`: Search all indexes, use best version

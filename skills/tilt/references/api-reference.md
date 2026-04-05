@@ -333,13 +333,13 @@ sys.executable           # Path to Tilt binary
 
 ## Ignore Mechanism Comparison
 
-| Mechanism | Scope | Prevents rebuild? | Affects Docker context? |
-|-----------|-------|-------------------|------------------------|
-| `.dockerignore` | docker_build only | Yes | Yes |
-| `.tiltignore` | All resources | Yes | No |
-| `ignore=` param | Per-build/resource | Yes | For docker_build: Yes |
-| `only=` param | docker_build only | Yes (inverse) | Yes |
-| `watch_settings(ignore=)` | Global | Yes | No |
+| Mechanism                 | Scope              | Prevents rebuild? | Affects Docker context? |
+| ------------------------- | ------------------ | ----------------- | ----------------------- |
+| `.dockerignore`           | docker_build only  | Yes               | Yes                     |
+| `.tiltignore`             | All resources      | Yes               | No                      |
+| `ignore=` param           | Per-build/resource | Yes               | For docker_build: Yes   |
+| `only=` param             | docker_build only  | Yes (inverse)     | Yes                     |
+| `watch_settings(ignore=)` | Global             | Yes               | No                      |
 
 ## Starlark Language Notes
 

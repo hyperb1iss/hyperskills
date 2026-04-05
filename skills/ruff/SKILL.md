@@ -23,10 +23,10 @@ ruff ...            # Global install
 
 ### select vs extend-select
 
-| Command | Behavior |
-|---------|----------|
-| `select = ["E", "F", "B"]` | **Replaces** entire default set. Only these run. |
-| `extend-select = ["B"]` | **Adds** to whatever `select` provides (or defaults) |
+| Command                    | Behavior                                             |
+| -------------------------- | ---------------------------------------------------- |
+| `select = ["E", "F", "B"]` | **Replaces** entire default set. Only these run.     |
+| `extend-select = ["B"]`    | **Adds** to whatever `select` provides (or defaults) |
 
 **Config inheritance trap:** When a child config specifies `select`, the parent's `ignore` list is **discarded**. This surprises people with monorepo setups.
 
@@ -35,6 +35,7 @@ ruff ...            # Global install
 ### Recommended Selection Strategy
 
 **New project — start broad:**
+
 ```toml
 [tool.ruff.lint]
 select = [
@@ -52,6 +53,7 @@ ignore = ["E501"]  # Let formatter handle line length
 ```
 
 **Library / open source — maximum strictness:**
+
 ```toml
 [tool.ruff.lint]
 select = ["ALL"]
@@ -77,6 +79,7 @@ ignore = [
 ```
 
 **Legacy migration — incremental:**
+
 ```toml
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F"]
@@ -123,14 +126,14 @@ ignore = [
 
 Ruff targets >99.9% parity with Black but has 23 intentional divergences. The most impactful:
 
-| Deviation | Ruff | Black |
-|-----------|------|-------|
-| F-string interiors | Formats `{expr}` contents (stable since 0.9.0) | Does not touch f-string interiors |
-| Pragma comments (`# noqa`, `# type:`) | Excluded from line width | Counted in line width |
-| Implicit string concat | Merges when fits on one line | Splits more aggressively |
-| Blank lines at block start | Removes them | Preserves them (Black 24+) |
-| Trailing comments | Expands statement to keep comment close | Collapses, moves comment to end |
-| Single-element tuples | Always parenthesizes | Removes parens when safe |
+| Deviation                             | Ruff                                           | Black                             |
+| ------------------------------------- | ---------------------------------------------- | --------------------------------- |
+| F-string interiors                    | Formats `{expr}` contents (stable since 0.9.0) | Does not touch f-string interiors |
+| Pragma comments (`# noqa`, `# type:`) | Excluded from line width                       | Counted in line width             |
+| Implicit string concat                | Merges when fits on one line                   | Splits more aggressively          |
+| Blank lines at block start            | Removes them                                   | Preserves them (Black 24+)        |
+| Trailing comments                     | Expands statement to keep comment close        | Collapses, moves comment to end   |
+| Single-element tuples                 | Always parenthesizes                           | Removes parens when safe          |
 
 ### E501 and the Formatter
 
@@ -144,12 +147,13 @@ ruff check --fix --unsafe-fixes .     # Include unsafe (review first!)
 ruff check --fix --diff .             # Preview changes before applying
 ```
 
-| Safety | Meaning | Example |
-|--------|---------|---------|
-| Safe | Cannot change runtime behavior | Reordering imports |
-| Unsafe | May change behavior | `list(x)[0]` -> `next(iter(x))` changes exception type |
+| Safety | Meaning                        | Example                                                |
+| ------ | ------------------------------ | ------------------------------------------------------ |
+| Safe   | Cannot change runtime behavior | Reordering imports                                     |
+| Unsafe | May change behavior            | `list(x)[0]` -> `next(iter(x))` changes exception type |
 
 Override per-rule:
+
 ```toml
 [tool.ruff.lint]
 extend-safe-fixes = ["RUF015"]       # Promote to safe
@@ -239,26 +243,26 @@ ruff linter                      # List all available linters
 
 ## Non-Obvious Gotchas
 
-| Gotcha | Explanation |
-|--------|-------------|
-| TCH -> TC rename | `TCH` prefix is now legacy alias for `TC`. Use `TC` in new configs |
-| No third-party plugins | Ruff re-implements Flake8 plugins in Rust. Cannot install additional ones |
-| isort differences | Some edge cases differ from real isort (aliased imports, inline comments) |
-| Notebooks: per-cell scope | E402 checked per-cell, not per-file. Each cell is its own module scope |
-| `--fix` can break code | Even "safe" fixes can break dynamic Python. Review diffs for F401, UP, B rules |
-| `ruff-lsp` is dead | Use `ruff server` (built into binary). The separate `ruff-lsp` package was archived Dec 2025 |
-| Range formatting | `ruff format --range=10:1-20:1` formats only lines 10-20 (single file, not notebooks) |
+| Gotcha                    | Explanation                                                                                  |
+| ------------------------- | -------------------------------------------------------------------------------------------- |
+| TCH -> TC rename          | `TCH` prefix is now legacy alias for `TC`. Use `TC` in new configs                           |
+| No third-party plugins    | Ruff re-implements Flake8 plugins in Rust. Cannot install additional ones                    |
+| isort differences         | Some edge cases differ from real isort (aliased imports, inline comments)                    |
+| Notebooks: per-cell scope | E402 checked per-cell, not per-file. Each cell is its own module scope                       |
+| `--fix` can break code    | Even "safe" fixes can break dynamic Python. Review diffs for F401, UP, B rules               |
+| `ruff-lsp` is dead        | Use `ruff server` (built into binary). The separate `ruff-lsp` package was archived Dec 2025 |
+| Range formatting          | `ruff format --range=10:1-20:1` formats only lines 10-20 (single file, not notebooks)        |
 
 ## Anti-Patterns
 
-| Anti-Pattern | Fix |
-|-------------|-----|
-| Blanket `# noqa` on every line | Fix the violations or use per-file-ignores |
-| `select = ["ALL"]` with no `ignore` | Always pair with formatter conflict rules and overly strict rules |
-| Running `ruff format` before `ruff check --fix` | Lint fixes first (may reorder imports), then format |
-| Using `ruff-lsp` | Switch to `ruff server` (built-in, maintained) |
-| Ignoring E501 without using formatter | Either use `ruff format` OR enforce E501, not neither |
-| `select` in child config without knowing it resets | Use `extend-select` to preserve parent's rule set |
+| Anti-Pattern                                       | Fix                                                               |
+| -------------------------------------------------- | ----------------------------------------------------------------- |
+| Blanket `# noqa` on every line                     | Fix the violations or use per-file-ignores                        |
+| `select = ["ALL"]` with no `ignore`                | Always pair with formatter conflict rules and overly strict rules |
+| Running `ruff format` before `ruff check --fix`    | Lint fixes first (may reorder imports), then format               |
+| Using `ruff-lsp`                                   | Switch to `ruff server` (built-in, maintained)                    |
+| Ignoring E501 without using formatter              | Either use `ruff format` OR enforce E501, not neither             |
+| `select` in child config without knowing it resets | Use `extend-select` to preserve parent's rule set                 |
 
 ## What This Skill is NOT
 

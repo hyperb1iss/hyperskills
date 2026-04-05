@@ -72,13 +72,13 @@ The skills form a workflow pipeline. Each one handles a phase of the development
 
 **Typical flows:**
 
-| Scenario | Flow |
-|----------|------|
-| New feature | `brainstorm` → `plan` → `implement` → `codex-review` |
-| Greenfield project | `brainstorm` → `research` → `plan` → `orchestrate` → `implement` |
-| Bug fix | `implement` (straight to it — scale selection handles this) |
-| Architecture decision | `brainstorm` → `research` → decide |
-| Large refactor | `plan` → `orchestrate` → `implement` → `codex-review` |
+| Scenario              | Flow                                                             |
+| --------------------- | ---------------------------------------------------------------- |
+| New feature           | `brainstorm` → `plan` → `implement` → `codex-review`             |
+| Greenfield project    | `brainstorm` → `research` → `plan` → `orchestrate` → `implement` |
+| Bug fix               | `implement` (straight to it — scale selection handles this)      |
+| Architecture decision | `brainstorm` → `research` → decide                               |
+| Large refactor        | `plan` → `orchestrate` → `implement` → `codex-review`            |
 
 You don't need to follow the full pipeline. Each skill has built-in scale selection — a typo fix doesn't need brainstorming, and a clear bug doesn't need research. Start wherever makes sense.
 
@@ -86,7 +86,7 @@ You don't need to follow the full pipeline. Each skill has built-in scale select
 
 ### Process Skills
 
-These encode *how* to approach a class of work — workflows, phases, and decision gates.
+These encode _how_ to approach a class of work — workflows, phases, and decision gates.
 
 #### `brainstorm` — Structured Ideation
 
@@ -128,7 +128,7 @@ The core implementation skill, distilled from 21,321 tracked operations across 6
 
 #### `orchestrate` — Multi-Agent Coordination
 
-Meta-orchestration patterns mined from 597+ real agent dispatches. Tells you *which* multi-agent strategy to use, *how* to structure prompts for parallel agents, and *when* to use background vs foreground. Six strategies: Research Swarm, Epic Parallel Build, Sequential Pipeline, Parallel Sweep, Multi-Dimensional Audit, and Full Lifecycle.
+Meta-orchestration patterns mined from 597+ real agent dispatches. Tells you _which_ multi-agent strategy to use, _how_ to structure prompts for parallel agents, and _when_ to use background vs foreground. Six strategies: Research Swarm, Epic Parallel Build, Sequential Pipeline, Parallel Sweep, Multi-Dimensional Audit, and Full Lifecycle.
 
 ```bash
 /hyperskills:orchestrate
@@ -190,22 +190,22 @@ Level 3: references/                       ← Loaded on demand (unlimited)
 
 Four skills include reference files for deep-dive content:
 
-| Skill | Reference Files |
-|-------|----------------|
-| `implement` | `benchmarks.md` — quantitative data from 21k operations |
-| `codex-review` | `prompts.md` — 7 ready-to-use review prompt templates |
-| `tilt` | `api-reference.md`, `patterns.md` — full Tiltfile API + power patterns |
-| `tui-design` | `visual-catalog.md`, `app-patterns.md` — Unicode catalog + app gallery |
+| Skill          | Reference Files                                                        |
+| -------------- | ---------------------------------------------------------------------- |
+| `implement`    | `benchmarks.md` — quantitative data from 21k operations                |
+| `codex-review` | `prompts.md` — 7 ready-to-use review prompt templates                  |
+| `tilt`         | `api-reference.md`, `patterns.md` — full Tiltfile API + power patterns |
+| `tui-design`   | `visual-catalog.md`, `app-patterns.md` — Unicode catalog + app gallery |
 
 ## Compatibility
 
-| Platform | Installation |
-|----------|-------------|
-| **Claude Code** | `/plugin install hyperskills` |
-| **Codex CLI** | `npx skills add hyperbliss/hyperskills -a codex` |
-| **Cursor** | `npx skills add hyperbliss/hyperskills -a cursor` |
+| Platform           | Installation                                       |
+| ------------------ | -------------------------------------------------- |
+| **Claude Code**    | `/plugin install hyperskills`                      |
+| **Codex CLI**      | `npx skills add hyperbliss/hyperskills -a codex`   |
+| **Cursor**         | `npx skills add hyperbliss/hyperskills -a cursor`  |
 | **GitHub Copilot** | `npx skills add hyperbliss/hyperskills -a copilot` |
-| **Gemini CLI** | `npx skills add hyperbliss/hyperskills -a gemini` |
+| **Gemini CLI**     | `npx skills add hyperbliss/hyperskills -a gemini`  |
 
 ## Development
 

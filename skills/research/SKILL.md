@@ -41,6 +41,7 @@ digraph research {
 ### Actions
 
 1. **Search Sibyl first:**
+
    ```
    sibyl search "<research topic>"
    sibyl search "<related technology>"
@@ -57,11 +58,11 @@ digraph research {
 
 4. **Set the research budget:**
 
-   | Depth | Agents | Time | When |
-   |-------|--------|------|------|
-   | **Quick scan** | 2-3 | 2-5 min | Known domain, just need latest info |
-   | **Standard** | 5-10 | 10-15 min | Technology evaluation, architecture options |
-   | **Deep dive** | 10-30 | 20-40 min | Greenfield decisions, SOTA analysis |
+   | Depth          | Agents | Time      | When                                         |
+   | -------------- | ------ | --------- | -------------------------------------------- |
+   | **Quick scan** | 2-3    | 2-5 min   | Known domain, just need latest info          |
+   | **Standard**   | 5-10   | 10-15 min | Technology evaluation, architecture options  |
+   | **Deep dive**  | 10-30  | 20-40 min | Greenfield decisions, SOTA analysis          |
    | **Exhaustive** | 30-60+ | 40-90 min | New project inception, competitive landscape |
 
 ---
@@ -73,6 +74,7 @@ digraph research {
 ### Agent Design Principles
 
 Each agent gets:
+
 - **One specific topic** (not "research everything about X")
 - **An output file path** (no ambiguity about where to write)
 - **Search hints** (include year: "search [topic] 2026")
@@ -110,15 +112,15 @@ Cite sources with URLs.
 
 For technology evaluations, cover these dimensions:
 
-| Dimension | Question |
-|-----------|----------|
-| **Capability** | Does it do what we need? |
-| **Performance** | Is it fast enough? |
-| **Ecosystem** | Does it integrate with our stack? |
-| **Maturity** | Is it production-ready? |
-| **Community** | Will it be maintained in 2 years? |
-| **Cost** | What does it cost at our scale? |
-| **Migration** | How hard is it to adopt/abandon? |
+| Dimension       | Question                          |
+| --------------- | --------------------------------- |
+| **Capability**  | Does it do what we need?          |
+| **Performance** | Is it fast enough?                |
+| **Ecosystem**   | Does it integrate with our stack? |
+| **Maturity**    | Is it production-ready?           |
+| **Community**   | Will it be maintained in 2 years? |
+| **Cost**        | What does it cost at our scale?   |
+| **Migration**   | How hard is it to adopt/abandon?  |
 
 ---
 
@@ -142,12 +144,12 @@ For technology evaluations, cover these dimensions:
 
 ### Decision Point
 
-| Finding | Action |
-|---------|--------|
-| Good coverage, minor gaps | Synthesize now, note gaps |
-| Significant gaps | Deploy Wave 2 targeted agents |
-| Contradictory findings | Deploy verification agents to resolve |
-| Entirely new direction emerged | Deploy Wave 2 in new direction |
+| Finding                        | Action                                |
+| ------------------------------ | ------------------------------------- |
+| Good coverage, minor gaps      | Synthesize now, note gaps             |
+| Significant gaps               | Deploy Wave 2 targeted agents         |
+| Contradictory findings         | Deploy verification agents to resolve |
+| Entirely new direction emerged | Deploy Wave 2 in new direction        |
 
 ---
 
@@ -165,6 +167,7 @@ For technology evaluations, cover these dimensions:
 ### When to Stop
 
 Stop deploying waves when:
+
 - The research question can be answered with confidence
 - Additional agents would produce diminishing returns
 - You have >= 2 independent sources for key claims
@@ -184,30 +187,35 @@ Stop deploying waves when:
 ## Research: [Topic]
 
 ### TL;DR
+
 [2-3 sentences. The answer, not the journey.]
 
 ### Recommendation
+
 [Clear choice with justification. Don't hedge — pick one.]
 
 ### Options Evaluated
 
-| Option | Fit | Maturity | Perf | Ecosystem | Verdict |
-|--------|-----|----------|------|-----------|---------|
-| A | ... | ... | ... | ... | Best for [X] |
-| B | ... | ... | ... | ... | Best for [Y] |
-| C | ... | ... | ... | ... | Avoid: [reason] |
+| Option | Fit | Maturity | Perf | Ecosystem | Verdict         |
+| ------ | --- | -------- | ---- | --------- | --------------- |
+| A      | ... | ...      | ...  | ...       | Best for [X]    |
+| B      | ... | ...      | ...  | ...       | Best for [Y]    |
+| C      | ... | ...      | ...  | ...       | Avoid: [reason] |
 
 ### Key Findings
+
 1. [Most important finding with source]
 2. [Second most important]
 3. [Third most important]
 
 ### Risks & Gotchas
+
 - [Known issue or limitation]
 - [Migration complexity]
 - [Hidden cost]
 
 ### Sources
+
 - [Source 1](url) — [what it contributed]
 - [Source 2](url) — [what it contributed]
 ```
@@ -231,6 +239,7 @@ Stop deploying waves when:
 1. **Present the synthesis** to the user with a clear recommendation
 
 2. **Record in Sibyl:**
+
    ```
    sibyl add "Research: [topic]" "Evaluated [options]. Chose [X] because [reasons]. Key risk: [Y]. Sources: [primary URLs]. Date: [today]."
    ```
@@ -241,12 +250,12 @@ Stop deploying waves when:
 
 4. **Exit to next action:**
 
-   | Next Step | When |
-   |-----------|------|
-   | `/hyperskills:brainstorm` | Research surfaced multiple viable approaches |
-   | `/hyperskills:plan` | Decision made, ready to decompose implementation |
-   | `/hyperskills:orchestrate` | Decision made, work is parallelizable |
-   | Direct implementation | Research confirmed a simple path |
+   | Next Step                  | When                                             |
+   | -------------------------- | ------------------------------------------------ |
+   | `/hyperskills:brainstorm`  | Research surfaced multiple viable approaches     |
+   | `/hyperskills:plan`        | Decision made, ready to decompose implementation |
+   | `/hyperskills:orchestrate` | Decision made, work is parallelizable            |
+   | Direct implementation      | Research confirmed a simple path                 |
 
 ---
 
@@ -266,6 +275,7 @@ For focused questions that don't need the full wave protocol:
 ## Research Patterns by Type
 
 ### Technology Evaluation
+
 ```
 Wave 1: Official docs + GitHub README for each option (parallel)
 Wave 2: Production experience + benchmarks (parallel)
@@ -273,6 +283,7 @@ Synthesize: Comparison matrix + recommendation
 ```
 
 ### Codebase Archaeology
+
 ```
 Wave 1: Explore agents mapping each subsystem (parallel)
 Wave 2: Grep for specific patterns / usage (parallel)
@@ -280,6 +291,7 @@ Synthesize: Architecture diagram + dependency map
 ```
 
 ### SOTA Analysis
+
 ```
 Wave 1: WebSearch for latest papers, blog posts, releases (parallel)
 Wave 2: Deep read the most relevant 3-5 sources (parallel)
@@ -287,6 +299,7 @@ Synthesize: What's genuinely novel vs rehashed + recommendation
 ```
 
 ### Competitive Landscape
+
 ```
 Wave 1: Feature matrix for each competitor (parallel)
 Wave 2: Pricing, community size, trajectory (parallel)
@@ -297,14 +310,14 @@ Synthesize: Positioning matrix + gap analysis
 
 ## Anti-Patterns
 
-| Anti-Pattern | Fix |
-|-------------|-----|
-| Synthesizing after Wave 1 only | Wait for gap analysis — premature conclusions miss nuance |
-| 50 agents with "research everything" | Specific scope per agent — vague prompts produce vague results |
-| Only official documentation | Include community experience — docs show intent, community shows reality |
-| No dates on findings | Date everything — research spoils faster than produce |
-| No recommendation | Force a decision — "more research needed" is only valid with a specific question |
-| Researching what Sibyl already knows | Always prime first — don't burn tokens re-discovering known patterns |
+| Anti-Pattern                         | Fix                                                                              |
+| ------------------------------------ | -------------------------------------------------------------------------------- |
+| Synthesizing after Wave 1 only       | Wait for gap analysis — premature conclusions miss nuance                        |
+| 50 agents with "research everything" | Specific scope per agent — vague prompts produce vague results                   |
+| Only official documentation          | Include community experience — docs show intent, community shows reality         |
+| No dates on findings                 | Date everything — research spoils faster than produce                            |
+| No recommendation                    | Force a decision — "more research needed" is only valid with a specific question |
+| Researching what Sibyl already knows | Always prime first — don't burn tokens re-discovering known patterns             |
 
 ---
 

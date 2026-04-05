@@ -4,68 +4,68 @@
 
 ### mypy -> ty
 
-| mypy code | ty rule | Notes |
-|-----------|---------|-------|
-| `import-not-found` | `unresolved-import` | |
-| `attr-defined` | `unresolved-attribute` | |
-| `arg-type` | `invalid-argument-type` | |
-| `assignment` | `invalid-assignment` | |
-| `return-value` | `invalid-return-type` | |
-| `union-attr` | `possibly-missing-attribute` | |
-| `override` | `invalid-method-override` | |
-| `redundant-cast` | `redundant-cast` | |
-| `name-defined` | `possibly-unresolved-reference` | |
-| `call-arg` | `invalid-argument-type` | Merged with arg-type |
+| mypy code          | ty rule                         | Notes                |
+| ------------------ | ------------------------------- | -------------------- |
+| `import-not-found` | `unresolved-import`             |                      |
+| `attr-defined`     | `unresolved-attribute`          |                      |
+| `arg-type`         | `invalid-argument-type`         |                      |
+| `assignment`       | `invalid-assignment`            |                      |
+| `return-value`     | `invalid-return-type`           |                      |
+| `union-attr`       | `possibly-missing-attribute`    |                      |
+| `override`         | `invalid-method-override`       |                      |
+| `redundant-cast`   | `redundant-cast`                |                      |
+| `name-defined`     | `possibly-unresolved-reference` |                      |
+| `call-arg`         | `invalid-argument-type`         | Merged with arg-type |
 
 ### pyright -> ty
 
-| pyright code | ty rule |
-|-------------|---------|
-| `reportMissingImports` | `unresolved-import` |
-| `reportGeneralClassIssues` | Various specific rules |
-| `reportMissingTypeStubs` | `unresolved-import` |
+| pyright code                 | ty rule                      |
+| ---------------------------- | ---------------------------- |
+| `reportMissingImports`       | `unresolved-import`          |
+| `reportGeneralClassIssues`   | Various specific rules       |
+| `reportMissingTypeStubs`     | `unresolved-import`          |
 | `reportOptionalMemberAccess` | `possibly-missing-attribute` |
-| `reportReturnType` | `invalid-return-type` |
-| `reportAssignmentType` | `invalid-assignment` |
-| `reportArgumentType` | `invalid-argument-type` |
+| `reportReturnType`           | `invalid-return-type`        |
+| `reportAssignmentType`       | `invalid-assignment`         |
+| `reportArgumentType`         | `invalid-argument-type`      |
 
 ## Configuration Mapping
 
 ### mypy -> ty
 
-| mypy option | ty equivalent |
-|-------------|---------------|
-| `python_version = "3.12"` | `environment.python-version = "3.12"` |
-| `ignore_missing_imports = true` | `rules.unresolved-import = "ignore"` |
-| `exclude = ["tests"]` | `src.exclude = ["tests/**"]` (glob patterns) |
-| `check_untyped_defs = true` | Default behavior (always on) |
-| `disallow_untyped_defs = true` | Use ruff ANN001/ANN201 |
-| `strict = true` | No single flag; enable rules individually |
-| `plugins = ["pydantic.mypy"]` | **Not supported** |
-| `warn_unused_ignores = true` | Default behavior |
-| `warn_redundant_casts = true` | `rules.redundant-cast = "warn"` (default) |
-| Per-module overrides | `[[tool.ty.overrides]]` with file globs |
+| mypy option                     | ty equivalent                                |
+| ------------------------------- | -------------------------------------------- |
+| `python_version = "3.12"`       | `environment.python-version = "3.12"`        |
+| `ignore_missing_imports = true` | `rules.unresolved-import = "ignore"`         |
+| `exclude = ["tests"]`           | `src.exclude = ["tests/**"]` (glob patterns) |
+| `check_untyped_defs = true`     | Default behavior (always on)                 |
+| `disallow_untyped_defs = true`  | Use ruff ANN001/ANN201                       |
+| `strict = true`                 | No single flag; enable rules individually    |
+| `plugins = ["pydantic.mypy"]`   | **Not supported**                            |
+| `warn_unused_ignores = true`    | Default behavior                             |
+| `warn_redundant_casts = true`   | `rules.redundant-cast = "warn"` (default)    |
+| Per-module overrides            | `[[tool.ty.overrides]]` with file globs      |
 
 ### pyright -> ty
 
-| pyright option | ty equivalent |
-|---------------|---------------|
-| `pythonVersion = "3.12"` | `environment.python-version = "3.12"` |
-| `pythonPlatform = "Linux"` | `environment.python-platform = "linux"` |
-| `venvPath` / `venv` | `environment.python = ".venv"` |
-| `include = ["src"]` | `src.include = ["src/**/*.py"]` |
-| `exclude = ["tests"]` | `src.exclude = ["tests/**"]` |
-| `executionEnvironments` | `[[tool.ty.overrides]]` |
+| pyright option                | ty equivalent                               |
+| ----------------------------- | ------------------------------------------- |
+| `pythonVersion = "3.12"`      | `environment.python-version = "3.12"`       |
+| `pythonPlatform = "Linux"`    | `environment.python-platform = "linux"`     |
+| `venvPath` / `venv`           | `environment.python = ".venv"`              |
+| `include = ["src"]`           | `src.include = ["src/**/*.py"]`             |
+| `exclude = ["tests"]`         | `src.exclude = ["tests/**"]`                |
+| `executionEnvironments`       | `[[tool.ty.overrides]]`                     |
 | `typeCheckingMode = "strict"` | No equivalent; configure rules individually |
-| `# pyright: ignore` | `# ty: ignore` |
+| `# pyright: ignore`           | `# ty: ignore`                              |
 
 ### Suppression Comment Mapping
 
-| Tool | Syntax |
-|------|--------|
-| mypy | `# type: ignore[error-code]` |
+| Tool    | Syntax                          |
+| ------- | ------------------------------- |
+| mypy    | `# type: ignore[error-code]`    |
 | pyright | `# pyright: ignore[reportCode]` |
-| ty | `# ty: ignore[rule-name]` |
+| ty      | `# ty: ignore[rule-name]`       |
 
 ty honors `# type: ignore` by default (configurable via `analysis.respect-type-ignore-comments`).
 
@@ -88,7 +88,7 @@ This adds `# ty: ignore[...]` comments to every line with a type error, giving y
 ```yaml
 # Run both, ty as non-blocking
 - run: mypy .
-- run: ty check || true  # Non-blocking
+- run: ty check || true # Non-blocking
 ```
 
 Compare outputs. Note differences in diagnostics.

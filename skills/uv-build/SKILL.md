@@ -39,6 +39,7 @@ When uv detects `uv_build` as the backend, it **bypasses PEP 517 entirely** — 
 This means you can **build and publish packages without Python installed** — the entire build runs in Rust.
 
 Conditions for fast path:
+
 - `build-backend` is exactly `"uv_build"`
 - `requires` contains only `uv_build` (no extra build deps)
 - Version specifier is within known compatible range
@@ -71,6 +72,7 @@ module-name = "cloud.database"    # Dotted name — parent must NOT have __init_
 ```
 
 For multiple namespace roots:
+
 ```toml
 [tool.uv.build-backend]
 namespace = true
@@ -94,6 +96,7 @@ default-excludes = true                           # __pycache__, *.pyc (default 
 **Patterns:** PEP 639 portable glob syntax. Exclusions always override inclusions.
 
 **Safety features:**
+
 - Warns on 10k+ files (likely traversing `.venv` or `node_modules`)
 - Detects virtual environments and skips them
 - `pyproject.toml` + module source always included regardless of patterns
@@ -157,6 +160,7 @@ uv pip install -e .      # Explicit editable install
 ## Metadata Validation
 
 uv_build is **strict** about metadata:
+
 - Rejects `project.description` with newlines
 - Enforces SPDX license expressions
 - Validates classifiers
@@ -258,23 +262,23 @@ uv build --no-sources    # Verify PyPI compatibility
 
 ## Limitations
 
-| Limitation | Impact | Alternative |
-|-----------|--------|-------------|
-| Pure Python only | No C/C++/Cython/Rust extensions | setuptools, maturin, scikit-build-core |
-| No dynamic metadata | Can't derive version from VCS/git tags | hatchling + hatch-vcs, or `uv version --bump` |
-| No build hooks | No code gen, protobuf, asset bundling | hatchling with build hooks |
-| No setup.py/setup.cfg | Must fully convert to pyproject.toml | Convert first, then migrate |
-| Upper-bound pinning | Must update `requires` when upgrading | Manageable with `uv version` workflow |
+| Limitation            | Impact                                 | Alternative                                   |
+| --------------------- | -------------------------------------- | --------------------------------------------- |
+| Pure Python only      | No C/C++/Cython/Rust extensions        | setuptools, maturin, scikit-build-core        |
+| No dynamic metadata   | Can't derive version from VCS/git tags | hatchling + hatch-vcs, or `uv version --bump` |
+| No build hooks        | No code gen, protobuf, asset bundling  | hatchling with build hooks                    |
+| No setup.py/setup.cfg | Must fully convert to pyproject.toml   | Convert first, then migrate                   |
+| Upper-bound pinning   | Must update `requires` when upgrading  | Manageable with `uv version` workflow         |
 
 ## Anti-Patterns
 
-| Anti-Pattern | Fix |
-|-------------|-----|
-| Using uv_build for packages with C extensions | Use setuptools, maturin, or scikit-build-core |
-| Omitting upper bound on requires | Always `<0.X` to prevent breaking changes |
-| `source-include = ["**/*"]` | Let defaults handle it; add specific patterns only |
+| Anti-Pattern                                  | Fix                                                     |
+| --------------------------------------------- | ------------------------------------------------------- |
+| Using uv_build for packages with C extensions | Use setuptools, maturin, or scikit-build-core           |
+| Omitting upper bound on requires              | Always `<0.X` to prevent breaking changes               |
+| `source-include = ["**/*"]`                   | Let defaults handle it; add specific patterns only      |
 | Forgetting `--no-sources` test before publish | Sources are dev-only; verify PyPI-only resolution works |
-| Dynamic version from `__init__.py` | Static version in pyproject.toml + `uv version --bump` |
+| Dynamic version from `__init__.py`            | Static version in pyproject.toml + `uv version --bump`  |
 
 ## What This Skill is NOT
 

@@ -48,13 +48,13 @@ digraph implement {
 
 Strategy changes dramatically based on scope. Pick the right weight class:
 
-| Scale | Edits | Strategy |
-|-------|-------|----------|
-| **Trivial** (config, typo) | 1-5 | Read -> Edit -> Verify -> Commit |
-| **Small fix** | 5-20 | Grep error -> Read -> Fix -> Test -> Commit |
-| **Feature** | 50-200 | Plan -> Layer-by-layer impl -> Verify per layer |
-| **Subsystem** | 300-500 | Task planning -> Wave dispatch -> Layer-by-layer |
-| **Epic** | 1000+ | Research swarm -> Spec -> Parallel agents -> Integration |
+| Scale                      | Edits   | Strategy                                                 |
+| -------------------------- | ------- | -------------------------------------------------------- |
+| **Trivial** (config, typo) | 1-5     | Read -> Edit -> Verify -> Commit                         |
+| **Small fix**              | 5-20    | Grep error -> Read -> Fix -> Test -> Commit              |
+| **Feature**                | 50-200  | Plan -> Layer-by-layer impl -> Verify per layer          |
+| **Subsystem**              | 300-500 | Task planning -> Wave dispatch -> Layer-by-layer         |
+| **Epic**                   | 1000+   | Research swarm -> Spec -> Parallel agents -> Integration |
 
 **Skip planning when:** Scope is clear, single-file change, fix describable in one sentence.
 
@@ -71,6 +71,7 @@ Types/Models -> Backend Logic -> API Routes -> Frontend Types -> Hooks/Client ->
 ```
 
 **Fullstack (Python + TypeScript):**
+
 1. Database model + migration
 2. Service/business logic layer
 3. API routes (FastAPI or tRPC)
@@ -80,6 +81,7 @@ Types/Models -> Backend Logic -> API Routes -> Frontend Types -> Hooks/Client ->
 7. Lint -> typecheck -> test -> commit
 
 **Rust:**
+
 1. Error types (`thiserror` enum with `#[from]`)
 2. Type definitions (structs, enums)
 3. Core logic (`impl` blocks)
@@ -94,13 +96,13 @@ Types/Models -> Backend Logic -> API Routes -> Frontend Types -> Hooks/Client ->
 
 The single most impactful practice. Get this right and everything else follows.
 
-| Gate | When | Speed |
-|------|------|-------|
-| **Typecheck** | After every 2-3 edits | Fast (primary gate) |
-| **Lint (autofix)** | After implementation batch | Fast |
-| **Tests (specific)** | After feature complete | Medium |
-| **Tests (full suite)** | Before commit | Slow |
-| **Build** | Before PR/deploy only | Slowest |
+| Gate                   | When                       | Speed               |
+| ---------------------- | -------------------------- | ------------------- |
+| **Typecheck**          | After every 2-3 edits      | Fast (primary gate) |
+| **Lint (autofix)**     | After implementation batch | Fast                |
+| **Tests (specific)**   | After feature complete     | Medium              |
+| **Tests (full suite)** | Before commit              | Slow                |
+| **Build**              | Before PR/deploy only      | Slowest             |
 
 ### The Edit-Verify-Fix Cycle
 
@@ -111,6 +113,7 @@ The expensive pattern: **2 changes -> typecheck -> 15 fixes** (type cascade). Pr
 **Combined gates save time:** `turbo lint:fix typecheck --filter=pkg` runs both in one shot. Scope verification to affected packages, never the full monorepo.
 
 **Practical tips:**
+
 - Run `lint:fix` BEFORE `lint` check to reduce iterations
 - `cargo check` over `cargo build` (2-3x faster, same error detection)
 - Truncate verbose output: `2>&1 | tail -20`
@@ -155,12 +158,12 @@ Can changes be made incrementally?
 
 ### Bug Fix vs Feature vs Refactor
 
-| Type | Cadence | Typical Cycles |
-|------|---------|---------------|
-| **Bug fix** | Grep error -> Read 2-5 files -> Edit 1-3 files -> Test -> Commit | 1-2 |
-| **Feature** | Plan -> Models -> API -> Frontend -> Test -> Commit | 5-15 |
-| **Refactor** | Audit -> Gap analysis -> Incremental migration -> Verify parity | 10-30+ |
-| **Upgrade** | Research changelog -> Identify breaking changes -> Bump -> Fix consumers | Variable |
+| Type         | Cadence                                                                  | Typical Cycles |
+| ------------ | ------------------------------------------------------------------------ | -------------- |
+| **Bug fix**  | Grep error -> Read 2-5 files -> Edit 1-3 files -> Test -> Commit         | 1-2            |
+| **Feature**  | Plan -> Models -> API -> Frontend -> Test -> Commit                      | 5-15           |
+| **Refactor** | Audit -> Gap analysis -> Incremental migration -> Verify parity          | 10-30+         |
+| **Upgrade**  | Research changelog -> Identify breaking changes -> Bump -> Fix consumers | Variable       |
 
 ---
 
@@ -190,17 +193,17 @@ If you've corrected the same issue twice, `/clear` and restart. Accumulated cont
 
 ## Anti-Patterns
 
-| Anti-Pattern | Fix |
-|---|---|
-| 20+ edits without verification | Verify every 2-3 edits |
-| Fix without verifying the fix (73% of fixes!) | One fix, one verify, repeat |
-| `fix -> fix -> fix` chains without checking | Always verify between fixes |
-| Editing without reading first | Read the file immediately before editing |
-| Writing tests from memory | Read actual function signatures first |
+| Anti-Pattern                                     | Fix                                             |
+| ------------------------------------------------ | ----------------------------------------------- |
+| 20+ edits without verification                   | Verify every 2-3 edits                          |
+| Fix without verifying the fix (73% of fixes!)    | One fix, one verify, repeat                     |
+| `fix -> fix -> fix` chains without checking      | Always verify between fixes                     |
+| Editing without reading first                    | Read the file immediately before editing        |
+| Writing tests from memory                        | Read actual function signatures first           |
 | Changing shared types without grepping consumers | `Grep` all usages before modifying shared types |
-| Mixing move and change in one commit | Move first commit, change second commit |
-| Debugging spiral past 3 attempts | Change approach or escalate |
-| Premature optimization | Correctness first, optimize after tests pass |
+| Mixing move and change in one commit             | Move first commit, change second commit         |
+| Debugging spiral past 3 attempts                 | Change approach or escalate                     |
+| Premature optimization                           | Correctness first, optimize after tests pass    |
 
 ---
 

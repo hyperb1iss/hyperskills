@@ -220,7 +220,7 @@ ci_settings(
 - name: Install Tilt
   uses: yokawasa/action-setup-tools@v0.9.0
   with:
-    tilt: '0.36.3'
+    tilt: "0.36.3"
 - name: Run Tilt CI
   run: tilt ci -- --profile ci
 ```
@@ -315,20 +315,20 @@ load('ext://restart_process', 'docker_build_with_restart')
 
 ### Key Extensions
 
-| Extension | Purpose | Import |
-|-----------|---------|--------|
+| Extension         | Purpose                                  | Import                                                       |
+| ----------------- | ---------------------------------------- | ------------------------------------------------------------ |
 | `restart_process` | Restart container process on live update | `load('ext://restart_process', 'docker_build_with_restart')` |
-| `helm_remote` | Deploy Helm charts from remote repos | `load('ext://helm_remote', 'helm_remote')` |
-| `namespace` | Create namespace if it doesn't exist | `load('ext://namespace', 'namespace_create')` |
-| `secret` | Create k8s secrets from local values | `load('ext://secret', 'secret_create_generic')` |
-| `configmap` | Create ConfigMaps from files/literals | `load('ext://configmap', 'configmap_create')` |
-| `git_resource` | Deploy from a git repo | `load('ext://git_resource', 'git_checkout')` |
-| `uibutton` | Add custom buttons to Tilt UI | `load('ext://uibutton', 'cmd_button')` |
-| `ko` | Build Go images with ko | `load('ext://ko', 'ko_build')` |
-| `pack` | Build with Cloud Native Buildpacks | `load('ext://pack', 'pack')` |
-| `dotenv` | Load .env files | `load('ext://dotenv', 'dotenv')` |
-| `cancel` | Add cancel buttons to resources | `load('ext://cancel', 'register')` |
-| `local_output` | Capture local command output | `load('ext://local_output', 'local_output')` |
+| `helm_remote`     | Deploy Helm charts from remote repos     | `load('ext://helm_remote', 'helm_remote')`                   |
+| `namespace`       | Create namespace if it doesn't exist     | `load('ext://namespace', 'namespace_create')`                |
+| `secret`          | Create k8s secrets from local values     | `load('ext://secret', 'secret_create_generic')`              |
+| `configmap`       | Create ConfigMaps from files/literals    | `load('ext://configmap', 'configmap_create')`                |
+| `git_resource`    | Deploy from a git repo                   | `load('ext://git_resource', 'git_checkout')`                 |
+| `uibutton`        | Add custom buttons to Tilt UI            | `load('ext://uibutton', 'cmd_button')`                       |
+| `ko`              | Build Go images with ko                  | `load('ext://ko', 'ko_build')`                               |
+| `pack`            | Build with Cloud Native Buildpacks       | `load('ext://pack', 'pack')`                                 |
+| `dotenv`          | Load .env files                          | `load('ext://dotenv', 'dotenv')`                             |
+| `cancel`          | Add cancel buttons to resources          | `load('ext://cancel', 'register')`                           |
+| `local_output`    | Capture local command output             | `load('ext://local_output', 'local_output')`                 |
 
 ### Custom UI Buttons
 

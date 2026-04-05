@@ -115,11 +115,11 @@ If Sibyl has a directly applicable pattern or decision, **present it first**. Do
 
 1. **Present 2-3 approaches** with explicit tradeoffs:
 
-   | Approach | Pros | Cons | Complexity | Risk |
-   |----------|------|------|------------|------|
-   | A: [name] | ... | ... | Low/Med/High | ... |
-   | B: [name] | ... | ... | Low/Med/High | ... |
-   | C: [name] | ... | ... | Low/Med/High | ... |
+   | Approach  | Pros | Cons | Complexity   | Risk |
+   | --------- | ---- | ---- | ------------ | ---- |
+   | A: [name] | ...  | ...  | Low/Med/High | ...  |
+   | B: [name] | ...  | ...  | Low/Med/High | ...  |
+   | C: [name] | ...  | ...  | Low/Med/High | ...  |
 
 2. **Include at least one unconventional option** — break fixation on the obvious path
 
@@ -156,19 +156,20 @@ Balance like MCTS — don't fixate on the first decent idea:
 1. **Let the user choose.** Present your recommendation but don't bulldoze.
 
 2. **Record the decision in Sibyl:**
+
    ```
    sibyl add "Brainstorm: [topic]" "Chose [approach] because [reason]. Rejected [other approaches] due to [tradeoffs]. Key constraint: [X]."
    ```
 
 3. **Define next action** — the brainstorm exits to whatever makes sense:
 
-   | Next Step | When |
-   |-----------|------|
-   | `/hyperskills:plan` | Complex feature needing decomposition |
-   | `/hyperskills:research` | Need deeper investigation first |
-   | `/hyperskills:orchestrate` | Ready to dispatch agents |
-   | Direct implementation | Simple enough to just build |
-   | Write a spec | Needs formal documentation |
+   | Next Step                  | When                                  |
+   | -------------------------- | ------------------------------------- |
+   | `/hyperskills:plan`        | Complex feature needing decomposition |
+   | `/hyperskills:research`    | Need deeper investigation first       |
+   | `/hyperskills:orchestrate` | Ready to dispatch agents              |
+   | Direct implementation      | Simple enough to just build           |
+   | Write a spec               | Needs formal documentation            |
 
 ### Output
 

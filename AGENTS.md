@@ -104,17 +104,20 @@ description: Use this skill when [specific triggers]. Activates on mentions of [
 ```
 
 **Description rules:**
+
 - Start with "Use this skill when" followed by concrete scenarios
 - Include "Activates on mentions of" with specific trigger words/phrases
 - Be generous with triggers — list 8-12 keywords that should activate the skill
 - Include both formal terms ("threat modeling") and casual phrasing ("security review")
 
 **Good example:**
+
 ```yaml
 description: Use this skill for complex git operations including rebases, merge conflict resolution, cherry-picking, branch management, or repository archaeology. Activates on mentions of git rebase, merge conflict, cherry-pick, git history, branch cleanup, git bisect, worktree, force push, or complex git operations.
 ```
 
 **Bad example:**
+
 ```yaml
 description: Helps with git stuff.
 ```
@@ -133,7 +136,7 @@ One-paragraph summary of what this skill provides and its core insight.
 Tables, decision trees, and procedures. Prefer tables over prose:
 
 | Situation | Action |
-|-----------|--------|
+| --------- | ------ |
 | X         | Do Y   |
 | Z         | Do W   |
 
@@ -143,8 +146,8 @@ Tables, decision trees, and procedures. Prefer tables over prose:
 
 ## Anti-Patterns
 
-| Anti-Pattern | Fix |
-|-------------|-----|
+| Anti-Pattern   | Fix             |
+| -------------- | --------------- |
 | Common mistake | How to avoid it |
 
 ## What This Skill is NOT
@@ -154,6 +157,7 @@ Tables, decision trees, and procedures. Prefer tables over prose:
 ```
 
 **Body guidelines:**
+
 - Target 1,500-3,000 words. Move anything beyond that to `references/`
 - Use tables over prose — they scan faster and waste fewer tokens
 - Include decision trees for branching logic
@@ -175,12 +179,14 @@ skills/<skill-name>/
 ```
 
 **Reference files:**
+
 - No YAML frontmatter needed — just plain markdown
 - Can be large (2,000-10,000+ words)
 - Only loaded into context when Claude determines it needs them
 - Must be referenced from SKILL.md so Claude knows they exist
 
 **Reference from SKILL.md like this:**
+
 ```markdown
 ## References
 
@@ -190,16 +196,16 @@ For advanced configuration patterns, see `references/patterns.md`.
 
 **When to use references vs inline:**
 
-| Content Type | Where |
-|-------------|-------|
-| Core workflow steps | SKILL.md body |
-| Decision trees | SKILL.md body |
-| Quick-reference tables | SKILL.md body |
-| Anti-patterns | SKILL.md body |
-| Full API surfaces | `references/` |
-| Unicode/visual catalogs | `references/` |
+| Content Type                    | Where         |
+| ------------------------------- | ------------- |
+| Core workflow steps             | SKILL.md body |
+| Decision trees                  | SKILL.md body |
+| Quick-reference tables          | SKILL.md body |
+| Anti-patterns                   | SKILL.md body |
+| Full API surfaces               | `references/` |
+| Unicode/visual catalogs         | `references/` |
 | Advanced patterns (>20 entries) | `references/` |
-| Real-world app galleries | `references/` |
+| Real-world app galleries        | `references/` |
 
 ### Step 4: Update Plugin Metadata
 
@@ -211,15 +217,12 @@ Add relevant keywords to the `keywords` array:
 
 ```json
 {
-  "keywords": [
-    "existing-keyword",
-    "new-skill-keyword-1",
-    "new-skill-keyword-2"
-  ]
+  "keywords": ["existing-keyword", "new-skill-keyword-1", "new-skill-keyword-2"]
 }
 ```
 
 Bump the version following semver:
+
 - New skill = minor version bump (e.g., 3.0.0 → 3.1.0)
 - Skill content update = patch bump (e.g., 3.1.0 → 3.1.1)
 - Breaking changes (rename/remove skill) = major bump
@@ -265,32 +268,34 @@ Before committing, verify:
 
 ## Existing Skill Inventory
 
-| Skill | Tokens | References | Domain |
-|-------|--------|------------|--------|
-| `brainstorm` | ~2,500 | none | Process — ideation |
-| `plan` | ~2,800 | none | Process — decomposition |
-| `research` | ~3,200 | none | Process — knowledge gathering |
-| `orchestrate` | ~4,000 | none | Process — multi-agent dispatch |
-| `security` | ~1,500 | none | Domain — security ops |
-| `git` | ~1,200 | none | Domain — git operations |
-| `tilt` | ~2,500 | 2 files | Domain — Kubernetes dev |
-| `tui-design` | ~3,000 | 2 files | Domain — terminal UI |
-| `codex-review` | ~2,000 | 1 file | Process — cross-model review |
-| `implement` | ~2,500 | 1 file | Process — implementation |
-| `uv` | ~3,000 | 3 files | Domain — Python package management |
-| `ruff` | ~2,800 | 2 files | Domain — Python linting & formatting |
-| `ty` | ~2,500 | 2 files | Domain — Python type checking |
-| `uv-build` | ~2,500 | none | Domain — Python build backend |
+| Skill          | Tokens | References | Domain                               |
+| -------------- | ------ | ---------- | ------------------------------------ |
+| `brainstorm`   | ~2,500 | none       | Process — ideation                   |
+| `plan`         | ~2,800 | none       | Process — decomposition              |
+| `research`     | ~3,200 | none       | Process — knowledge gathering        |
+| `orchestrate`  | ~4,000 | none       | Process — multi-agent dispatch       |
+| `security`     | ~1,500 | none       | Domain — security ops                |
+| `git`          | ~1,200 | none       | Domain — git operations              |
+| `tilt`         | ~2,500 | 2 files    | Domain — Kubernetes dev              |
+| `tui-design`   | ~3,000 | 2 files    | Domain — terminal UI                 |
+| `codex-review` | ~2,000 | 1 file     | Process — cross-model review         |
+| `implement`    | ~2,500 | 1 file     | Process — implementation             |
+| `uv`           | ~3,000 | 3 files    | Domain — Python package management   |
+| `ruff`         | ~2,800 | 2 files    | Domain — Python linting & formatting |
+| `ty`           | ~2,500 | 2 files    | Domain — Python type checking        |
+| `uv-build`     | ~2,500 | none       | Domain — Python build backend        |
 
 ## Skill Categories
 
 When adding a new skill, it should fit one of these categories:
 
 **Process skills** — HOW to approach a class of work:
+
 - `brainstorm`, `plan`, `research`, `orchestrate`, `codex-review`, `implement`
 - These tend to be workflow-heavy with phases and decision gates
 
 **Domain skills** — specialized knowledge for a specific technology or practice:
+
 - `security`, `git`, `tilt`, `tui-design`, `uv`, `ruff`, `ty`, `uv-build`
 - These tend to be reference-heavy with decision trees and lookup tables
 
@@ -305,13 +310,13 @@ When adding a new skill, it should fit one of these categories:
 
 ## Common Mistakes
 
-| Mistake | Fix |
-|---------|-----|
-| Vague description with no trigger words | Add 8-12 specific keywords after "Activates on mentions of" |
-| Entire skill is >5,000 words in SKILL.md | Split into SKILL.md (core) + references/ (detail) |
-| Prose paragraphs explaining options | Convert to decision tree tables |
-| Duplicating what models already know | Only encode non-obvious procedural knowledge |
-| No anti-patterns section | Add one — knowing pitfalls is half the value |
-| Missing "What This Skill is NOT" | Add scope boundaries to prevent misuse |
-| Reference files exist but aren't mentioned in SKILL.md | Add a References section pointing to them |
-| Forgetting to update plugin.json and CLAUDE.md | Always update both after adding/changing skills |
+| Mistake                                                | Fix                                                         |
+| ------------------------------------------------------ | ----------------------------------------------------------- |
+| Vague description with no trigger words                | Add 8-12 specific keywords after "Activates on mentions of" |
+| Entire skill is >5,000 words in SKILL.md               | Split into SKILL.md (core) + references/ (detail)           |
+| Prose paragraphs explaining options                    | Convert to decision tree tables                             |
+| Duplicating what models already know                   | Only encode non-obvious procedural knowledge                |
+| No anti-patterns section                               | Add one — knowing pitfalls is half the value                |
+| Missing "What This Skill is NOT"                       | Add scope boundaries to prevent misuse                      |
+| Reference files exist but aren't mentioned in SKILL.md | Add a References section pointing to them                   |
+| Forgetting to update plugin.json and CLAUDE.md         | Always update both after adding/changing skills             |

@@ -4,23 +4,23 @@ Quantitative data from 21,321 tracked operations across 64+ projects.
 
 ## Quantitative Benchmarks
 
-| Metric | Value | Source |
-|--------|-------|--------|
-| Reads per code change | 0.8 | Sibyl (21k ops) |
-| Searches per code change | 0.5 | Sibyl |
-| Edits between verifications (sweet spot) | 2-3 | Sibyl + v2 |
-| Changes per commit | 48.7 | Sibyl |
-| Verifications per commit | 23.2 | Sibyl |
-| Typecheck:Lint:Test ratio | 4.6:1.9:1 | Sibyl |
-| Edit:Write ratio (mature codebase) | 9:1 | v2 |
-| Verification failure rate | ~35% | v2 |
-| Post-fix verification rate | 27% | Debugging (612 sessions) |
-| Quick fix rate (1-2 iterations) | 42% | Debugging |
-| Spiral rate (6+ iterations) | 42% | Debugging |
-| Context overflow in spirals | 99% | Debugging |
-| Sessions with tests | 90% | Sibyl |
-| Exploration before first edit (10+ reads) | 31% | v2 |
-| Agent survivorship in research swarms | 67-100% | Config/skills |
+| Metric                                    | Value     | Source                   |
+| ----------------------------------------- | --------- | ------------------------ |
+| Reads per code change                     | 0.8       | Sibyl (21k ops)          |
+| Searches per code change                  | 0.5       | Sibyl                    |
+| Edits between verifications (sweet spot)  | 2-3       | Sibyl + v2               |
+| Changes per commit                        | 48.7      | Sibyl                    |
+| Verifications per commit                  | 23.2      | Sibyl                    |
+| Typecheck:Lint:Test ratio                 | 4.6:1.9:1 | Sibyl                    |
+| Edit:Write ratio (mature codebase)        | 9:1       | v2                       |
+| Verification failure rate                 | ~35%      | v2                       |
+| Post-fix verification rate                | 27%       | Debugging (612 sessions) |
+| Quick fix rate (1-2 iterations)           | 42%       | Debugging                |
+| Spiral rate (6+ iterations)               | 42%       | Debugging                |
+| Context overflow in spirals               | 99%       | Debugging                |
+| Sessions with tests                       | 90%       | Sibyl                    |
+| Exploration before first edit (10+ reads) | 31%       | v2                       |
+| Agent survivorship in research swarms     | 67-100%   | Config/skills            |
 
 ---
 
@@ -73,12 +73,12 @@ Research swarm -> Task graph with dependencies -> Wave dispatch (3-7 agents per 
 
 ## Context Engineering Budget
 
-| Item | Tokens |
-|------|--------|
-| Baseline system + CLAUDE.md | ~20k |
-| Usable budget (200k window) | ~180k |
-| Target utilization | 40-60% |
-| Context rot threshold | ~15-20 iterations |
+| Item                        | Tokens            |
+| --------------------------- | ----------------- |
+| Baseline system + CLAUDE.md | ~20k              |
+| Usable budget (200k window) | ~180k             |
+| Target utilization          | 40-60%            |
+| Context rot threshold       | ~15-20 iterations |
 
 ### Context Preservation Strategies
 
@@ -93,11 +93,11 @@ Research swarm -> Task graph with dependencies -> Wave dispatch (3-7 agents per 
 
 346 cycles detected across 27/30 Sibyl sessions:
 
-| Profile | Pattern | Frequency |
-|---------|---------|-----------|
-| **Quick fix** | 3 changes -> LINT -> 1 fix | Most common |
-| **Standard** | 5.8 changes -> verify -> 5.7 fixes | Average |
-| **Type cascade** | 2 changes -> TC -> 15 fixes | Most expensive |
+| Profile          | Pattern                            | Frequency      |
+| ---------------- | ---------------------------------- | -------------- |
+| **Quick fix**    | 3 changes -> LINT -> 1 fix         | Most common    |
+| **Standard**     | 5.8 changes -> verify -> 5.7 fixes | Average        |
+| **Type cascade** | 2 changes -> TC -> 15 fixes        | Most expensive |
 
 - Lint triggers most cycles (~140 of 346)
 - Typecheck triggers fewest but costliest cycles

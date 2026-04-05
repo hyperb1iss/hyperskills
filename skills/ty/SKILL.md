@@ -67,11 +67,11 @@ ty server                          # Start LSP
 
 ### Exit Codes
 
-| Code | Meaning |
-|------|---------|
-| `0` | No errors (warnings don't count unless `--error-on-warning`) |
-| `1` | Type errors found |
-| `2` | CLI/configuration error |
+| Code | Meaning                                                      |
+| ---- | ------------------------------------------------------------ |
+| `0`  | No errors (warnings don't count unless `--error-on-warning`) |
+| `1`  | Type errors found                                            |
+| `2`  | CLI/configuration error                                      |
 
 ## Configuration
 
@@ -147,11 +147,11 @@ Built on Salsa (same framework as rust-analyzer). Changing one function re-parse
 
 ### Performance
 
-| Project | ty | pyright | mypy |
-|---------|-----|---------|------|
-| home-assistant (cold) | 2.19s | 19.62s | 45.66s |
-| PyTorch (cold) | 4.04s | 262.74s | — |
-| PyTorch (incremental) | **4.7ms** | 386ms | — |
+| Project               | ty        | pyright | mypy   |
+| --------------------- | --------- | ------- | ------ |
+| home-assistant (cold) | 2.19s     | 19.62s  | 45.66s |
+| PyTorch (cold)        | 4.04s     | 262.74s | —      |
+| PyTorch (incremental) | **4.7ms** | 386ms   | —      |
 
 ## Editor/LSP Setup
 
@@ -160,17 +160,20 @@ ty ships a full LSP with go-to-definition, find references, auto-complete with a
 **VS Code:** Install `astral-sh.ty` extension.
 
 **Neovim (>=0.11):**
+
 ```lua
 vim.lsp.config('ty', { settings = { ty = {} } })
 vim.lsp.enable('ty')
 ```
 
 **Neovim (<0.11):**
+
 ```lua
 require('lspconfig').ty.setup({ settings = { ty = {} } })
 ```
 
 **Zed:** Built-in, enable in settings:
+
 ```json
 { "languages": { "Python": { "language_servers": ["ty", "ruff"] } } }
 ```
@@ -183,25 +186,25 @@ require('lspconfig').ty.setup({ settings = { ty = {} } })
 
 ty and ruff are complementary:
 
-| Tool | Role |
-|------|------|
+| Tool     | Role                                               |
+| -------- | -------------------------------------------------- |
 | **ruff** | Linting (style, correctness, imports) + formatting |
-| **ty** | Type checking + language server |
+| **ty**   | Type checking + language server                    |
 
 ty has **no strict mode** for requiring annotations. Use ruff's `ANN001`/`ANN201` rules instead. Both LSPs can run simultaneously in editors.
 
 ## Current Limitations (Beta)
 
-| Limitation | Impact | Workaround |
-|-----------|--------|------------|
-| **No plugin system** | No Pydantic/Django/SQLAlchemy plugins | Wait for first-class framework support |
-| **No strict mode** | Can't require annotations | Use ruff ANN rules |
-| **No pre-commit hook** | Must set up manually | `uvx ty check` in custom hook |
-| **No TypeVarTuple/Unpack** | NumPy/tensor typing limited | Use mypy for these |
-| **No TypedDict functional syntax** | `TD = TypedDict("TD", ...)` not supported | Use class syntax |
-| **Beta stability** | Breaking changes between versions | Pin version, test upgrades |
-| **Script deps ignored** | PEP 723 inline metadata not recognized | Run ty in project context |
-| **Limited monorepo support** | No automatic multi-root discovery | Configure root paths manually |
+| Limitation                         | Impact                                    | Workaround                             |
+| ---------------------------------- | ----------------------------------------- | -------------------------------------- |
+| **No plugin system**               | No Pydantic/Django/SQLAlchemy plugins     | Wait for first-class framework support |
+| **No strict mode**                 | Can't require annotations                 | Use ruff ANN rules                     |
+| **No pre-commit hook**             | Must set up manually                      | `uvx ty check` in custom hook          |
+| **No TypeVarTuple/Unpack**         | NumPy/tensor typing limited               | Use mypy for these                     |
+| **No TypedDict functional syntax** | `TD = TypedDict("TD", ...)` not supported | Use class syntax                       |
+| **Beta stability**                 | Breaking changes between versions         | Pin version, test upgrades             |
+| **Script deps ignored**            | PEP 723 inline metadata not recognized    | Run ty in project context              |
+| **Limited monorepo support**       | No automatic multi-root discovery         | Configure root paths manually          |
 
 For the full type system feature matrix, see `references/type-system.md`.
 For detailed migration tables from mypy/pyright, see `references/migration.md`.
@@ -233,13 +236,13 @@ pyright path/to/file.py       ->  ty check path/to/file.py
 
 ## Anti-Patterns
 
-| Anti-Pattern | Fix |
-|-------------|-----|
-| Blanket `# ty: ignore` everywhere | Fix errors or use rule-specific ignores |
-| Using `# type: ignore` in new code | Use `# ty: ignore[rule-name]` |
-| Expecting mypy plugin behavior | Check limitation table; wait for framework support if needed |
-| Running ty on unannotated code expecting strictness | Add ruff ANN rules for annotation enforcement |
-| Pinning to latest without testing | Pin version in CI, test upgrades deliberately |
+| Anti-Pattern                                        | Fix                                                          |
+| --------------------------------------------------- | ------------------------------------------------------------ |
+| Blanket `# ty: ignore` everywhere                   | Fix errors or use rule-specific ignores                      |
+| Using `# type: ignore` in new code                  | Use `# ty: ignore[rule-name]`                                |
+| Expecting mypy plugin behavior                      | Check limitation table; wait for framework support if needed |
+| Running ty on unannotated code expecting strictness | Add ruff ANN rules for annotation enforcement                |
+| Pinning to latest without testing                   | Pin version in CI, test upgrades deliberately                |
 
 ## What This Skill is NOT
 

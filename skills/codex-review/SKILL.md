@@ -20,21 +20,21 @@ model_reasoning_effort = "high"
 
 ## Two Ways to Invoke Codex
 
-| Mode | Command | Best For |
-|------|---------|----------|
-| `codex review` | Structured diff review with prioritized findings | Pre-PR reviews, commit reviews, WIP checks |
-| `codex exec` | Freeform non-interactive deep-dive with full prompt control | Security audits, architecture review, focused investigation |
+| Mode           | Command                                                     | Best For                                                    |
+| -------------- | ----------------------------------------------------------- | ----------------------------------------------------------- |
+| `codex review` | Structured diff review with prioritized findings            | Pre-PR reviews, commit reviews, WIP checks                  |
+| `codex exec`   | Freeform non-interactive deep-dive with full prompt control | Security audits, architecture review, focused investigation |
 
 **Key flags:**
 
-| Flag | Applies To | Purpose |
-|------|-----------|---------|
-| `-c model="gpt-5.4"` | both | Model selection (review has no `-m` flag) |
-| `-m`, `--model` | `exec` only | Model selection shorthand |
-| `-c model_reasoning_effort="xhigh"` | both | Reasoning depth: `low` / `medium` / `high` / `xhigh` |
-| `--base <BRANCH>` | `review` only | Diff against base branch |
-| `--commit <SHA>` | `review` only | Review a specific commit |
-| `--uncommitted` | `review` only | Review working tree changes |
+| Flag                                | Applies To    | Purpose                                              |
+| ----------------------------------- | ------------- | ---------------------------------------------------- |
+| `-c model="gpt-5.4"`                | both          | Model selection (review has no `-m` flag)            |
+| `-m`, `--model`                     | `exec` only   | Model selection shorthand                            |
+| `-c model_reasoning_effort="xhigh"` | both          | Reasoning depth: `low` / `medium` / `high` / `xhigh` |
+| `--base <BRANCH>`                   | `review` only | Diff against base branch                             |
+| `--commit <SHA>`                    | `review` only | Review a specific commit                             |
+| `--uncommitted`                     | `review` only | Review working tree changes                          |
 
 ## Review Patterns
 
@@ -112,23 +112,23 @@ STOP after 3 iterations. Diminishing returns beyond this.
 
 For thorough reviews, run multiple focused passes instead of one vague pass. Each pass gets a specific persona and concern domain.
 
-| Pass | Focus | Mode | Reasoning |
-|------|-------|------|-----------|
-| **Correctness** | Bugs, logic, edge cases, race conditions | `codex review` | default |
-| **Security** | OWASP Top 10, injection, auth, secrets | `codex exec` with security prompt | `xhigh` |
-| **Architecture** | Coupling, abstractions, API consistency | `codex exec` with architecture prompt | `xhigh` |
-| **Performance** | O(n^2), N+1 queries, memory leaks | `codex exec` with performance prompt | `high` |
+| Pass             | Focus                                    | Mode                                  | Reasoning |
+| ---------------- | ---------------------------------------- | ------------------------------------- | --------- |
+| **Correctness**  | Bugs, logic, edge cases, race conditions | `codex review`                        | default   |
+| **Security**     | OWASP Top 10, injection, auth, secrets   | `codex exec` with security prompt     | `xhigh`   |
+| **Architecture** | Coupling, abstractions, API consistency  | `codex exec` with architecture prompt | `xhigh`   |
+| **Performance**  | O(n^2), N+1 queries, memory leaks        | `codex exec` with performance prompt  | `high`    |
 
 Run passes sequentially. Fix critical findings between passes to avoid noise compounding.
 
 When to use multi-pass vs single-pass:
 
-| Change Size | Strategy |
-|-------------|----------|
-| < 50 lines, single concern | Single `codex review` |
-| 50-300 lines, feature work | `codex review` + security pass |
-| 300+ lines or architecture change | Full 4-pass |
-| Security-sensitive (auth, payments, crypto) | Always include security pass |
+| Change Size                                 | Strategy                       |
+| ------------------------------------------- | ------------------------------ |
+| < 50 lines, single concern                  | Single `codex review`          |
+| 50-300 lines, feature work                  | `codex review` + security pass |
+| 300+ lines or architecture change           | Full 4-pass                    |
+| Security-sensitive (auth, payments, crypto) | Always include security pass   |
 
 ## Decision Tree: Which Pattern?
 
@@ -167,18 +167,18 @@ Ready-to-use prompt templates are in `references/prompts.md`.
 
 ## Anti-Patterns
 
-| Anti-Pattern | Why It Fails | Fix |
-|-------------|-------------|-----|
-| "Review this code" | Too vague — produces surface-level bikeshedding | Use specific domain prompts with persona |
-| Single pass for everything | Context dilution — every dimension gets shallow treatment | Multi-pass with one concern per pass |
-| Self-review (Claude reviews Claude's code) | Systematic bias — models approve their own patterns | Cross-model: Claude writes, Codex reviews |
-| No confidence threshold | Noise floods signal — 0.3 confidence findings waste time | Only act on >= 0.7 confidence |
-| Style comments in review | LLMs default to bikeshedding without explicit skip directives | "Skip: formatting, naming, minor docs" |
-| > 3 review iterations | Diminishing returns, increasing noise, overbaking | Stop at 3. Accept trade-offs. |
-| Review without project context | Generic advice disconnected from codebase conventions | Codex reads CLAUDE.md/AGENTS.md automatically |
-| Using an MCP wrapper | Unnecessary indirection over a CLI binary | Call `codex` directly via Bash |
+| Anti-Pattern                                         | Why It Fails                                                                    | Fix                                                                                                        |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| "Review this code"                                   | Too vague — produces surface-level bikeshedding                                 | Use specific domain prompts with persona                                                                   |
+| Single pass for everything                           | Context dilution — every dimension gets shallow treatment                       | Multi-pass with one concern per pass                                                                       |
+| Self-review (Claude reviews Claude's code)           | Systematic bias — models approve their own patterns                             | Cross-model: Claude writes, Codex reviews                                                                  |
+| No confidence threshold                              | Noise floods signal — 0.3 confidence findings waste time                        | Only act on >= 0.7 confidence                                                                              |
+| Style comments in review                             | LLMs default to bikeshedding without explicit skip directives                   | "Skip: formatting, naming, minor docs"                                                                     |
+| > 3 review iterations                                | Diminishing returns, increasing noise, overbaking                               | Stop at 3. Accept trade-offs.                                                                              |
+| Review without project context                       | Generic advice disconnected from codebase conventions                           | Codex reads CLAUDE.md/AGENTS.md automatically                                                              |
+| Using an MCP wrapper                                 | Unnecessary indirection over a CLI binary                                       | Call `codex` directly via Bash                                                                             |
 | Specifying legacy/deprecated models (o1, o3, gpt-4o) | These models are ancient history and may not be available on the user's account | Use the defaults from `~/.codex/config.toml` or the model shown in `codex --help`. Never guess model names |
-| Overcomplicating the invocation | Adding unnecessary flags, custom reasoning efforts, or exotic configs | Use `codex review` with simple flags (`--uncommitted`, `--base main`). The defaults are good |
+| Overcomplicating the invocation                      | Adding unnecessary flags, custom reasoning efforts, or exotic configs           | Use `codex review` with simple flags (`--uncommitted`, `--base main`). The defaults are good               |
 
 ## What This Skill is NOT
 

@@ -153,12 +153,12 @@ uv python pin 3.13                   # Create .python-version
 uv python list --only-installed      # Show installed versions
 ```
 
-| Preference Setting | Behavior |
-|--------------------|----------|
+| Preference Setting  | Behavior                   |
+| ------------------- | -------------------------- |
 | `managed` (default) | Prefer uv-installed Python |
-| `only-managed` | Never use system Python |
-| `system` | Prefer system Python |
-| `only-system` | Never use managed Python |
+| `only-managed`      | Never use system Python    |
+| `system`            | Prefer system Python       |
+| `only-system`       | Never use managed Python   |
 
 ## Workspaces
 
@@ -173,6 +173,7 @@ my-lib = { workspace = true }
 ```
 
 Key behaviors:
+
 - **Single lockfile** across all members
 - **Single `requires-python`** — intersection of all members
 - Workspace members are always **editable**
@@ -187,6 +188,7 @@ uv build --package my-lib            # Build specific member
 ```
 
 **Virtual workspaces** (no root package):
+
 ```toml
 [tool.uv]
 package = false
@@ -210,6 +212,7 @@ uv publish --check-url https://pypi.org/simple/  # Skip if exists
 ```
 
 Trusted publishing (GitHub Actions, no credentials):
+
 ```yaml
 permissions:
   id-token: write
@@ -221,12 +224,12 @@ steps:
 
 Enable with `--preview` or `UV_PREVIEW=1`, or selectively with `--preview-features`:
 
-| Feature | Flag | Description |
-|---------|------|-------------|
-| `uv audit` | `--preview` | Security vulnerability scanning (OSV database) |
-| `uv format` | `format` | Code formatting via Ruff |
-| `pylock` | `pylock` | Install from `pylock.toml` (PEP 751) |
-| `native-auth` | `native-auth` | System keychain credentials |
+| Feature       | Flag          | Description                                    |
+| ------------- | ------------- | ---------------------------------------------- |
+| `uv audit`    | `--preview`   | Security vulnerability scanning (OSV database) |
+| `uv format`   | `format`      | Code formatting via Ruff                       |
+| `pylock`      | `pylock`      | Install from `pylock.toml` (PEP 751)           |
+| `native-auth` | `native-auth` | System keychain credentials                    |
 
 ```bash
 uv audit --preview                   # Scan for vulnerabilities
@@ -238,16 +241,16 @@ uv audit --preview                   # Scan for vulnerabilities
 
 In a workspace, config search starts at workspace root. `uv.toml` takes precedence over `pyproject.toml` in the same directory.
 
-| Setting | Default | Purpose |
-|---------|---------|---------|
-| `required-version` | — | Enforce uv version (PEP 440) |
-| `add-bounds` | `"lower"` | Default bounds for `uv add` |
-| `compile-bytecode` | `false` | Compile .pyc on install |
-| `fork-strategy` | `"requires-python"` | Resolution fork behavior |
-| `exclude-newer` | — | Date/duration cutoff for reproducibility |
-| `environments` | `[]` | Limit lockfile platforms |
-| `torch-backend` | — | PyTorch backend (cpu/cu126/auto) |
-| `default-groups` | `["dev"]` | Groups installed by default |
+| Setting            | Default             | Purpose                                  |
+| ------------------ | ------------------- | ---------------------------------------- |
+| `required-version` | —                   | Enforce uv version (PEP 440)             |
+| `add-bounds`       | `"lower"`           | Default bounds for `uv add`              |
+| `compile-bytecode` | `false`             | Compile .pyc on install                  |
+| `fork-strategy`    | `"requires-python"` | Resolution fork behavior                 |
+| `exclude-newer`    | —                   | Date/duration cutoff for reproducibility |
+| `environments`     | `[]`                | Limit lockfile platforms                 |
+| `torch-backend`    | —                   | PyTorch backend (cpu/cu126/auto)         |
+| `default-groups`   | `["dev"]`           | Groups installed by default              |
 
 **.env file support:** `uv run` automatically loads `.env` files. Control with `--env-file` or `UV_NO_ENV_FILE=1`.
 
@@ -257,29 +260,29 @@ For dependency resolution deep dive, see `references/resolution.md`.
 
 ## Non-Obvious Gotchas
 
-| Gotcha | Explanation |
-|--------|-------------|
-| `uv pip install` in a project | Bypasses lockfile and pyproject.toml. Use `uv add` instead |
-| Scripts with metadata ignore project | Even inside a project dir, PEP 723 scripts run in isolation |
-| `--locked` vs `--frozen` | `--locked` errors on stale lockfile; `--frozen` silently uses whatever's there |
-| `uv venv` needs `--clear` (0.10+) | No longer auto-removes existing venvs |
-| `tool.uv.sources` stripped on publish | Sources are development-only; published packages use `project.dependencies` |
-| Workspace config inheritance | Member-level `uv.toml` is ignored; only workspace root config applies |
-| `link-mode` in Docker | Must use `copy` with cache mounts (hardlinks fail across filesystem boundaries) |
-| `exclude-newer` accepts durations | `"30 days"`, `"1 week"`, `"PT24H"` — not just RFC 3339 timestamps |
-| `uv run` uses inexact sync | Won't remove extraneous packages by default; use `--exact` to enforce |
+| Gotcha                                | Explanation                                                                     |
+| ------------------------------------- | ------------------------------------------------------------------------------- |
+| `uv pip install` in a project         | Bypasses lockfile and pyproject.toml. Use `uv add` instead                      |
+| Scripts with metadata ignore project  | Even inside a project dir, PEP 723 scripts run in isolation                     |
+| `--locked` vs `--frozen`              | `--locked` errors on stale lockfile; `--frozen` silently uses whatever's there  |
+| `uv venv` needs `--clear` (0.10+)     | No longer auto-removes existing venvs                                           |
+| `tool.uv.sources` stripped on publish | Sources are development-only; published packages use `project.dependencies`     |
+| Workspace config inheritance          | Member-level `uv.toml` is ignored; only workspace root config applies           |
+| `link-mode` in Docker                 | Must use `copy` with cache mounts (hardlinks fail across filesystem boundaries) |
+| `exclude-newer` accepts durations     | `"30 days"`, `"1 week"`, `"PT24H"` — not just RFC 3339 timestamps               |
+| `uv run` uses inexact sync            | Won't remove extraneous packages by default; use `--exact` to enforce           |
 
 ## Anti-Patterns
 
-| Anti-Pattern | Fix |
-|-------------|-----|
-| `pip install` / `python -m pip` in uv project | `uv add <package>` for deps, `uv run` for commands |
-| `python script.py` | `uv run script.py` (ensures correct environment) |
-| `python -m venv .venv && source .venv/bin/activate` | `uv run <command>` (auto-manages venv) |
-| Manual `requirements.txt` for new projects | `uv init` + `uv add` + `uv.lock` |
-| `uv pip compile` for project deps | `uv lock` (universal resolution) |
-| `uv tool install pytest` | `uv add --dev pytest` + `uv run pytest` (project-scoped) |
-| `uvx` for project-scoped tools | `uv run <tool>` (picks up project context) |
+| Anti-Pattern                                        | Fix                                                      |
+| --------------------------------------------------- | -------------------------------------------------------- |
+| `pip install` / `python -m pip` in uv project       | `uv add <package>` for deps, `uv run` for commands       |
+| `python script.py`                                  | `uv run script.py` (ensures correct environment)         |
+| `python -m venv .venv && source .venv/bin/activate` | `uv run <command>` (auto-manages venv)                   |
+| Manual `requirements.txt` for new projects          | `uv init` + `uv add` + `uv.lock`                         |
+| `uv pip compile` for project deps                   | `uv lock` (universal resolution)                         |
+| `uv tool install pytest`                            | `uv add --dev pytest` + `uv run pytest` (project-scoped) |
+| `uvx` for project-scoped tools                      | `uv run <tool>` (picks up project context)               |
 
 ## What This Skill is NOT
 

@@ -5,6 +5,7 @@ Pure reference material for terminal visual elements. Scan, don't read.
 ## Box-Drawing Characters
 
 ### Light (standard TUI borders)
+
 ```
 ┌───┬───┐    Corners: ┌ ┐ └ ┘
 │   │   │    T-pieces: ├ ┤ ┬ ┴
@@ -14,6 +15,7 @@ Pure reference material for terminal visual elements. Scan, don't read.
 ```
 
 ### Heavy (emphasis borders)
+
 ```
 ┏━━━┳━━━┓    Corners: ┏ ┓ ┗ ┛
 ┃   ┃   ┃    T-pieces: ┣ ┫ ┳ ┻
@@ -23,6 +25,7 @@ Pure reference material for terminal visual elements. Scan, don't read.
 ```
 
 ### Double (classic DOS/Norton style)
+
 ```
 ╔═══╦═══╗    Corners: ╔ ╗ ╚ ╝
 ║   ║   ║    T-pieces: ╠ ╣ ╦ ╩
@@ -32,6 +35,7 @@ Pure reference material for terminal visual elements. Scan, don't read.
 ```
 
 ### Rounded (modern, friendly)
+
 ```
 ╭───┬───╮    Corners: ╭ ╮ ╰ ╯
 │   │   │    (T-pieces, cross, lines
@@ -41,6 +45,7 @@ Pure reference material for terminal visual elements. Scan, don't read.
 ```
 
 ### Mixed: Heavy Header + Light Body
+
 ```
 ┏━━━━━━━━━━━━━━━━━━━━┓
 ┃  Panel Title        ┃
@@ -52,38 +57,44 @@ Pure reference material for terminal visual elements. Scan, don't read.
 
 ### When to Use Which
 
-| Style | Use Case |
-|-------|----------|
-| Light `─│` | Default panel borders, dividers, tables |
-| Heavy `━┃` | Active/focused panel, headers, emphasis |
-| Double `═║` | Legacy/retro aesthetic, prominent sections |
-| Rounded `╭╯` | Modern/friendly feel, cards, tooltips |
+| Style             | Use Case                                           |
+| ----------------- | -------------------------------------------------- |
+| Light `─│`        | Default panel borders, dividers, tables            |
+| Heavy `━┃`        | Active/focused panel, headers, emphasis            |
+| Double `═║`       | Legacy/retro aesthetic, prominent sections         |
+| Rounded `╭╯`      | Modern/friendly feel, cards, tooltips              |
 | Mixed heavy+light | Focus indicator (heavy = active, light = inactive) |
-| No border | Background layering sufficient, minimal aesthetic |
+| No border         | Background layering sufficient, minimal aesthetic  |
 
 ---
 
 ## Block Elements
 
 ### Fractional Blocks (horizontal, left-to-right fill)
+
 ```
 ▏ ▎ ▍ ▌ ▋ ▊ ▉ █
 ```
+
 1/8 through 8/8 width. Use for sub-character precision in horizontal bar charts.
 
 ### Fractional Blocks (vertical, bottom-to-top fill)
+
 ```
 ▁ ▂ ▃ ▄ ▅ ▆ ▇ █
 ```
+
 1/8 through 8/8 height. Use for sparklines and vertical bar charts.
 
 ### Shade Blocks
+
 ```
 ░ Light shade (25%)
 ▒ Medium shade (50%)
 ▓ Dark shade (75%)
 █ Full block (100%)
 ```
+
 Use for density visualization, heatmaps, and background patterns.
 
 ### Progress Bar Recipes
@@ -112,6 +123,7 @@ Combined: ⣿ = all dots    ⠀ = empty (blank braille)
 Use for high-resolution terminal graphics. Each character cell provides 2×4 = 8 sub-pixels, enabling line charts, scatter plots, and pixel art at 2× horizontal and 4× vertical resolution.
 
 ### Sparkline with Braille
+
 ```
 Network: ⣀⣤⣶⣿⣶⣤⣀⣀⣤⣶⣿⣿⣶⣤  Peak: 1.2 MB/s
 ```
@@ -121,6 +133,7 @@ Network: ⣀⣤⣶⣿⣶⣤⣀⣀⣤⣶⣿⣿⣶⣤  Peak: 1.2 MB/s
 ## Status Indicators
 
 ### Dots and Bullets
+
 ```
 ●  Filled circle (active, online, enabled)
 ○  Empty circle (inactive, offline, disabled)
@@ -130,6 +143,7 @@ Network: ⣀⣤⣶⣿⣶⣤⣀⣀⣤⣶⣿⣿⣶⣤  Peak: 1.2 MB/s
 ```
 
 ### Check and Cross
+
 ```
 ✓  Check mark (success, done, yes)      ✔  Heavy check
 ✗  Ballot X (failure, error, no)        ✘  Heavy X
@@ -137,6 +151,7 @@ Network: ⣀⣤⣶⣿⣶⣤⣀⣀⣤⣶⣿⣿⣶⣤  Peak: 1.2 MB/s
 ```
 
 ### Severity/Priority
+
 ```
 ▲  Up triangle (increase, higher, expand)
 ▼  Down triangle (decrease, lower, collapse)
@@ -146,6 +161,7 @@ Network: ⣀⣤⣶⣿⣶⣤⣀⣀⣤⣶⣿⣿⣶⣤  Peak: 1.2 MB/s
 ```
 
 ### Arrows
+
 ```
 Navigation:  ← → ↑ ↓    ⇐ ⇒ ⇑ ⇓
 Triangles:   ◀ ▶ ▲ ▼    ◁ ▷ △ ▽
@@ -158,6 +174,7 @@ Powerline:   ▏            (thin separator)
 ## Tree Drawing
 
 ### Standard Tree
+
 ```
 ├── src/
 │   ├── main.rs
@@ -173,6 +190,7 @@ Powerline:   ▏            (thin separator)
 Characters: `├── ` (branch), `└── ` (last branch), `│   ` (continuation), `    ` (spacing)
 
 ### Compact Tree (for narrow panels)
+
 ```
 ├ src/
 │ ├ main.rs
@@ -186,6 +204,7 @@ Characters: `├── ` (branch), `└── ` (last branch), `│   ` (continu
 ## Table Formatting
 
 ### Standard Table
+
 ```
 ┌──────┬────────┬───────┐
 │ Name │ Status │ CPU % │
@@ -197,6 +216,7 @@ Characters: `├── ` (branch), `└── ` (last branch), `│   ` (continu
 ```
 
 ### Minimal Table (no outer border)
+
 ```
  Name   Status   CPU %
  ─────  ──────   ─────
@@ -206,6 +226,7 @@ Characters: `├── ` (branch), `└── ` (last branch), `│   ` (continu
 ```
 
 ### Zebra Stripe (alternating background)
+
 Use `bg.surface` on even rows, `bg.base` on odd rows for scanability.
 
 ---
@@ -227,6 +248,7 @@ Labeled:   ──── Section Title ──────
 ## Diff Presentation
 
 ### Inline (unified)
+
 ```
   fn process(data: &str) {     (context - default color)
 -     let result = parse(data); (removed - red + dim)
@@ -236,6 +258,7 @@ Labeled:   ──── Section Title ──────
 ```
 
 ### Side-by-Side
+
 ```
 │ fn process(data: &str) {     │ fn process(data: &str) {     │
 │-  let result = parse(data);  │+  let result = parse_v2(data);│

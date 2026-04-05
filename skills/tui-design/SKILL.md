@@ -35,17 +35,18 @@ digraph tui_design {
 
 Choose your primary layout based on what you're building:
 
-| App Type | Paradigm | Examples |
-|----------|----------|----------|
-| File manager | Miller Columns | yazi, ranger |
-| Git / DevOps tool | Persistent Multi-Panel | lazygit, lazydocker |
-| System monitor | Widget Dashboard | btop, bottom, oxker |
-| Data browser / K8s | Drill-Down Stack | k9s, diskonaut |
-| SQL / HTTP client | IDE Three-Panel | harlequin, posting |
-| Shell augmentation | Overlay / Popup | atuin, fzf |
-| Log / event viewer | Header + Scrollable List | htop, tig |
+| App Type           | Paradigm                 | Examples            |
+| ------------------ | ------------------------ | ------------------- |
+| File manager       | Miller Columns           | yazi, ranger        |
+| Git / DevOps tool  | Persistent Multi-Panel   | lazygit, lazydocker |
+| System monitor     | Widget Dashboard         | btop, bottom, oxker |
+| Data browser / K8s | Drill-Down Stack         | k9s, diskonaut      |
+| SQL / HTTP client  | IDE Three-Panel          | harlequin, posting  |
+| Shell augmentation | Overlay / Popup          | atuin, fzf          |
+| Log / event viewer | Header + Scrollable List | htop, tig           |
 
 ### Persistent Multi-Panel
+
 All panels visible simultaneously. Focus shifts between them. Users build spatial memory — "branches are always top-left."
 
 ```
@@ -66,6 +67,7 @@ All panels visible simultaneously. Focus shifts between them. Users build spatia
 **Key rule:** Panels maintain fixed positions across sessions. Never rearrange without user action.
 
 ### Miller Columns
+
 Three-pane past/present/future navigation. Parent directory (left), current (center), preview (right).
 
 ```
@@ -81,12 +83,14 @@ Three-pane past/present/future navigation. Parent directory (left), current (cen
 **Key rule:** Preview pane content adapts to selection type — code gets highlighting, images render, directories show contents.
 
 ### Drill-Down Stack
+
 `Enter` descends, `Esc` ascends. Browser-like navigation through hierarchical data.
 
 **When to use:** Deep hierarchies where showing all levels simultaneously is impractical (Kubernetes resources, database schemas).
 **Key rule:** Always show the current navigation path as a breadcrumb. Provide `:resource` command-mode for direct jumps.
 
 ### Widget Dashboard
+
 Self-contained widget panels with independent data. All information visible at once, no navigation required.
 
 ```
@@ -105,18 +109,21 @@ Self-contained widget panels with independent data. All information visible at o
 **Key rule:** Each widget is self-contained with its own title. Use braille/block characters for high-density data.
 
 ### IDE Three-Panel
+
 Sidebar (left), editor/main (center), detail/output (bottom). Tab bar along top.
 
 **When to use:** Editing-focused tools (SQL clients, HTTP tools, config editors).
 **Key rule:** Sidebar toggles with a single key. Center panel supports tabs. Bottom panel can expand to full height.
 
 ### Overlay / Popup
+
 TUI appears on demand over the shell, disappears after use.
 
 **When to use:** Shell augmentations (history search, file picker, command palette).
 **Key rule:** Configurable height. Return selection to the caller. Never disrupt scrollback.
 
 ### Header + Scrollable List
+
 Fixed header with meters/stats, scrollable data below, function bar at bottom.
 
 **When to use:** Single-list tools with metadata (process viewers, log viewers, sorted listings).
@@ -128,15 +135,16 @@ Fixed header with meters/stats, scrollable data below, function bar at bottom.
 
 Terminals resize. Your TUI must handle it gracefully.
 
-| Strategy | When |
-|----------|------|
-| **Proportional split** | Panels maintain percentage ratios on resize |
-| **Priority collapse** | Less important panels hide first below minimum width |
-| **Stacking** | Panels collapse to title-only bars, active one expands (zellij pattern) |
-| **Breakpoint modes** | Switch layout entirely below a threshold (e.g., multi-panel → single panel) |
-| **Minimum size gate** | Display "terminal too small" if below usable minimum |
+| Strategy               | When                                                                        |
+| ---------------------- | --------------------------------------------------------------------------- |
+| **Proportional split** | Panels maintain percentage ratios on resize                                 |
+| **Priority collapse**  | Less important panels hide first below minimum width                        |
+| **Stacking**           | Panels collapse to title-only bars, active one expands (zellij pattern)     |
+| **Breakpoint modes**   | Switch layout entirely below a threshold (e.g., multi-panel → single panel) |
+| **Minimum size gate**  | Display "terminal too small" if below usable minimum                        |
 
 **Rules:**
+
 - Define a minimum terminal size (typically 80x24). Below that, show a resize message.
 - Never crash on resize. Handle `SIGWINCH` gracefully.
 - Use constraint-based layouts (percentages, min/max, ratios) — not absolute positions.
@@ -148,25 +156,26 @@ Terminals resize. Your TUI must handle it gracefully.
 
 ### Navigation Style Selector
 
-| App Complexity | Recommended Model |
-|----------------|-------------------|
-| Single-purpose, <20 actions | Direct keybinding (every key = action) |
-| Multi-view, complex | Vim-style modes + contextual footer |
-| IDE-like, many features | Command palette + tabs + vim motions |
-| Data browser | Drill-down + fuzzy search + `:` command mode |
+| App Complexity              | Recommended Model                            |
+| --------------------------- | -------------------------------------------- |
+| Single-purpose, <20 actions | Direct keybinding (every key = action)       |
+| Multi-view, complex         | Vim-style modes + contextual footer          |
+| IDE-like, many features     | Command palette + tabs + vim motions         |
+| Data browser                | Drill-down + fuzzy search + `:` command mode |
 
 ### Keyboard Design Layers
 
 Design keybindings in four progressive layers:
 
-| Layer | Keys | Audience | Always show? |
-|-------|------|----------|--------------|
-| **L0: Universal** | Arrow keys, Enter, Esc, q | Everyone | Yes (footer) |
-| **L1: Vim motions** | hjkl, /, ?, :, gg, G | Intermediate | Yes (footer) |
-| **L2: Actions** | Single mnemonics: d(elete), c(ommit), p(ush) | Regular users | On `?` help |
-| **L3: Power** | Composed commands, macros, custom bindings | Power users | Docs only |
+| Layer               | Keys                                         | Audience      | Always show? |
+| ------------------- | -------------------------------------------- | ------------- | ------------ |
+| **L0: Universal**   | Arrow keys, Enter, Esc, q                    | Everyone      | Yes (footer) |
+| **L1: Vim motions** | hjkl, /, ?, :, gg, G                         | Intermediate  | Yes (footer) |
+| **L2: Actions**     | Single mnemonics: d(elete), c(ommit), p(ush) | Regular users | On `?` help  |
+| **L3: Power**       | Composed commands, macros, custom bindings   | Power users   | Docs only    |
 
 **Keybinding conventions (lingua franca):**
+
 - `j`/`k` — move down/up
 - `h`/`l` — move left/right (or collapse/expand)
 - `/` — search
@@ -201,24 +210,24 @@ The universal pattern: press `/`, type query, results filter live.
 
 ### Help System — Three Tiers
 
-| Tier | Trigger | Content | Audience |
-|------|---------|---------|----------|
-| **Always visible** | Footer bar | 3-5 essential shortcuts | Everyone |
-| **On demand** | `?` key | Full keybinding overlay for current context | Regular users |
-| **Documentation** | `--help`, man page | Complete reference | Power users |
+| Tier               | Trigger            | Content                                     | Audience      |
+| ------------------ | ------------------ | ------------------------------------------- | ------------- |
+| **Always visible** | Footer bar         | 3-5 essential shortcuts                     | Everyone      |
+| **On demand**      | `?` key            | Full keybinding overlay for current context | Regular users |
+| **Documentation**  | `--help`, man page | Complete reference                          | Power users   |
 
 **Footer format:** `[q]uit [/]search [?]help [Tab]focus [Enter]select`
 
-Context-sensitive footers update based on the active panel or mode. Show only what's actionable *right now*.
+Context-sensitive footers update based on the active panel or mode. Show only what's actionable _right now_.
 
 ### Dialogs & Confirmation
 
-| Action Severity | Pattern |
-|-----------------|---------|
-| Reversible | Just do it, show brief confirmation in status bar |
-| Moderate (delete file) | Inline "Press y to confirm" |
-| Severe (drop database) | Modal dialog requiring resource name input |
-| Irreversible batch | `--dry-run` flag + explicit confirmation |
+| Action Severity        | Pattern                                           |
+| ---------------------- | ------------------------------------------------- |
+| Reversible             | Just do it, show brief confirmation in status bar |
+| Moderate (delete file) | Inline "Press y to confirm"                       |
+| Severe (drop database) | Modal dialog requiring resource name input        |
+| Irreversible batch     | `--dry-run` flag + explicit confirmation          |
 
 - Modal overlays: render popup on top of dimmed/blurred background
 - Toast notifications: auto-dismiss after 3-5 seconds, no interaction required
@@ -232,39 +241,40 @@ Context-sensitive footers update based on the active panel or mode. Show only wh
 
 Design for graceful degradation across all three tiers:
 
-| Tier | Escape Sequence | Colors | Strategy |
-|------|----------------|--------|----------|
-| **16 ANSI** | `\033[31m` | 16 (relative) | Foundation. Terminal theme controls appearance. |
-| **256 Color** | `\033[38;5;{n}m` | 256 (16 relative + 240 fixed) | Extended palette. Fixed colors may clash with themes. |
-| **True Color** | `\033[38;2;{r};{g};{b}m` | 16.7M (absolute) | Full control. Requires `COLORTERM=truecolor`. |
+| Tier           | Escape Sequence          | Colors                        | Strategy                                              |
+| -------------- | ------------------------ | ----------------------------- | ----------------------------------------------------- |
+| **16 ANSI**    | `\033[31m`               | 16 (relative)                 | Foundation. Terminal theme controls appearance.       |
+| **256 Color**  | `\033[38;5;{n}m`         | 256 (16 relative + 240 fixed) | Extended palette. Fixed colors may clash with themes. |
+| **True Color** | `\033[38;2;{r};{g};{b}m` | 16.7M (absolute)              | Full control. Requires `COLORTERM=truecolor`.         |
 
 **Detection hierarchy:**
+
 1. `$COLORTERM` = `truecolor` or `24bit` → true color
 2. `$TERM` contains `256color` → 256 colors
 3. `$NO_COLOR` is set → disable all color
 4. Default → 16 ANSI colors
 
-**Golden rule:** Your TUI must be *usable* in 16-color mode. True color *enhances* — it never *creates* the hierarchy.
+**Golden rule:** Your TUI must be _usable_ in 16-color mode. True color _enhances_ — it never _creates_ the hierarchy.
 
 ### Semantic Color Slots
 
 Define colors by function, not appearance. Map semantics to actual colors through your theme:
 
-| Slot | Purpose | Typical Dark Theme |
-|------|---------|-------------------|
-| `fg.default` | Body text | Off-white (#c0caf5) |
-| `fg.muted` | Secondary text, metadata | Gray (#565f89) |
-| `fg.emphasis` | Headers, focused items | Bright white (#e0e0e0) |
-| `bg.base` | Primary background | Near-black (#1a1b26) |
-| `bg.surface` | Panel/widget backgrounds | Slightly lighter (#24283b) |
-| `bg.overlay` | Popup/dialog backgrounds | Lighter still (#414868) |
-| `bg.selection` | Selected item highlight | Distinct (#364a82) |
-| `accent.primary` | Interactive elements, focus | Brand color (#7aa2f7) |
-| `accent.secondary` | Supporting interactions | Complementary (#bb9af7) |
-| `status.error` | Errors, deletions | Red (#f7768e) |
-| `status.warning` | Warnings, caution | Yellow (#e0af68) |
-| `status.success` | Success, additions | Green (#9ece6a) |
-| `status.info` | Informational | Cyan (#7dcfff) |
+| Slot               | Purpose                     | Typical Dark Theme         |
+| ------------------ | --------------------------- | -------------------------- |
+| `fg.default`       | Body text                   | Off-white (#c0caf5)        |
+| `fg.muted`         | Secondary text, metadata    | Gray (#565f89)             |
+| `fg.emphasis`      | Headers, focused items      | Bright white (#e0e0e0)     |
+| `bg.base`          | Primary background          | Near-black (#1a1b26)       |
+| `bg.surface`       | Panel/widget backgrounds    | Slightly lighter (#24283b) |
+| `bg.overlay`       | Popup/dialog backgrounds    | Lighter still (#414868)    |
+| `bg.selection`     | Selected item highlight     | Distinct (#364a82)         |
+| `accent.primary`   | Interactive elements, focus | Brand color (#7aa2f7)      |
+| `accent.secondary` | Supporting interactions     | Complementary (#bb9af7)    |
+| `status.error`     | Errors, deletions           | Red (#f7768e)              |
+| `status.warning`   | Warnings, caution           | Yellow (#e0af68)           |
+| `status.success`   | Success, additions          | Green (#9ece6a)            |
+| `status.info`      | Informational               | Cyan (#7dcfff)             |
 
 **Never hardcode hex values in widget code.** Always reference semantic slots.
 
@@ -272,14 +282,14 @@ Define colors by function, not appearance. Map semantics to actual colors throug
 
 Color is one tool among several. Use them in combination:
 
-| Technique | Effect | Use For |
-|-----------|--------|---------|
-| **Bold** (SGR 1) | Increases visual weight | Headers, labels, active items |
-| **Dim** (SGR 2) | Decreases visual weight | Metadata, timestamps, secondary info |
-| **Italic** (SGR 3) | Semantic distinction | Comments, types, annotations |
-| **Underline** (SGR 4) | Links, actionable items | Clickable elements, URLs |
-| **Reverse** (SGR 7) | Swaps fg/bg | Selection highlight (always works!) |
-| **Strikethrough** (SGR 9) | Negation | Deleted items, deprecated features |
+| Technique                 | Effect                  | Use For                              |
+| ------------------------- | ----------------------- | ------------------------------------ |
+| **Bold** (SGR 1)          | Increases visual weight | Headers, labels, active items        |
+| **Dim** (SGR 2)           | Decreases visual weight | Metadata, timestamps, secondary info |
+| **Italic** (SGR 3)        | Semantic distinction    | Comments, types, annotations         |
+| **Underline** (SGR 4)     | Links, actionable items | Clickable elements, URLs             |
+| **Reverse** (SGR 7)       | Swaps fg/bg             | Selection highlight (always works!)  |
+| **Strikethrough** (SGR 9) | Negation                | Deleted items, deprecated features   |
 
 **Hierarchy recipe:** 80% of content in `fg.default`. Headers in bold + `fg.emphasis`. Metadata in dim + `fg.muted`. Status in their semantic colors. Accents for interactive elements only.
 
@@ -296,6 +306,7 @@ Each step ~5-8% lighter in dark themes. The eye perceives depth from the contras
 ### Theme Architecture
 
 Follow the Base16 pattern: define 16 named color slots, map them semantically:
+
 - **8 monotones** (base00-base07): background/foreground gradient
 - **8 accents** (base08-base0F): syntax/semantic colors
 
@@ -314,33 +325,33 @@ Ship a dark theme by default. Detect light/dark terminal via OSC escape query or
 
 ### Character-Resolution Building Blocks
 
-| Element | Characters | Resolution | Use For |
-|---------|-----------|------------|---------|
-| **Full blocks** | `█▉▊▋▌▍▎▏` | 8 steps/cell | Progress bars, bar charts |
-| **Shade blocks** | `░▒▓█` | 4 densities | Heatmaps, density plots |
-| **Braille** | `⠁⠂⠃...⣿` (U+2800-U+28FF) | 2x4 dots/cell | High-res line graphs, scatter plots |
-| **Sparkline** | `▁▂▃▄▅▆▇█` | 8 heights | Inline mini-charts |
+| Element          | Characters                | Resolution    | Use For                             |
+| ---------------- | ------------------------- | ------------- | ----------------------------------- |
+| **Full blocks**  | `█▉▊▋▌▍▎▏`                | 8 steps/cell  | Progress bars, bar charts           |
+| **Shade blocks** | `░▒▓█`                    | 4 densities   | Heatmaps, density plots             |
+| **Braille**      | `⠁⠂⠃...⣿` (U+2800-U+28FF) | 2x4 dots/cell | High-res line graphs, scatter plots |
+| **Sparkline**    | `▁▂▃▄▅▆▇█`                | 8 heights     | Inline mini-charts                  |
 
 ### Common Widgets
 
-| Widget | Pattern | Tips |
-|--------|---------|------|
-| **Progress bar** | `[████████░░░░] 67%` | Show percentage + ETA. Color gradient green→yellow→red by urgency. |
-| **Sparkline** | `▁▂▃▅▇█▇▅▃▂` | Perfect for inline time-series in headers/status bars. |
-| **Gauge** | `CPU [██████████░░] 83%` | Label + bar + value. Color by threshold. |
-| **Table** | Sortable columns, zebra stripes | Align numbers right, text left. Truncate with `…`. |
-| **Tree** | `├── `, `└── `, `│   ` guides | Indent 2-4 chars per level. Expand/collapse with Enter. |
-| **Diff** | Green `+` lines, red `-` lines | Word-level highlighting within changed lines elevates quality. |
-| **Log** | Colored level, timestamp, message | TRACE=dim, DEBUG=cyan, INFO=default, WARN=yellow, ERROR=red, FATAL=red+bold. |
+| Widget           | Pattern                           | Tips                                                                         |
+| ---------------- | --------------------------------- | ---------------------------------------------------------------------------- |
+| **Progress bar** | `[████████░░░░] 67%`              | Show percentage + ETA. Color gradient green→yellow→red by urgency.           |
+| **Sparkline**    | `▁▂▃▅▇█▇▅▃▂`                      | Perfect for inline time-series in headers/status bars.                       |
+| **Gauge**        | `CPU [██████████░░] 83%`          | Label + bar + value. Color by threshold.                                     |
+| **Table**        | Sortable columns, zebra stripes   | Align numbers right, text left. Truncate with `…`.                           |
+| **Tree**         | `├── `, `└── `, `│   ` guides     | Indent 2-4 chars per level. Expand/collapse with Enter.                      |
+| **Diff**         | Green `+` lines, red `-` lines    | Word-level highlighting within changed lines elevates quality.               |
+| **Log**          | Colored level, timestamp, message | TRACE=dim, DEBUG=cyan, INFO=default, WARN=yellow, ERROR=red, FATAL=red+bold. |
 
 ### Spinner Selection
 
-| Context | Spinner | Interval |
-|---------|---------|----------|
-| Default / modern | Braille dots `⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏` | 80ms |
-| Minimal | Line `-\|/` | 130ms |
-| Heavy processing | Blocks `▖▘▝▗` | 100ms |
-| Fun / branded | Custom frames | 70-100ms |
+| Context          | Spinner                   | Interval |
+| ---------------- | ------------------------- | -------- |
+| Default / modern | Braille dots `⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏` | 80ms     |
+| Minimal          | Line `-\|/`               | 130ms    |
+| Heavy processing | Blocks `▖▘▝▗`             | 100ms    |
+| Fun / branded    | Custom frames             | 70-100ms |
 
 Use spinners for indeterminate operations. Progress bars for determinate. Show spinners only after 200ms delay to avoid flash on fast operations.
 
@@ -358,14 +369,14 @@ Three layers, all required for smooth TUI rendering:
 
 ### When to Animate
 
-| Situation | Animation | Duration |
-|-----------|-----------|----------|
-| View transition | Fade or slide | 100-200ms |
-| Selection change | Instant highlight | 0ms (never animate) |
-| Data loading | Spinner or skeleton | Until complete |
-| Success feedback | Brief flash/checkmark | 1-2 seconds |
-| Panel resize | Immediate reflow | 0ms |
-| Chart data update | Smooth value transition | 200-500ms |
+| Situation         | Animation               | Duration            |
+| ----------------- | ----------------------- | ------------------- |
+| View transition   | Fade or slide           | 100-200ms           |
+| Selection change  | Instant highlight       | 0ms (never animate) |
+| Data loading      | Spinner or skeleton     | Until complete      |
+| Success feedback  | Brief flash/checkmark   | 1-2 seconds         |
+| Panel resize      | Immediate reflow        | 0ms                 |
+| Chart data update | Smooth value transition | 200-500ms           |
 
 **Rule:** Animations must never delay user input. If the user presses a key during a transition, cancel it and respond immediately.
 
@@ -388,7 +399,7 @@ Three layers, all required for smooth TUI rendering:
 
 4. **Async everything** — Never freeze the UI. File operations, network requests, scans all run in the background with progress indication. Cancel with `Esc`.
 
-5. **Semantic color** — Color encodes meaning, not decoration. If you removed all color, the interface should still be *usable* through layout, typography, and symbols.
+5. **Semantic color** — Color encodes meaning, not decoration. If you removed all color, the interface should still be _usable_ through layout, typography, and symbols.
 
 6. **Contextual intelligence** — Keybindings update per panel. Status bars reflect current state. Help shows what's actionable right now, not everything ever.
 
@@ -400,18 +411,18 @@ Three layers, all required for smooth TUI rendering:
 
 Validate your design against these ranked pitfalls (ordered by real-world complaint frequency):
 
-| # | Anti-Pattern | Fix |
-|---|-------------|-----|
-| 1 | **Colors break on different terminals** | Use 16 ANSI colors as foundation. Test 3+ emulators + light/dark themes. |
-| 2 | **Flickering / full redraws** | Double buffer + synchronized output + batched writes. Overwrite, never clear. |
-| 3 | **Undiscoverable keybindings** | Context-sensitive footer + `?` help overlay + Which-Key-style hints. |
-| 4 | **Broken on Windows / WSL** | Test on Windows Terminal. Avoid advanced Unicode beyond box-drawing. |
-| 5 | **Unicode rendering inconsistency** | Stick to box-drawing + block elements. Restrict emoji to Unicode 9.0. |
-| 6 | **Terminal multiplexer incompatibility** | Test inside tmux and zellij. Mouse capture must not break selection. |
-| 7 | **No accessibility support** | Respect `NO_COLOR`, provide monochrome mode, never color-only meaning. |
-| 8 | **Blocking UI during operations** | Show feedback within 100ms. Use async + spinners + progress bars. |
-| 9 | **Modal confusion** | Always show current mode in status bar. Cursor shape changes per mode. |
-| 10 | **Over-decorated chrome** | Borders and colors serve content, not ego. The content IS the interface. |
+| #   | Anti-Pattern                             | Fix                                                                           |
+| --- | ---------------------------------------- | ----------------------------------------------------------------------------- |
+| 1   | **Colors break on different terminals**  | Use 16 ANSI colors as foundation. Test 3+ emulators + light/dark themes.      |
+| 2   | **Flickering / full redraws**            | Double buffer + synchronized output + batched writes. Overwrite, never clear. |
+| 3   | **Undiscoverable keybindings**           | Context-sensitive footer + `?` help overlay + Which-Key-style hints.          |
+| 4   | **Broken on Windows / WSL**              | Test on Windows Terminal. Avoid advanced Unicode beyond box-drawing.          |
+| 5   | **Unicode rendering inconsistency**      | Stick to box-drawing + block elements. Restrict emoji to Unicode 9.0.         |
+| 6   | **Terminal multiplexer incompatibility** | Test inside tmux and zellij. Mouse capture must not break selection.          |
+| 7   | **No accessibility support**             | Respect `NO_COLOR`, provide monochrome mode, never color-only meaning.        |
+| 8   | **Blocking UI during operations**        | Show feedback within 100ms. Use async + spinners + progress bars.             |
+| 9   | **Modal confusion**                      | Always show current mode in status bar. Cursor shape changes per mode.        |
+| 10  | **Over-decorated chrome**                | Borders and colors serve content, not ego. The content IS the interface.      |
 
 ## 9. Compatibility Checklist
 

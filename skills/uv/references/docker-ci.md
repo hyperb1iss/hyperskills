@@ -30,14 +30,14 @@ CMD ["my_app"]
 
 ### Docker Environment Variables
 
-| Variable | Value | Purpose |
-|----------|-------|---------|
-| `UV_COMPILE_BYTECODE` | `1` | Faster startup in production |
-| `UV_LINK_MODE` | `copy` | **Required** for cache mounts (hardlinks fail across FS boundaries) |
-| `UV_NO_CACHE` | `1` | Reduce image size (if not using cache mounts) |
-| `UV_PYTHON_DOWNLOADS` | `0` | Don't download Python in container (use base image's) |
-| `UV_NO_DEV` | `1` | Exclude dev dependencies |
-| `UV_FROZEN` | `1` | Don't update lockfile during build |
+| Variable              | Value  | Purpose                                                             |
+| --------------------- | ------ | ------------------------------------------------------------------- |
+| `UV_COMPILE_BYTECODE` | `1`    | Faster startup in production                                        |
+| `UV_LINK_MODE`        | `copy` | **Required** for cache mounts (hardlinks fail across FS boundaries) |
+| `UV_NO_CACHE`         | `1`    | Reduce image size (if not using cache mounts)                       |
+| `UV_PYTHON_DOWNLOADS` | `0`    | Don't download Python in container (use base image's)               |
+| `UV_NO_DEV`           | `1`    | Exclude dev dependencies                                            |
+| `UV_FROZEN`           | `1`    | Don't update lockfile during build                                  |
 
 ### Docker Tips
 
@@ -79,7 +79,7 @@ jobs:
 ### Lockfile Verification
 
 ```yaml
-- run: uv lock --check  # Fails if lockfile is stale
+- run: uv lock --check # Fails if lockfile is stale
 ```
 
 ### Trusted Publishing (No Credentials)
@@ -114,8 +114,8 @@ repos:
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.11.2
     hooks:
-      - id: uv-lock     # Keep uv.lock in sync
-      - id: uv-export   # Keep requirements.txt in sync
+      - id: uv-lock # Keep uv.lock in sync
+      - id: uv-export # Keep requirements.txt in sync
 ```
 
 ## PyTorch Configuration

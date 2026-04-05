@@ -39,6 +39,7 @@ digraph planning {
 ### Actions
 
 1. **Search Sibyl** for related tasks, decisions, prior plans:
+
    ```
    sibyl search "<feature keywords>"
    sibyl task list -s todo
@@ -55,12 +56,12 @@ digraph planning {
 
 4. **Classify complexity:**
 
-   | Scale | Description | Planning Depth |
-   |-------|-------------|----------------|
-   | **Quick fix** | < 3 files, clear solution | Skip to implementation |
-   | **Feature** | 3-10 files, known patterns | Light plan (this skill) |
-   | **Epic** | 10+ files, new patterns | Full plan + orchestration |
-   | **Redesign** | Architecture change | Full plan + research first |
+   | Scale         | Description                | Planning Depth             |
+   | ------------- | -------------------------- | -------------------------- |
+   | **Quick fix** | < 3 files, clear solution  | Skip to implementation     |
+   | **Feature**   | 3-10 files, known patterns | Light plan (this skill)    |
+   | **Epic**      | 10+ files, new patterns    | Full plan + orchestration  |
+   | **Redesign**  | Architecture change        | Full plan + research first |
 
 ### Gate
 
@@ -89,6 +90,7 @@ If this is a **quick fix**, stop planning and go build. Planning a 5-minute fix 
 ### Output
 
 A mental model of the change surface:
+
 > "This touches: [module A] (new endpoint), [module B] (type changes), [module C] (tests). Pattern follows [existing feature X]. Depends on [infrastructure Y] being available."
 
 ---
@@ -103,24 +105,24 @@ A mental model of the change surface:
 
 For each task, define:
 
-| Field | Description |
-|-------|-------------|
-| **What** | Specific implementation action |
-| **Files** | Exact files to create/modify |
-| **Verify** | How to confirm it works |
+| Field          | Description                     |
+| -------------- | ------------------------------- |
+| **What**       | Specific implementation action  |
+| **Files**      | Exact files to create/modify    |
+| **Verify**     | How to confirm it works         |
 | **Depends on** | Which tasks must complete first |
 
 ### Verification Methods
 
-| Method | When to Use |
-|--------|-------------|
-| `typecheck` | Type changes, interface additions |
-| `test` | Logic, edge cases, integrations |
-| `lint` | Style, formatting, import order |
-| `build` | Build system changes |
-| `visual` | UI changes (screenshot or browser check) |
-| `curl/httpie` | API endpoint changes |
-| `manual` | Only when no automation exists |
+| Method        | When to Use                              |
+| ------------- | ---------------------------------------- |
+| `typecheck`   | Type changes, interface additions        |
+| `test`        | Logic, edge cases, integrations          |
+| `lint`        | Style, formatting, import order          |
+| `build`       | Build system changes                     |
+| `visual`      | UI changes (screenshot or browser check) |
+| `curl/httpie` | API endpoint changes                     |
+| `manual`      | Only when no automation exists           |
 
 ### Decomposition Heuristics
 
@@ -139,9 +141,11 @@ For each task, define:
 **Parallel:** Yes/No (can run alongside Task [X])
 
 ### Implementation
+
 [2-4 bullet points of what to do]
 
 ### Verify
+
 - [ ] `pnpm typecheck` passes
 - [ ] `pnpm test -- file.test.ts` passes
 - [ ] [specific assertion about behavior]
@@ -186,20 +190,24 @@ Show the plan as a structured list with waves:
 **Parallelizable:** [X]% of tasks can run in parallel
 
 ### Wave 1: Foundation
+
 - [ ] Task 1: [title] → verify: [method]
 - [ ] Task 2: [title] → verify: [method]
 
 ### Wave 2: Core Implementation
+
 - [ ] Task 3: [title] → verify: [method] (depends: 1)
 - [ ] Task 4: [title] → verify: [method] (depends: 2)
 
 ### Wave 3: Integration
+
 - [ ] Task 5: [title] → verify: [method] (depends: 3, 4)
 ```
 
 ### Gap Analysis
 
 After presenting, explicitly check:
+
 - "Is there anything missing from this plan?"
 - "Should any of these tasks be combined or split further?"
 - "Are the success criteria right?"
@@ -213,11 +221,13 @@ After presenting, explicitly check:
 ### Actions
 
 1. **Create a Sibyl task** for the feature:
+
    ```
    sibyl task create --title "[Feature]" -d "[success criteria]" --complexity epic
    ```
 
 2. **Create sub-tasks** for each plan step:
+
    ```
    sibyl task create --title "Task 1: [title]" -e [epic-id] -d "[implementation + verify]"
    ```
@@ -242,20 +252,20 @@ Plans change when they meet reality. When a task reveals unexpected complexity:
 
 Once the plan is approved, hand off to the right tool:
 
-| Situation | Handoff |
-|-----------|---------|
-| 3-5 simple tasks, user present | Execute directly with verification gates |
-| 5-15 tasks, mixed parallel | `/hyperskills:orchestrate` with wave strategy |
-| Large epic, 15+ tasks | Orchestrate with Epic Parallel Build strategy |
-| Needs more research first | `/hyperskills:research` before executing |
+| Situation                      | Handoff                                       |
+| ------------------------------ | --------------------------------------------- |
+| 3-5 simple tasks, user present | Execute directly with verification gates      |
+| 5-15 tasks, mixed parallel     | `/hyperskills:orchestrate` with wave strategy |
+| Large epic, 15+ tasks          | Orchestrate with Epic Parallel Build strategy |
+| Needs more research first      | `/hyperskills:research` before executing      |
 
 ### Trust Gradient for Execution
 
-| Phase | Review Level | When |
-|-------|-------------|------|
-| **Full ceremony** | Implement + spec review + code review | First 3-4 tasks |
-| **Standard** | Implement + spec review | Tasks 5-8, patterns stabilized |
-| **Light** | Implement + quick verify | Late tasks, established patterns |
+| Phase             | Review Level                          | When                             |
+| ----------------- | ------------------------------------- | -------------------------------- |
+| **Full ceremony** | Implement + spec review + code review | First 3-4 tasks                  |
+| **Standard**      | Implement + spec review               | Tasks 5-8, patterns stabilized   |
+| **Light**         | Implement + quick verify              | Late tasks, established patterns |
 
 This is earned confidence, not cutting corners.
 
