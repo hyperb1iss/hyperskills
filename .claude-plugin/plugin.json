@@ -1,7 +1,7 @@
 {
   "name": "hyperskills",
   "version": "3.3.0",
-  "description": "Focused AI agent skills: brainstorming, planning, research, orchestration, implementation, security, git operations, Tilt Kubernetes development, TUI design, cross-model code review, and Python tooling (uv, ruff, ty, uv-build)",
+  "description": "Focused AI agent skills: brainstorming, planning, research, orchestration, implementation, dreaming (conversation review & knowledge consolidation), security, git operations, Tilt Kubernetes development, TUI design, cross-model code review, and Python tooling (uv, ruff, ty, uv-build)",
   "author": {
     "name": "Stefanie Jane",
     "url": "https://hyperbliss.tech"
@@ -53,6 +53,13 @@
     "type-checker",
     "astral",
     "pyproject-toml",
+    "dream",
+    "dreaming",
+    "memory-consolidation",
+    "conversation-review",
+    "knowledge-extraction",
+    "sleep-cycle",
+    "sibyl",
     "skills"
   ]
 }
