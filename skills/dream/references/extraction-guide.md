@@ -118,13 +118,13 @@ digraph entity_selection {
 1. **Exact match check:**
 
    ```bash
-   sibyl search "[exact entity title]" --types [type] --limit 3
+   sibyl search "[exact entity title]" --type [type] --limit 3
    ```
 
 2. **Semantic similarity check:**
 
    ```bash
-   sibyl search "[key concepts from the extraction]" --types [type] --limit 5
+   sibyl search "[key concepts from the extraction]" --type [type] --limit 5
    ```
 
 3. **Decision matrix:**

@@ -53,7 +53,7 @@ digraph dream {
    stat ~/.claude/projects/*/memory/.consolidate-lock 2>/dev/null | grep -A1 "Modify"
 
    # Check Sibyl for recent dream entries
-   sibyl search "dream report" --types episode --limit 3
+   sibyl search "dream report" --type episode --limit 3
    ```
 
 2. **Discover conversation sources:**
@@ -98,21 +98,45 @@ Claude Code JSONL files contain one JSON object per line. Key message types to l
 | **Architecture discussion** | Longer text blocks with design reasoning | Patterns, system relationships       |
 | **Thinking blocks**         | `type: "thinking"` content               | Reasoning chains, hidden insights    |
 
-**Extraction strategy — don't read whole files.** Use targeted grep:
+**Extraction strategy — don't read whole files.** Use targeted python extraction:
 
 ```bash
-# Find corrections/feedback (user disagreeing)
-grep -n '"role":"user"' <session.jsonl> | grep -i "no\|wrong\|actually\|instead\|don't\|stop\|not that"
+# Extract all user prompts (most reliable method)
+python3 -c "
+import json, sys
+with open('session.jsonl') as f:
+    for line in f:
+        obj = json.loads(line)
+        if obj.get('type') == 'user':
+            content = obj.get('message', {}).get('content', '')
+            if isinstance(content, str) and len(content) > 20 and not content.startswith('<'):
+                print(content[:300])
+"
 
-# Find decisions (assistant explaining rationale)
-grep -n '"type":"text"' <session.jsonl> | grep -i "because\|decided\|chose\|trade-off\|approach"
+# Extract assistant decisions and rationale
+python3 -c "
+import json
+with open('session.jsonl') as f:
+    for line in f:
+        obj = json.loads(line)
+        if obj.get('type') == 'assistant':
+            for block in obj.get('message', {}).get('content', []):
+                if isinstance(block, dict) and block.get('type') == 'text':
+                    text = block['text']
+                    if any(kw in text.lower() for kw in ['because', 'root cause', 'the issue', 'approach', 'trade-off']):
+                        if len(text) > 100:
+                            print(text[:400])
+                            print('---')
+"
 
-# Find errors and fixes
-grep -n '"type":"tool_use"' <session.jsonl> | grep -i "error\|fix\|bug\|issue\|failed"
-
-# Find significant text blocks (long responses = rich content)
-grep -c '"type":"text"' <session.jsonl>  # Count text blocks per session
+# Get session titles (best way to understand session topics at a glance)
+for f in ~/.claude/projects/-Users-bliss-dev-*/*.jsonl; do
+  title=\$(grep -m1 '"ai-title"' "\$f" 2>/dev/null | python3 -c "import sys,json; print(json.loads(next(sys.stdin)).get('aiTitle',''))" 2>/dev/null)
+  [[ -n "\$title" ]] && echo "\$(du -h "\$f" | cut -f1)  \$(basename "\$(dirname "\$f")"): \$title"
+done | sort -rh | head -20
 ```
+
+**Why python over grep:** Claude Code JSONL has nested JSON structures (content arrays inside message objects). Simple grep patterns like `'"role":"user"'` match across the entire line, producing false positives from assistant messages that quote user content. Python parsing is slower but precise. Use grep only for initial signal scoring (counts), then python for actual extraction.
 
 For promising sessions (high correction count, long duration, many tool calls), read key segments more deeply using `Read` tool on the JSONL file with offset/limit.
 
@@ -124,11 +148,38 @@ Codex rollouts at `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl` use a different
 # Find Codex sessions with substantial content
 find ~/.codex/sessions -name "rollout-*.jsonl" -mtime -7 -size +10k
 
-# Extract user messages from Codex
-grep '"type":"event_msg"' <rollout.jsonl> | grep '"user_message"'
+# Get Codex session metadata (cwd, branch, model)
+python3 -c "
+import json
+with open('rollout.jsonl') as f:
+    for line in f:
+        obj = json.loads(line)
+        if obj.get('type') == 'session_meta':
+            p = obj['payload']
+            print(f'cwd: {p.get(\"cwd\")}')
+            print(f'model: {p.get(\"model_provider\")}')
+            print(f'branch: {p.get(\"git\", {}).get(\"branch\")}')
+            break
+"
 
-# Extract tool calls
-grep '"type":"response_item"' <rollout.jsonl> | grep '"function_call"'
+# Extract user messages from Codex (payload.role == 'user')
+python3 -c "
+import json
+with open('rollout.jsonl') as f:
+    for line in f:
+        obj = json.loads(line)
+        if obj.get('type') == 'response_item':
+            p = obj.get('payload', {})
+            if p.get('role') == 'user':
+                for c in p.get('content', []):
+                    if c.get('type') == 'input_text':
+                        text = c['text']
+                        if not text.startswith('#') and not text.startswith('<') and len(text) > 20:
+                            print(text[:200])
+"
+
+# Extract function calls
+grep '"function_call"' rollout.jsonl | grep -v '"function_call_output"'
 ```
 
 ### Signal Scoring
@@ -212,7 +263,7 @@ sibyl add "Tension: [the unresolved question]" \
 **Before writing ANY entity to Sibyl, check for existing similar entries:**
 
 ```bash
-sibyl search "[entity title keywords]" --types [type] --limit 5
+sibyl search "[entity title keywords]" --type [type] --limit 5
 ```
 
 | Finding                 | Action                                                      |
@@ -242,13 +293,13 @@ For efficiency, accumulate extractions and write them in batches:
 
 ```bash
 # What patterns exist across multiple projects?
-sibyl explore --types pattern --limit 50
+sibyl explore --type pattern --limit 50
 
 # What error patterns keep recurring?
-sibyl explore --types error_pattern --limit 30
+sibyl explore --type error_pattern --limit 30
 
 # What tensions are unresolved?
-sibyl search "tension" --types episode --limit 20
+sibyl search "tension" --type episode --limit 20
 ```
 
 ### Connection Discovery
@@ -273,7 +324,7 @@ sibyl add "Cross-project: [insight]" \
 
 ```bash
 # Find old entities that may be outdated
-sibyl explore --types pattern,rule --limit 100
+sibyl explore --type pattern,rule --limit 100
 ```
 
 For each entity older than 90 days:

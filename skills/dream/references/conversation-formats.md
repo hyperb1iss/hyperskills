@@ -2,7 +2,7 @@
 
 ## Claude Code JSONL
 
-**Location:** `~/.claude/projects/<encoded-path>/sessions/<session-uuid>.jsonl`
+**Location:** `~/.claude/projects/<encoded-path>/<session-uuid>.jsonl`
 **Encoding:** Path separators replaced with `-` (e.g., `/Users/bliss/dev/dreamer` → `-Users-bliss-dev-dreamer`)
 
 ### Message Structure
@@ -69,11 +69,25 @@ Subagent messages have `isSidechain: true` and an `agentId` field.
 ### Useful Grep Patterns
 
 ```bash
-# All user prompts in a session
-grep '"role":"user"' session.jsonl | python3 -c "import sys,json; [print(json.loads(l)['message']['content'][:200]) for l in sys.stdin]"
+# All user prompts in a session (grep top-level type, not nested role)
+grep '"type":"user"' session.jsonl | python3 -c "
+import sys, json
+for l in sys.stdin:
+    obj = json.loads(l)
+    content = obj.get('message', {}).get('content', '')
+    if isinstance(content, str) and len(content) > 10 and not content.startswith('<'):
+        print(content[:200])
+"
 
-# All tool invocations
-grep '"type":"tool_use"' session.jsonl | python3 -c "import sys,json; [print(json.loads(l).get('name','?'), json.dumps(json.loads(l).get('input',{}))[:100]) for l in sys.stdin if 'tool_use' in l]"
+# All tool invocations (inside assistant message content arrays)
+grep '"tool_use"' session.jsonl | python3 -c "
+import sys, json
+for l in sys.stdin:
+    obj = json.loads(l)
+    for block in obj.get('message', {}).get('content', []):
+        if isinstance(block, dict) and block.get('type') == 'tool_use':
+            print(block.get('name', '?'), json.dumps(block.get('input', {}))[:100])
+"
 
 # Count messages by type
 grep -c '"type":"user"' session.jsonl
@@ -93,18 +107,26 @@ grep '"type":"thinking"' session.jsonl | wc -l
 
 ```bash
 # All sessions for a project, sorted by recency
-ls -lt ~/.claude/projects/-Users-bliss-dev-<project>/sessions/*.jsonl | head -20
+# Sessions live directly in the project dir, NOT in a sessions/ subdirectory
+ls -lt ~/.claude/projects/-Users-bliss-dev-<project>/*.jsonl | head -20
 
 # All projects with sessions in the last 7 days
-find ~/.claude/projects -name "*.jsonl" -path "*/sessions/*" -mtime -7 \
-  | sed 's|/sessions/.*||' | sort -u
+# Exclude subagent transcripts which live in <session-uuid>/subagents/
+find ~/.claude/projects -maxdepth 2 -name "*.jsonl" -not -path "*/subagents/*" -mtime -7 \
+  | sed 's|/[^/]*\.jsonl$||' | sort -u
 
 # Global history (all prompts across all projects)
 tail -20 ~/.claude/history.jsonl | python3 -c "import sys,json; [print(json.loads(l).get('display','')[:100]) for l in sys.stdin]"
 
 # Session sizes (bigger = richer conversations)
-find ~/.claude/projects -name "*.jsonl" -path "*/sessions/*" -mtime -7 \
+find ~/.claude/projects -maxdepth 2 -name "*.jsonl" -not -path "*/subagents/*" -mtime -7 \
   -exec ls -lhS {} + | head -20
+
+# Get AI-generated session titles (great for understanding session topics)
+for f in ~/.claude/projects/-Users-bliss-dev-*/*.jsonl; do
+  title=$(grep -m1 '"ai-title"' "$f" 2>/dev/null | python3 -c "import sys,json; print(json.loads(next(sys.stdin)).get('aiTitle',''))" 2>/dev/null)
+  [[ -n "$title" ]] && echo "$(du -h "$f" | cut -f1)  $(basename "$(dirname "$f")"): $title"
+done | sort -rh | head -20
 ```
 
 ---
@@ -128,12 +150,14 @@ Each line has a `timestamp`, `type`, and type-specific payload:
 
 **`session_meta`** — One per file, session header:
 
-- `session_id`: UUID
-- `cwd`: Working directory
-- `version`: CLI version
-- `originator`: `codex_cli_rs` | `codex_exec`
-- `model_provider`: Provider name
-- `system_prompt`: Full system prompt text
+- `payload.id`: Session UUID
+- `payload.cwd`: Working directory
+- `payload.cli_version`: CLI version
+- `payload.originator`: `codex_cli_rs` | `codex_exec`
+- `payload.model_provider`: Provider name (e.g., `openai`)
+- `payload.base_instructions`: System prompt text (NOT `system_prompt`)
+- `payload.source`: Source identifier
+- `payload.git`: `{branch, origin_url, ...}` — git context for the session
 
 **`response_item`** — Conversation turns:
 
@@ -203,7 +227,7 @@ sqlite3 ~/.codex/state_5.sqlite "SELECT id, title, model, cwd, datetime(created_
 
 | Feature            | Claude Code                             | Codex                                    |
 | ------------------ | --------------------------------------- | ---------------------------------------- |
-| Location           | `~/.claude/projects/*/sessions/*.jsonl` | `~/.codex/sessions/YYYY/MM/DD/*.jsonl`   |
+| Location           | `~/.claude/projects/*/<uuid>.jsonl`     | `~/.codex/sessions/YYYY/MM/DD/*.jsonl`   |
 | Message format     | `message.content` (string or array)     | `payload.content[].type`                 |
 | Tool calls         | `type: "tool_use"` in content array     | `type: "function_call"` as response_item |
 | Tool results       | Separate tool_result message            | `function_call_output` response_item     |
