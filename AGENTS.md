@@ -278,7 +278,8 @@ Before committing, verify:
 | `git`          | ~1,200 | none       | Domain — git operations              |
 | `tilt`         | ~2,500 | 2 files    | Domain — Kubernetes dev              |
 | `tui-design`   | ~3,000 | 2 files    | Domain — terminal UI                 |
-| `codex-review` | ~2,000 | 1 file     | Process — cross-model review         |
+| `codex-review` | ~2,000 | 1 file     | Process — Codex-specific review (Claude → Codex) |
+| `cross-model-review` | ~2,400 | 1 file | Process — bidirectional cross-model review |
 | `implement`    | ~2,500 | 1 file     | Process — implementation             |
 | `uv`           | ~3,000 | 3 files    | Domain — Python package management   |
 | `ruff`         | ~2,800 | 2 files    | Domain — Python linting & formatting |

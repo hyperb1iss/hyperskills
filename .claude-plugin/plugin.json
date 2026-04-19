@@ -1,6 +1,6 @@
 {
   "name": "hyperskills",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "description": "Focused AI agent skills: brainstorming, planning, research, orchestration, implementation, dreaming (conversation review & knowledge consolidation), security, git operations, Tilt Kubernetes development, TUI design, cross-model code review, and Python tooling (uv, ruff, ty, uv-build)",
   "author": {
     "name": "Stefanie Jane",
@@ -37,6 +37,9 @@
     "code-review",
     "codex",
     "cross-model",
+    "cross-model-review",
+    "independent-review",
+    "second-opinion",
     "peer-review",
     "implementation",
     "verification",

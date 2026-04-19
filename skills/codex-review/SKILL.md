@@ -1,6 +1,6 @@
 ---
 name: codex-review
-description: Use this skill for cross-model code reviews using the Codex CLI. Activates on mentions of codex review, cross-model review, code review with codex, peer review, review my code, review this PR, review changes, codex check, second opinion, or gpt review.
+description: Use this skill for code reviews using the Codex CLI from a Claude-hosted session. Activates on mentions of codex review, code review with codex, codex check, gpt review, codex exec review, run codex, review my code, review this PR, review changes, peer review, or second opinion.
 ---
 
 # Cross-Model Code Review with Codex CLI
@@ -9,14 +9,7 @@ Cross-model validation using the `codex` binary directly. Claude writes code, Co
 
 **Core insight:** Single-model self-review is systematically biased. Cross-model review catches different bug classes because the reviewer has fundamentally different blind spots than the author.
 
-**Prerequisite:** The `codex` CLI must be installed and authenticated. Verify with `codex --help`. Configure defaults in `~/.codex/config.toml`:
-
-```toml
-model = "gpt-5.4"
-review_model = "gpt-5.4"
-# Note: review_model overrides model for codex review specifically
-model_reasoning_effort = "high"
-```
+**Prerequisite:** The `codex` CLI must be installed and authenticated. Verify with `codex --help`. User defaults are configured in `~/.codex/config.toml` — respect those defaults and never override model or reasoning effort unless the user explicitly requests it.
 
 ## Two Ways to Invoke Codex
 
@@ -27,14 +20,14 @@ model_reasoning_effort = "high"
 
 **Key flags:**
 
-| Flag                                | Applies To    | Purpose                                              |
-| ----------------------------------- | ------------- | ---------------------------------------------------- |
-| `-c model="gpt-5.4"`                | both          | Model selection (review has no `-m` flag)            |
-| `-m`, `--model`                     | `exec` only   | Model selection shorthand                            |
-| `-c model_reasoning_effort="xhigh"` | both          | Reasoning depth: `low` / `medium` / `high` / `xhigh` |
-| `--base <BRANCH>`                   | `review` only | Diff against base branch                             |
-| `--commit <SHA>`                    | `review` only | Review a specific commit                             |
-| `--uncommitted`                     | `review` only | Review working tree changes                          |
+| Flag                                  | Applies To    | Purpose                                          |
+| ------------------------------------- | ------------- | ------------------------------------------------ |
+| `--base <BRANCH>`                     | `review` only | Diff against base branch                         |
+| `--commit <SHA>`                      | `review` only | Review a specific commit                         |
+| `--uncommitted`                       | `review` only | Review working tree changes                      |
+| `-c model="<model>"`                  | both          | Override default model (only if user requests)   |
+| `-m <model>`                          | `exec` only   | Model override shorthand                         |
+| `-c model_reasoning_effort="<level>"` | both          | Override reasoning depth (only if user requests) |
 
 ## Review Patterns
 
@@ -45,17 +38,15 @@ The standard review before opening a PR. Use for any non-trivial change.
 ```
 Step 1 — Structured review (catches correctness + general issues):
   Run via Bash:
-    codex review --base main -c model="gpt-5.4"
+    codex review --base main
 
 Step 2 — Security deep-dive (if code touches auth, input handling, or APIs):
   Run via Bash:
-    codex exec -m gpt-5.4 \
-      -c model_reasoning_effort="xhigh" \
-      "<security prompt from references/prompts.md>"
+    codex exec "<security prompt from references/prompts.md>"
 
 Step 3 — Fix findings, then re-review:
   Run via Bash:
-    codex review --base main -c model="gpt-5.4"
+    codex review --base main
 ```
 
 ### Pattern 2: Commit-Level Review
@@ -63,7 +54,7 @@ Step 3 — Fix findings, then re-review:
 Quick check after each meaningful commit.
 
 ```bash
-codex review --commit <SHA> -c model="gpt-5.4"
+codex review --commit <SHA>
 ```
 
 ### Pattern 3: WIP Check
@@ -71,7 +62,7 @@ codex review --commit <SHA> -c model="gpt-5.4"
 Review uncommitted work mid-development. Catches issues before they're baked in.
 
 ```bash
-codex review --uncommitted -c model="gpt-5.4"
+codex review --uncommitted
 ```
 
 ### Pattern 4: Focused Investigation
@@ -79,8 +70,7 @@ codex review --uncommitted -c model="gpt-5.4"
 Surgical deep-dive on a specific concern (error handling, concurrency, data flow).
 
 ```bash
-codex exec -m gpt-5.4 \
-  -c model_reasoning_effort="xhigh" \
+codex exec \
   "Analyze [specific concern] in the changes between main and HEAD.
    For each issue found: cite file and line, explain the risk,
    suggest a concrete fix. Confidence threshold: only flag issues
@@ -94,16 +84,15 @@ Iterative quality enforcement — implement, review, fix, repeat. Max 3 iteratio
 ```
 Iteration 1:
   Claude -> implement feature
-  Bash: codex review --base main -c model="gpt-5.4" -> findings
+  Bash: codex review --base main -> findings
   Claude -> fix critical/high findings
 
 Iteration 2:
-  Bash: codex review --base main -c model="gpt-5.4" -> verify fixes + catch remaining
+  Bash: codex review --base main -> verify fixes + catch remaining
   Claude -> fix remaining issues
 
 Iteration 3 (final):
-  Bash: codex review --base main -c model="gpt-5.4" -> clean bill of health
-  (or accept known trade-offs and document them)
+  Bash: codex review --base main -> clean or accept trade-offs
 
 STOP after 3 iterations. Diminishing returns beyond this.
 ```
@@ -112,12 +101,12 @@ STOP after 3 iterations. Diminishing returns beyond this.
 
 For thorough reviews, run multiple focused passes instead of one vague pass. Each pass gets a specific persona and concern domain.
 
-| Pass             | Focus                                    | Mode                                  | Reasoning |
-| ---------------- | ---------------------------------------- | ------------------------------------- | --------- |
-| **Correctness**  | Bugs, logic, edge cases, race conditions | `codex review`                        | default   |
-| **Security**     | OWASP Top 10, injection, auth, secrets   | `codex exec` with security prompt     | `xhigh`   |
-| **Architecture** | Coupling, abstractions, API consistency  | `codex exec` with architecture prompt | `xhigh`   |
-| **Performance**  | O(n^2), N+1 queries, memory leaks        | `codex exec` with performance prompt  | `high`    |
+| Pass             | Focus                                    | Mode                                  |
+| ---------------- | ---------------------------------------- | ------------------------------------- |
+| **Correctness**  | Bugs, logic, edge cases, race conditions | `codex review`                        |
+| **Security**     | OWASP Top 10, injection, auth, secrets   | `codex exec` with security prompt     |
+| **Architecture** | Coupling, abstractions, API consistency  | `codex exec` with architecture prompt |
+| **Performance**  | O(n^2), N+1 queries, memory leaks        | `codex exec` with performance prompt  |
 
 Run passes sequentially. Fix critical findings between passes to avoid noise compounding.
 

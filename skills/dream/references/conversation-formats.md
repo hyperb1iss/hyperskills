@@ -225,14 +225,14 @@ sqlite3 ~/.codex/state_5.sqlite "SELECT id, title, model, cwd, datetime(created_
 
 ## Cross-Format Comparison
 
-| Feature            | Claude Code                             | Codex                                    |
-| ------------------ | --------------------------------------- | ---------------------------------------- |
-| Location           | `~/.claude/projects/*/<uuid>.jsonl`     | `~/.codex/sessions/YYYY/MM/DD/*.jsonl`   |
-| Message format     | `message.content` (string or array)     | `payload.content[].type`                 |
-| Tool calls         | `type: "tool_use"` in content array     | `type: "function_call"` as response_item |
-| Tool results       | Separate tool_result message            | `function_call_output` response_item     |
-| Thinking/reasoning | `type: "thinking"` (readable)           | `type: "reasoning"` (encrypted)          |
-| Session metadata   | `ai-title`, `tag`, `pr-link` entries    | `session_meta` header + `turn_context`   |
-| Subagents          | Separate `subagents/` directory         | Not applicable                           |
-| Retention          | 30 days default                         | No auto-cleanup                          |
-| Index DB           | None (JSONL only)                       | SQLite `state_5.sqlite`                  |
+| Feature            | Claude Code                          | Codex                                    |
+| ------------------ | ------------------------------------ | ---------------------------------------- |
+| Location           | `~/.claude/projects/*/<uuid>.jsonl`  | `~/.codex/sessions/YYYY/MM/DD/*.jsonl`   |
+| Message format     | `message.content` (string or array)  | `payload.content[].type`                 |
+| Tool calls         | `type: "tool_use"` in content array  | `type: "function_call"` as response_item |
+| Tool results       | Separate tool_result message         | `function_call_output` response_item     |
+| Thinking/reasoning | `type: "thinking"` (readable)        | `type: "reasoning"` (encrypted)          |
+| Session metadata   | `ai-title`, `tag`, `pr-link` entries | `session_meta` header + `turn_context`   |
+| Subagents          | Separate `subagents/` directory      | Not applicable                           |
+| Retention          | 30 days default                      | No auto-cleanup                          |
+| Index DB           | None (JSONL only)                    | SQLite `state_5.sqlite`                  |

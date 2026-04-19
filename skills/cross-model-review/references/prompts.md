@@ -1,4 +1,4 @@
-# Codex Review Prompt Templates
+# Cross-Model Review Prompt Templates
 
 Ready-to-use prompts for each review pass. These are model-agnostic — they work with any reviewer CLI.
 
@@ -7,10 +7,10 @@ Ready-to-use prompts for each review pass. These are model-agnostic — they wor
 Pass prompts as the final argument to the reviewer CLI:
 
 ```bash
-# From Claude (Codex reviews)
+# Claude-hosted session (Codex reviews)
 codex exec "PROMPT_TEXT_HERE"
 
-# From Codex (Claude reviews)
+# Codex-hosted session (Claude reviews)
 claude -p "PROMPT_TEXT_HERE"
 
 # Or pipe a diff into either

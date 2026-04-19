@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Skills-10-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="10 Skills">
+  <img src="https://img.shields.io/badge/Skills-11-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="11 Skills">
   <img src="https://img.shields.io/badge/skills.sh-Compatible-ff6ac1?style=for-the-badge&logo=vercel&logoColor=white" alt="skills.sh">
 </p>
 
@@ -61,7 +61,7 @@ ln -s $(pwd)/hyperskills/skills ~/.claude/skills/hyperskills
 The skills form a workflow pipeline. Each one handles a phase of the development lifecycle and hands off to the next:
 
 ```
- brainstorm ──→ research ──→ plan ──→ implement ──→ codex-review
+ brainstorm ──→ research ──→ plan ──→ implement ──→ cross-model-review
      │              │           │          │
      │              │           │          └──→ git
      │              │           │
@@ -74,11 +74,11 @@ The skills form a workflow pipeline. Each one handles a phase of the development
 
 | Scenario              | Flow                                                             |
 | --------------------- | ---------------------------------------------------------------- |
-| New feature           | `brainstorm` → `plan` → `implement` → `codex-review`             |
+| New feature           | `brainstorm` → `plan` → `implement` → `cross-model-review`       |
 | Greenfield project    | `brainstorm` → `research` → `plan` → `orchestrate` → `implement` |
 | Bug fix               | `implement` (straight to it — scale selection handles this)      |
 | Architecture decision | `brainstorm` → `research` → decide                               |
-| Large refactor        | `plan` → `orchestrate` → `implement` → `codex-review`            |
+| Large refactor        | `plan` → `orchestrate` → `implement` → `cross-model-review`      |
 
 You don't need to follow the full pipeline. Each skill has built-in scale selection — a typo fix doesn't need brainstorming, and a clear bug doesn't need research. Start wherever makes sense.
 
@@ -134,9 +134,17 @@ Meta-orchestration patterns mined from 597+ real agent dispatches. Tells you _wh
 /hyperskills:orchestrate
 ```
 
-#### `codex-review` — Cross-Model Code Review
+#### `cross-model-review` — Bidirectional Cross-Model Code Review
 
-Claude writes code, Codex reviews it — different architecture, different training distribution, no self-approval bias. Multi-pass review strategy (correctness → security → architecture → performance), 7 ready-to-use prompt templates, and integration with the Ralph Loop for iterative quality enforcement.
+The authoring model writes code, a different model reviews it — different architecture, different training distribution, no self-approval bias. Detects your host (Claude Code or Codex) and invokes the other model's CLI automatically. Covers both directions: Claude → Codex via `codex review`, and Codex → Claude via `claude -p`. Includes multi-pass strategy, piped-diff vs tool-access modes, and 7 ready-to-use prompt templates.
+
+```bash
+/hyperskills:cross-model-review
+```
+
+#### `codex-review` — Codex-Specific Code Review
+
+The Claude → Codex direction in depth. Full Codex CLI reference including `codex review` (structured diff review) and `codex exec` (freeform deep-dive), multi-pass review strategy (correctness → security → architecture → performance), and integration with the Ralph Loop for iterative quality enforcement. Use `cross-model-review` if you want bidirectional host detection; use this one when you specifically want Codex as the reviewer from a Claude session.
 
 ```bash
 /hyperskills:codex-review
@@ -188,14 +196,15 @@ Level 2: SKILL.md body                     ← Loaded when skill triggers (~1,50
 Level 3: references/                       ← Loaded on demand (unlimited)
 ```
 
-Four skills include reference files for deep-dive content:
+Skills with reference files for deep-dive content:
 
-| Skill          | Reference Files                                                        |
-| -------------- | ---------------------------------------------------------------------- |
-| `implement`    | `benchmarks.md` — quantitative data from 21k operations                |
-| `codex-review` | `prompts.md` — 7 ready-to-use review prompt templates                  |
-| `tilt`         | `api-reference.md`, `patterns.md` — full Tiltfile API + power patterns |
-| `tui-design`   | `visual-catalog.md`, `app-patterns.md` — Unicode catalog + app gallery |
+| Skill | Reference Files |
+|-------|----------------|
+| `implement` | `benchmarks.md` — quantitative data from 21k operations |
+| `codex-review` | `prompts.md` — 7 ready-to-use review prompt templates |
+| `cross-model-review` | `prompts.md` — 7 ready-to-use review prompt templates |
+| `tilt` | `api-reference.md`, `patterns.md` — full Tiltfile API + power patterns |
+| `tui-design` | `visual-catalog.md`, `app-patterns.md` — Unicode catalog + app gallery |
 
 ## Compatibility
 
