@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Skills-11-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="11 Skills">
+  <img src="https://img.shields.io/badge/Skills-17-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="17 Skills">
   <img src="https://img.shields.io/badge/skills.sh-Compatible-ff6ac1?style=for-the-badge&logo=vercel&logoColor=white" alt="skills.sh">
 </p>
 
@@ -178,6 +178,14 @@ Complete Tilt operational reference. CLI commands for log viewing, resource mana
 /hyperskills:tilt
 ```
 
+#### `agent-sandbox` — Kubernetes Operator for AI Agent Runtimes
+
+Full operational reference for the [`kubernetes-sigs/agent-sandbox`](https://github.com/kubernetes-sigs/agent-sandbox) operator. Covers the four CRDs (Sandbox, SandboxTemplate, SandboxClaim, SandboxWarmPool), install and upgrade hazards, warm pool HPA tuning, PDB scoping gotchas, isolation runtime selection (gVisor, Kata), network policy patterns, Karpenter integration, and the Python + Go SDK surface. Captures real-world scars from running the operator at scale. Includes detailed CRD field reference, production patterns, and client SDK deep-dive as progressive disclosure references.
+
+```bash
+/hyperskills:agent-sandbox
+```
+
 #### `tui-design` — Terminal UI Design System
 
 Universal design patterns for building exceptional terminal user interfaces. Layout paradigm selector, interaction model decision trees, terminal color theory, visual hierarchy techniques, data visualization, and animation patterns. Framework-agnostic — works with Ratatui, Ink, Textual, Bubbletea, or any TUI toolkit. Includes a Unicode visual catalog and gallery of real TUI app design patterns.
@@ -204,6 +212,7 @@ Skills with reference files for deep-dive content:
 | `codex-review` | `prompts.md` — 7 ready-to-use review prompt templates |
 | `cross-model-review` | `prompts.md` — 7 ready-to-use review prompt templates |
 | `tilt` | `api-reference.md`, `patterns.md` — full Tiltfile API + power patterns |
+| `agent-sandbox` | `crds.md`, `patterns.md`, `clients.md` — CRD fields + production patterns + SDKs |
 | `tui-design` | `visual-catalog.md`, `app-patterns.md` — Unicode catalog + app gallery |
 
 ## Compatibility

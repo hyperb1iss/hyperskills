@@ -1,7 +1,7 @@
 {
   "name": "hyperskills",
-  "version": "3.4.0",
-  "description": "Focused AI agent skills: brainstorming, planning, research, orchestration, implementation, dreaming (conversation review & knowledge consolidation), security, git operations, Tilt Kubernetes development, TUI design, cross-model code review, and Python tooling (uv, ruff, ty, uv-build)",
+  "version": "3.5.0",
+  "description": "Focused AI agent skills: brainstorming, planning, research, orchestration, implementation, dreaming (conversation review & knowledge consolidation), security, git operations, Tilt Kubernetes development, agent-sandbox Kubernetes operator, TUI design, cross-model code review, and Python tooling (uv, ruff, ty, uv-build)",
   "author": {
     "name": "Stefanie Jane",
     "url": "https://hyperbliss.tech"
@@ -27,6 +27,17 @@
     "kubernetes",
     "tiltfile",
     "live-update",
+    "agent-sandbox",
+    "sandbox",
+    "ai-agents",
+    "agent-runtime",
+    "code-interpreter",
+    "gvisor",
+    "kata-containers",
+    "warm-pool",
+    "sandboxclaim",
+    "sandboxtemplate",
+    "k8s-operator",
     "tui",
     "tui-design",
     "terminal-ui",

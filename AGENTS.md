@@ -27,6 +27,12 @@ hyperskills/
 │   │   └── references/
 │   │       ├── api-reference.md
 │   │       └── patterns.md
+│   ├── agent-sandbox/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── crds.md
+│   │       ├── patterns.md
+│   │       └── clients.md
 │   ├── tui-design/
 │   │   ├── SKILL.md
 │   │   └── references/
@@ -277,6 +283,7 @@ Before committing, verify:
 | `security`     | ~1,500 | none       | Domain — security ops                |
 | `git`          | ~1,200 | none       | Domain — git operations              |
 | `tilt`         | ~2,500 | 2 files    | Domain — Kubernetes dev              |
+| `agent-sandbox` | ~2,000 | 3 files    | Domain — agent-sandbox Kubernetes operator |
 | `tui-design`   | ~3,000 | 2 files    | Domain — terminal UI                 |
 | `codex-review` | ~2,000 | 1 file     | Process — Codex-specific review (Claude → Codex) |
 | `cross-model-review` | ~2,400 | 1 file | Process — bidirectional cross-model review |
@@ -297,7 +304,7 @@ When adding a new skill, it should fit one of these categories:
 
 **Domain skills** — specialized knowledge for a specific technology or practice:
 
-- `security`, `git`, `tilt`, `tui-design`, `uv`, `ruff`, `ty`, `uv-build`
+- `security`, `git`, `tilt`, `agent-sandbox`, `tui-design`, `uv`, `ruff`, `ty`, `uv-build`
 - These tend to be reference-heavy with decision trees and lookup tables
 
 ## Writing Style
