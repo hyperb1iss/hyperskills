@@ -1,6 +1,6 @@
-# Ruff Rule Catalog (v0.15.8 — 954 Rules, 57 Categories)
+# Ruff Rule Family Map (Apr 2026)
 
-817 stable, 137 preview. 237 always fixable, 229 sometimes fixable, 488 not fixable.
+Use `ruff linter` and <https://docs.astral.sh/ruff/rules/> for authoritative current counts. This file is a routing map for deciding which rule families matter, not a version-pinned census.
 
 ## Framework-Specific
 
@@ -25,7 +25,7 @@
 | I      | isort       |     2 |       2 | Import sorting                               |
 | C90    | mccabe      |     1 |       0 | Cyclomatic complexity                        |
 
-## Pylint Re-implementations (115 rules total)
+## Pylint Re-implementations
 
 | Prefix | Category   | Rules | Fixable |
 | ------ | ---------- | ----: | ------: |
@@ -90,7 +90,7 @@
 | TRY    | tryceratops  |    10 |       2 | Exception handling               |
 | YTT    | flake8-2020  |    10 |       0 | sys.version comparison           |
 
-## Ruff-Specific (73 rules)
+## Ruff-Specific
 
 | Code   | Name                               | Notable                 |
 | ------ | ---------------------------------- | ----------------------- |
@@ -117,9 +117,9 @@ UP045/046/047/049 (PEP 604/695 syntax), PLR1733, PLW0177/1641, FURB122/132/157/1
 
 ## Conflicting Rule Pairs
 
-| Pair                | Resolution                                                     |
-| ------------------- | -------------------------------------------------------------- |
-| D203 vs D211        | Choose D211 (no blank line before class docstring)             |
-| D212 vs D213        | Choose D212 (docstring starts on first line)                   |
-| COM812 vs formatter | Disable COM812 when using ruff format                          |
-| ISC001 vs formatter | Only conflicts with specific ISC002 + allow-multiline settings |
+| Pair                | Resolution                                                                          |
+| ------------------- | ----------------------------------------------------------------------------------- |
+| D203 vs D211        | Choose D211 (no blank line before class docstring)                                  |
+| D212 vs D213        | Choose D212 (docstring starts on first line)                                        |
+| COM812 vs formatter | Disable COM812 when using ruff format                                               |
+| ISC002 vs formatter | Avoid when ISC002 is selected, ISC001 is not selected, and allow-multiline is false |

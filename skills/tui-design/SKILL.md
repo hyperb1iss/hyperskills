@@ -407,7 +407,7 @@ Three layers, all required for smooth TUI rendering:
 
 ---
 
-## 8. Anti-Pattern Checklist
+## Anti-Patterns
 
 Validate your design against these ranked pitfalls (ordered by real-world complaint frequency):
 
@@ -443,3 +443,10 @@ Before shipping, verify:
 
 For Unicode character reference tables and border style gallery, see [visual-catalog.md](references/visual-catalog.md).
 For real-world TUI app design analysis and inspiration, see [app-patterns.md](references/app-patterns.md).
+
+## What This Skill is NOT
+
+- Not a framework-specific API reference.
+- Not an excuse to over-decorate terminal tools.
+- Not a replacement for testing in real terminal emulators.
+- Not only for Rust; the patterns apply across TUI frameworks.

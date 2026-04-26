@@ -19,11 +19,11 @@ The SDK talks to Kubernetes for lifecycle and to the pod's runtime endpoint for 
 
 ## Connection Modes
 
-| Mode | When | How |
-|---|---|---|
-| Gateway | Production. The sandbox-router is fronted by a cloud load balancer (GKE Gateway, AWS ALB, etc.) | SDK discovers Gateway IP, routes through it |
-| Tunnel | Dev / CI. No public ingress | SDK runs `kubectl port-forward` under the covers |
-| Direct | In-cluster callers (agent orchestrator running inside the same cluster as the sandbox) | SDK hits a supplied URL |
+| Mode    | When                                                                                            | How                                              |
+| ------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Gateway | Production. The sandbox-router is fronted by a cloud load balancer (GKE Gateway, AWS ALB, etc.) | SDK discovers Gateway IP, routes through it      |
+| Tunnel  | Dev / CI. No public ingress                                                                     | SDK runs `kubectl port-forward` under the covers |
+| Direct  | In-cluster callers (agent orchestrator running inside the same cluster as the sandbox)          | SDK hits a supplied URL                          |
 
 ### Router prerequisite
 
@@ -205,17 +205,17 @@ opts.APIURL = "http://sandbox-router-svc.agent-sandbox-system.svc.cluster.local:
 
 All configurable via `Options`. Defaults:
 
-| Option | Default | What it covers |
-|---|---|---|
-| `SandboxReadyTimeout` | 180s | Claim → Pod Ready |
-| `GatewayReadyTimeout` | 180s | Time to acquire Gateway IP |
-| `PortForwardReadyTimeout` | 30s | SPDY tunnel establishment |
-| `RequestTimeout` | 180s | Per-call (Run/Read/Write/List) |
-| `PerAttemptTimeout` | 60s | Time to receive response headers per HTTP attempt (SDK retries internally) |
-| `MaxUploadSize` | 256 MiB | `Write` payload cap |
-| `MaxDownloadSize` | 256 MiB | `Read` payload cap |
-| `MaxResponseSize` (Run) | 16 MiB | Run output cap |
-| `MaxResponseSize` (List/Exists) | 8 MiB | List output cap |
+| Option                          | Default | What it covers                                                             |
+| ------------------------------- | ------- | -------------------------------------------------------------------------- |
+| `SandboxReadyTimeout`           | 180s    | Claim → Pod Ready                                                          |
+| `GatewayReadyTimeout`           | 180s    | Time to acquire Gateway IP                                                 |
+| `PortForwardReadyTimeout`       | 30s     | SPDY tunnel establishment                                                  |
+| `RequestTimeout`                | 180s    | Per-call (Run/Read/Write/List)                                             |
+| `PerAttemptTimeout`             | 60s     | Time to receive response headers per HTTP attempt (SDK retries internally) |
+| `MaxUploadSize`                 | 256 MiB | `Write` payload cap                                                        |
+| `MaxDownloadSize`               | 256 MiB | `Read` payload cap                                                         |
+| `MaxResponseSize` (Run)         | 16 MiB  | Run output cap                                                             |
+| `MaxResponseSize` (List/Exists) | 8 MiB   | List output cap                                                            |
 
 ### Error catalog
 
@@ -235,15 +235,15 @@ var (
 
 **Critical error handling rules:**
 
-| Error | Semantics | Recovery |
-|---|---|---|
-| `ErrNotReady` | Transport is dead — port-forward died or router unreachable. Returned by any Run/Read/Write after the monitor detects tunnel death | Call `s.Open(ctx)` to re-establish. Existing claim is preserved |
-| `ErrAlreadyOpen` | You called `Open` twice without `Close` in between | Call `Close` or `Disconnect` first |
-| `ErrOrphanedClaim` | A prior process left a claim with your configured name. The SDK refuses to adopt silently | Either use a new claim name or explicitly reclaim the old one |
-| `ErrTimeout` on `Open` | Pod didn't reach Ready within `SandboxReadyTimeout` | Check template image, probe config, warm pool state |
-| `ErrClaimFailed` | The API server rejected the claim (validation error, RBAC) | Error message contains details; fix manifest |
-| `ErrPortForwardDied` | Tunnel mode only — the `kubectl port-forward` subprocess died | `s.Open(ctx)` to reconnect. Equivalent to `ErrNotReady` for most callers |
-| `ErrSandboxDeleted` | The backing Sandbox was deleted between claim creation and Ready | Usually means someone ran `kubectl delete sandbox` manually or the template changed mid-creation |
+| Error                  | Semantics                                                                                                                          | Recovery                                                                                         |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `ErrNotReady`          | Transport is dead — port-forward died or router unreachable. Returned by any Run/Read/Write after the monitor detects tunnel death | Call `s.Open(ctx)` to re-establish. Existing claim is preserved                                  |
+| `ErrAlreadyOpen`       | You called `Open` twice without `Close` in between                                                                                 | Call `Close` or `Disconnect` first                                                               |
+| `ErrOrphanedClaim`     | A prior process left a claim with your configured name. The SDK refuses to adopt silently                                          | Either use a new claim name or explicitly reclaim the old one                                    |
+| `ErrTimeout` on `Open` | Pod didn't reach Ready within `SandboxReadyTimeout`                                                                                | Check template image, probe config, warm pool state                                              |
+| `ErrClaimFailed`       | The API server rejected the claim (validation error, RBAC)                                                                         | Error message contains details; fix manifest                                                     |
+| `ErrPortForwardDied`   | Tunnel mode only — the `kubectl port-forward` subprocess died                                                                      | `s.Open(ctx)` to reconnect. Equivalent to `ErrNotReady` for most callers                         |
+| `ErrSandboxDeleted`    | The backing Sandbox was deleted between claim creation and Ready                                                                   | Usually means someone ran `kubectl delete sandbox` manually or the template changed mid-creation |
 
 The Go SDK runs a **background monitor on the port-forward tunnel** — it detects tunnel death and fails fast with `ErrNotReady` rather than waiting for the next RPC to time out. You don't need to poll.
 
@@ -284,11 +284,11 @@ Without the Sandbox Router, none of the SDK modes work. **Don't hand-write the m
 
 Authoritative source: `clients/python/agentic-sandbox-client/sandbox-router/sandbox_router.yaml` in the `kubernetes-sigs/agent-sandbox` repo. Resources it creates:
 
-| Resource | Name | Selector / label | Purpose |
-|---|---|---|---|
-| `Service` | `sandbox-router-svc` | `app: sandbox-router` | Stable ClusterIP on port 8080 |
-| `Deployment` | `sandbox-router-deployment` | `app: sandbox-router` | Router pods, 2 replicas, zone-spread |
-| `ServiceAccount` / `ClusterRole` / `ClusterRoleBinding` | — | — | Read access to sandboxes / claims / pods |
+| Resource                                                | Name                        | Selector / label      | Purpose                                  |
+| ------------------------------------------------------- | --------------------------- | --------------------- | ---------------------------------------- |
+| `Service`                                               | `sandbox-router-svc`        | `app: sandbox-router` | Stable ClusterIP on port 8080            |
+| `Deployment`                                            | `sandbox-router-deployment` | `app: sandbox-router` | Router pods, 2 replicas, zone-spread     |
+| `ServiceAccount` / `ClusterRole` / `ClusterRoleBinding` | —                           | —                     | Read access to sandboxes / claims / pods |
 
 Typical install:
 
@@ -301,12 +301,12 @@ A `Gateway` manifest lives next to it (`gateway.yaml`) for production Gateway mo
 
 ## SDK Version Compatibility
 
-| SDK version | Works against controller |
-|---|---|
-| Python 0.1.x | v0.1.0 through v0.1.1 |
-| Python 0.2.x | v0.2.1+ |
+| SDK version  | Works against controller                               |
+| ------------ | ------------------------------------------------------ |
+| Python 0.1.x | v0.1.0 through v0.1.1                                  |
+| Python 0.2.x | v0.2.1+                                                |
 | Python 0.3.x | v0.3.10+ (required for `warmpool`, `DeleteForeground`) |
-| Go 0.3.x | v0.3.10+ (the Go SDK didn't exist before v0.3.10) |
+| Go 0.3.x     | v0.3.10+ (the Go SDK didn't exist before v0.3.10)      |
 
 Cross-version operation is **unsupported**. The upstream project tracks SDK + controller together; don't mix.
 
@@ -331,14 +331,14 @@ For integration tests, the Go SDK's own `integration_test.go` is a reasonable re
 
 To be reachable by either SDK, the container in the sandbox pod must expose:
 
-| Path | Method | Purpose |
-|---|---|---|
-| `/healthz` | GET | Readiness probe. Return 200 when ready to accept `/run`, etc. |
-| `/run` | POST | Execute a shell command. Body: JSON with `{command, env, cwd, stdin}`. Response: `{exit_code, stdout, stderr}` |
-| `/files/read` | POST | Read a file. Body: `{path}`. Response: `{content}` (base64) |
-| `/files/write` | POST | Write a file. Body: `{path, content}` (base64) |
-| `/files/list` | POST | Directory listing. Body: `{path}`. Response: `[{name, type, size}]` |
-| `/files/exists` | POST | Existence check. Body: `{path}`. Response: `{exists: bool}` |
+| Path            | Method | Purpose                                                                                                        |
+| --------------- | ------ | -------------------------------------------------------------------------------------------------------------- |
+| `/healthz`      | GET    | Readiness probe. Return 200 when ready to accept `/run`, etc.                                                  |
+| `/run`          | POST   | Execute a shell command. Body: JSON with `{command, env, cwd, stdin}`. Response: `{exit_code, stdout, stderr}` |
+| `/files/read`   | POST   | Read a file. Body: `{path}`. Response: `{content}` (base64)                                                    |
+| `/files/write`  | POST   | Write a file. Body: `{path, content}` (base64)                                                                 |
+| `/files/list`   | POST   | Directory listing. Body: `{path}`. Response: `[{name, type, size}]`                                            |
+| `/files/exists` | POST   | Existence check. Body: `{path}`. Response: `{exists: bool}`                                                    |
 
 There is no formal OpenAPI spec yet (tracked for future beta). The Python SDK's client methods are the de facto spec — mirror their request/response shapes.
 

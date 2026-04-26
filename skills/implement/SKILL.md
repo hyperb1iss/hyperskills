@@ -55,13 +55,13 @@ These principles bias toward caution over speed. For trivial fixes, use judgment
 
 Don't assume. Don't hide confusion. Surface tradeoffs.
 
-| Situation                                | Action                            |
-| ---------------------------------------- | --------------------------------- |
-| Multiple interpretations of the request  | Present them; don't pick silently |
-| A simpler approach is plausible          | Say so; push back when warranted  |
-| Something is unclear                     | Stop; name what's confusing; ask  |
-| You hold a load-bearing assumption       | State it explicitly               |
-| Inconsistency between request and code   | Surface it before proceeding      |
+| Situation                               | Action                            |
+| --------------------------------------- | --------------------------------- |
+| Multiple interpretations of the request | Present them; don't pick silently |
+| A simpler approach is plausible         | Say so; push back when warranted  |
+| Something is unclear                    | Stop; name what's confusing; ask  |
+| You hold a load-bearing assumption      | State it explicitly               |
+| Inconsistency between request and code  | Surface it before proceeding      |
 
 ORIENT (read the code) is the prerequisite. This principle is what to do with what you find: name the gaps, don't paper over them.
 
@@ -69,13 +69,13 @@ ORIENT (read the code) is the prerequisite. This principle is what to do with wh
 
 Minimum code that solves the problem. Nothing speculative.
 
-| Don't                                            | Do                                            |
-| ------------------------------------------------ | --------------------------------------------- |
-| Add features beyond what was asked               | Solve exactly the stated problem              |
-| Build abstractions for single-use code           | Inline first; abstract when reused            |
-| Add "flexibility" or configurability not asked   | Hardcode now; parameterize on demand          |
-| Handle errors for impossible scenarios           | Trust internal invariants; validate at edges  |
-| Write 200 lines when 50 would do                 | Rewrite tighter                               |
+| Don't                                          | Do                                           |
+| ---------------------------------------------- | -------------------------------------------- |
+| Add features beyond what was asked             | Solve exactly the stated problem             |
+| Build abstractions for single-use code         | Inline first; abstract when reused           |
+| Add "flexibility" or configurability not asked | Hardcode now; parameterize on demand         |
+| Handle errors for impossible scenarios         | Trust internal invariants; validate at edges |
+| Write 200 lines when 50 would do               | Rewrite tighter                              |
 
 The test: would a senior engineer call this overcomplicated? If yes, simplify.
 
@@ -83,15 +83,15 @@ The test: would a senior engineer call this overcomplicated? If yes, simplify.
 
 Touch only what you must. Clean up only your own mess.
 
-| Rule                                                  | Why                                              |
-| ----------------------------------------------------- | ------------------------------------------------ |
+| Rule                                                   | Why                                             |
+| ------------------------------------------------------ | ----------------------------------------------- |
 | Don't "improve" adjacent code, comments, or formatting | Pollutes the diff; outside your scope           |
-| Don't refactor code that isn't broken                 | Scope creep expands blast radius                 |
-| Match existing style even if you'd do it differently  | Local consistency beats your preferences         |
-| Notice unrelated dead code → mention, don't delete    | Other branches/agents may rely on it             |
-| Remove imports/vars/funcs *your* changes orphaned     | Clean up after yourself                          |
-| Leave pre-existing dead code alone                    | Outside your remit unless explicitly asked       |
-| Don't touch comments you don't understand             | Karpathy: "side effects ... orthogonal to task"  |
+| Don't refactor code that isn't broken                  | Scope creep expands blast radius                |
+| Match existing style even if you'd do it differently   | Local consistency beats your preferences        |
+| Notice unrelated dead code → mention, don't delete     | Other branches/agents may rely on it            |
+| Remove imports/vars/funcs _your_ changes orphaned      | Clean up after yourself                         |
+| Leave pre-existing dead code alone                     | Outside your remit unless explicitly asked      |
+| Don't touch comments you don't understand              | Karpathy: "side effects ... orthogonal to task" |
 
 The test: every changed line should trace directly to the user's request.
 
@@ -99,12 +99,12 @@ The test: every changed line should trace directly to the user's request.
 
 Define verifiable success. Loop until it passes.
 
-| Vague task        | Verifiable goal                                       |
-| ----------------- | ----------------------------------------------------- |
-| "Add validation"  | Write tests for invalid inputs, then make them pass   |
-| "Fix the bug"     | Write a test that reproduces it, then make it pass    |
-| "Refactor X"      | Ensure the same tests pass before and after           |
-| "Make it work"    | Reject — name the actual signal that proves it works  |
+| Vague task       | Verifiable goal                                      |
+| ---------------- | ---------------------------------------------------- |
+| "Add validation" | Write tests for invalid inputs, then make them pass  |
+| "Fix the bug"    | Write a test that reproduces it, then make it pass   |
+| "Refactor X"     | Ensure the same tests pass before and after          |
+| "Make it work"   | Reject — name the actual signal that proves it works |
 
 For multi-step work, state the plan with verification per step:
 
@@ -294,13 +294,13 @@ git log -10 --oneline
 
 Observe the actual patterns and mirror them:
 
-| Pattern              | Example                          | Mirror               |
-| -------------------- | -------------------------------- | -------------------- |
-| Conventional Commits | `feat(api): add token refresh`   | `type(scope): msg`   |
-| Gitmoji              | `✨ Add token refresh`           | Leading emoji + msg  |
-| Ticket prefix        | `[ENG-1234] Add token refresh`   | Mirror bracket style |
-| Module prefix        | `auth: add token refresh`        | Mirror separator     |
-| Plain                | `Add token refresh`              | No prefix, plain     |
+| Pattern              | Example                        | Mirror               |
+| -------------------- | ------------------------------ | -------------------- |
+| Conventional Commits | `feat(api): add token refresh` | `type(scope): msg`   |
+| Gitmoji              | `✨ Add token refresh`         | Leading emoji + msg  |
+| Ticket prefix        | `[ENG-1234] Add token refresh` | Mirror bracket style |
+| Module prefix        | `auth: add token refresh`      | Mirror separator     |
+| Plain                | `Add token refresh`            | No prefix, plain     |
 
 **Mirror format, NOT quality.** If existing commits are terse one-liners, you still write a descriptive subject and body — you're elevating the standard, not lowering yours to match. If no clear pattern exists, default to Conventional Commits.
 
@@ -391,13 +391,13 @@ git add <specific-files>  # Only files you personally touched
 git commit -m "..."       # HEREDOC for the message
 ```
 
-| Rule                                            | Why                                        |
-| ----------------------------------------------- | ------------------------------------------ |
-| Never `git add -A` or `git add .`               | Picks up other agents' WIP and secrets     |
-| Never `git restore` files you didn't modify     | May discard another agent's in-flight work |
-| Never `git push` unless explicitly asked        | Push is the human's call                   |
-| Skip planning docs, scratch files, `.local.md`  | These don't belong in the repo             |
-| Verify before commit, not after                 | A red commit poisons bisect history        |
+| Rule                                           | Why                                        |
+| ---------------------------------------------- | ------------------------------------------ |
+| Never `git add -A` or `git add .`              | Picks up other agents' WIP and secrets     |
+| Never `git restore` files you didn't modify    | May discard another agent's in-flight work |
+| Never `git push` unless explicitly asked       | Push is the human's call                   |
+| Skip planning docs, scratch files, `.local.md` | These don't belong in the repo             |
+| Verify before commit, not after                | A red commit poisons bisect history        |
 
 ---
 

@@ -5,7 +5,7 @@ description: Use this skill when working with Python projects, packages, scripts
 
 # uv — Python Package & Project Manager
 
-uv (v0.11, March 2026) replaces pip, pip-tools, pipx, pyenv, virtualenv, and poetry. Written in Rust, 10-100x faster than alternatives. Now downloads Python from Astral's own mirror by default.
+uv (v0.11.7, Apr 2026) replaces pip, pip-tools, pipx, pyenv, virtualenv, and poetry. Written in Rust, 10-100x faster than alternatives. It is stable production software; minor versions can contain breaking changes, while patch releases are intended to be non-breaking.
 
 ## Workflow Decision Tree
 
@@ -131,7 +131,7 @@ echo 'print("hi")' | uv run -       # Read from stdin
 
 ```bash
 uvx ruff check .                     # Run tool in isolated env
-uvx ruff@0.15.8 check .             # Specific version
+uvx ruff@0.15.12 check .            # Specific version
 uvx --from 'httpie' http             # Package name differs from command
 uvx --python 3.12 ruff              # With specific Python
 

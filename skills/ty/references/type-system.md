@@ -58,21 +58,21 @@ All decorator params, `field()`, `InitVar`, `ClassVar`, `KW_ONLY`, `replace()`, 
 
 ## Not Yet Implemented
 
-| Feature                                         | Impact                         | Tracking |
-| ----------------------------------------------- | ------------------------------ | -------- |
-| `TypeVarTuple` / `Unpack`                       | NumPy/tensor typing            | #156     |
-| `Concatenate`                                   | Partial (just added in 0.0.26) | —        |
-| `type[SomeProtocol]`                            | Protocol metaclass             | #903     |
-| `@classmethod`/`@staticmethod` protocol members | Protocol completeness          | #1381    |
-| `ClassVar` protocol members                     | Protocol completeness          | #1380    |
-| TypedDict functional syntax                     | `TD = TypedDict("TD", ...)`    | #3095    |
-| PEP 728 `closed`/`extra_items` TypedDict        | TypedDict completeness         | #3096    |
-| `Unpack` for `**kwargs`                         | Typed kwargs                   | #1746    |
-| Tuple length narrowing                          | Tuple refinement               | #560     |
-| Enum functional syntax + `Flag`                 | Enum completeness              | #876     |
-| Overlapping overload diagnostics                | Overload correctness           | #103     |
-| `dataclass_transform`                           | Partial                        | —        |
-| Tagged union narrowing for TypedDict            | Discriminated unions           | #1479    |
+| Feature                                         | Impact                      | Tracking |
+| ----------------------------------------------- | --------------------------- | -------- |
+| `TypeVarTuple` / `Unpack`                       | NumPy/tensor typing         | #156     |
+| `Concatenate`                                   | Supported in current beta   | —        |
+| `type[SomeProtocol]`                            | Protocol metaclass          | #903     |
+| `@classmethod`/`@staticmethod` protocol members | Protocol completeness       | #1381    |
+| `ClassVar` protocol members                     | Protocol completeness       | #1380    |
+| TypedDict functional syntax                     | `TD = TypedDict("TD", ...)` | #3095    |
+| PEP 728 `closed`/`extra_items` TypedDict        | TypedDict completeness      | #3096    |
+| `Unpack` for `**kwargs`                         | Typed kwargs                | #1746    |
+| Tuple length narrowing                          | Tuple refinement            | #560     |
+| Enum functional syntax + `Flag`                 | Enum completeness           | #876     |
+| Overlapping overload diagnostics                | Overload correctness        | #103     |
+| `dataclass_transform`                           | Partial                     | —        |
+| Tagged union narrowing for TypedDict            | Discriminated unions        | #1479    |
 
 ## Key Rules
 

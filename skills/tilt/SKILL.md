@@ -167,3 +167,19 @@ For detailed API signatures and advanced patterns, consult:
 
 - **`references/api-reference.md`** — Complete Tiltfile API catalog organized by category, Starlark language notes, ignore mechanism comparison
 - **`references/patterns.md`** — Multi-service architectures, environment config, CI integration, performance optimization, programmatic Tilt interaction, extension ecosystem
+
+## Anti-Patterns
+
+| Anti-Pattern                              | Fix                                               |
+| ----------------------------------------- | ------------------------------------------------- |
+| Starting or stopping Tilt without consent | Ask before changing long-running dev environments |
+| Treating `tilt up` as a build command     | Use `tilt ci` for batch verification              |
+| Live update without fallbacks             | Put build/dependency files in `fall_back_on`      |
+| Debugging from Kubernetes YAML only       | Inspect `uiresources`, file watches, and logs     |
+| Using `local()` for watched shell work    | Use `local_resource` with explicit `deps`         |
+
+## What This Skill is NOT
+
+- Not a Kubernetes primer.
+- Not permission to run, restart, or tear down a dev environment.
+- Not a substitute for reading `tilt doctor` and resource logs.

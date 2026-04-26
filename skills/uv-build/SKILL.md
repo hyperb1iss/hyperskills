@@ -5,7 +5,7 @@ description: Use this skill when building Python packages, configuring build bac
 
 # uv-build — Python Build Backend
 
-`uv_build` is Astral's Rust-based build backend for Python packages. Stable since July 2025, default for `uv init`. 10-35x faster than setuptools/hatchling/flit. **Pure Python packages only** — no C/Rust extensions.
+`uv_build` is Astral's Rust-based build backend for Python packages. As of uv-build 0.11.7 (Apr 2026), it is the native backend documented by uv for most pure Python packages. **Pure Python packages only** — no C/Rust extensions.
 
 ## When to Use uv-build
 
@@ -26,11 +26,11 @@ Is your package pure Python?
 
 ```toml
 [build-system]
-requires = ["uv_build>=0.11.2,<0.12"]
+requires = ["uv_build>=0.11.7,<0.12"]
 build-backend = "uv_build"
 ```
 
-**Always include an upper bound** (`<0.12`). The build backend schema is versioned by minor version. Bump when upgrading uv.
+For published packages and CI, prefer an upper bound such as `<0.12` so new minor releases are adopted deliberately after `uv build` verification.
 
 ## The Direct Build Fast Path
 
@@ -185,7 +185,7 @@ dependencies = ["sqlalchemy>=2.0"]
 cloud-db = "cloud_database.cli:main"
 
 [build-system]
-requires = ["uv_build>=0.11.2,<0.12"]
+requires = ["uv_build>=0.11.7,<0.12"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
@@ -207,7 +207,7 @@ build-backend = "setuptools.build_meta"
 
 # AFTER
 [build-system]
-requires = ["uv_build>=0.11.2,<0.12"]
+requires = ["uv_build>=0.11.7,<0.12"]
 build-backend = "uv_build"
 ```
 
@@ -229,7 +229,7 @@ build-backend = "hatchling.build"
 
 # AFTER
 [build-system]
-requires = ["uv_build>=0.11.2,<0.12"]
+requires = ["uv_build>=0.11.7,<0.12"]
 build-backend = "uv_build"
 ```
 
@@ -245,7 +245,7 @@ build-backend = "flit_core.buildapi"
 
 # AFTER  (flit uses flat layout by default)
 [build-system]
-requires = ["uv_build>=0.11.2,<0.12"]
+requires = ["uv_build>=0.11.7,<0.12"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
@@ -275,7 +275,7 @@ uv build --no-sources    # Verify PyPI compatibility
 | Anti-Pattern                                  | Fix                                                     |
 | --------------------------------------------- | ------------------------------------------------------- |
 | Using uv_build for packages with C extensions | Use setuptools, maturin, or scikit-build-core           |
-| Omitting upper bound on requires              | Always `<0.X` to prevent breaking changes               |
+| Unbounded backend in CI/published packages    | Use a tested minor range and bump deliberately          |
 | `source-include = ["**/*"]`                   | Let defaults handle it; add specific patterns only      |
 | Forgetting `--no-sources` test before publish | Sources are dev-only; verify PyPI-only resolution works |
 | Dynamic version from `__init__.py`            | Static version in pyproject.toml + `uv version --bump`  |

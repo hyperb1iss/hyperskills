@@ -28,7 +28,7 @@ rules:
     - seriesQuery: 'agent_sandbox_claim_creation_total{namespace!=""}'
       resources:
         overrides:
-          namespace: {resource: namespace}
+          namespace: { resource: namespace }
       name:
         matches: "^agent_sandbox_claim_creation_total$"
         as: "agent_sandbox_cold_claims_per_second"
@@ -60,7 +60,7 @@ spec:
               warmpool_name: code-interp-pool
         target:
           type: Value
-          value: "0.5"                     # cold claims/sec above this triggers scale-up
+          value: "0.5" # cold claims/sec above this triggers scale-up
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 30
@@ -224,7 +224,7 @@ spec:
           values: [arm64]
         - key: karpenter.sh/capacity-type
           operator: In
-          values: [on-demand]                # NOT spot — active tool execution mid-flight
+          values: [on-demand] # NOT spot — active tool execution mid-flight
         - key: node.kubernetes.io/instance-type
           operator: In
           values: [m8g.2xlarge, m8g.4xlarge, m8g.8xlarge]
@@ -241,7 +241,7 @@ spec:
     budgets:
       - nodes: "30%"
   weight: 15
-  expireAfter: 2h                            # force AMI refresh
+  expireAfter: 2h # force AMI refresh
 ```
 
 SandboxTemplate sidebar that matches:
@@ -277,17 +277,17 @@ podTemplate:
 networkPolicy:
   egress:
     # DNS — always
-    - ports: [{protocol: UDP, port: 53}, {protocol: TCP, port: 53}]
+    - ports: [{ protocol: UDP, port: 53 }, { protocol: TCP, port: 53 }]
     # Platform API callback
     - to:
-        - namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: platform}}
-          podSelector: {matchLabels: {app.kubernetes.io/name: api}}
-      ports: [{protocol: TCP, port: 10191}]
+        - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: platform } }
+          podSelector: { matchLabels: { app.kubernetes.io/name: api } }
+      ports: [{ protocol: TCP, port: 10191 }]
     # Observability (OTLP)
     - to:
-        - namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: o11y}}
-          podSelector: {matchLabels: {app.kubernetes.io/name: alloy-edge}}
-      ports: [{protocol: TCP, port: 4317}]
+        - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: o11y } }
+          podSelector: { matchLabels: { app.kubernetes.io/name: alloy-edge } }
+      ports: [{ protocol: TCP, port: 4317 }]
     # Public internet HTTPS only (no internal cluster IPs)
     - to:
         - ipBlock:
@@ -296,13 +296,13 @@ networkPolicy:
               - 10.0.0.0/8
               - 172.16.0.0/12
               - 192.168.0.0/16
-              - 169.254.0.0/16             # link-local + metadata
-      ports: [{protocol: TCP, port: 443}]
+              - 169.254.0.0/16 # link-local + metadata
+      ports: [{ protocol: TCP, port: 443 }]
   ingress:
     # Platform frontend reaches the sandbox's runtime API
     - from:
-        - namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: platform}}
-      ports: [{protocol: TCP, port: 8080}]
+        - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: platform } }
+      ports: [{ protocol: TCP, port: 8080 }]
 ```
 
 The `ipBlock` egress rule with an `except:` list is the canonical way to allow public internet while blocking internal cluster IPs. It mirrors the default-deny policy the controller would install if `networkPolicy` were omitted.
@@ -316,26 +316,26 @@ networkPolicy:
   ingress:
     # Istio sidecar health port
     - from:
-        - podSelector: {}          # allow from same namespace
-      ports: [{protocol: TCP, port: 15020}]
+        - podSelector: {} # allow from same namespace
+      ports: [{ protocol: TCP, port: 15020 }]
     # Datadog APM
     - from:
         - podSelector: {}
-      ports: [{protocol: TCP, port: 8126}]
+      ports: [{ protocol: TCP, port: 8126 }]
 ```
 
 ### CNI compatibility
 
 Standard `NetworkPolicy` is supported by most CNIs but enforcement varies. Before trusting the policy in production, verify:
 
-| CNI | Default enforcement |
-|---|---|
-| Calico | Enforced out of the box |
-| Cilium | Enforced; prefer `CiliumNetworkPolicy` for more expressiveness |
-| EKS VPC CNI | **Not enforced unless you enable the Network Policy Agent add-on** and set `enableNetworkPolicy: true` |
-| AKS Azure CNI | Requires `--network-policy azure` or `cilium` at cluster create |
-| AKS kubenet | **Never enforced.** Migrate to Azure CNI Overlay |
-| GKE Dataplane V2 | Enforced |
+| CNI              | Default enforcement                                                                                    |
+| ---------------- | ------------------------------------------------------------------------------------------------------ |
+| Calico           | Enforced out of the box                                                                                |
+| Cilium           | Enforced; prefer `CiliumNetworkPolicy` for more expressiveness                                         |
+| EKS VPC CNI      | **Not enforced unless you enable the Network Policy Agent add-on** and set `enableNetworkPolicy: true` |
+| AKS Azure CNI    | Requires `--network-policy azure` or `cilium` at cluster create                                        |
+| AKS kubenet      | **Never enforced.** Migrate to Azure CNI Overlay                                                       |
+| GKE Dataplane V2 | Enforced                                                                                               |
 
 If the CNI does not enforce NetworkPolicy, set `networkPolicyManagement: Unmanaged` on the template so the controller doesn't create a policy that gives you a false sense of security.
 
@@ -381,9 +381,9 @@ containers:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: $(POD_NAME),$(POD_NAMESPACE)
       - name: POD_NAME
-        valueFrom: {fieldRef: {fieldPath: metadata.name}}
+        valueFrom: { fieldRef: { fieldPath: metadata.name } }
       - name: POD_NAMESPACE
-        valueFrom: {fieldRef: {fieldPath: metadata.namespace}}
+        valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
 ```
 
 Sidecar option — run Alloy or OTel Collector as a sidecar if you need to buffer logs when egress is flaky, but remember sidecar ports need explicit ingress rules in the NetworkPolicy.
@@ -399,10 +399,10 @@ The operator's own `make test-e2e --suite=benchmarks` is the start. For realisti
 Target numbers reported upstream at BURST=1, WARMPOOL=2:
 
 | Percentile | Claim → Ready (warm) |
-|---|---|
-| p50 | 654 ms |
-| p90 | 1150 ms |
-| p99 | 2365 ms |
+| ---------- | -------------------- |
+| p50        | 654 ms               |
+| p90        | 1150 ms              |
+| p99        | 2365 ms              |
 
 Above p99 is dominated by kube-apiserver contention. If your numbers are materially worse, check 409 conflicts in the controller logs — that's the symptom of pod-watch amplification ([#527](https://github.com/kubernetes-sigs/agent-sandbox/issues/527)).
 
@@ -426,14 +426,14 @@ Per-tenant namespace is the strong answer. Per-tenant label is the practical ans
 
 ## Debugging Cheat Sheet
 
-| Symptom | First check |
-|---|---|
-| Claim stuck `Ready=False` | `kubectl describe sandboxclaim` for conditions; `kubectl logs -n agent-sandbox-system deploy/agent-sandbox-controller` for reconcile errors |
-| Pod keeps restarting | Container logs, then probe definitions — startupProbe too aggressive is the #1 cause |
-| Warm pool not scaling | Is `prometheus-adapter` exposing your derived cold-rate metric? Check `kubectl get --raw /apis/external.metrics.k8s.io/v1beta1` (external, not custom, because this skill routes through the `type: External` HPA path). Also confirm the controller is emitting `agent_sandbox_claim_creation_total` with `launch_type="cold"` for your pool |
-| Pool pods all on one node | Missing `topologySpreadConstraints` in the template |
-| Sandbox can't reach external service | `kubectl exec -it <pod> -- nslookup <host>`; then `kubectl get networkpolicy`; then check CNI actually enforces it |
-| ArgoCD PostSync hook never runs | PDB blocking with `SyncFailed` — check PDB selector scope |
-| Old image keeps running after template update | Run the warm pool refresh Job manually |
-| `409 Conflict` storm in controller logs | Bump `--kube-api-burst`; if that doesn't help, you're hitting [#527](https://github.com/kubernetes-sigs/agent-sandbox/issues/527) |
-| Claim works locally, fails on one cluster | Most likely CNI difference — policy enforced in dev, not in prod (or vice versa) |
+| Symptom                                       | First check                                                                                                                                                                                                                                                                                                                                   |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claim stuck `Ready=False`                     | `kubectl describe sandboxclaim` for conditions; `kubectl logs -n agent-sandbox-system deploy/agent-sandbox-controller` for reconcile errors                                                                                                                                                                                                   |
+| Pod keeps restarting                          | Container logs, then probe definitions — startupProbe too aggressive is the #1 cause                                                                                                                                                                                                                                                          |
+| Warm pool not scaling                         | Is `prometheus-adapter` exposing your derived cold-rate metric? Check `kubectl get --raw /apis/external.metrics.k8s.io/v1beta1` (external, not custom, because this skill routes through the `type: External` HPA path). Also confirm the controller is emitting `agent_sandbox_claim_creation_total` with `launch_type="cold"` for your pool |
+| Pool pods all on one node                     | Missing `topologySpreadConstraints` in the template                                                                                                                                                                                                                                                                                           |
+| Sandbox can't reach external service          | `kubectl exec -it <pod> -- nslookup <host>`; then `kubectl get networkpolicy`; then check CNI actually enforces it                                                                                                                                                                                                                            |
+| ArgoCD PostSync hook never runs               | PDB blocking with `SyncFailed` — check PDB selector scope                                                                                                                                                                                                                                                                                     |
+| Old image keeps running after template update | Run the warm pool refresh Job manually                                                                                                                                                                                                                                                                                                        |
+| `409 Conflict` storm in controller logs       | Bump `--kube-api-burst`; if that doesn't help, you're hitting [#527](https://github.com/kubernetes-sigs/agent-sandbox/issues/527)                                                                                                                                                                                                             |
+| Claim works locally, fails on one cluster     | Most likely CNI difference — policy enforced in dev, not in prod (or vice versa)                                                                                                                                                                                                                                                              |

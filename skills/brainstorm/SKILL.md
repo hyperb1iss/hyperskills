@@ -208,6 +208,18 @@ Synthesize their outputs, then present the unified analysis to the user.
 
 ---
 
+## Anti-Patterns
+
+| Anti-Pattern                              | Fix                                              |
+| ----------------------------------------- | ------------------------------------------------ |
+| Jumping to solutions before defining pain | Spend one pass on the problem frame first        |
+| Asking a stack of questions at once       | Ask one load-bearing question, then adapt        |
+| Presenting seven "maybe" options          | Offer 2-3 real choices with tradeoffs            |
+| Ignoring prior decisions in Sibyl         | Search memory first and surface relevant context |
+| Brainstorming when the user said build it | Switch to implementation and keep momentum       |
+
+---
+
 ## What This Skill is NOT
 
 - **Not a gate.** You don't need permission to skip phases. If the user says "just build it," build it.

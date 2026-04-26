@@ -38,7 +38,7 @@ target-version = "py312"      # py37-py315, inferred from requires-python if uns
 line-length = 88
 indent-width = 4
 src = ["src", "tests"]        # First-party import classification
-required-version = "==0.15.8" # Pin version (exact match only)
+required-version = "==0.15.12" # Pin version with a PEP 440 specifier
 respect-gitignore = true
 include = ["*.py", "*.pyi"]
 exclude = [".venv", "migrations"]

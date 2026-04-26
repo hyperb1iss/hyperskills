@@ -65,6 +65,19 @@ digraph research {
    | **Deep dive**  | 10-30  | 20-40 min | Greenfield decisions, SOTA analysis          |
    | **Exhaustive** | 30-60+ | 40-90 min | New project inception, competitive landscape |
 
+### Source Quality Contract
+
+| Claim Type              | Required Source                                  |
+| ----------------------- | ------------------------------------------------ |
+| Current version         | Package registry, release page, or official CLI  |
+| CLI flags / config keys | Official docs or local `--help` output           |
+| Security frameworks     | OWASP, NIST, SLSA/OpenSSF, CIS, ISO, PCI sources |
+| Cloud/provider behavior | Provider docs and current changelog              |
+| Research papers / SOTA  | Paper, benchmark repo, or authors' artifact      |
+| Community health        | Repository activity plus issue/release cadence   |
+
+If primary sources disagree with blog posts, trust the primary source and record the discrepancy. If a fact is volatile, date it explicitly and prefer a command/source the next agent can rerun.
+
 ---
 
 ## Phase 2: WAVE 1 — Broad Sweep

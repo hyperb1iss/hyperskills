@@ -5,7 +5,7 @@ description: Use this skill when linting, formatting, or fixing Python code with
 
 # ruff — Python Linter & Formatter
 
-ruff (v0.15.8, March 2026) is three tools in one Rust binary: linter (`ruff check`), formatter (`ruff format`), and dependency analyzer (`ruff analyze graph`). 954 rules across 57 categories. Replaces Flake8, Black, isort, pyupgrade, and dozens more.
+ruff (v0.15.12, Apr 2026) is three tools in one Rust binary: linter (`ruff check`), formatter (`ruff format`), and dependency analyzer (`ruff analyze graph`). It replaces Flake8, Black, isort, pyupgrade, and dozens more.
 
 **The built-in language server** (`ruff server`) replaces the deprecated `ruff-lsp` package (archived Dec 2025).
 
@@ -109,7 +109,7 @@ preview = false                  # Enable 2026 style guide
 
 ### Rules That CONFLICT With the Formatter
 
-When using `ruff format`, these 13 lint rules **must** be disabled:
+When using `ruff format`, these lint rules should be avoided:
 
 ```toml
 ignore = [
@@ -120,7 +120,7 @@ ignore = [
 ]
 ```
 
-`ISC001` only conflicts when `ISC002` is also disabled AND `allow-multiline = false`.
+Also avoid `ISC002` in Ruff's documented formatter-conflict case: `ISC002` selected, `ISC001` not selected, and `flake8-implicit-str-concat.allow-multiline = false`.
 
 ### Known Deviations from Black
 
@@ -213,7 +213,7 @@ Falls back to `~/.config/ruff/ruff.toml` when no project config exists.
 target-version = "py312"         # Inferred from requires-python if unset
 line-length = 88
 src = ["src", "tests"]           # First-party import classification
-required-version = "==0.15.8"    # Pin version (exact match only)
+required-version = "==0.15.12"   # Pin version with a PEP 440 specifier
 extend = "../pyproject.toml"     # Inherit parent config
 
 [tool.ruff.lint.isort]
@@ -228,7 +228,7 @@ runtime-evaluated-base-classes = ["pydantic.BaseModel"]
 runtime-evaluated-decorators = ["attrs.define"]
 ```
 
-For the complete rule catalog (57 categories), see `references/rules.md`.
+For the complete rule catalog snapshot, see `references/rules.md`.
 For full configuration reference, see `references/configuration.md`.
 
 ## Debugging

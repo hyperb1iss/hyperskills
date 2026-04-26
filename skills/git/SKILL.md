@@ -78,3 +78,19 @@ git bisect start && git bisect bad HEAD && git bisect good v1.0.0
 3. **Regenerate lock files** -- never merge them
 4. **Backup branch before destructive ops:** `git branch backup-$(date +%Y%m%d-%H%M%S)`
 5. **Never commit large binaries** -- use Git LFS
+
+## Anti-Patterns
+
+| Anti-Pattern                         | Fix                                             |
+| ------------------------------------ | ----------------------------------------------- |
+| Manually merging generated lockfiles | Take one side, regenerate with the package tool |
+| Rebasing a shared branch             | Merge or create a new branch                    |
+| Using `--force`                      | Use `--force-with-lease` only when approved     |
+| Running recovery commands by habit   | Inspect `status`, `log`, and `reflog` first     |
+| Staging unrelated work               | `git add <specific-files>`                      |
+
+## What This Skill is NOT
+
+- Not for routine `git status` or simple commits.
+- Not permission to rewrite shared history.
+- Not a replacement for understanding the diff before committing.

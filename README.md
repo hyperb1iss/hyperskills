@@ -28,7 +28,7 @@ Models already know how to write React components, Kubernetes manifests, and PyT
 
 **hyperskills** provides skills for things that are genuinely hard to get right without guidance — procedural knowledge distilled from thousands of real sessions, decision trees for high-stakes operations, and multi-agent orchestration patterns that actually work in production.
 
-10 skills. Zero bloat. Each one earned its place through real-world evidence.
+17 skills. Zero bloat. Each one earned its place through real-world evidence.
 
 ## Installation
 
@@ -62,12 +62,12 @@ The skills form a workflow pipeline. Each one handles a phase of the development
 
 ```
  brainstorm ──→ research ──→ plan ──→ implement ──→ cross-model-review
-     │              │           │          │
-     │              │           │          └──→ git
-     │              │           │
-     │              │           └──→ orchestrate (parallel agents)
-     │              │
-     └──────────────┴──→ Any skill can loop back when new questions emerge
+     │              │           │          │                 │
+     │              │           │          ├──→ git          └──→ dream
+     │              │           │          └──→ domain skills
+     │              │           └──→ orchestrate
+     │              └──→ domain skills: security, tilt, tui-design, uv, ruff, ty, uv-build
+     └──→ Any skill can loop back when new questions emerge
 ```
 
 **Typical flows:**
@@ -79,6 +79,8 @@ The skills form a workflow pipeline. Each one handles a phase of the development
 | Bug fix               | `implement` (straight to it — scale selection handles this)      |
 | Architecture decision | `brainstorm` → `research` → decide                               |
 | Large refactor        | `plan` → `orchestrate` → `implement` → `cross-model-review`      |
+| Python project work   | `uv` → `ruff` → `ty` → `uv-build` as needed                      |
+| Memory maintenance    | `dream` → Sibyl knowledge consolidation                          |
 
 You don't need to follow the full pipeline. Each skill has built-in scale selection — a typo fix doesn't need brainstorming, and a clear bug doesn't need research. Start wherever makes sense.
 
@@ -150,13 +152,21 @@ The Claude → Codex direction in depth. Full Codex CLI reference including `cod
 /hyperskills:codex-review
 ```
 
+#### `dream` — Conversation Memory Consolidation
+
+Two-phase conversation review that harvests Claude Code and Codex sessions, extracts decisions, patterns, corrections, and unresolved questions, then records durable knowledge in Sibyl. Use it for end-of-day memory maintenance or deep cross-project synthesis.
+
+```bash
+/hyperskills:dream
+```
+
 ### Domain Skills
 
 These encode specialized knowledge for specific technologies — reference material, decision trees, and hard-won patterns.
 
 #### `security` — Security Operations
 
-Frameworks and checklists for secure systems. STRIDE threat modeling, Zero Trust principles, OWASP Top 10, SLSA supply chain levels, incident response phases, and compliance framework reference (SOC 2, HIPAA, PCI DSS).
+Frameworks and checklists for secure systems. STRIDE threat modeling, NIST Zero Trust, OWASP Top 10:2025, SLSA 1.2 Build/Source tracks, incident response mapped to NIST CSF 2.0, and compliance framework reference.
 
 ```bash
 /hyperskills:security
@@ -194,6 +204,38 @@ Universal design patterns for building exceptional terminal user interfaces. Lay
 /hyperskills:tui-design
 ```
 
+#### `uv` — Python Package & Project Management
+
+Astral uv workflows for projects, scripts, tools, Python versions, workspaces, locking, publishing, and Docker/CI patterns. Encodes when to use project commands instead of the pip interface.
+
+```bash
+/hyperskills:uv
+```
+
+#### `ruff` — Python Linting & Formatting
+
+Current Ruff guidance for lint rule selection, formatter compatibility, suppression, preview mode, dependency graph analysis, and debugging resolved configuration.
+
+```bash
+/hyperskills:ruff
+```
+
+#### `ty` — Python Type Checking
+
+Astral ty guidance for beta adoption, CLI usage, configuration, suppression comments, editor/LSP setup, limitations, and migration from mypy or Pyright.
+
+```bash
+/hyperskills:ty
+```
+
+#### `uv-build` — Python Build Backend
+
+uv_build backend guidance for pure Python packages, module discovery, namespace/stub packages, file inclusion, publishing workflows, migration from setuptools/hatchling/flit, and reproducible build checks.
+
+```bash
+/hyperskills:uv-build
+```
+
 ## Architecture
 
 Skills use progressive disclosure to manage context efficiently:
@@ -206,14 +248,18 @@ Level 3: references/                       ← Loaded on demand (unlimited)
 
 Skills with reference files for deep-dive content:
 
-| Skill | Reference Files |
-|-------|----------------|
-| `implement` | `benchmarks.md` — quantitative data from 21k operations |
-| `codex-review` | `prompts.md` — 7 ready-to-use review prompt templates |
-| `cross-model-review` | `prompts.md` — 7 ready-to-use review prompt templates |
-| `tilt` | `api-reference.md`, `patterns.md` — full Tiltfile API + power patterns |
-| `agent-sandbox` | `crds.md`, `patterns.md`, `clients.md` — CRD fields + production patterns + SDKs |
-| `tui-design` | `visual-catalog.md`, `app-patterns.md` — Unicode catalog + app gallery |
+| Skill                | Reference Files                                                                              |
+| -------------------- | -------------------------------------------------------------------------------------------- |
+| `implement`          | `benchmarks.md` — quantitative data from 21k operations                                      |
+| `codex-review`       | `prompts.md` — 7 ready-to-use review prompt templates                                        |
+| `cross-model-review` | `prompts.md` — 7 ready-to-use review prompt templates                                        |
+| `dream`              | `conversation-formats.md`, `extraction-guide.md` — session schemas + memory extraction rules |
+| `tilt`               | `api-reference.md`, `patterns.md` — full Tiltfile API + power patterns                       |
+| `agent-sandbox`      | `crds.md`, `patterns.md`, `clients.md` — CRD fields + production patterns + SDKs             |
+| `tui-design`         | `visual-catalog.md`, `app-patterns.md` — Unicode catalog + app gallery                       |
+| `uv`                 | `configuration.md`, `docker-ci.md`, `resolution.md` — uv config, CI, resolver details        |
+| `ruff`               | `configuration.md`, `rules.md` — Ruff config and rule catalog snapshot                       |
+| `ty`                 | `migration.md`, `type-system.md` — migration and beta type-system support                    |
 
 ## Compatibility
 

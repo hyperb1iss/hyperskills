@@ -8,7 +8,7 @@
     {
       "name": "hyperskills",
       "source": "./",
-      "description": "Elite AI agent skills for rapid product development - 7 skill domains, 23 specialized agents"
+      "description": "Focused AI agent skills for integrated planning, research, implementation, review, memory, security, git, Kubernetes dev, TUI design, and Python tooling"
     }
   ]
 }

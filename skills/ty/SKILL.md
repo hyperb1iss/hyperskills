@@ -5,7 +5,7 @@ description: Use this skill when type checking Python code or setting up type ch
 
 # ty — Python Type Checker & Language Server
 
-ty (v0.0.26, March 2026) is Astral's Rust-based Python type checker. **Beta status** — 0.0.x versioning, breaking changes between versions, 1.0 targeted later in 2026. 10-60x faster than mypy/pyright without caching, 80x faster for incremental editor diagnostics.
+ty (v0.0.32, Apr 2026) is Astral's Rust-based Python type checker and language server. **Beta status** — 0.0.x versioning, breaking changes between versions, and no stable API yet. Astral reports 10-100x faster checks than mypy and Pyright on large projects.
 
 **Formerly "Red-Knot"** — renamed May 2025, extracted from the ruff repo to `astral-sh/ty`.
 
@@ -79,7 +79,7 @@ ty reads from `ty.toml` (takes precedence) or `pyproject.toml` under `[tool.ty]`
 
 ```toml
 [tool.ty.environment]
-python-version = "3.12"          # 3.7-3.14, default: 3.14
+python-version = "3.12"          # 3.7-3.15 allowed; unset falls back to 3.14
 python-platform = "linux"        # win32|darwin|android|ios|linux|all
 python = ".venv"                 # Path to environment/interpreter
 root = ["src"]                   # First-party module discovery

@@ -13,10 +13,10 @@ Cross-model validation: the authoring model writes code, a different model revie
 
 Identify the current host, then invoke the other model's CLI.
 
-| Current Host | Reviewer CLI | Direction |
-|--------------|--------------|-----------|
-| Claude Code | `codex` | Claude writes → Codex reviews |
-| Codex | `claude` | Codex writes → Claude reviews |
+| Current Host | Reviewer CLI | Direction                     |
+| ------------ | ------------ | ----------------------------- |
+| Claude Code  | `codex`      | Claude writes → Codex reviews |
+| Codex        | `claude`     | Codex writes → Claude reviews |
 
 Verify the reviewer CLI is installed and authenticated before starting:
 
@@ -29,15 +29,15 @@ claude --version   # For Codex-hosted sessions
 
 ## Invocation Cheat Sheet
 
-| Capability | Claude → Codex | Codex → Claude |
-|-----------|----------------|----------------|
-| Structured diff review | `codex review --base main` | Use piped diff or tool access (no equivalent) |
-| Commit review | `codex review --commit <SHA>` | `git show <SHA> \| claude -p "PROMPT"` |
-| Uncommitted WIP | `codex review --uncommitted` | `git diff \| claude -p "PROMPT"` |
-| Freeform prompt | `codex exec "PROMPT"` | `claude -p "PROMPT"` |
-| Pipe diff in | `git diff main...HEAD \| codex exec "PROMPT"` | `git diff main...HEAD \| claude -p "PROMPT"` |
-| Read-only exploration | `codex exec -s read-only "PROMPT"` | `claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" "PROMPT"` |
-| JSON output | `--json` | `--output-format json` |
+| Capability             | Claude → Codex                                | Codex → Claude                                                   |
+| ---------------------- | --------------------------------------------- | ---------------------------------------------------------------- |
+| Structured diff review | `codex review --base main`                    | Use piped diff or tool access (no equivalent)                    |
+| Commit review          | `codex review --commit <SHA>`                 | `git show <SHA> \| claude -p "PROMPT"`                           |
+| Uncommitted WIP        | `codex review --uncommitted`                  | `git diff \| claude -p "PROMPT"`                                 |
+| Freeform prompt        | `codex exec "PROMPT"`                         | `claude -p "PROMPT"`                                             |
+| Pipe diff in           | `git diff main...HEAD \| codex exec "PROMPT"` | `git diff main...HEAD \| claude -p "PROMPT"`                     |
+| Read-only exploration  | `codex exec -s read-only "PROMPT"`            | `claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" "PROMPT"` |
+| JSON output            | `codex exec --json "PROMPT"`                  | `claude -p --output-format json "PROMPT"`                        |
 
 Codex has a dedicated `review` subcommand with structured output; Claude reviews go through print mode (`-p`) with a prompt.
 
@@ -161,9 +161,9 @@ Invoke the reviewer with Pattern 1 commands each iteration.
 
 For Codex-hosted sessions reviewing with Claude, choose based on depth needed:
 
-| Approach | Command Shape | When to Use |
-|----------|---------------|-------------|
-| **Piped diff** | `git diff ... \| claude -p "PROMPT"` | Quick reviews; reviewer sees only the diff |
+| Approach        | Command Shape                                                    | When to Use                                                                 |
+| --------------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| **Piped diff**  | `git diff ... \| claude -p "PROMPT"`                             | Quick reviews; reviewer sees only the diff                                  |
 | **Tool access** | `claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" "PROMPT"` | Architecture/security deep-dives; reviewer can trace data flow across files |
 
 Piped diff is faster and cheaper. Tool access costs more tokens but catches bugs that require surrounding context (function signatures defined elsewhere, downstream consumers, similar patterns in the codebase).
@@ -172,20 +172,20 @@ Piped diff is faster and cheaper. Tool access costs more tokens but catches bugs
 
 For thorough reviews, run multiple focused passes. Each pass gets a specific persona and concern domain.
 
-| Pass | Focus | Approach |
-|------|-------|----------|
-| **Correctness** | Bugs, logic, edge cases, race conditions | Structured review (`codex review`) or piped diff with general prompt |
-| **Security** | OWASP Top 10, injection, auth, secrets | Focused investigation with security persona |
-| **Architecture** | Coupling, abstractions, API consistency | Tool-access mode for full file context |
-| **Performance** | O(n^2), N+1 queries, memory leaks | Focused investigation with performance persona |
+| Pass             | Focus                                       | Approach                                                             |
+| ---------------- | ------------------------------------------- | -------------------------------------------------------------------- |
+| **Correctness**  | Bugs, logic, edge cases, race conditions    | Structured review (`codex review`) or piped diff with general prompt |
+| **Security**     | OWASP Top 10:2025, injection, auth, secrets | Focused investigation with security persona                          |
+| **Architecture** | Coupling, abstractions, API consistency     | Tool-access mode for full file context                               |
+| **Performance**  | O(n^2), N+1 queries, memory leaks           | Focused investigation with performance persona                       |
 
 When to go multi-pass:
 
-| Change Size | Strategy |
-|-------------|----------|
-| < 50 lines, single concern | Single review pass |
-| 50-300 lines, feature work | Review + security pass |
-| 300+ lines or architecture change | Full 4-pass |
+| Change Size                                 | Strategy                     |
+| ------------------------------------------- | ---------------------------- |
+| < 50 lines, single concern                  | Single review pass           |
+| 50-300 lines, feature work                  | Review + security pass       |
+| 300+ lines or architecture change           | Full 4-pass                  |
 | Security-sensitive (auth, payments, crypto) | Always include security pass |
 
 Run passes sequentially. Fix critical findings between passes to avoid noise compounding.
@@ -229,18 +229,18 @@ Ready-to-use prompt templates for security, architecture, performance, error han
 
 ## Anti-Patterns
 
-| Anti-Pattern | Why It Fails | Fix |
-|---|---|---|
-| Self-review (model reviews its own code) | Systematic bias — same blind spots | Cross-model: author and reviewer are different models |
-| "Review this code" (no specifics) | Too vague, produces bikeshedding | Domain-specific prompts with persona |
-| Single pass for everything | Context dilution | Multi-pass, one concern per pass |
-| No confidence threshold | Noise floods signal | Only act on >= 0.7 |
-| > 3 review iterations | Diminishing returns | Stop at 3, accept trade-offs |
-| Hardcoding model names in commands | Overrides user config, goes stale fast | Omit model/effort flags; use configured defaults |
-| Style comments in review | LLMs default to bikeshedding | "Skip: formatting, naming, minor docs" |
-| Piped diff for architecture review | Diff lacks surrounding context | Use tool-access mode for architecture passes |
-| Using an MCP wrapper | Unnecessary indirection over a CLI binary | Call the reviewer CLI directly via Bash |
-| Review without project context | Generic advice disconnected from codebase | Both CLIs read project memory (CLAUDE.md / AGENTS.md) automatically |
+| Anti-Pattern                             | Why It Fails                              | Fix                                                               |
+| ---------------------------------------- | ----------------------------------------- | ----------------------------------------------------------------- |
+| Self-review (model reviews its own code) | Systematic bias — same blind spots        | Cross-model: author and reviewer are different models             |
+| "Review this code" (no specifics)        | Too vague, produces bikeshedding          | Domain-specific prompts with persona                              |
+| Single pass for everything               | Context dilution                          | Multi-pass, one concern per pass                                  |
+| No confidence threshold                  | Noise floods signal                       | Only act on >= 0.7                                                |
+| > 3 review iterations                    | Diminishing returns                       | Stop at 3, accept trade-offs                                      |
+| Hardcoding model names in commands       | Overrides user config, goes stale fast    | Omit model/effort flags; use configured defaults                  |
+| Style comments in review                 | LLMs default to bikeshedding              | "Skip: formatting, naming, minor docs"                            |
+| Piped diff for architecture review       | Diff lacks surrounding context            | Use tool-access mode for architecture passes                      |
+| Using an MCP wrapper                     | Unnecessary indirection over a CLI binary | Call the reviewer CLI directly via Bash                           |
+| Review without project context           | Generic advice disconnected from codebase | Run from repo root so project memory and source files are visible |
 
 ## What This Skill is NOT
 

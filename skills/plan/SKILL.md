@@ -271,6 +271,18 @@ This is earned confidence, not cutting corners.
 
 ---
 
+## Anti-Patterns
+
+| Anti-Pattern                           | Fix                                          |
+| -------------------------------------- | -------------------------------------------- |
+| Planning a five-minute fix             | Build directly and verify                    |
+| Tasks without verification             | Add a concrete check or split the task       |
+| Parallel tasks touching the same files | Sequence them or repartition ownership       |
+| Planning from filenames only           | Read the actual code path before decomposing |
+| Treating the first plan as permanent   | Replan when reality reveals new constraints  |
+
+---
+
 ## What This Skill is NOT
 
 - **Not required for simple tasks.** If the solution is obvious, just build it.

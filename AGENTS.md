@@ -18,6 +18,23 @@ hyperskills/
 │   │   └── SKILL.md
 │   ├── orchestrate/
 │   │   └── SKILL.md
+│   ├── implement/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── benchmarks.md
+│   ├── codex-review/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── prompts.md
+│   ├── cross-model-review/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── prompts.md
+│   ├── dream/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── conversation-formats.md
+│   │       └── extraction-guide.md
 │   ├── security/
 │   │   └── SKILL.md
 │   ├── git/
@@ -38,14 +55,6 @@ hyperskills/
 │   │   └── references/
 │   │       ├── visual-catalog.md
 │   │       └── app-patterns.md
-│   ├── codex-review/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   │       └── prompts.md
-│   ├── implement/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   │       └── benchmarks.md
 │   ├── uv/
 │   │   ├── SKILL.md
 │   │   └── references/
@@ -64,7 +73,7 @@ hyperskills/
 │   │       └── migration.md
 │   └── uv-build/
 │       └── SKILL.md
-├── CLAUDE.md                # Project instructions for Claude sessions
+├── CLAUDE.md -> AGENTS.md   # Claude reads the same contributor guide
 ├── AGENTS.md                # This file — contributor guide
 ├── LICENSE
 └── README.md
@@ -233,7 +242,9 @@ Bump the version following semver:
 - Skill content update = patch bump (e.g., 3.1.0 → 3.1.1)
 - Breaking changes (rename/remove skill) = major bump
 
-#### `CLAUDE.md`
+#### `AGENTS.md` / `CLAUDE.md`
+
+`CLAUDE.md` is a symlink to `AGENTS.md`. Edit `AGENTS.md`; Claude sees the same file.
 
 Add an install command:
 
@@ -269,29 +280,30 @@ Before committing, verify:
 - [ ] Anti-patterns section included
 - [ ] "What This Skill is NOT" section included
 - [ ] `plugin.json` keywords updated
-- [ ] `CLAUDE.md` updated with install command, description, and usage
+- [ ] `AGENTS.md` updated with install command, description, and usage
 - [ ] Version bumped in `plugin.json`
 
 ## Existing Skill Inventory
 
-| Skill          | Tokens | References | Domain                               |
-| -------------- | ------ | ---------- | ------------------------------------ |
-| `brainstorm`   | ~2,500 | none       | Process — ideation                   |
-| `plan`         | ~2,800 | none       | Process — decomposition              |
-| `research`     | ~3,200 | none       | Process — knowledge gathering        |
-| `orchestrate`  | ~4,000 | none       | Process — multi-agent dispatch       |
-| `security`     | ~1,500 | none       | Domain — security ops                |
-| `git`          | ~1,200 | none       | Domain — git operations              |
-| `tilt`         | ~2,500 | 2 files    | Domain — Kubernetes dev              |
-| `agent-sandbox` | ~2,000 | 3 files    | Domain — agent-sandbox Kubernetes operator |
-| `tui-design`   | ~3,000 | 2 files    | Domain — terminal UI                 |
-| `codex-review` | ~2,000 | 1 file     | Process — Codex-specific review (Claude → Codex) |
-| `cross-model-review` | ~2,400 | 1 file | Process — bidirectional cross-model review |
-| `implement`    | ~4,200 | 1 file     | Process — implementation             |
-| `uv`           | ~3,000 | 3 files    | Domain — Python package management   |
-| `ruff`         | ~2,800 | 2 files    | Domain — Python linting & formatting |
-| `ty`           | ~2,500 | 2 files    | Domain — Python type checking        |
-| `uv-build`     | ~2,500 | none       | Domain — Python build backend        |
+| Skill                | Tokens | References | Domain                                           |
+| -------------------- | ------ | ---------- | ------------------------------------------------ |
+| `brainstorm`         | ~2,500 | none       | Process — ideation                               |
+| `plan`               | ~2,800 | none       | Process — decomposition                          |
+| `research`           | ~3,200 | none       | Process — knowledge gathering                    |
+| `orchestrate`        | ~4,000 | none       | Process — multi-agent dispatch                   |
+| `implement`          | ~4,200 | 1 file     | Process — implementation                         |
+| `codex-review`       | ~2,000 | 1 file     | Process — Codex-specific review (Claude → Codex) |
+| `cross-model-review` | ~2,400 | 1 file     | Process — bidirectional cross-model review       |
+| `dream`              | ~2,300 | 2 files    | Process — conversation memory consolidation      |
+| `security`           | ~1,500 | none       | Domain — security ops                            |
+| `git`                | ~1,200 | none       | Domain — git operations                          |
+| `tilt`               | ~2,500 | 2 files    | Domain — Kubernetes dev                          |
+| `agent-sandbox`      | ~2,000 | 3 files    | Domain — agent-sandbox Kubernetes operator       |
+| `tui-design`         | ~3,000 | 2 files    | Domain — terminal UI                             |
+| `uv`                 | ~3,000 | 3 files    | Domain — Python package management               |
+| `ruff`               | ~2,800 | 2 files    | Domain — Python linting & formatting             |
+| `ty`                 | ~2,500 | 2 files    | Domain — Python type checking                    |
+| `uv-build`           | ~2,500 | none       | Domain — Python build backend                    |
 
 ## Skill Categories
 
@@ -299,7 +311,7 @@ When adding a new skill, it should fit one of these categories:
 
 **Process skills** — HOW to approach a class of work:
 
-- `brainstorm`, `plan`, `research`, `orchestrate`, `codex-review`, `implement`
+- `brainstorm`, `plan`, `research`, `orchestrate`, `implement`, `codex-review`, `cross-model-review`, `dream`
 - These tend to be workflow-heavy with phases and decision gates
 
 **Domain skills** — specialized knowledge for a specific technology or practice:
@@ -327,4 +339,4 @@ When adding a new skill, it should fit one of these categories:
 | No anti-patterns section                               | Add one — knowing pitfalls is half the value                |
 | Missing "What This Skill is NOT"                       | Add scope boundaries to prevent misuse                      |
 | Reference files exist but aren't mentioned in SKILL.md | Add a References section pointing to them                   |
-| Forgetting to update plugin.json and CLAUDE.md         | Always update both after adding/changing skills             |
+| Forgetting to update plugin.json and AGENTS.md         | Always update both after adding/changing skills             |

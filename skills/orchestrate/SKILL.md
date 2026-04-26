@@ -153,7 +153,7 @@ Phase 3: Monitor and coordinate
     - Track via Sibyl tasks or TodoWrite
 
 Phase 4: Review and harden (FOREGROUND)
-    - Run Codex/code-reviewer on completed work
+    - Run `cross-model-review` on completed work
     - Dispatch fix agents for critical findings
     - Integration testing
 ```
@@ -217,7 +217,7 @@ When running 10+ agents concurrently:
 
 ## Strategy 3: Sequential Pipeline
 
-Execute dependent tasks one at a time with review gates. Each task builds on the previous task's output. Use `superpowers:subagent-driven-development` for the full pipeline.
+Execute dependent tasks one at a time with review gates. Each task builds on the previous task's output.
 
 ### When to Use
 
@@ -246,12 +246,12 @@ Trust Gradient (adapt over time):
 
 As the session progresses and patterns prove reliable, progressively lighten review overhead:
 
-| Phase              | Review Overhead                       | When                                   |
-| ------------------ | ------------------------------------- | -------------------------------------- |
-| **Full ceremony**  | Implement + Spec Review + Code Review | First 3-4 tasks                        |
-| **Standard**       | Implement + Spec Review               | Tasks 5-8, or after patterns stabilize |
-| **Light**          | Implement + quick spot-check          | Late tasks with established patterns   |
-| **Cost-optimized** | Use `model: "haiku"` for reviews      | Formulaic review passes                |
+| Phase              | Review Overhead                         | When                                   |
+| ------------------ | --------------------------------------- | -------------------------------------- |
+| **Full ceremony**  | Implement + Spec Review + Code Review   | First 3-4 tasks                        |
+| **Standard**       | Implement + Spec Review                 | Tasks 5-8, or after patterns stabilize |
+| **Light**          | Implement + quick spot-check            | Late tasks with established patterns   |
+| **Cost-optimized** | Use the host's configured fast reviewer | Formulaic review passes                |
 
 This is NOT cutting corners -- it's earned confidence. If a late task deviates from the pattern, escalate back to full ceremony.
 
@@ -396,6 +396,11 @@ Session 4: HARDEN (Sequential Pipeline)
     -> Security fixes, race condition fixes
     -> Test infrastructure setup
     -> Output: production-ready codebase
+
+Session 5: CONSOLIDATE (Dream)
+    -> Capture durable patterns, gotchas, and architecture decisions
+    -> Link learnings back to project context in Sibyl
+    -> Output: updated knowledge graph for future sessions
 ```
 
 Each session shifts orchestration strategy to match the work's nature. Parallel when possible, sequential when required.
@@ -576,39 +581,34 @@ When running 10+ background agents:
 
 ---
 
-## Common Mistakes
+## Anti-Patterns
 
-**DON'T:** Dispatch agents that touch the same files -> merge conflicts
-**DO:** Partition by directory/module -- one agent per scope
+| Anti-Pattern                                    | Fix                                                           |
+| ----------------------------------------------- | ------------------------------------------------------------- |
+| Dispatch agents that touch the same files       | Partition by directory/module; one owner per scope            |
+| Run independent research agents foreground      | Background research; synthesize after completion              |
+| Send 50 agents with "fix everything" prompts    | Give each agent a specific scope, issue list, and done signal |
+| Skip the scout phase for build sprints          | Explore first to map dependencies and file ownership          |
+| Keep full review ceremony for every late task   | Apply the trust gradient after patterns prove stable          |
+| Let agents run `git add .` or `git push`        | Explicit git hygiene in every build prompt                    |
+| Dispatch background agents for integration code | Background is for research; coordinate code changes           |
 
-**DON'T:** Run all agents foreground when they're independent -> sequential bottleneck
-**DO:** Use background for research, foreground for code that needs coordination
+## Hyperskills Integration
 
-**DON'T:** Send 50 agents with vague "fix everything" prompts
-**DO:** Give each agent a specific scope, issue list, and domain guidance
+| Skill                | Use With                | When                                       |
+| -------------------- | ----------------------- | ------------------------------------------ |
+| `brainstorm`         | Full Lifecycle          | Before research when the direction is open |
+| `research`           | Research Swarm          | Knowledge gathering before decisions       |
+| `plan`               | Epic Parallel Build     | Convert scope into dependency-safe waves   |
+| `implement`          | All build strategies    | Execution loop and verification cadence    |
+| `cross-model-review` | All strategies          | Independent quality gate after integration |
+| `security`           | Multi-Dimensional Audit | Security review lens                       |
+| `git`                | Epic Parallel Build     | Multi-agent staging, rebases, recovery     |
+| `dream`              | Full Lifecycle          | Capture durable learnings after large runs |
 
-**DON'T:** Skip the scout phase for build sprints
-**DO:** Always Explore first to map what exists and identify dependencies
+## What This Skill is NOT
 
-**DON'T:** Keep full review ceremony for every task in a long session
-**DO:** Apply the trust gradient -- earn lighter reviews through consistency
-
-**DON'T:** Let agents run `git add .` or `git push`
-**DO:** Explicit git hygiene in every build prompt
-
-**DON'T:** Dispatch background agents for code that needs integration
-**DO:** Background is for research only. Code agents run foreground.
-
----
-
-## Integration with Other Skills
-
-| Skill                                        | Use With            | When                                |
-| -------------------------------------------- | ------------------- | ----------------------------------- |
-| `superpowers:subagent-driven-development`    | Sequential Pipeline | Single-task implement-review cycles |
-| `superpowers:dispatching-parallel-agents`    | Parallel Sweep      | Independent bug fixes               |
-| `superpowers:writing-plans`                  | Full Lifecycle      | Create the plan before Phase 2      |
-| `superpowers:executing-plans`                | Sequential Pipeline | Batch execution in separate session |
-| `superpowers:brainstorming`                  | Full Lifecycle      | Before research phase               |
-| `superpowers:requesting-code-review`         | All strategies      | Quality gates between phases        |
-| `superpowers:verification-before-completion` | All strategies      | Final validation                    |
+- Not permission to spawn agents when the host environment forbids it.
+- Not a replacement for planning; orchestration executes a task graph.
+- Not useful for tiny changes that one agent can finish faster directly.
+- Not a way around file ownership; overlapping edits still need sequencing.

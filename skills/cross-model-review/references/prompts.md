@@ -27,7 +27,7 @@ Best as the first pass. Broad coverage across all dimensions.
 ```
 Review the changes between main and HEAD with extreme thoroughness. Prioritize:
 1. Correctness — logic errors, edge cases, null handling, race conditions
-2. Security — injection, auth gaps, secrets exposure, OWASP Top 10
+2. Security — injection, auth gaps, secrets exposure, OWASP Top 10:2025
 3. Performance — algorithmic complexity, N+1 queries, memory leaks
 4. Maintainability — coupling, abstraction leaks, API consistency
 

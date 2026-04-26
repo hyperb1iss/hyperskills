@@ -20,14 +20,13 @@ Cross-model validation using the `codex` binary directly. Claude writes code, Co
 
 **Key flags:**
 
-| Flag                                  | Applies To    | Purpose                                          |
-| ------------------------------------- | ------------- | ------------------------------------------------ |
-| `--base <BRANCH>`                     | `review` only | Diff against base branch                         |
-| `--commit <SHA>`                      | `review` only | Review a specific commit                         |
-| `--uncommitted`                       | `review` only | Review working tree changes                      |
-| `-c model="<model>"`                  | both          | Override default model (only if user requests)   |
-| `-m <model>`                          | `exec` only   | Model override shorthand                         |
-| `-c model_reasoning_effort="<level>"` | both          | Override reasoning depth (only if user requests) |
+| Flag                 | Applies To    | Purpose                                        |
+| -------------------- | ------------- | ---------------------------------------------- |
+| `--base <BRANCH>`    | `review` only | Diff against base branch                       |
+| `--commit <SHA>`     | `review` only | Review a specific commit                       |
+| `--uncommitted`      | `review` only | Review working tree changes                    |
+| `-c model="<model>"` | both          | Override default model (only if user requests) |
+| `-m <model>`         | `exec` only   | Model override shorthand                       |
 
 ## Review Patterns
 
@@ -101,12 +100,12 @@ STOP after 3 iterations. Diminishing returns beyond this.
 
 For thorough reviews, run multiple focused passes instead of one vague pass. Each pass gets a specific persona and concern domain.
 
-| Pass             | Focus                                    | Mode                                  |
-| ---------------- | ---------------------------------------- | ------------------------------------- |
-| **Correctness**  | Bugs, logic, edge cases, race conditions | `codex review`                        |
-| **Security**     | OWASP Top 10, injection, auth, secrets   | `codex exec` with security prompt     |
-| **Architecture** | Coupling, abstractions, API consistency  | `codex exec` with architecture prompt |
-| **Performance**  | O(n^2), N+1 queries, memory leaks        | `codex exec` with performance prompt  |
+| Pass             | Focus                                       | Mode                                  |
+| ---------------- | ------------------------------------------- | ------------------------------------- |
+| **Correctness**  | Bugs, logic, edge cases, race conditions    | `codex review`                        |
+| **Security**     | OWASP Top 10:2025, injection, auth, secrets | `codex exec` with security prompt     |
+| **Architecture** | Coupling, abstractions, API consistency     | `codex exec` with architecture prompt |
+| **Performance**  | O(n^2), N+1 queries, memory leaks           | `codex exec` with performance prompt  |
 
 Run passes sequentially. Fix critical findings between passes to avoid noise compounding.
 
@@ -156,18 +155,18 @@ Ready-to-use prompt templates are in `references/prompts.md`.
 
 ## Anti-Patterns
 
-| Anti-Pattern                                         | Why It Fails                                                                    | Fix                                                                                                        |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| "Review this code"                                   | Too vague — produces surface-level bikeshedding                                 | Use specific domain prompts with persona                                                                   |
-| Single pass for everything                           | Context dilution — every dimension gets shallow treatment                       | Multi-pass with one concern per pass                                                                       |
-| Self-review (Claude reviews Claude's code)           | Systematic bias — models approve their own patterns                             | Cross-model: Claude writes, Codex reviews                                                                  |
-| No confidence threshold                              | Noise floods signal — 0.3 confidence findings waste time                        | Only act on >= 0.7 confidence                                                                              |
-| Style comments in review                             | LLMs default to bikeshedding without explicit skip directives                   | "Skip: formatting, naming, minor docs"                                                                     |
-| > 3 review iterations                                | Diminishing returns, increasing noise, overbaking                               | Stop at 3. Accept trade-offs.                                                                              |
-| Review without project context                       | Generic advice disconnected from codebase conventions                           | Codex reads CLAUDE.md/AGENTS.md automatically                                                              |
-| Using an MCP wrapper                                 | Unnecessary indirection over a CLI binary                                       | Call `codex` directly via Bash                                                                             |
-| Specifying legacy/deprecated models (o1, o3, gpt-4o) | These models are ancient history and may not be available on the user's account | Use the defaults from `~/.codex/config.toml` or the model shown in `codex --help`. Never guess model names |
-| Overcomplicating the invocation                      | Adding unnecessary flags, custom reasoning efforts, or exotic configs           | Use `codex review` with simple flags (`--uncommitted`, `--base main`). The defaults are good               |
+| Anti-Pattern                               | Why It Fails                                                          | Fix                                                                                          |
+| ------------------------------------------ | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| "Review this code"                         | Too vague — produces surface-level bikeshedding                       | Use specific domain prompts with persona                                                     |
+| Single pass for everything                 | Context dilution — every dimension gets shallow treatment             | Multi-pass with one concern per pass                                                         |
+| Self-review (Claude reviews Claude's code) | Systematic bias — models approve their own patterns                   | Cross-model: Claude writes, Codex reviews                                                    |
+| No confidence threshold                    | Noise floods signal — 0.3 confidence findings waste time              | Only act on >= 0.7 confidence                                                                |
+| Style comments in review                   | LLMs default to bikeshedding without explicit skip directives         | "Skip: formatting, naming, minor docs"                                                       |
+| > 3 review iterations                      | Diminishing returns, increasing noise, overbaking                     | Stop at 3. Accept trade-offs.                                                                |
+| Review without project context             | Generic advice disconnected from codebase conventions                 | Run from repo root so project memory and source files are visible                            |
+| Using an MCP wrapper                       | Unnecessary indirection over a CLI binary                             | Call `codex` directly via Bash                                                               |
+| Hardcoding model names                     | Overrides user config and goes stale fast                             | Use the defaults from `~/.codex/config.toml`; never guess model names                        |
+| Overcomplicating the invocation            | Adding unnecessary flags, custom reasoning efforts, or exotic configs | Use `codex review` with simple flags (`--uncommitted`, `--base main`). The defaults are good |
 
 ## What This Skill is NOT
 

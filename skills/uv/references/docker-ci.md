@@ -4,7 +4,7 @@
 
 ```dockerfile
 FROM python:3.13-slim AS builder
-COPY --from=ghcr.io/astral-sh/uv:0.11.2 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.11.7 /uv /uvx /bin/
 
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 
@@ -51,8 +51,8 @@ CMD ["my_app"]
 Astral publishes hardened Docker images with SBOM attestations:
 
 ```dockerfile
-FROM ghcr.io/astral-sh/uv:0.11.2  # Full image with uv
-FROM ghcr.io/astral-sh/uv:0.11.2-python3.13-bookworm  # With Python
+FROM ghcr.io/astral-sh/uv:0.11.7  # Full image with uv
+FROM ghcr.io/astral-sh/uv:0.11.7-python3.13-bookworm  # With Python
 ```
 
 ## GitHub Actions
@@ -112,7 +112,7 @@ PEP 740 attestations are discovered and uploaded automatically. Use `--no-attest
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.11.2
+    rev: 0.11.7
     hooks:
       - id: uv-lock # Keep uv.lock in sync
       - id: uv-export # Keep requirements.txt in sync
