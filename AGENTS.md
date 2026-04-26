@@ -287,7 +287,7 @@ Before committing, verify:
 | `tui-design`   | ~3,000 | 2 files    | Domain — terminal UI                 |
 | `codex-review` | ~2,000 | 1 file     | Process — Codex-specific review (Claude → Codex) |
 | `cross-model-review` | ~2,400 | 1 file | Process — bidirectional cross-model review |
-| `implement`    | ~3,400 | 1 file     | Process — implementation             |
+| `implement`    | ~4,200 | 1 file     | Process — implementation             |
 | `uv`           | ~3,000 | 3 files    | Domain — Python package management   |
 | `ruff`         | ~2,800 | 2 files    | Domain — Python linting & formatting |
 | `ty`           | ~2,500 | 2 files    | Domain — Python type checking        |

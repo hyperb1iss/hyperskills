@@ -45,6 +45,79 @@ digraph implement {
 
 ---
 
+## Code Discipline
+
+Behavioral lens that governs every phase of the loop. Adapted from Karpathy's [observations](https://x.com/karpathy/status/2015883857489522876) on LLM coding pitfalls — models "make wrong assumptions on your behalf and just run along with them without checking ... they really like to overcomplicate code and APIs, bloat abstractions ... implement a bloated construction over 1000 lines when 100 would do."
+
+These principles bias toward caution over speed. For trivial fixes, use judgment.
+
+### Think before coding
+
+Don't assume. Don't hide confusion. Surface tradeoffs.
+
+| Situation                                | Action                            |
+| ---------------------------------------- | --------------------------------- |
+| Multiple interpretations of the request  | Present them; don't pick silently |
+| A simpler approach is plausible          | Say so; push back when warranted  |
+| Something is unclear                     | Stop; name what's confusing; ask  |
+| You hold a load-bearing assumption       | State it explicitly               |
+| Inconsistency between request and code   | Surface it before proceeding      |
+
+ORIENT (read the code) is the prerequisite. This principle is what to do with what you find: name the gaps, don't paper over them.
+
+### Simplicity first
+
+Minimum code that solves the problem. Nothing speculative.
+
+| Don't                                            | Do                                            |
+| ------------------------------------------------ | --------------------------------------------- |
+| Add features beyond what was asked               | Solve exactly the stated problem              |
+| Build abstractions for single-use code           | Inline first; abstract when reused            |
+| Add "flexibility" or configurability not asked   | Hardcode now; parameterize on demand          |
+| Handle errors for impossible scenarios           | Trust internal invariants; validate at edges  |
+| Write 200 lines when 50 would do                 | Rewrite tighter                               |
+
+The test: would a senior engineer call this overcomplicated? If yes, simplify.
+
+### Surgical changes
+
+Touch only what you must. Clean up only your own mess.
+
+| Rule                                                  | Why                                              |
+| ----------------------------------------------------- | ------------------------------------------------ |
+| Don't "improve" adjacent code, comments, or formatting | Pollutes the diff; outside your scope           |
+| Don't refactor code that isn't broken                 | Scope creep expands blast radius                 |
+| Match existing style even if you'd do it differently  | Local consistency beats your preferences         |
+| Notice unrelated dead code → mention, don't delete    | Other branches/agents may rely on it             |
+| Remove imports/vars/funcs *your* changes orphaned     | Clean up after yourself                          |
+| Leave pre-existing dead code alone                    | Outside your remit unless explicitly asked       |
+| Don't touch comments you don't understand             | Karpathy: "side effects ... orthogonal to task"  |
+
+The test: every changed line should trace directly to the user's request.
+
+### Goal-driven execution
+
+Define verifiable success. Loop until it passes.
+
+| Vague task        | Verifiable goal                                       |
+| ----------------- | ----------------------------------------------------- |
+| "Add validation"  | Write tests for invalid inputs, then make them pass   |
+| "Fix the bug"     | Write a test that reproduces it, then make it pass    |
+| "Refactor X"      | Ensure the same tests pass before and after           |
+| "Make it work"    | Reject — name the actual signal that proves it works  |
+
+For multi-step work, state the plan with verification per step:
+
+```
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
+
+Strong success criteria let you loop independently. Weak criteria require constant clarification.
+
+---
+
 ## Scale Selection
 
 Strategy changes dramatically based on scope. Pick the right weight class:
@@ -348,6 +421,11 @@ git commit -m "..."       # HEREDOC for the message
 | Uncertain language ("might fix", "should work")  | State facts; read more code if you don't know   |
 | `git add -A` / `git add .`                       | Stage specific files only                       |
 | `git push` without explicit request              | Push is the human's call; never autonomous      |
+| Silently picking one interpretation              | Surface options; ask before committing to one   |
+| "Improving" code adjacent to your change         | Stay surgical; touch only what's asked          |
+| Touching comments you don't understand           | Leave them; not your scope                      |
+| Bloated abstraction for single-use code          | Write the function; abstract when reused        |
+| Vague "make it work" goal                        | Define a verifiable check first                 |
 
 ---
 
