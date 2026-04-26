@@ -1,7 +1,7 @@
 # Hyperskills Plugin - Development Makefile
 # ─────────────────────────────────────────────
 
-.PHONY: all lint format check clean help stats
+.PHONY: all lint format check clean help stats install
 
 # Colors (SilkCircuit palette)
 PURPLE := \033[38;2;225;53;255m
@@ -94,6 +94,64 @@ validate-frontmatter:
 	@echo "$(GREEN)  ✓ Frontmatter valid$(RESET)"
 
 #─────────────────────────────────────────────
+# Install — symlink skills into ~/.agents and ~/.claude
+#─────────────────────────────────────────────
+AGENTS_SKILLS := $(HOME)/.agents/skills
+CLAUDE_SKILLS := $(HOME)/.claude/skills
+REPO_SKILLS := $(abspath skills)
+
+install:
+	@printf "$(PURPLE)→ Installing hyperskills symlinks$(RESET)\n"
+	@printf "$(CYAN)  source: $(REPO_SKILLS)$(RESET)\n"
+	@mkdir -p "$(AGENTS_SKILLS)" "$(CLAUDE_SKILLS)"
+	@ok=0; linked=0; backed_up=0; ts=$$(date +%Y%m%d-%H%M%S); \
+	for dir in skills/*/; do \
+		name=$$(basename "$$dir"); \
+		src="$(REPO_SKILLS)/$$name"; \
+		agent_link="$(AGENTS_SKILLS)/$$name"; \
+		claude_link="$(CLAUDE_SKILLS)/$$name"; \
+		claude_target="../../.agents/skills/$$name"; \
+		a_status=""; c_status=""; \
+		if [ -L "$$agent_link" ] && [ "$$(readlink "$$agent_link")" = "$$src" ]; then \
+			a_status="ok"; \
+		else \
+			if [ -d "$$agent_link" ] && [ ! -L "$$agent_link" ]; then \
+				mv "$$agent_link" "$$agent_link.bak-$$ts"; \
+				a_status="replaced-dir"; backed_up=$$((backed_up + 1)); \
+			else \
+				rm -f "$$agent_link"; a_status="linked"; \
+			fi; \
+			ln -s "$$src" "$$agent_link"; linked=$$((linked + 1)); \
+		fi; \
+		if [ -L "$$claude_link" ] && [ "$$(readlink "$$claude_link")" = "$$claude_target" ]; then \
+			c_status="ok"; \
+		else \
+			if [ -d "$$claude_link" ] && [ ! -L "$$claude_link" ]; then \
+				mv "$$claude_link" "$$claude_link.bak-$$ts"; \
+				c_status="replaced-dir"; backed_up=$$((backed_up + 1)); \
+			else \
+				rm -f "$$claude_link"; c_status="linked"; \
+			fi; \
+			ln -s "$$claude_target" "$$claude_link"; linked=$$((linked + 1)); \
+		fi; \
+		if [ "$$a_status" = "ok" ] && [ "$$c_status" = "ok" ]; then \
+			printf "  $(CYAN)= %s$(RESET)  already linked\n" "$$name"; \
+			ok=$$((ok + 1)); \
+		else \
+			if [ "$$a_status" = "replaced-dir" ] || [ "$$c_status" = "replaced-dir" ]; then \
+				printf "  $(YELLOW)⚠ %s$(RESET)  agents=%s claude=%s\n" "$$name" "$$a_status" "$$c_status"; \
+			else \
+				printf "  $(GREEN)+ %s$(RESET)  agents=%s claude=%s\n" "$$name" "$$a_status" "$$c_status"; \
+			fi; \
+		fi; \
+	done; \
+	echo ""; \
+	printf "$(GREEN)✓ Install complete$(RESET)  $(CYAN)%s ok · %s linked · %s backed up$(RESET)\n" "$$ok" "$$linked" "$$backed_up"; \
+	if [ "$$backed_up" -gt 0 ]; then \
+		printf "$(YELLOW)  pre-existing directories preserved with suffix .bak-%s$(RESET)\n" "$$ts"; \
+	fi
+
+#─────────────────────────────────────────────
 # Plugin Testing
 #─────────────────────────────────────────────
 test-local:
@@ -138,6 +196,7 @@ help:
 	@echo ""
 	@echo "$(CYAN)Targets:$(RESET)"
 	@echo "  $(GREEN)all$(RESET)              Run all checks (default)"
+	@echo "  $(GREEN)install$(RESET)          Symlink skills into ~/.agents and ~/.claude"
 	@echo "  $(GREEN)lint$(RESET)             Run all linters"
 	@echo "  $(GREEN)format$(RESET)           Format all files with prettier"
 	@echo "  $(GREEN)format-check$(RESET)     Check if files are formatted"
