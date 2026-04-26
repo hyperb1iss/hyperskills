@@ -103,15 +103,27 @@ REPO_SKILLS := $(abspath skills)
 install:
 	@printf "$(PURPLE)→ Installing hyperskills symlinks$(RESET)\n"
 	@printf "$(CYAN)  source: $(REPO_SKILLS)$(RESET)\n"
-	@mkdir -p "$(AGENTS_SKILLS)" "$(CLAUDE_SKILLS)"
-	@ok=0; linked=0; backed_up=0; ts=$$(date +%Y%m%d-%H%M%S); \
+	@mkdir -p "$(AGENTS_SKILLS)"
+	@unified=0; \
+	if [ -e "$(CLAUDE_SKILLS)" ]; then \
+		c_real=$$(cd "$(CLAUDE_SKILLS)" && pwd -P); \
+		a_real=$$(cd "$(AGENTS_SKILLS)" && pwd -P); \
+		if [ "$$c_real" = "$$a_real" ]; then unified=1; fi; \
+	fi; \
+	if [ "$$unified" -eq 1 ]; then \
+		printf "$(CYAN)  ~/.claude/skills resolves to ~/.agents/skills — installing once$(RESET)\n"; \
+	else \
+		mkdir -p "$(CLAUDE_SKILLS)"; \
+	fi; \
+	ok=0; linked=0; backed_up=0; cleaned=0; ts=$$(date +%Y%m%d-%H%M%S); \
 	for dir in skills/*/; do \
 		name=$$(basename "$$dir"); \
 		src="$(REPO_SKILLS)/$$name"; \
 		agent_link="$(AGENTS_SKILLS)/$$name"; \
-		claude_link="$(CLAUDE_SKILLS)/$$name"; \
-		claude_target="../../.agents/skills/$$name"; \
 		a_status=""; c_status=""; \
+		if [ -L "$$agent_link" ] && [ ! -e "$$agent_link" ]; then \
+			rm -f "$$agent_link"; cleaned=$$((cleaned + 1)); \
+		fi; \
 		if [ -L "$$agent_link" ] && [ "$$(readlink "$$agent_link")" = "$$src" ]; then \
 			a_status="ok"; \
 		else \
@@ -123,18 +135,27 @@ install:
 			fi; \
 			ln -s "$$src" "$$agent_link"; linked=$$((linked + 1)); \
 		fi; \
-		if [ -L "$$claude_link" ] && [ "$$(readlink "$$claude_link")" = "$$claude_target" ]; then \
-			c_status="ok"; \
+		if [ "$$unified" -eq 1 ]; then \
+			c_status="unified"; \
 		else \
-			if [ -d "$$claude_link" ] && [ ! -L "$$claude_link" ]; then \
-				mv "$$claude_link" "$$claude_link.bak-$$ts"; \
-				c_status="replaced-dir"; backed_up=$$((backed_up + 1)); \
-			else \
-				rm -f "$$claude_link"; c_status="linked"; \
+			claude_link="$(CLAUDE_SKILLS)/$$name"; \
+			claude_target="../../.agents/skills/$$name"; \
+			if [ -L "$$claude_link" ] && [ ! -e "$$claude_link" ]; then \
+				rm -f "$$claude_link"; cleaned=$$((cleaned + 1)); \
 			fi; \
-			ln -s "$$claude_target" "$$claude_link"; linked=$$((linked + 1)); \
+			if [ -L "$$claude_link" ] && [ "$$(readlink "$$claude_link")" = "$$claude_target" ]; then \
+				c_status="ok"; \
+			else \
+				if [ -d "$$claude_link" ] && [ ! -L "$$claude_link" ]; then \
+					mv "$$claude_link" "$$claude_link.bak-$$ts"; \
+					c_status="replaced-dir"; backed_up=$$((backed_up + 1)); \
+				else \
+					rm -f "$$claude_link"; c_status="linked"; \
+				fi; \
+				ln -s "$$claude_target" "$$claude_link"; linked=$$((linked + 1)); \
+			fi; \
 		fi; \
-		if [ "$$a_status" = "ok" ] && [ "$$c_status" = "ok" ]; then \
+		if [ "$$a_status" = "ok" ] && { [ "$$c_status" = "ok" ] || [ "$$c_status" = "unified" ]; }; then \
 			printf "  $(CYAN)= %s$(RESET)  already linked\n" "$$name"; \
 			ok=$$((ok + 1)); \
 		else \
@@ -146,7 +167,7 @@ install:
 		fi; \
 	done; \
 	echo ""; \
-	printf "$(GREEN)✓ Install complete$(RESET)  $(CYAN)%s ok · %s linked · %s backed up$(RESET)\n" "$$ok" "$$linked" "$$backed_up"; \
+	printf "$(GREEN)✓ Install complete$(RESET)  $(CYAN)%s ok · %s linked · %s backed up · %s cleaned$(RESET)\n" "$$ok" "$$linked" "$$backed_up" "$$cleaned"; \
 	if [ "$$backed_up" -gt 0 ]; then \
 		printf "$(YELLOW)  pre-existing directories preserved with suffix .bak-%s$(RESET)\n" "$$ts"; \
 	fi
