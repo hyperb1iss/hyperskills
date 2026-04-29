@@ -10,8 +10,12 @@ Pass prompts as the final argument to the reviewer CLI:
 # Claude-hosted session (Codex reviews)
 codex exec "PROMPT_TEXT_HERE"
 
-# Codex-hosted session (Claude reviews)
+# Codex-hosted session (Claude reviews) — basic
 claude -p "PROMPT_TEXT_HERE"
+
+# Codex-hosted session (Claude reviews) — with read-only tool access
+# The `--` is required: --allowedTools is variadic and will swallow the prompt without it.
+claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT_TEXT_HERE"
 
 # Or pipe a diff into either
 git diff main...HEAD | codex exec "PROMPT_TEXT_HERE"
@@ -19,6 +23,8 @@ git diff main...HEAD | claude -p "PROMPT_TEXT_HERE"
 ```
 
 For Codex's structured `codex review` command, prompts aren't needed — it has its own review format.
+
+**Claude CLI gotcha:** Variadic flags (`--allowedTools`, `--allowed-tools`, `--disallowedTools`, `--tools`, `--add-dir`, `--betas`, `--file`, `--mcp-config`, `--plugin-dir`) greedily consume every following argument until the next flag. Always either put the prompt before the flag, separate it with `--`, or feed it via stdin.
 
 ## General Review
 

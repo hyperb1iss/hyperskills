@@ -27,19 +27,37 @@ claude --version   # For Codex-hosted sessions
 
 **User defaults are authoritative.** Both CLIs read configured defaults (`~/.codex/config.toml`, `~/.claude/settings.json`). Never specify `--model`, `-m`, `--effort`, or `-c model=` in invocations unless the user explicitly asks to override.
 
+## ⚠️ Critical: Claude CLI Variadic Flag Gotcha
+
+The `claude` CLI has variadic flags that take `<value...>` and greedily consume every following argument until the next flag. If a prompt follows one of these, it gets swallowed as a value, the prompt arg goes missing, and Claude either errors with `Input must be provided either through stdin or as a prompt argument when using --print` or hangs waiting on stdin.
+
+**Variadic flags to watch for:** `--allowedTools` / `--allowed-tools`, `--disallowedTools` / `--disallowed-tools`, `--tools`, `--add-dir`, `--betas`, `--file`, `--mcp-config`, `--plugin-dir`.
+
+**Three working shapes — use one of these whenever a variadic flag is involved:**
+
+| Shape                  | Example                                                              |
+| ---------------------- | -------------------------------------------------------------------- |
+| `--` separator         | `claude -p --allowedTools "Read,Bash(git *)" -- "PROMPT"`            |
+| Prompt before flag     | `claude -p "PROMPT" --allowedTools "Read,Bash(git *)"`               |
+| Stdin pipe, no prompt arg | `echo "PROMPT" \| claude -p --allowedTools "Read,Bash(git *)"`     |
+
+`--` is the most defensive — it works regardless of flag ordering and is the form to standardize on.
+
+The `codex` CLI does not have this gotcha; its flags are non-variadic and any of `codex exec "PROMPT"` / `codex exec --flag value "PROMPT"` work fine.
+
 ## Invocation Cheat Sheet
 
-| Capability             | Claude → Codex                                | Codex → Claude                                                   |
-| ---------------------- | --------------------------------------------- | ---------------------------------------------------------------- |
-| Structured diff review | `codex review --base main`                    | Use piped diff or tool access (no equivalent)                    |
-| Commit review          | `codex review --commit <SHA>`                 | `git show <SHA> \| claude -p "PROMPT"`                           |
-| Uncommitted WIP        | `codex review --uncommitted`                  | `git diff \| claude -p "PROMPT"`                                 |
-| Freeform prompt        | `codex exec "PROMPT"`                         | `claude -p "PROMPT"`                                             |
-| Pipe diff in           | `git diff main...HEAD \| codex exec "PROMPT"` | `git diff main...HEAD \| claude -p "PROMPT"`                     |
-| Read-only exploration  | `codex exec -s read-only "PROMPT"`            | `claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" "PROMPT"` |
-| JSON output            | `codex exec --json "PROMPT"`                  | `claude -p --output-format json "PROMPT"`                        |
+| Capability             | Claude → Codex                                | Codex → Claude                                                      |
+| ---------------------- | --------------------------------------------- | ------------------------------------------------------------------- |
+| Structured diff review | `codex review --base main`                    | Use piped diff or tool access (no equivalent)                       |
+| Commit review          | `codex review --commit <SHA>`                 | `git show <SHA> \| claude -p "PROMPT"`                              |
+| Uncommitted WIP        | `codex review --uncommitted`                  | `git diff \| claude -p "PROMPT"`                                    |
+| Freeform prompt        | `codex exec "PROMPT"`                         | `claude -p "PROMPT"`                                                |
+| Pipe diff in           | `git diff main...HEAD \| codex exec "PROMPT"` | `git diff main...HEAD \| claude -p "PROMPT"`                        |
+| Read-only exploration  | `codex exec -s read-only "PROMPT"`            | `claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT"` |
+| JSON output            | `codex exec --json "PROMPT"`                  | `claude -p --output-format json -- "PROMPT"`                        |
 
-Codex has a dedicated `review` subcommand with structured output; Claude reviews go through print mode (`-p`) with a prompt.
+Codex has a dedicated `review` subcommand with structured output; Claude reviews go through print mode (`-p`) with a prompt. Note the `--` separator before the prompt in every Codex → Claude invocation that uses a variadic flag — this is required, not optional.
 
 ## Review Patterns
 
@@ -68,12 +86,14 @@ git diff main...HEAD | claude -p \
 **Codex → Claude (deep, full context):**
 
 ```bash
-claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" \
+claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- \
   "Review the changes between main and HEAD in this repository.
    Prioritize correctness, security, and performance.
    For each finding: cite file and line, explain the risk, suggest a fix.
    Rate confidence 0.0-1.0. Skip formatting and naming style."
 ```
+
+The `--` separator is required — `--allowedTools` is variadic and will swallow the prompt without it. See the gotcha section above.
 
 ### Pattern 2: Commit-Level Review
 
@@ -127,7 +147,7 @@ codex exec \
 **Codex → Claude:**
 
 ```bash
-claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" \
+claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- \
   "You are a senior [DOMAIN] engineer. Analyze [CONCERN] in the changes
    between main and HEAD. For each issue: cite file and line, explain the
    risk, suggest a concrete fix. Confidence threshold: 0.7."
@@ -161,10 +181,10 @@ Invoke the reviewer with Pattern 1 commands each iteration.
 
 For Codex-hosted sessions reviewing with Claude, choose based on depth needed:
 
-| Approach        | Command Shape                                                    | When to Use                                                                 |
-| --------------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| **Piped diff**  | `git diff ... \| claude -p "PROMPT"`                             | Quick reviews; reviewer sees only the diff                                  |
-| **Tool access** | `claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" "PROMPT"` | Architecture/security deep-dives; reviewer can trace data flow across files |
+| Approach        | Command Shape                                                       | When to Use                                                                 |
+| --------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| **Piped diff**  | `git diff ... \| claude -p "PROMPT"`                                | Quick reviews; reviewer sees only the diff                                  |
+| **Tool access** | `claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT"` | Architecture/security deep-dives; reviewer can trace data flow across files |
 
 Piped diff is faster and cheaper. Tool access costs more tokens but catches bugs that require surrounding context (function signatures defined elsewhere, downstream consumers, similar patterns in the codebase).
 
@@ -237,6 +257,7 @@ Ready-to-use prompt templates for security, architecture, performance, error han
 | No confidence threshold                  | Noise floods signal                       | Only act on >= 0.7                                                |
 | > 3 review iterations                    | Diminishing returns                       | Stop at 3, accept trade-offs                                      |
 | Hardcoding model names in commands       | Overrides user config, goes stale fast    | Omit model/effort flags; use configured defaults                  |
+| `claude -p --allowedTools "..." "PROMPT"` (no `--`) | Variadic flag eats the prompt; CLI errors or hangs on stdin | Use `claude -p --allowedTools "..." -- "PROMPT"` (or pipe via stdin) |
 | Style comments in review                 | LLMs default to bikeshedding              | "Skip: formatting, naming, minor docs"                            |
 | Piped diff for architecture review       | Diff lacks surrounding context            | Use tool-access mode for architecture passes                      |
 | Using an MCP wrapper                     | Unnecessary indirection over a CLI binary | Call the reviewer CLI directly via Bash                           |
