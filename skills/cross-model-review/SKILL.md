@@ -27,6 +27,22 @@ claude --version   # For Codex-hosted sessions
 
 **User defaults are authoritative.** Both CLIs read configured defaults (`~/.codex/config.toml`, `~/.claude/settings.json`). Never specify `--model`, `-m`, `--effort`, or `-c model=` in invocations unless the user explicitly asks to override.
 
+## ⚠️ Critical: Codex Sandbox `yield_time_ms` Gotcha
+
+**This is the #1 reason cross-model review fails when Codex is the host.** Codex's `shell` tool yields output back to the model when `yield_time_ms` elapses (default `1000`). A real `claude -p` review takes 30 seconds to 5+ minutes. Default behavior: empty output + `Process running with session ID NNNN` after 1s, the model assumes failure, retries with new flags, spawns *another* claude process, and the cycle compounds. Audited sessions show 10–14 retries, 5+ orphaned `claude -p` processes, ~7 minutes wall time before the model self-recovered. Set `yield_time_ms` correctly the first time and the call works in one shot.
+
+**The rule: any `claude -p` invocation must run with `yield_time_ms: 300000` (5 minutes) from the very first call.**
+
+```json
+{"cmd": "claude -p --allowedTools \"Read,Glob,Grep,Bash(git *)\" -- \"PROMPT\"", "yield_time_ms": 300000}
+```
+
+If output is empty and the response says `Process running with session ID NNNN`, **do not retry the command** — the call is still working. Reap the running session by passing `session_id: NNNN` with a long yield, e.g. `{"session_id": NNNN, "yield_time_ms": 300000}`. Repeat until `Process exited with code 0`.
+
+Quick sanity ping (use this to confirm the binary is reachable before a real review): `printf 'say ok\n' | claude -p --output-format text --no-session-persistence` with `yield_time_ms: 30000`.
+
+`claude ultrareview` is cloud-hosted and may be disabled by org policy — it returns `Remote sessions are disabled by your organization's policy` at some workplaces. Always fall back to local `claude -p` with `yield_time_ms: 300000`.
+
 ## ⚠️ Critical: Claude CLI Variadic Flag Gotcha
 
 The `claude` CLI has variadic flags that take `<value...>` and greedily consume every following argument until the next flag. If a prompt follows one of these, it gets swallowed as a value, the prompt arg goes missing, and Claude either errors with `Input must be provided either through stdin or as a prompt argument when using --print` or hangs waiting on stdin.
@@ -258,6 +274,9 @@ Ready-to-use prompt templates for security, architecture, performance, error han
 | > 3 review iterations                    | Diminishing returns                       | Stop at 3, accept trade-offs                                      |
 | Hardcoding model names in commands       | Overrides user config, goes stale fast    | Omit model/effort flags; use configured defaults                  |
 | `claude -p --allowedTools "..." "PROMPT"` (no `--`) | Variadic flag eats the prompt; CLI errors or hangs on stdin | Use `claude -p --allowedTools "..." -- "PROMPT"` (or pipe via stdin) |
+| Running `claude -p` with default `yield_time_ms` (1000) on Codex | Yields empty output before claude responds; model misreads as failure and retries, spawning duplicate processes | Set `yield_time_ms: 300000` on the initial call |
+| Re-running `claude -p` after empty output + "Process running with session ID NNNN" | Spawns a parallel claude process; original is still working | Reap the existing `session_id: NNNN` with long yields until exit |
+| Trying `claude ultrareview` first when org policy is unknown | Many orgs disable cloud sessions ("Remote sessions are disabled...") | Use local `claude -p` directly; treat ultrareview as opt-in |
 | Style comments in review                 | LLMs default to bikeshedding              | "Skip: formatting, naming, minor docs"                            |
 | Piped diff for architecture review       | Diff lacks surrounding context            | Use tool-access mode for architecture passes                      |
 | Using an MCP wrapper                     | Unnecessary indirection over a CLI binary | Call the reviewer CLI directly via Bash                           |

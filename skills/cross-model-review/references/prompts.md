@@ -26,6 +26,8 @@ For Codex's structured `codex review` command, prompts aren't needed — it has 
 
 **Claude CLI gotcha:** Variadic flags (`--allowedTools`, `--allowed-tools`, `--disallowedTools`, `--tools`, `--add-dir`, `--betas`, `--file`, `--mcp-config`, `--plugin-dir`) greedily consume every following argument until the next flag. Always either put the prompt before the flag, separate it with `--`, or feed it via stdin.
 
+**Codex sandbox gotcha:** When Codex is the host, run `claude -p` with `yield_time_ms: 300000`. The default 1000ms yield returns empty output and `Process running with session ID NNNN` while claude is still working — do not retry, reap `session_id: NNNN` until it exits. See SKILL.md for details.
+
 ## General Review
 
 Best as the first pass. Broad coverage across all dimensions.
