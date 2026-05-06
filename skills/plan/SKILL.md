@@ -261,13 +261,13 @@ Once the plan is approved, hand off to the right tool:
 
 ### Trust Gradient for Execution
 
-| Phase             | Review Level                          | When                             |
-| ----------------- | ------------------------------------- | -------------------------------- |
-| **Full ceremony** | Implement + spec review + code review | First 3-4 tasks                  |
-| **Standard**      | Implement + spec review               | Tasks 5-8, patterns stabilized   |
-| **Light**         | Implement + quick verify              | Late tasks, established patterns |
+| Phase             | Review Level                                       | When                             |
+| ----------------- | -------------------------------------------------- | -------------------------------- |
+| **Full ceremony** | Implement + spec review + `cross-model-review`     | First 3-4 tasks                  |
+| **Standard**      | Implement + spec review                            | Tasks 5-8, patterns stabilized   |
+| **Light**         | Implement + quick verify                           | Late tasks, established patterns |
 
-This is earned confidence, not cutting corners.
+This is earned confidence, not cutting corners. Run `/hyperskills:cross-model-review` for any task that touches auth, payments, migrations, or data integrity, regardless of phase.
 
 ---
 

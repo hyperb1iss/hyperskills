@@ -267,103 +267,52 @@ If you've corrected the same issue twice, `/clear` and restart. Accumulated cont
 
 ## Commit Cadence
 
-Commit as you go. Each commit captures one logical chunk that has been built, verified, and tested. Many small commits per session is the norm — never accumulate hours of unrelated work into a single mega-commit. The COMMIT step in the macro-sequence loops back to IMPLEMENT for the next chunk; that loop is the rhythm.
+Commit each logical chunk as it lands and verifies. Many small commits per session is the norm — never accumulate hours of unrelated work into one mega-commit. The COMMIT step loops back to IMPLEMENT for the next chunk.
 
 ### When to commit
 
-| Trigger                                          | Action          |
-| ------------------------------------------------ | --------------- |
-| Logical chunk done and verification passes       | Commit now      |
-| Move/rename complete (before behavioral changes) | Commit (move)   |
-| Behavioral change works (after the move commit)  | Commit (change) |
-| Refactor extracted, callers still pass           | Commit          |
-| Test added that exercises a fixed bug            | Commit          |
-| About to switch to a different concern           | Commit current  |
-| Verification fails mid-chunk                     | Don't commit    |
-| Speculative or exploratory edits                 | Don't commit    |
+| Trigger                                            | Action          |
+| -------------------------------------------------- | --------------- |
+| Logical chunk done, verification passes            | Commit          |
+| Move/rename complete, before behavioral changes    | Commit (move)   |
+| Behavioral change works after the move commit      | Commit (change) |
+| Refactor extracted, callers still pass             | Commit          |
+| About to switch to a different concern             | Commit current  |
+| Verification fails or edit is speculative          | Don't commit    |
 
-Rule of thumb: if a reviewer would want to read it as a separate diff, it's a separate commit.
+If a reviewer would want it as a separate diff, it's a separate commit.
 
-### Local style first
+### Mirror local style
 
-Before the first commit in any repo, detect the local style. Repos have personalities — your commits should match.
+Before the first commit in any repo, run `git log -10 --oneline` and mirror the pattern. **Mirror format, not quality** — terse history doesn't lower your bar. Default to Conventional Commits when no pattern exists.
 
-```bash
-git log -10 --oneline
-```
+| Pattern              | Example                        |
+| -------------------- | ------------------------------ |
+| Conventional Commits | `feat(api): add token refresh` |
+| Gitmoji              | `✨ Add token refresh`         |
+| Ticket prefix        | `[ENG-1234] Add token refresh` |
+| Module prefix        | `auth: add token refresh`      |
+| Plain                | `Add token refresh`            |
 
-Observe the actual patterns and mirror them:
-
-| Pattern              | Example                        | Mirror               |
-| -------------------- | ------------------------------ | -------------------- |
-| Conventional Commits | `feat(api): add token refresh` | `type(scope): msg`   |
-| Gitmoji              | `✨ Add token refresh`         | Leading emoji + msg  |
-| Ticket prefix        | `[ENG-1234] Add token refresh` | Mirror bracket style |
-| Module prefix        | `auth: add token refresh`      | Mirror separator     |
-| Plain                | `Add token refresh`            | No prefix, plain     |
-
-**Mirror format, NOT quality.** If existing commits are terse one-liners, you still write a descriptive subject and body — you're elevating the standard, not lowering yours to match. If no clear pattern exists, default to Conventional Commits.
-
-### Conventional Commits (default)
-
-Format: `type(scope): subject`. Scope is optional but encouraged when the change is localized.
-
-| Type       | When                                     |
-| ---------- | ---------------------------------------- |
-| `feat`     | New user-facing capability               |
-| `fix`      | Bug fix                                  |
-| `refactor` | Restructure without behavior change      |
-| `perf`     | Performance improvement                  |
-| `test`     | Add/update tests only                    |
-| `docs`     | Documentation only                       |
-| `style`    | Formatting, whitespace (no logic change) |
-| `chore`    | Tooling, deps, housekeeping              |
-| `build`    | Build system, packaging                  |
-| `ci`       | CI/CD configuration                      |
+Conventional Commit types: `feat` (capability), `fix` (bug), `refactor` (no behavior change), `perf`, `test`, `docs`, `style` (formatting only), `chore` (tooling/deps), `build`, `ci`. Scope is optional but encouraged when the change is localized.
 
 ### Message anatomy
 
-**Subject line:**
+**Subject:** imperative mood, ≤76 chars, no trailing period, no filenames. "Fix null deref in token refresh" beats "Fix bug." For Conventional Commits, no emoji in the subject — it breaks parsers.
 
-| Rule                     | Why                                                        |
-| ------------------------ | ---------------------------------------------------------- |
-| Imperative mood          | "Add token refresh", not "Added" or "Adds"                 |
-| ≤72 characters           | Renders cleanly in `git log --oneline` and PR lists        |
-| No trailing period       | It's a title, not a sentence                               |
-| No emojis (Conventional) | Breaks parser tooling; emoji belongs in body if anywhere   |
-| Skip filenames           | The diff already shows them — describe behavior, not paths |
-| Be specific              | "Fix null deref in token refresh" beats "Fix bug"          |
+**Body** (always include one): wrap at 76 chars, separated from subject by a blank line. Explain *why* — the diff shows *what*. State facts: banish "likely", "probably", "might", "seems", "appears to". If you don't know what a change does, read more before committing. Two sentences usually suffices; mention load-bearing context a future bisect would want.
 
-**Body (always include one):**
+### HEREDOC + Co-Author
 
-- Explain **why**, not what — the diff shows what
-- Wrap at ~72 chars, separate from subject with one blank line
-- Two sentences is often enough; a few short paragraphs when warranted
-- Mention load-bearing context: hidden constraints, related issues, what a future bisect would want to know
-- **No uncertain language.** Banish "likely", "probably", "might", "seems", "appears to", "presumably". You wrote the code — state facts. If you don't know what a change does, read more before committing.
-
-### Co-Authored-By
-
-When an agent does meaningful work in a commit, add a `Co-Authored-By:` trailer with a descriptive identity that names the model. This makes attribution legible across multi-agent sessions and `git log`.
-
-```
-Co-Authored-By: Nova (Claude Opus 4.7) <noreply@anthropic.com>
-```
-
-Use a name that signals which model or persona contributed — not just "Claude".
-
-### The HEREDOC pattern
-
-Always pass commit messages via HEREDOC to preserve formatting and avoid shell-quoting bugs:
+Always pass messages via HEREDOC to preserve formatting. Add a `Co-Authored-By` trailer that names the model — "Claude" alone doesn't disambiguate across multi-agent sessions.
 
 ```bash
 git commit -m "$(cat <<'EOF'
 fix(auth): guard against null session in token refresh
 
-Refresh requests racing with logout were dereferencing a freed session
-pointer, surfacing as a 500 with no log trail. Added an early return
-that emits a single warn log so the failure mode is visible without
-spamming on every refresh attempt.
+Refresh racing with logout was dereferencing a freed session, surfacing
+as a 500 with no log trail. Early return plus a single warn log makes
+the failure mode visible without spamming on every refresh.
 
 Co-Authored-By: Nova (Claude Opus 4.7) <noreply@anthropic.com>
 EOF
@@ -372,32 +321,25 @@ EOF
 
 ### Examples
 
-| Bad                        | Why bad                 | Good                                              |
-| -------------------------- | ----------------------- | ------------------------------------------------- |
-| `fix: bug`                 | Vague                   | `fix(api): resolve null pointer in token refresh` |
-| `update stuff`             | No type, no specificity | `chore(deps): bump axios to 1.7.4`                |
-| `WIP`                      | Not a commit message    | `feat(auth): scaffold magic-link sign-in flow`    |
-| `Added new file for users` | Filename + past tense   | `feat(users): add bulk import endpoint`           |
-| `feat: it works now`       | Doesn't say what works  | `feat(search): add fuzzy matching to user lookup` |
+| Bad                        | Good                                              |
+| -------------------------- | ------------------------------------------------- |
+| `fix: bug`                 | `fix(api): resolve null deref in token refresh`   |
+| `update stuff`             | `chore(deps): bump axios to 1.7.4`                |
+| `WIP`                      | `feat(auth): scaffold magic-link sign-in flow`    |
+| `Added new file for users` | `feat(users): add bulk import endpoint`           |
+| `feat: it works now`       | `feat(search): add fuzzy matching to user lookup` |
 
-### Multi-agent hygiene
+### Multi-agent staging
 
-Other agents may be working in parallel. Stage with care:
+Other agents may be working in parallel:
 
 ```bash
 git status                # See the full picture first
 git diff --staged         # Review what you're about to commit
 git add <specific-files>  # Only files you personally touched
-git commit -m "..."       # HEREDOC for the message
 ```
 
-| Rule                                           | Why                                        |
-| ---------------------------------------------- | ------------------------------------------ |
-| Never `git add -A` or `git add .`              | Picks up other agents' WIP and secrets     |
-| Never `git restore` files you didn't modify    | May discard another agent's in-flight work |
-| Never `git push` unless explicitly asked       | Push is the human's call                   |
-| Skip planning docs, scratch files, `.local.md` | These don't belong in the repo             |
-| Verify before commit, not after                | A red commit poisons bisect history        |
+Never `git add -A` or `git add .` (catches other agents' WIP and secrets). Never `git restore` files you didn't modify. Never `git push` without explicit request — push is the human's call. Skip planning docs, scratch files, and `.local.md` from the repo.
 
 ---
 
@@ -431,7 +373,7 @@ git commit -m "..."       # HEREDOC for the message
 
 ## Cross-Model Review
 
-For high-stakes changes, use `/hyperskills:codex-review` after implementation. A fresh model context eliminates implementation bias and catches real bugs: migration idempotency, PII in debug logging, empty array edge cases, missing batch limits.
+For high-stakes changes, run `/hyperskills:cross-model-review` after implementation. A different reviewer model has different blind spots than the author and catches real bugs: migration idempotency, PII in debug logging, empty-array edge cases, missing batch limits. Use `/hyperskills:codex-review` only when you specifically want the Claude → Codex direction with `codex review` subcommand semantics.
 
 ---
 

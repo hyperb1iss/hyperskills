@@ -153,7 +153,7 @@ Phase 3: Monitor and coordinate
     - Track via Sibyl tasks or TodoWrite
 
 Phase 4: Review and harden (FOREGROUND)
-    - Run `cross-model-review` on completed work
+    - Run `/hyperskills:cross-model-review` on completed work
     - Dispatch fix agents for critical findings
     - Integration testing
 ```
