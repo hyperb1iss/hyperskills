@@ -31,6 +31,29 @@ If output exceeds ~100KB, the diff is too large for one pass. Split per commit, 
 
 ---
 
+## ⚠️ Capture Output to a File — Don't Pipe to `tail`
+
+Never pipe a review to `| tail -N`. Three failure modes:
+
+1. **The pipe buffers until EOF.** `tail` reads the whole stream before producing output, so the agent gets nothing until codex exits or times out — no progress signal mid-review.
+2. **Reviews put the verdict near the top, not the bottom.** Findings sort by severity (BLOCKER first), so `tail -300` cuts exactly the part you want.
+3. **A file lets a human watch progress live.** `tail -f /tmp/review.txt` in another terminal streams the review in real time, completely independent of the agent's call.
+
+**Right pattern:** pick a non-colliding filename, redirect, then read it back.
+
+```bash
+# mktemp so parallel/repeat reviews don't clobber each other.
+# Bake the scope into the slug so it's self-describing under tail -f.
+out=$(mktemp -t codex-review-pre-pr.XXXXXX) && echo "$out"
+
+codex review --base main > "$out" 2>&1
+codex exec --sandbox read-only "PROMPT" > "$out" 2>&1
+```
+
+If `mktemp` isn't handy: `out=/tmp/codex-review-$$-$(date +%s).txt`. Echo the path before the redirect so a human running `tail -f` knows where to look. After exit, `Read` (or `cat`) the file. It persists across turns — re-read instead of re-running.
+
+---
+
 ## Two Ways to Invoke Codex
 
 | Mode           | Command                                                     | Best For                                                    |
@@ -240,6 +263,7 @@ Ready-to-use prompt templates are in `references/prompts.md`.
 | Bare `codex review` (no scope flag) | Hangs or produces 100KB+ blob output | Always pass `--base <ref>`, `--commit <SHA>`, or `--uncommitted` |
 | `codex review` output > 100KB | Diff too large for one pass | Split per commit, or use `codex exec` with narrower prompt |
 | `timeout 30 codex review` | Reviews legitimately take 30s–5min | No timeout, or `timeout 300` minimum |
+| `codex exec "PROMPT" \| tail -300` or `codex review ... \| tail -N` | Pipe buffers until EOF (no progress); cuts the summary/verdict (usually near top); dumps full review into agent context | Redirect to file: `... > /tmp/review.txt 2>&1`, then `head`, `rg severity`, `sed`-by-range. Human can `tail -f` separately. |
 | "Review this code" (no specifics) | Vague — produces bikeshedding | Specific domain prompts with persona |
 | Single pass for everything | Context dilution — shallow on every dimension | Multi-pass with one concern per pass |
 | Self-review (Claude reviews Claude's code) | Systematic bias — models approve their own patterns | Cross-model: Claude writes, Codex reviews |

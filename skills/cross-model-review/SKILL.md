@@ -142,6 +142,36 @@ If `codex review` output exceeds ~100KB, the diff is too large for one pass. Spl
 
 ---
 
+## ⚠️ Both Directions: Capture Output to a File
+
+**Never** pipe a review to `| tail -N` or `| head -N`. Three reasons it fails:
+
+1. **The pipe buffers until EOF.** `tail` (and `head`) read the entire upstream stream before producing output. The agent gets *nothing* until the review process exits or times out — no progress signal, no early verdict, no way to tell if the call is alive. With `claude -p`, this compounds the `yield_time_ms` problem: the wrapping shell call holds output until claude exits, then `tail` finally runs.
+2. **Reviews don't put the verdict at the end.** Findings are typically ordered by severity (BLOCKER first), with the summary/verdict near the top. `tail -300` discards exactly the part you need.
+3. **A file lets a human watch progress live.** `tail -f /tmp/review.txt` in another terminal shows the review streaming in real time, completely independent of the agent's call. The pipe pattern hides everything until exit.
+
+**Right pattern:** pick a non-colliding filename, redirect to it, then read it back.
+
+```bash
+# Use mktemp so parallel/repeat reviews don't clobber each other.
+# Bake the scope into the slug so the file is self-describing when you tail -f it.
+out=$(mktemp -t codex-review-pre-pr.XXXXXX) && echo "$out"
+
+# Claude → Codex
+codex review --base main > "$out" 2>&1
+codex exec --sandbox read-only "PROMPT" > "$out" 2>&1
+
+# Codex → Claude (yield_time_ms: 300000 still required on the shell call)
+claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT" > "$out" 2>&1
+git diff main...HEAD | claude -p "PROMPT" > "$out" 2>&1
+```
+
+If `mktemp` isn't handy, use a PID + timestamp slug: `out=/tmp/codex-review-$$-$(date +%s).txt`.
+
+Echo the path before the redirect so the agent (and a human running `tail -f`) knows where to look. After the command exits, `Read` (or `cat`) the file. It persists across turns — re-read instead of re-running.
+
+---
+
 ## Review Modes Matrix
 
 Match the row to what you're actually reviewing. The current skill historically documented 5 patterns; real usage covers many more.
@@ -291,6 +321,7 @@ Ready-to-use prompt templates for security, architecture, performance, error han
 | Bare `codex review` (no scope flag) | Hangs or produces 100KB+ blob output | Always pass `--base <ref>`, `--commit <SHA>`, or `--uncommitted` |
 | `codex review` output > 100KB | Diff too large for one pass | Split per commit, or use `codex exec` with narrower prompt |
 | `timeout 30 codex review` or `timeout 30 claude -p` | Reviews legitimately take 30s–5min | No timeout, or `timeout 300` minimum |
+| `codex exec "PROMPT" \| tail -300` or `claude -p "PROMPT" \| tail -300` | Pipe buffers until EOF (no progress signal); discards summary/verdict (usually near top); slurps full review into agent context window | Redirect to a file: `... > /tmp/review.txt 2>&1`. Then `head`, `rg severity`, `sed`-by-range. Human can `tail -f` separately. |
 | `<<'EOF'` heredoc when prompt references env vars | Single-quoted heredoc blocks expansion; vars stay literal | Use `<<EOF` (unquoted) when interpolation is needed |
 | Trying `claude ultrareview` first | Many orgs block ("Remote sessions are disabled by your organization's policy") | Local `claude -p` first; ultrareview is opt-in |
 | Style/formatting comments in review | LLMs default to bikeshedding | Always include "Skip: formatting, naming, minor docs" |
