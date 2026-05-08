@@ -7,7 +7,7 @@ description: Use this skill when designing, deploying, or operating the kubernet
 
 [`kubernetes-sigs/agent-sandbox`](https://github.com/kubernetes-sigs/agent-sandbox) is a SIG Apps subproject that provides a Kubernetes-native primitive for **isolated, stateful, singleton workloads** — the shape needed for AI agent runtimes, code interpreters, computer-use browsers, dev sandboxes, and per-user Jupyter notebooks. It fills the gap between `Deployment` (stateless, replicated) and `StatefulSet` (numbered, replicated) by modelling a long-lived pod that can be paused, resumed, scheduled for expiry, and optionally pre-warmed.
 
-Current API version is `v1alpha1`. Latest release at the time this skill was written is **v0.3.10** (April 2026). The project launched at KubeCon Atlanta in November 2025, so most training data predates it — prefer this skill over guessing.
+Current API version is `v1alpha1`. Latest release at the time this skill was written is **v0.4.5** (May 2026). The project launched at KubeCon Atlanta in November 2025, so most training data predates it. Prefer this skill over guessing.
 
 ## The Four CRDs
 

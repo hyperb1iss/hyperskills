@@ -5,7 +5,7 @@ description: Use this skill when building Python packages, configuring build bac
 
 # uv-build — Python Build Backend
 
-`uv_build` is Astral's Rust-based build backend for Python packages. As of uv-build 0.11.7 (Apr 2026), it is the native backend documented by uv for most pure Python packages. **Pure Python packages only** — no C/Rust extensions.
+`uv_build` is Astral's Rust-based build backend for Python packages. As of uv-build 0.11.11 (May 2026), it is the native backend documented by uv for most pure Python packages. **Pure Python packages only:** no C/Rust extensions.
 
 ## When to Use uv-build
 

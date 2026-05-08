@@ -23,7 +23,7 @@ NIST SP 800-207 frames Zero Trust as removing implicit trust based on network lo
 
 ## SLSA 1.2 (Supply Chain)
 
-As of Apr 26, 2026, SLSA 1.2 uses separate tracks. The old single SLSA 1-4 framing is retired; Build L4, hermetic builds, and reproducible builds are future-direction topics, not current requirements.
+As of May 2026, SLSA 1.2 uses separate tracks. The old single SLSA 1-4 framing is retired; Build L4, hermetic builds, and reproducible builds are future-direction topics, not current requirements.
 
 | Track  | Level | Meaning                                | Primary Protection        |
 | ------ | ----- | -------------------------------------- | ------------------------- |
@@ -48,7 +48,7 @@ For agent work, minimum practical target is Build L2 for releases: hosted CI, si
 
 ## OWASP Top 10:2025 Checklist
 
-As of Apr 26, 2026, OWASP lists the 2025 release as current.
+As of May 2026, OWASP lists the 2025 release as current.
 
 - [ ] A01: Broken Access Control
 - [ ] A02: Security Misconfiguration
