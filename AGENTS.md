@@ -35,8 +35,6 @@ hyperskills/
 │   │   └── references/
 │   │       ├── conversation-formats.md
 │   │       └── extraction-guide.md
-│   ├── security/
-│   │   └── SKILL.md
 │   ├── git/
 │   │   └── SKILL.md
 │   ├── tilt/
@@ -236,11 +234,11 @@ Add relevant keywords to the `keywords` array:
 }
 ```
 
-Bump the version following semver:
+Bump the version. Skills are opt-in, so strict semver "breaking" rarely applies — version reflects user-facing surface change, not theoretical break risk:
 
-- New skill = minor version bump (e.g., 3.0.0 → 3.1.0)
-- Skill content update = patch bump (e.g., 3.1.0 → 3.1.1)
-- Breaking changes (rename/remove skill) = major bump
+- Patch: edits to existing skills (content updates, fixes, small additions)
+- Minor: new skill added, removed, or renamed
+- Major: reserved for plugin-level architectural changes (manifest format, layout overhaul) — rare
 
 #### `AGENTS.md` / `CLAUDE.md`
 
@@ -295,7 +293,6 @@ Before committing, verify:
 | `codex-review`       | ~2,000 | 1 file     | Process — Codex-specific review (Claude → Codex) |
 | `cross-model-review` | ~2,400 | 1 file     | Process — bidirectional cross-model review       |
 | `dream`              | ~2,300 | 2 files    | Process — conversation memory consolidation      |
-| `security`           | ~1,500 | none       | Domain — security ops                            |
 | `git`                | ~1,200 | none       | Domain — git operations                          |
 | `tilt`               | ~2,500 | 2 files    | Domain — Kubernetes dev                          |
 | `agent-sandbox`      | ~2,000 | 3 files    | Domain — agent-sandbox Kubernetes operator       |
@@ -316,7 +313,7 @@ When adding a new skill, it should fit one of these categories:
 
 **Domain skills** — specialized knowledge for a specific technology or practice:
 
-- `security`, `git`, `tilt`, `agent-sandbox`, `tui-design`, `uv`, `ruff`, `ty`, `uv-build`
+- `git`, `tilt`, `agent-sandbox`, `tui-design`, `uv`, `ruff`, `ty`, `uv-build`
 - These tend to be reference-heavy with decision trees and lookup tables
 
 ## Writing Style

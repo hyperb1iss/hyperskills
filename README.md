@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Skills-17-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="17 Skills">
+  <img src="https://img.shields.io/badge/Skills-16-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="16 Skills">
   <img src="https://img.shields.io/badge/skills.sh-Compatible-ff6ac1?style=for-the-badge&logo=vercel&logoColor=white" alt="skills.sh">
 </p>
 
@@ -32,9 +32,9 @@ Models already know how to write React components, Kubernetes manifests, and PyT
 
 hyperskills is built around an agent workflow. Brainstorming structured by the Double Diamond. Wave-based research with deferred synthesis. Verification-driven planning and implementation. Cross-model peer review that catches what self-review misses. Six orchestration strategies for multi-agent work. Conversation consolidation that pulls signal out of past sessions into persistent memory. The process skills are the heart of it, mined from thousands of real dispatches and tens of thousands of tracked operations.
 
-Domain skills round out the toolbox where models have stale or missing knowledge: the agent-sandbox Kubernetes operator (too new for training data), current Astral Python tooling, Tilt operational decision trees, terminal UI design that survives across emulators, an OWASP/SLSA security reference.
+Domain skills round out the toolbox where models have stale or missing knowledge: the agent-sandbox Kubernetes operator (too new for training data), current Astral Python tooling, Tilt operational decision trees, and terminal UI design that survives across emulators.
 
-Each skill encodes procedural knowledge, decision trees, anti-patterns, and current SOTA. None prescribes a strict workflow. They give you knowledge and framing; you decide when to reach for them. Skills carry procedural knowledge in-context; [Sibyl](https://github.com/hyperb1iss/sibyl) carries decisions, patterns, and learnings across sessions. 17 skills, all installable independently.
+Each skill encodes procedural knowledge, decision trees, anti-patterns, and current SOTA. None prescribes a strict workflow. They give you knowledge and framing; you decide when to reach for them. Skills carry procedural knowledge in-context; [Sibyl](https://github.com/hyperb1iss/sibyl) carries decisions, patterns, and learnings across sessions. 16 skills, all installable independently.
 
 ## ⚡ Installation
 
@@ -80,7 +80,7 @@ A few combinations come up often, more as observation than prescription:
 | Python project work     | uv, ruff, ty, uv-build                                |
 | Knowledge consolidation | dream pulls insights from past sessions into Sibyl    |
 
-Domain skills (security, git, tilt, agent-sandbox, tui-design, uv, ruff, ty, uv-build) plug in wherever the work touches their territory. Any skill can loop back when new questions emerge.
+Domain skills (git, tilt, agent-sandbox, tui-design, uv, ruff, ty, uv-build) plug in wherever the work touches their territory. Any skill can loop back when new questions emerge.
 
 ## 🔮 Skills
 
@@ -161,14 +161,6 @@ Two-phase conversation review. Harvests Claude Code and Codex sessions, extracts
 ### Domain Skills
 
 Specialized knowledge for specific technologies where models have stale or missing training data. Reference material, decision trees, field-tested patterns.
-
-#### `security`: Security Operations
-
-STRIDE threat modeling, NIST Zero Trust, OWASP Top 10:2025, SLSA 1.2 Build / Source tracks, incident response mapped to NIST CSF 2.0, and a compliance framework reference.
-
-```bash
-/hyperskills:security
-```
 
 #### `git`: Advanced Git Operations
 
