@@ -1,5 +1,5 @@
 <h1 align="center">
-  hyperskills
+  ⚡ hyperskills
 </h1>
 
 <p align="center">
@@ -26,22 +26,24 @@
 
 ---
 
-## What This Is
+## 💎 What This Is
 
 Models already know how to write React components, Kubernetes manifests, and PyTorch code. They don't need 300 lines of examples for that.
 
-hyperskills covers the parts they don't have. Cross-model code review gotchas (the `yield_time_ms` trap, variadic flag escaping, output capture). Multi-agent dispatch strategies mined from hundreds of real sessions. Build-system migrations between Astral tools. Tilt operational decision trees. Terminal UI design that survives different emulators. The agent-sandbox Kubernetes operator (too new for any model's training data).
+hyperskills is built around an agent workflow. Brainstorming structured by the Double Diamond. Wave-based research with deferred synthesis. Verification-driven planning and implementation. Cross-model peer review that catches what self-review misses. Six orchestration strategies for multi-agent work. Conversation consolidation that pulls signal out of past sessions into persistent memory. The process skills are the heart of it, mined from thousands of real dispatches and tens of thousands of tracked operations.
 
-Each skill encodes procedural knowledge, decision trees, anti-patterns, and current SOTA. None of them prescribes a strict workflow. They give you knowledge and framing; you decide when to reach for them.
+Domain skills round out the toolbox where models have stale or missing knowledge: the agent-sandbox Kubernetes operator (too new for training data), current Astral Python tooling, Tilt operational decision trees, terminal UI design that survives across emulators, an OWASP/SLSA security reference.
 
-This is what Bliss & Nova use every day. Skills carry procedural knowledge in-context; [Sibyl](https://github.com/hyperb1iss/sibyl) carries decisions, patterns, and learnings across sessions. 17 skills, all installable independently.
+Each skill encodes procedural knowledge, decision trees, anti-patterns, and current SOTA. None prescribes a strict workflow. They give you knowledge and framing; you decide when to reach for them. Skills carry procedural knowledge in-context; [Sibyl](https://github.com/hyperb1iss/sibyl) carries decisions, patterns, and learnings across sessions. 17 skills, all installable independently.
 
-## Installation
+## ⚡ Installation
 
 ### Claude Code
 
 ```bash
-/plugin install hyperskills
+# Register the marketplace, then install
+/plugin marketplace add hyperb1iss/hyperskills
+/plugin install hyperskills@hyperb1iss
 ```
 
 ### Vercel Skills (skills.sh)
@@ -62,7 +64,7 @@ git clone https://github.com/hyperb1iss/hyperskills.git
 ln -s $(pwd)/hyperskills/skills ~/.claude/skills/hyperskills
 ```
 
-## Composing Skills
+## 🪄 Composing Skills
 
 Skills are independent. None of them require the others. A typo fix doesn't need brainstorming, a clear bug doesn't need research, and the Python tooling skills compose freely.
 
@@ -80,11 +82,11 @@ A few combinations come up often, more as observation than prescription:
 
 Domain skills (security, git, tilt, agent-sandbox, tui-design, uv, ruff, ty, uv-build) plug in wherever the work touches their territory. Any skill can loop back when new questions emerge.
 
-## Skills
+## 🔮 Skills
 
 ### Process Skills
 
-How to approach a class of work: workflows, phases, decision gates.
+How to approach a class of work: workflows, phases, decision gates. The interesting part of hyperskills lives here.
 
 #### `brainstorm`: Structured Ideation
 
@@ -158,7 +160,7 @@ Two-phase conversation review. Harvests Claude Code and Codex sessions, extracts
 
 ### Domain Skills
 
-Specialized knowledge for specific technologies. Reference material, decision trees, field-tested patterns.
+Specialized knowledge for specific technologies where models have stale or missing training data. Reference material, decision trees, field-tested patterns.
 
 #### `security`: Security Operations
 
@@ -232,7 +234,7 @@ uv_build backend guidance for pure Python packages, module discovery, namespace 
 /hyperskills:uv-build
 ```
 
-## Architecture
+## 🧪 Architecture
 
 Skills use progressive disclosure. Light when you don't need depth, deep when you do.
 
@@ -261,13 +263,13 @@ Skills with reference files for the deep-dive material:
 
 | Platform           | Installation                                       |
 | ------------------ | -------------------------------------------------- |
-| **Claude Code**    | `/plugin install hyperskills`                      |
+| **Claude Code**    | `/plugin marketplace add hyperb1iss/hyperskills`<br>`/plugin install hyperskills@hyperb1iss` |
 | **Codex CLI**      | `npx skills add hyperbliss/hyperskills -a codex`   |
 | **Cursor**         | `npx skills add hyperbliss/hyperskills -a cursor`  |
 | **GitHub Copilot** | `npx skills add hyperbliss/hyperskills -a copilot` |
 | **Gemini CLI**     | `npx skills add hyperbliss/hyperskills -a gemini`  |
 
-## Development
+## 🛠️ Development
 
 ```bash
 git clone https://github.com/hyperb1iss/hyperskills.git
@@ -286,6 +288,10 @@ See [AGENTS.md](AGENTS.md) for the contributor guide on adding new skills.
 Licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ---
+
+<p align="center">
+  💜
+</p>
 
 <p align="center">
   <a href="https://github.com/hyperb1iss">
