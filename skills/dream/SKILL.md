@@ -270,7 +270,7 @@ sibyl search "[entity title keywords]" --type [type] --limit 5
 | ----------------------- | ----------------------------------------------------------- |
 | No similar entries      | Create new entity                                           |
 | Similar but older entry | Update existing if new info supersedes, or add relationship |
-| Exact duplicate         | Skip, log in dream report                                  |
+| Exact duplicate         | Skip, log in dream report                                   |
 | Contradictory entry     | Create tension entity linking both                          |
 
 ### Batch Processing
@@ -466,15 +466,15 @@ See `references/extraction-guide.md` for:
 
 ## Anti-Patterns
 
-| Anti-Pattern                             | Fix                                                                   |
-| ---------------------------------------- | --------------------------------------------------------------------- |
-| Reading entire JSONL files               | Grep first, read targeted segments                                    |
-| Extracting trivial Q&A                   | Only extract non-obvious insights with transfer value                 |
+| Anti-Pattern                             | Fix                                                                  |
+| ---------------------------------------- | -------------------------------------------------------------------- |
+| Reading entire JSONL files               | Grep first, read targeted segments                                   |
+| Extracting trivial Q&A                   | Only extract non-obvious insights with transfer value                |
 | Writing to memory/\*.md instead of Sibyl | Sibyl is the primary store, memory files are a narrow exception      |
 | Skipping dedup check                     | Always search Sibyl before writing, duplicates degrade graph quality |
 | Dream without orient                     | Always check when last dream ran, avoid re-processing                |
-| Extracting everything from every session | Score sessions first, process high-signal ones deeply                 |
-| Ignoring Codex sessions                  | Codex conversations contain valuable engineering knowledge too        |
+| Extracting everything from every session | Score sessions first, process high-signal ones deeply                |
+| Ignoring Codex sessions                  | Codex conversations contain valuable engineering knowledge too       |
 
 ---
 

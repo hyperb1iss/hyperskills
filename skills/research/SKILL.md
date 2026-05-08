@@ -323,8 +323,8 @@ Synthesize: Positioning matrix + gap analysis
 
 ## Anti-Patterns
 
-| Anti-Pattern                         | Fix                                                                              |
-| ------------------------------------ | -------------------------------------------------------------------------------- |
+| Anti-Pattern                         | Fix                                                                             |
+| ------------------------------------ | ------------------------------------------------------------------------------- |
 | Synthesizing after Wave 1 only       | Wait for gap analysis, premature conclusions miss nuance                        |
 | 50 agents with "research everything" | Specific scope per agent, vague prompts produce vague results                   |
 | Only official documentation          | Include community experience, docs show intent, community shows reality         |

@@ -11,7 +11,7 @@ Cross-model validation: the authoring model writes code, a different model revie
 
 ## Direction & Pre-Flight
 
-Identify the host first. The host runs the *other* model's CLI as a subprocess.
+Identify the host first. The host runs the _other_ model's CLI as a subprocess.
 
 | Current host | You invoke   | Direction                     |
 | ------------ | ------------ | ----------------------------- |
@@ -20,10 +20,10 @@ Identify the host first. The host runs the *other* model's CLI as a subprocess.
 
 Confirm the reviewer is reachable before the real call:
 
-| Host  | Verify command                                                                                                       | Notes                          |
-| ----- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| Claude | `codex --version`                                                                                                   | One-shot, no special flags     |
-| Codex | `printf 'say ok\n' \| claude -p --output-format text --no-session-persistence` with `yield_time_ms: 30000`            | Sanity ping only, see Rule 1  |
+| Host   | Verify command                                                                                             | Notes                        |
+| ------ | ---------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| Claude | `codex --version`                                                                                          | One-shot, no special flags   |
+| Codex  | `printf 'say ok\n' \| claude -p --output-format text --no-session-persistence` with `yield_time_ms: 30000` | Sanity ping only, see Rule 1 |
 
 **User defaults are authoritative.** Both CLIs read configured defaults (`~/.codex/config.toml`, `~/.claude/settings.json`). Never specify `--model`, `-m`, or `-c model=`. The only sanctioned override is reasoning effort, and only for spec review (see Effort Override Policy below).
 
@@ -40,7 +40,7 @@ Codex's shell tool yields output back to the model after `yield_time_ms` elapses
 **The rule:** every `claude -p` call uses `yield_time_ms: 300000` (5 minutes). Initial call, every reaping call, every sanity ping beyond a one-line `say ok`. No exceptions.
 
 ```json
-{"cmd": "claude -p --allowedTools \"Read,Glob,Grep,Bash(git *)\" -- \"PROMPT\"", "yield_time_ms": 300000}
+{ "cmd": "claude -p --allowedTools \"Read,Glob,Grep,Bash(git *)\" -- \"PROMPT\"", "yield_time_ms": 300000 }
 ```
 
 **Common cognitive trap:** "My prompt is short, I only need 30s." Wrong. Claude session setup, network, and model compute dominate; prompt length barely factors in. Always 300000.
@@ -115,10 +115,10 @@ claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT"
 
 **Two fallback shapes** (use only if `--` won't work in your context):
 
-| Shape | Example |
-| ----- | ------- |
-| Prompt before flags | `claude -p "PROMPT" --allowedTools "Read,Bash(git *)"` |
-| Stdin pipe | `echo "PROMPT" \| claude -p --allowedTools "Read,Bash(git *)"` |
+| Shape               | Example                                                        |
+| ------------------- | -------------------------------------------------------------- |
+| Prompt before flags | `claude -p "PROMPT" --allowedTools "Read,Bash(git *)"`         |
+| Stdin pipe          | `echo "PROMPT" \| claude -p --allowedTools "Read,Bash(git *)"` |
 
 The `codex` CLI does not have this issue, its flags are non-variadic.
 
@@ -130,11 +130,11 @@ The `codex` CLI does not have this issue, its flags are non-variadic.
 
 A bare `codex review` (no scope) is the #1 cause of Claude → Codex failures: it hangs or produces 100KB+ blob output. **Always specify exactly one scope flag:**
 
-| Want to review | Command |
-| -------------- | ------- |
-| Branch since main | `codex review --base main` |
-| Single commit | `codex review --commit <SHA>` |
-| Working tree (unstaged) | `codex review --uncommitted` |
+| Want to review          | Command                       |
+| ----------------------- | ----------------------------- |
+| Branch since main       | `codex review --base main`    |
+| Single commit           | `codex review --commit <SHA>` |
+| Working tree (unstaged) | `codex review --uncommitted`  |
 
 For anything outside this trio (spec docs, single files, custom scopes, personas), use `codex exec "PROMPT"` with explicit scope in the prompt, never bare `codex review`.
 
@@ -146,7 +146,7 @@ If `codex review` output exceeds ~100KB, the diff is too large for one pass. Spl
 
 **Never** pipe a review to `| tail -N` or `| head -N`. Three reasons it fails:
 
-1. **The pipe buffers until EOF.** `tail` (and `head`) read the entire upstream stream before producing output. The agent gets *nothing* until the review process exits or times out, no progress signal, no early verdict, no way to tell if the call is alive. With `claude -p`, this compounds the `yield_time_ms` problem: the wrapping shell call holds output until claude exits, then `tail` finally runs.
+1. **The pipe buffers until EOF.** `tail` (and `head`) read the entire upstream stream before producing output. The agent gets _nothing_ until the review process exits or times out, no progress signal, no early verdict, no way to tell if the call is alive. With `claude -p`, this compounds the `yield_time_ms` problem: the wrapping shell call holds output until claude exits, then `tail` finally runs.
 2. **Reviews don't put the verdict at the end.** Findings are typically ordered by severity (BLOCKER first), with the summary/verdict near the top. `tail -300` discards exactly the part you need.
 3. **A file lets a human watch progress live.** `tail -f /tmp/review.txt` in another terminal shows the review streaming in real time, completely independent of the agent's call. The pipe pattern hides everything until exit.
 
@@ -176,19 +176,19 @@ Echo the path before the redirect so the agent (and a human running `tail -f`) k
 
 Match the row to what you're actually reviewing. The current skill historically documented 5 patterns; real usage covers many more.
 
-| Mode | Scope | Claude → Codex | Codex → Claude |
-| ---- | ----- | -------------- | -------------- |
-| **Pre-PR full** | `main...HEAD` (all commits on branch) | `codex review --base main` | `git diff main...HEAD \| claude -p "PROMPT"` |
-| **Single commit** | One SHA | `codex review --commit <SHA>` | `git show <SHA> \| claude -p "PROMPT"` |
-| **Commit range** | `<base>..HEAD` (multi-commit slice, not all of main) | `codex review --base <base>` | `git diff <base>..HEAD \| claude -p "PROMPT"` |
-| **Branch-vs-branch** | feat-a vs feat-b (stacked PRs) | `codex review --base feat-a` | `git diff feat-a...HEAD \| claude -p "PROMPT"` |
-| **Staged only** | About-to-commit | `git diff --staged \| codex exec "PROMPT"` | `git diff --staged \| claude -p "PROMPT"` |
-| **Unstaged WIP** | Working tree | `codex review --uncommitted` | `git diff \| claude -p "PROMPT"` |
-| **Mixed state** | Staged + unstaged + untracked | `git status; codex exec "Review all current uncommitted work"` | `git status; git diff HEAD \| claude -p "PROMPT"` |
-| **Single file / path** | One file or directory | `codex exec --sandbox read-only "Review only <path> for ..."` | `git diff <path> \| claude -p "PROMPT"` (or tool-access for cross-file) |
-| **Spec / RFC / design doc** | Markdown prose | `codex exec -c model_reasoning_effort="xhigh" "Review docs/design/RFC.md ..."` | `cat docs/design/RFC.md \| claude -p "PROMPT"` (max effort, see policy) |
-| **Focused investigation** | Custom (security, perf) | `codex exec "You are a senior <DOMAIN> engineer. Analyze <CONCERN> ..."` | `claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT"` |
-| **Ralph loop** | Implement → review → fix | Repeat any of the above × 3 max | Repeat any of the above × 3 max |
+| Mode                        | Scope                                                | Claude → Codex                                                                 | Codex → Claude                                                          |
+| --------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| **Pre-PR full**             | `main...HEAD` (all commits on branch)                | `codex review --base main`                                                     | `git diff main...HEAD \| claude -p "PROMPT"`                            |
+| **Single commit**           | One SHA                                              | `codex review --commit <SHA>`                                                  | `git show <SHA> \| claude -p "PROMPT"`                                  |
+| **Commit range**            | `<base>..HEAD` (multi-commit slice, not all of main) | `codex review --base <base>`                                                   | `git diff <base>..HEAD \| claude -p "PROMPT"`                           |
+| **Branch-vs-branch**        | feat-a vs feat-b (stacked PRs)                       | `codex review --base feat-a`                                                   | `git diff feat-a...HEAD \| claude -p "PROMPT"`                          |
+| **Staged only**             | About-to-commit                                      | `git diff --staged \| codex exec "PROMPT"`                                     | `git diff --staged \| claude -p "PROMPT"`                               |
+| **Unstaged WIP**            | Working tree                                         | `codex review --uncommitted`                                                   | `git diff \| claude -p "PROMPT"`                                        |
+| **Mixed state**             | Staged + unstaged + untracked                        | `git status; codex exec "Review all current uncommitted work"`                 | `git status; git diff HEAD \| claude -p "PROMPT"`                       |
+| **Single file / path**      | One file or directory                                | `codex exec --sandbox read-only "Review only <path> for ..."`                  | `git diff <path> \| claude -p "PROMPT"` (or tool-access for cross-file) |
+| **Spec / RFC / design doc** | Markdown prose                                       | `codex exec -c model_reasoning_effort="xhigh" "Review docs/design/RFC.md ..."` | `cat docs/design/RFC.md \| claude -p "PROMPT"` (max effort, see policy) |
+| **Focused investigation**   | Custom (security, perf)                              | `codex exec "You are a senior <DOMAIN> engineer. Analyze <CONCERN> ..."`       | `claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT"`     |
+| **Ralph loop**              | Implement → review → fix                             | Repeat any of the above × 3 max                                                | Repeat any of the above × 3 max                                         |
 
 **Common scope mistakes:**
 
@@ -206,13 +206,13 @@ Both CLIs scope what the reviewer can read, write, and execute. Default to the m
 
 `codex exec` and `codex review` accept `--sandbox <mode>`:
 
-| Mode                             | Read | Write     | Network | Use for                                    |
-| -------------------------------- | ---- | --------- | ------- | ------------------------------------------ |
-| `read-only`                      | ✓    | ✗         | ✗       | Pure review (default for review work)      |
-| `workspace-write`                | ✓    | cwd only  | ✗       | Review + apply suggested fixes             |
-| `danger-full-access`             | ✓    | ✓         | ✓       | Last resort; explicit user request only    |
-| `--full-auto` (alias)            | —    | —         | —       | `--ask-for-approval never --sandbox workspace-write` |
-| `--dangerously-bypass-approvals-and-sandbox` | — | — | — | Last resort; full bypass               |
+| Mode                                         | Read | Write    | Network | Use for                                              |
+| -------------------------------------------- | ---- | -------- | ------- | ---------------------------------------------------- |
+| `read-only`                                  | ✓    | ✗        | ✗       | Pure review (default for review work)                |
+| `workspace-write`                            | ✓    | cwd only | ✗       | Review + apply suggested fixes                       |
+| `danger-full-access`                         | ✓    | ✓        | ✓       | Last resort; explicit user request only              |
+| `--full-auto` (alias)                        | —    | —        | —       | `--ask-for-approval never --sandbox workspace-write` |
+| `--dangerously-bypass-approvals-and-sandbox` | —    | —        | —       | Last resort; full bypass                             |
 
 ### Codex working-directory and ergonomics flags
 
@@ -228,13 +228,13 @@ Both CLIs scope what the reviewer can read, write, and execute. Default to the m
 
 ### Claude permission flags (`claude -p`)
 
-| Flag                                          | When                                              |
-| --------------------------------------------- | ------------------------------------------------- |
-| `--allowedTools "Read,Glob,Grep,Bash(git *)"` | Standard read-only review toolset (recommended)   |
-| `--add-dir <PATH>`                            | Read access outside cwd                           |
-| `--no-session-persistence`                    | Sanity pings; one-shot calls                      |
-| `--output-format text` / `json`               | Capture for parsing                               |
-| `--dangerously-skip-permissions`              | Last resort; explicit user request only           |
+| Flag                                          | When                                            |
+| --------------------------------------------- | ----------------------------------------------- |
+| `--allowedTools "Read,Glob,Grep,Bash(git *)"` | Standard read-only review toolset (recommended) |
+| `--add-dir <PATH>`                            | Read access outside cwd                         |
+| `--no-session-persistence`                    | Sanity pings; one-shot calls                    |
+| `--output-format text` / `json`               | Capture for parsing                             |
+| `--dangerously-skip-permissions`              | Last resort; explicit user request only         |
 
 The default toolset for Codex → Claude is `--allowedTools "Read,Glob,Grep,Bash(git *)"`. Add `Bash(rg:*)` if the reviewer needs grep across files. Resist write tools unless the review explicitly applies fixes.
 
@@ -244,10 +244,10 @@ The default toolset for Codex → Claude is `--allowedTools "Read,Glob,Grep,Bash
 
 Code review defers to user config. Spec review overrides higher.
 
-| What you're reviewing                | Codex effort                              | Claude effort |
-| ------------------------------------ | ----------------------------------------- | ------------- |
-| Code (commit / diff / PR / WIP)      | **No flag**, defer to `~/.codex/config.toml` | **No flag**, defer to settings |
-| Spec / RFC / design doc              | `-c model_reasoning_effort="xhigh"`       | `max`         |
+| What you're reviewing           | Codex effort                                 | Claude effort                  |
+| ------------------------------- | -------------------------------------------- | ------------------------------ |
+| Code (commit / diff / PR / WIP) | **No flag**, defer to `~/.codex/config.toml` | **No flag**, defer to settings |
+| Spec / RFC / design doc         | `-c model_reasoning_effort="xhigh"`          | `max`                          |
 
 **Why split:** specs are higher-stakes than diffs, a subtle architectural mistake compounds across the eventual implementation. Code diffs are smaller scope and the user's configured effort is fine.
 
@@ -257,9 +257,9 @@ Code review defers to user config. Spec review overrides higher.
 
 For Codex-hosted sessions, choose based on depth:
 
-| Approach | Command shape | When |
-| -------- | ------------- | ---- |
-| **Piped diff** | `git diff ... \| claude -p "PROMPT"` | Quick review; reviewer sees only the diff. Faster, cheaper. |
+| Approach        | Command shape                                                       | When                                                                                                         |
+| --------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Piped diff**  | `git diff ... \| claude -p "PROMPT"`                                | Quick review; reviewer sees only the diff. Faster, cheaper.                                                  |
 | **Tool access** | `claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT"` | Architecture/security/cross-file deep-dive. Reviewer can trace data flow across files the diff doesn't show. |
 
 Tool access costs more tokens but catches bugs that need surrounding context (signatures defined elsewhere, downstream consumers, similar patterns).
@@ -275,7 +275,7 @@ Run multiple focused passes for thorough reviews. Each pass gets a specific pers
 | **Correctness**  | Bugs, logic, edge cases, race conditions    | Structured review (`codex review`) or piped diff with general prompt |
 | **Security**     | OWASP Top 10:2025, injection, auth, secrets | Focused investigation with security persona                          |
 | **Architecture** | Coupling, abstractions, API consistency     | Tool-access mode for full file context                               |
-| **Performance** | O(n²), N+1 queries, memory leaks            | Focused investigation with performance persona                       |
+| **Performance**  | O(n²), N+1 queries, memory leaks            | Focused investigation with performance persona                       |
 
 | Change size                                 | Strategy                     |
 | ------------------------------------------- | ---------------------------- |
@@ -306,29 +306,29 @@ Ready-to-use prompt templates for security, architecture, performance, error han
 
 ## Anti-Patterns
 
-| Anti-Pattern | Why It Fails | Fix |
-| ------------ | ------------ | --- |
-| Self-review (model reviews its own code) | Systematic bias, same blind spots | Cross-model: author and reviewer are different models |
-| "Review this code" (no specifics) | Vague → bikeshedding | Domain prompt + persona + structured output |
-| Single pass for everything | Context dilution | Multi-pass, one concern per pass |
-| No confidence threshold | Noise floods signal | Only act on ≥ 0.7 |
-| > 3 review iterations | Diminishing returns | Stop at 3, accept trade-offs |
-| Hardcoding `--model` / `-m` / `-c model=` | Overrides user config; stale model names | Defer to user config; only `model_reasoning_effort` for spec review |
-| `claude -p --allowedTools "..." "PROMPT"` (no `--`) | Variadic flag eats prompt → "Input must be provided" or hang | Always `--` separator: `claude -p --allowedTools "..." -- "PROMPT"` |
-| `yield_time_ms: 1000` (or any value < 300000) on `claude -p` | Yields empty output before claude responds; model treats as failure and retries | `yield_time_ms: 300000` on EVERY call, no exceptions |
-| Reverting `yield_time_ms` mid-session (300000 → 1000 between calls) | New orphans pile on top of existing ones | Pick 300000 once, keep it for every call |
-| Re-invoking `claude -p` after `Process running with session ID NNNN` | Spawns a parallel claude; original still working | Reap with `{"session_id": NNNN, "yield_time_ms": 300000}` until exit code |
-| Bare `codex review` (no scope flag) | Hangs or produces 100KB+ blob output | Always pass `--base <ref>`, `--commit <SHA>`, or `--uncommitted` |
-| `codex review` output > 100KB | Diff too large for one pass | Split per commit, or use `codex exec` with narrower prompt |
-| `timeout 30 codex review` or `timeout 30 claude -p` | Reviews legitimately take 30s–5min | No timeout, or `timeout 300` minimum |
+| Anti-Pattern                                                            | Why It Fails                                                                                                                           | Fix                                                                                                                           |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Self-review (model reviews its own code)                                | Systematic bias, same blind spots                                                                                                      | Cross-model: author and reviewer are different models                                                                         |
+| "Review this code" (no specifics)                                       | Vague → bikeshedding                                                                                                                   | Domain prompt + persona + structured output                                                                                   |
+| Single pass for everything                                              | Context dilution                                                                                                                       | Multi-pass, one concern per pass                                                                                              |
+| No confidence threshold                                                 | Noise floods signal                                                                                                                    | Only act on ≥ 0.7                                                                                                             |
+| > 3 review iterations                                                   | Diminishing returns                                                                                                                    | Stop at 3, accept trade-offs                                                                                                  |
+| Hardcoding `--model` / `-m` / `-c model=`                               | Overrides user config; stale model names                                                                                               | Defer to user config; only `model_reasoning_effort` for spec review                                                           |
+| `claude -p --allowedTools "..." "PROMPT"` (no `--`)                     | Variadic flag eats prompt → "Input must be provided" or hang                                                                           | Always `--` separator: `claude -p --allowedTools "..." -- "PROMPT"`                                                           |
+| `yield_time_ms: 1000` (or any value < 300000) on `claude -p`            | Yields empty output before claude responds; model treats as failure and retries                                                        | `yield_time_ms: 300000` on EVERY call, no exceptions                                                                          |
+| Reverting `yield_time_ms` mid-session (300000 → 1000 between calls)     | New orphans pile on top of existing ones                                                                                               | Pick 300000 once, keep it for every call                                                                                      |
+| Re-invoking `claude -p` after `Process running with session ID NNNN`    | Spawns a parallel claude; original still working                                                                                       | Reap with `{"session_id": NNNN, "yield_time_ms": 300000}` until exit code                                                     |
+| Bare `codex review` (no scope flag)                                     | Hangs or produces 100KB+ blob output                                                                                                   | Always pass `--base <ref>`, `--commit <SHA>`, or `--uncommitted`                                                              |
+| `codex review` output > 100KB                                           | Diff too large for one pass                                                                                                            | Split per commit, or use `codex exec` with narrower prompt                                                                    |
+| `timeout 30 codex review` or `timeout 30 claude -p`                     | Reviews legitimately take 30s–5min                                                                                                     | No timeout, or `timeout 300` minimum                                                                                          |
 | `codex exec "PROMPT" \| tail -300` or `claude -p "PROMPT" \| tail -300` | Pipe buffers until EOF (no progress signal); discards summary/verdict (usually near top); slurps full review into agent context window | Redirect to a file: `... > /tmp/review.txt 2>&1`. Then `head`, `rg severity`, `sed`-by-range. Human can `tail -f` separately. |
-| `<<'EOF'` heredoc when prompt references env vars | Single-quoted heredoc blocks expansion; vars stay literal | Use `<<EOF` (unquoted) when interpolation is needed |
-| Trying `claude ultrareview` first | Many orgs block ("Remote sessions are disabled by your organization's policy") | Local `claude -p` first; ultrareview is opt-in |
-| Style/formatting comments in review | LLMs default to bikeshedding | Always include "Skip: formatting, naming, minor docs" |
-| Piped diff for architecture review | Diff lacks surrounding context | Use tool-access mode (`--allowedTools`) |
-| MCP wrapper around `codex` / `claude` | Unnecessary indirection over a CLI binary | Call the reviewer CLI directly via Bash |
-| Reviewing without repo context | Generic advice disconnected from codebase | Run from repo root so project memory + source files are visible |
-| Effort override on routine code review | Wastes tokens, ignores user defaults | Spec review only; code review = no effort flag |
+| `<<'EOF'` heredoc when prompt references env vars                       | Single-quoted heredoc blocks expansion; vars stay literal                                                                              | Use `<<EOF` (unquoted) when interpolation is needed                                                                           |
+| Trying `claude ultrareview` first                                       | Many orgs block ("Remote sessions are disabled by your organization's policy")                                                         | Local `claude -p` first; ultrareview is opt-in                                                                                |
+| Style/formatting comments in review                                     | LLMs default to bikeshedding                                                                                                           | Always include "Skip: formatting, naming, minor docs"                                                                         |
+| Piped diff for architecture review                                      | Diff lacks surrounding context                                                                                                         | Use tool-access mode (`--allowedTools`)                                                                                       |
+| MCP wrapper around `codex` / `claude`                                   | Unnecessary indirection over a CLI binary                                                                                              | Call the reviewer CLI directly via Bash                                                                                       |
+| Reviewing without repo context                                          | Generic advice disconnected from codebase                                                                                              | Run from repo root so project memory + source files are visible                                                               |
+| Effort override on routine code review                                  | Wastes tokens, ignores user defaults                                                                                                   | Spec review only; code review = no effort flag                                                                                |
 
 ---
 

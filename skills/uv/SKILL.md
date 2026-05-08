@@ -269,7 +269,7 @@ For dependency resolution deep dive, see `references/resolution.md`.
 | `tool.uv.sources` stripped on publish | Sources are development-only; published packages use `project.dependencies`     |
 | Workspace config inheritance          | Member-level `uv.toml` is ignored; only workspace root config applies           |
 | `link-mode` in Docker                 | Must use `copy` with cache mounts (hardlinks fail across filesystem boundaries) |
-| `exclude-newer` accepts durations     | `"30 days"`, `"1 week"`, `"PT24H"`, not just RFC 3339 timestamps               |
+| `exclude-newer` accepts durations     | `"30 days"`, `"1 week"`, `"PT24H"`, not just RFC 3339 timestamps                |
 | `uv run` uses inexact sync            | Won't remove extraneous packages by default; use `--exact` to enforce           |
 
 ## Anti-Patterns

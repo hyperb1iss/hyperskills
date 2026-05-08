@@ -19,11 +19,11 @@ Cross-model validation using the `codex` binary directly. Claude writes code, Co
 
 A bare `codex review` (no scope) is the #1 cause of failures: it hangs or produces 100KB+ blob output. **Always specify exactly one scope flag:**
 
-| Want to review            | Command                       |
-| ------------------------- | ----------------------------- |
-| Branch since main         | `codex review --base main`    |
-| Single commit             | `codex review --commit <SHA>` |
-| Working tree (unstaged)   | `codex review --uncommitted`  |
+| Want to review          | Command                       |
+| ----------------------- | ----------------------------- |
+| Branch since main       | `codex review --base main`    |
+| Single commit           | `codex review --commit <SHA>` |
+| Working tree (unstaged) | `codex review --uncommitted`  |
 
 For anything outside this trio (spec docs, single files, custom personas, focused passes), use `codex exec "PROMPT"` with explicit scope in the prompt, never bare `codex review`.
 
@@ -63,33 +63,33 @@ If `mktemp` isn't handy: `out=/tmp/codex-review-$$-$(date +%s).txt`. Echo the pa
 
 ### Scope flags (`codex review` only)
 
-| Flag              | Purpose                          |
-| ----------------- | -------------------------------- |
-| `--base <BRANCH>` | Diff against base branch         |
-| `--commit <SHA>`  | Review a specific commit         |
-| `--uncommitted`   | Review working tree changes      |
+| Flag              | Purpose                     |
+| ----------------- | --------------------------- |
+| `--base <BRANCH>` | Diff against base branch    |
+| `--commit <SHA>`  | Review a specific commit    |
+| `--uncommitted`   | Review working tree changes |
 
 ### Sandbox & ergonomics flags (both modes)
 
-| Flag                                          | When                                              |
-| --------------------------------------------- | ------------------------------------------------- |
-| `--sandbox read-only`                         | Default for review work, no writes               |
-| `--sandbox workspace-write`                   | Review + apply suggested fixes                    |
-| `--full-auto`                                 | Alias for `--ask-for-approval never --sandbox workspace-write` |
-| `--dangerously-bypass-approvals-and-sandbox`  | Last resort; explicit user request only           |
-| `-C <DIR>` / `--cd <DIR>`                     | Run in another worktree without `cd`              |
-| `--skip-git-repo-check`                       | Running from a non-repo directory                 |
-| `--add-dir <DIR>`                             | Extend read access to another path                |
-| `--ephemeral`                                 | One-shot session, no persistence                  |
-| `--json` / `--output-last-message <FILE>`     | Capture structured output to a file               |
-| `-c model_reasoning_effort="xhigh"`           | Spec/RFC review only (see Effort Policy)          |
+| Flag                                         | When                                                           |
+| -------------------------------------------- | -------------------------------------------------------------- |
+| `--sandbox read-only`                        | Default for review work, no writes                             |
+| `--sandbox workspace-write`                  | Review + apply suggested fixes                                 |
+| `--full-auto`                                | Alias for `--ask-for-approval never --sandbox workspace-write` |
+| `--dangerously-bypass-approvals-and-sandbox` | Last resort; explicit user request only                        |
+| `-C <DIR>` / `--cd <DIR>`                    | Run in another worktree without `cd`                           |
+| `--skip-git-repo-check`                      | Running from a non-repo directory                              |
+| `--add-dir <DIR>`                            | Extend read access to another path                             |
+| `--ephemeral`                                | One-shot session, no persistence                               |
+| `--json` / `--output-last-message <FILE>`    | Capture structured output to a file                            |
+| `-c model_reasoning_effort="xhigh"`          | Spec/RFC review only (see Effort Policy)                       |
 
 ### Effort override policy
 
-| Reviewing            | Effort flag                              |
-| -------------------- | ---------------------------------------- |
+| Reviewing                       | Effort flag                               |
+| ------------------------------- | ----------------------------------------- |
 | Code (commit / diff / PR / WIP) | **None**, defer to `~/.codex/config.toml` |
-| Spec / RFC / design doc         | `-c model_reasoning_effort="xhigh"`        |
+| Spec / RFC / design doc         | `-c model_reasoning_effort="xhigh"`       |
 
 Specs are higher-stakes than diffs, a subtle architectural mistake compounds across the eventual implementation. Code diffs are smaller scope and the user's configured effort is fine.
 
@@ -196,7 +196,7 @@ For thorough reviews, run multiple focused passes instead of one vague pass. Eac
 | **Correctness**  | Bugs, logic, edge cases, race conditions    | `codex review`                        |
 | **Security**     | OWASP Top 10:2025, injection, auth, secrets | `codex exec` with security prompt     |
 | **Architecture** | Coupling, abstractions, API consistency     | `codex exec` with architecture prompt |
-| **Performance** | O(n²), N+1 queries, memory leaks            | `codex exec` with performance prompt  |
+| **Performance**  | O(n²), N+1 queries, memory leaks            | `codex exec` with performance prompt  |
 
 Run passes sequentially. Fix critical findings between passes to avoid noise compounding.
 
@@ -258,23 +258,23 @@ Ready-to-use prompt templates are in `references/prompts.md`.
 
 ## Anti-Patterns
 
-| Anti-Pattern | Why It Fails | Fix |
-| ------------ | ------------ | --- |
-| Bare `codex review` (no scope flag) | Hangs or produces 100KB+ blob output | Always pass `--base <ref>`, `--commit <SHA>`, or `--uncommitted` |
-| `codex review` output > 100KB | Diff too large for one pass | Split per commit, or use `codex exec` with narrower prompt |
-| `timeout 30 codex review` | Reviews legitimately take 30s–5min | No timeout, or `timeout 300` minimum |
+| Anti-Pattern                                                        | Why It Fails                                                                                                            | Fix                                                                                                                         |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Bare `codex review` (no scope flag)                                 | Hangs or produces 100KB+ blob output                                                                                    | Always pass `--base <ref>`, `--commit <SHA>`, or `--uncommitted`                                                            |
+| `codex review` output > 100KB                                       | Diff too large for one pass                                                                                             | Split per commit, or use `codex exec` with narrower prompt                                                                  |
+| `timeout 30 codex review`                                           | Reviews legitimately take 30s–5min                                                                                      | No timeout, or `timeout 300` minimum                                                                                        |
 | `codex exec "PROMPT" \| tail -300` or `codex review ... \| tail -N` | Pipe buffers until EOF (no progress); cuts the summary/verdict (usually near top); dumps full review into agent context | Redirect to file: `... > /tmp/review.txt 2>&1`, then `head`, `rg severity`, `sed`-by-range. Human can `tail -f` separately. |
-| "Review this code" (no specifics) | Vague, produces bikeshedding | Specific domain prompts with persona |
-| Single pass for everything | Context dilution, shallow on every dimension | Multi-pass with one concern per pass |
-| Self-review (Claude reviews Claude's code) | Systematic bias, models approve their own patterns | Cross-model: Claude writes, Codex reviews |
-| No confidence threshold | Noise floods signal, 0.3 confidence wastes time | Only act on ≥ 0.7 confidence |
-| Style comments in review | LLMs default to bikeshedding | "Skip: formatting, naming, minor docs" |
-| > 3 review iterations | Diminishing returns, increasing noise, overbaking | Stop at 3. Accept trade-offs. |
-| Review without project context | Generic advice disconnected from codebase | Run from repo root |
-| MCP wrapper around `codex` | Unnecessary indirection over a CLI binary | Call `codex` directly via Bash |
-| Hardcoding `--model` / `-m` / `-c model=` | Overrides user config; stale model names | Defer to `~/.codex/config.toml` |
-| Effort override on routine code review | Wastes tokens, ignores user defaults | `-c model_reasoning_effort="xhigh"` is for spec review only |
-| `--full-auto` for pure review | Grants write access the review doesn't need | `--sandbox read-only` for review; `--full-auto` only when applying fixes |
+| "Review this code" (no specifics)                                   | Vague, produces bikeshedding                                                                                            | Specific domain prompts with persona                                                                                        |
+| Single pass for everything                                          | Context dilution, shallow on every dimension                                                                            | Multi-pass with one concern per pass                                                                                        |
+| Self-review (Claude reviews Claude's code)                          | Systematic bias, models approve their own patterns                                                                      | Cross-model: Claude writes, Codex reviews                                                                                   |
+| No confidence threshold                                             | Noise floods signal, 0.3 confidence wastes time                                                                         | Only act on ≥ 0.7 confidence                                                                                                |
+| Style comments in review                                            | LLMs default to bikeshedding                                                                                            | "Skip: formatting, naming, minor docs"                                                                                      |
+| > 3 review iterations                                               | Diminishing returns, increasing noise, overbaking                                                                       | Stop at 3. Accept trade-offs.                                                                                               |
+| Review without project context                                      | Generic advice disconnected from codebase                                                                               | Run from repo root                                                                                                          |
+| MCP wrapper around `codex`                                          | Unnecessary indirection over a CLI binary                                                                               | Call `codex` directly via Bash                                                                                              |
+| Hardcoding `--model` / `-m` / `-c model=`                           | Overrides user config; stale model names                                                                                | Defer to `~/.codex/config.toml`                                                                                             |
+| Effort override on routine code review                              | Wastes tokens, ignores user defaults                                                                                    | `-c model_reasoning_effort="xhigh"` is for spec review only                                                                 |
+| `--full-auto` for pure review                                       | Grants write access the review doesn't need                                                                             | `--sandbox read-only` for review; `--full-auto` only when applying fixes                                                    |
 
 ---
 

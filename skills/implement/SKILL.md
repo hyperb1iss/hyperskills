@@ -99,11 +99,11 @@ The test: every changed line should trace directly to the user's request.
 
 Define verifiable success. Loop until it passes.
 
-| Vague task       | Verifiable goal                                      |
-| ---------------- | ---------------------------------------------------- |
-| "Add validation" | Write tests for invalid inputs, then make them pass  |
-| "Fix the bug"    | Write a test that reproduces it, then make it pass   |
-| "Refactor X"     | Ensure the same tests pass before and after          |
+| Vague task       | Verifiable goal                                     |
+| ---------------- | --------------------------------------------------- |
+| "Add validation" | Write tests for invalid inputs, then make them pass |
+| "Fix the bug"    | Write a test that reproduces it, then make it pass  |
+| "Refactor X"     | Ensure the same tests pass before and after         |
 | "Make it work"   | Reject, name the actual signal that proves it works |
 
 For multi-step work, state the plan with verification per step:
@@ -271,14 +271,14 @@ Commit each logical chunk as it lands and verifies. Many small commits per sessi
 
 ### When to commit
 
-| Trigger                                            | Action          |
-| -------------------------------------------------- | --------------- |
-| Logical chunk done, verification passes            | Commit          |
-| Move/rename complete, before behavioral changes    | Commit (move)   |
-| Behavioral change works after the move commit      | Commit (change) |
-| Refactor extracted, callers still pass             | Commit          |
-| About to switch to a different concern             | Commit current  |
-| Verification fails or edit is speculative          | Don't commit    |
+| Trigger                                         | Action          |
+| ----------------------------------------------- | --------------- |
+| Logical chunk done, verification passes         | Commit          |
+| Move/rename complete, before behavioral changes | Commit (move)   |
+| Behavioral change works after the move commit   | Commit (change) |
+| Refactor extracted, callers still pass          | Commit          |
+| About to switch to a different concern          | Commit current  |
+| Verification fails or edit is speculative       | Don't commit    |
 
 If a reviewer would want it as a separate diff, it's a separate commit.
 
@@ -300,7 +300,7 @@ Conventional Commit types: `feat` (capability), `fix` (bug), `refactor` (no beha
 
 **Subject:** imperative mood, ≤76 chars, no trailing period, no filenames. "Fix null deref in token refresh" beats "Fix bug." For Conventional Commits, no emoji in the subject, it breaks parsers.
 
-**Body** (always include one): wrap at 76 chars, separated from subject by a blank line. Explain *why*, the diff shows *what*. State facts: banish "likely", "probably", "might", "seems", "appears to". If you don't know what a change does, read more before committing. Two sentences usually suffices; mention load-bearing context a future bisect would want.
+**Body** (always include one): wrap at 76 chars, separated from subject by a blank line. Explain _why_, the diff shows _what_. State facts: banish "likely", "probably", "might", "seems", "appears to". If you don't know what a change does, read more before committing. Two sentences usually suffices; mention load-bearing context a future bisect would want.
 
 ### HEREDOC + Co-Author
 
@@ -358,7 +358,7 @@ Never `git add -A` or `git add .` (catches other agents' WIP and secrets). Never
 | Premature optimization                           | Correctness first, optimize after tests pass    |
 | One mega-commit at end of session                | Commit each logical chunk as it lands           |
 | Bare titles like `fix: bug` or `update stuff`    | Specific subject + body explaining why          |
-| Skipping the body to "save time"                 | Always include a body, even two sentences      |
+| Skipping the body to "save time"                 | Always include a body, even two sentences       |
 | Filenames or paths in the subject line           | Describe the behavior, not the file             |
 | Uncertain language ("might fix", "should work")  | State facts; read more code if you don't know   |
 | `git add -A` / `git add .`                       | Stage specific files only                       |

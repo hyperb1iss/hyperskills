@@ -70,15 +70,15 @@ Skills are independent. None of them require the others. A typo fix doesn't need
 
 A few combinations come up often, more as observation than prescription:
 
-| Situation                | Skills that pair well                                            |
-| ------------------------ | ---------------------------------------------------------------- |
-| New feature              | brainstorm, plan, implement, cross-model-review                  |
-| Greenfield project       | brainstorm, research, plan, orchestrate, implement               |
-| Architecture decision    | brainstorm, research                                             |
-| Large refactor           | plan, orchestrate, implement, cross-model-review                 |
-| Bug fix                  | implement (the skill scales itself for trivial fixes)            |
-| Python project work      | uv, ruff, ty, uv-build                                           |
-| Knowledge consolidation  | dream pulls insights from past sessions into Sibyl               |
+| Situation               | Skills that pair well                                 |
+| ----------------------- | ----------------------------------------------------- |
+| New feature             | brainstorm, plan, implement, cross-model-review       |
+| Greenfield project      | brainstorm, research, plan, orchestrate, implement    |
+| Architecture decision   | brainstorm, research                                  |
+| Large refactor          | plan, orchestrate, implement, cross-model-review      |
+| Bug fix                 | implement (the skill scales itself for trivial fixes) |
+| Python project work     | uv, ruff, ty, uv-build                                |
+| Knowledge consolidation | dream pulls insights from past sessions into Sibyl    |
 
 Domain skills (security, git, tilt, agent-sandbox, tui-design, uv, ruff, ty, uv-build) plug in wherever the work touches their territory. Any skill can loop back when new questions emerge.
 
@@ -246,28 +246,28 @@ Level 3: references/                       ← Loaded on demand, no length cap
 
 Skills with reference files for the deep-dive material:
 
-| Skill                | Reference Files                                                                                          |
-| -------------------- | -------------------------------------------------------------------------------------------------------- |
-| `implement`          | `benchmarks.md`: quantitative data from 21k operations and implementation archetype templates            |
-| `codex-review`       | `prompts.md`: ready-to-use review prompt templates                                                       |
-| `cross-model-review` | `prompts.md`: ready-to-use review prompt templates                                                       |
-| `dream`              | `conversation-formats.md`, `extraction-guide.md`: session schemas and memory extraction rules            |
-| `tilt`               | `api-reference.md`, `patterns.md`: full Tiltfile API and power patterns                                  |
-| `agent-sandbox`      | `crds.md`, `patterns.md`, `clients.md`: CRD fields, production patterns, SDK deep-dive                   |
-| `tui-design`         | `visual-catalog.md`, `app-patterns.md`: Unicode catalog and app gallery                                  |
-| `uv`                 | `configuration.md`, `docker-ci.md`, `resolution.md`: uv config, CI patterns, resolver details            |
-| `ruff`               | `configuration.md`, `rules.md`: Ruff config and rule catalog snapshot                                    |
-| `ty`                 | `migration.md`, `type-system.md`: migration from mypy or Pyright and beta type-system support            |
+| Skill                | Reference Files                                                                               |
+| -------------------- | --------------------------------------------------------------------------------------------- |
+| `implement`          | `benchmarks.md`: quantitative data from 21k operations and implementation archetype templates |
+| `codex-review`       | `prompts.md`: ready-to-use review prompt templates                                            |
+| `cross-model-review` | `prompts.md`: ready-to-use review prompt templates                                            |
+| `dream`              | `conversation-formats.md`, `extraction-guide.md`: session schemas and memory extraction rules |
+| `tilt`               | `api-reference.md`, `patterns.md`: full Tiltfile API and power patterns                       |
+| `agent-sandbox`      | `crds.md`, `patterns.md`, `clients.md`: CRD fields, production patterns, SDK deep-dive        |
+| `tui-design`         | `visual-catalog.md`, `app-patterns.md`: Unicode catalog and app gallery                       |
+| `uv`                 | `configuration.md`, `docker-ci.md`, `resolution.md`: uv config, CI patterns, resolver details |
+| `ruff`               | `configuration.md`, `rules.md`: Ruff config and rule catalog snapshot                         |
+| `ty`                 | `migration.md`, `type-system.md`: migration from mypy or Pyright and beta type-system support |
 
 ## Compatibility
 
-| Platform           | Installation                                       |
-| ------------------ | -------------------------------------------------- |
+| Platform           | Installation                                                                                 |
+| ------------------ | -------------------------------------------------------------------------------------------- |
 | **Claude Code**    | `/plugin marketplace add hyperb1iss/hyperskills`<br>`/plugin install hyperskills@hyperb1iss` |
-| **Codex CLI**      | `npx skills add hyperbliss/hyperskills -a codex`   |
-| **Cursor**         | `npx skills add hyperbliss/hyperskills -a cursor`  |
-| **GitHub Copilot** | `npx skills add hyperbliss/hyperskills -a copilot` |
-| **Gemini CLI**     | `npx skills add hyperbliss/hyperskills -a gemini`  |
+| **Codex CLI**      | `npx skills add hyperbliss/hyperskills -a codex`                                             |
+| **Cursor**         | `npx skills add hyperbliss/hyperskills -a cursor`                                            |
+| **GitHub Copilot** | `npx skills add hyperbliss/hyperskills -a copilot`                                           |
+| **Gemini CLI**     | `npx skills add hyperbliss/hyperskills -a gemini`                                            |
 
 ## 🛠️ Development
 
