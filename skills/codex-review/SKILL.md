@@ -5,11 +5,11 @@ description: Use this skill for code reviews using the Codex CLI from a Claude-h
 
 # Cross-Model Code Review with Codex CLI
 
-Cross-model validation using the `codex` binary directly. Claude writes code, Codex reviews it — different architecture, different training distribution, no self-approval bias.
+Cross-model validation using the `codex` binary directly. Claude writes code, Codex reviews it, different architecture, different training distribution, no self-approval bias.
 
 **Core insight:** Single-model self-review is systematically biased. Cross-model review catches different bug classes because the reviewer has fundamentally different blind spots than the author.
 
-**Prerequisite:** The `codex` CLI must be installed and authenticated. Verify with `codex --version`. User defaults are configured in `~/.codex/config.toml` — respect them.
+**Prerequisite:** The `codex` CLI must be installed and authenticated. Verify with `codex --version`. User defaults are configured in `~/.codex/config.toml`, respect them.
 
 **Direction:** Claude → Codex only. For the bidirectional skill (also handles Codex → Claude with the `claude -p` gotchas around `yield_time_ms` and variadic flags), use `/hyperskills:cross-model-review` instead.
 
@@ -25,17 +25,17 @@ A bare `codex review` (no scope) is the #1 cause of failures: it hangs or produc
 | Single commit             | `codex review --commit <SHA>` |
 | Working tree (unstaged)   | `codex review --uncommitted`  |
 
-For anything outside this trio (spec docs, single files, custom personas, focused passes), use `codex exec "PROMPT"` with explicit scope in the prompt — never bare `codex review`.
+For anything outside this trio (spec docs, single files, custom personas, focused passes), use `codex exec "PROMPT"` with explicit scope in the prompt, never bare `codex review`.
 
 If output exceeds ~100KB, the diff is too large for one pass. Split per commit, or use `codex exec` with a narrower prompt ("Review error handling only").
 
 ---
 
-## ⚠️ Capture Output to a File — Don't Pipe to `tail`
+## ⚠️ Capture Output to a File: Don't Pipe to `tail`
 
 Never pipe a review to `| tail -N`. Three failure modes:
 
-1. **The pipe buffers until EOF.** `tail` reads the whole stream before producing output, so the agent gets nothing until codex exits or times out — no progress signal mid-review.
+1. **The pipe buffers until EOF.** `tail` reads the whole stream before producing output, so the agent gets nothing until codex exits or times out, no progress signal mid-review.
 2. **Reviews put the verdict near the top, not the bottom.** Findings sort by severity (BLOCKER first), so `tail -300` cuts exactly the part you want.
 3. **A file lets a human watch progress live.** `tail -f /tmp/review.txt` in another terminal streams the review in real time, completely independent of the agent's call.
 
@@ -50,7 +50,7 @@ codex review --base main > "$out" 2>&1
 codex exec --sandbox read-only "PROMPT" > "$out" 2>&1
 ```
 
-If `mktemp` isn't handy: `out=/tmp/codex-review-$$-$(date +%s).txt`. Echo the path before the redirect so a human running `tail -f` knows where to look. After exit, `Read` (or `cat`) the file. It persists across turns — re-read instead of re-running.
+If `mktemp` isn't handy: `out=/tmp/codex-review-$$-$(date +%s).txt`. Echo the path before the redirect so a human running `tail -f` knows where to look. After exit, `Read` (or `cat`) the file. It persists across turns, re-read instead of re-running.
 
 ---
 
@@ -73,7 +73,7 @@ If `mktemp` isn't handy: `out=/tmp/codex-review-$$-$(date +%s).txt`. Echo the pa
 
 | Flag                                          | When                                              |
 | --------------------------------------------- | ------------------------------------------------- |
-| `--sandbox read-only`                         | Default for review work — no writes               |
+| `--sandbox read-only`                         | Default for review work, no writes               |
 | `--sandbox workspace-write`                   | Review + apply suggested fixes                    |
 | `--full-auto`                                 | Alias for `--ask-for-approval never --sandbox workspace-write` |
 | `--dangerously-bypass-approvals-and-sandbox`  | Last resort; explicit user request only           |
@@ -88,10 +88,10 @@ If `mktemp` isn't handy: `out=/tmp/codex-review-$$-$(date +%s).txt`. Echo the pa
 
 | Reviewing            | Effort flag                              |
 | -------------------- | ---------------------------------------- |
-| Code (commit / diff / PR / WIP) | **None** — defer to `~/.codex/config.toml` |
+| Code (commit / diff / PR / WIP) | **None**, defer to `~/.codex/config.toml` |
 | Spec / RFC / design doc         | `-c model_reasoning_effort="xhigh"`        |
 
-Specs are higher-stakes than diffs — a subtle architectural mistake compounds across the eventual implementation. Code diffs are smaller scope and the user's configured effort is fine.
+Specs are higher-stakes than diffs, a subtle architectural mistake compounds across the eventual implementation. Code diffs are smaller scope and the user's configured effort is fine.
 
 **Never** specify `--model`, `-m`, or `-c model=` to override the model itself. User config is authoritative.
 
@@ -244,13 +244,13 @@ digraph review_decision {
 
 ## Prompt Engineering Rules
 
-1. **Assign a persona** — "senior security engineer" beats "review for security"
-2. **Specify what to skip** — "Skip formatting, naming style, minor docs gaps"
-3. **Require confidence scores** — only act on findings ≥ 0.7
-4. **Demand file:line citations** — vague findings without location aren't actionable
-5. **Ask for concrete fixes** — "Suggest a specific fix" not "this is a problem"
-6. **One domain per pass** — security-only, architecture-only
-7. **Demand a verdict** — "Verdict: patch is correct / incorrect" or "go / no-go"
+1. **Assign a persona**: "senior security engineer" beats "review for security"
+2. **Specify what to skip**: "Skip formatting, naming style, minor docs gaps"
+3. **Require confidence scores**: only act on findings ≥ 0.7
+4. **Demand file:line citations**: vague findings without location aren't actionable
+5. **Ask for concrete fixes**: "Suggest a specific fix" not "this is a problem"
+6. **One domain per pass**: security-only, architecture-only
+7. **Demand a verdict**: "Verdict: patch is correct / incorrect" or "go / no-go"
 
 Ready-to-use prompt templates are in `references/prompts.md`.
 
@@ -264,10 +264,10 @@ Ready-to-use prompt templates are in `references/prompts.md`.
 | `codex review` output > 100KB | Diff too large for one pass | Split per commit, or use `codex exec` with narrower prompt |
 | `timeout 30 codex review` | Reviews legitimately take 30s–5min | No timeout, or `timeout 300` minimum |
 | `codex exec "PROMPT" \| tail -300` or `codex review ... \| tail -N` | Pipe buffers until EOF (no progress); cuts the summary/verdict (usually near top); dumps full review into agent context | Redirect to file: `... > /tmp/review.txt 2>&1`, then `head`, `rg severity`, `sed`-by-range. Human can `tail -f` separately. |
-| "Review this code" (no specifics) | Vague — produces bikeshedding | Specific domain prompts with persona |
-| Single pass for everything | Context dilution — shallow on every dimension | Multi-pass with one concern per pass |
-| Self-review (Claude reviews Claude's code) | Systematic bias — models approve their own patterns | Cross-model: Claude writes, Codex reviews |
-| No confidence threshold | Noise floods signal — 0.3 confidence wastes time | Only act on ≥ 0.7 confidence |
+| "Review this code" (no specifics) | Vague, produces bikeshedding | Specific domain prompts with persona |
+| Single pass for everything | Context dilution, shallow on every dimension | Multi-pass with one concern per pass |
+| Self-review (Claude reviews Claude's code) | Systematic bias, models approve their own patterns | Cross-model: Claude writes, Codex reviews |
+| No confidence threshold | Noise floods signal, 0.3 confidence wastes time | Only act on ≥ 0.7 confidence |
 | Style comments in review | LLMs default to bikeshedding | "Skip: formatting, naming, minor docs" |
 | > 3 review iterations | Diminishing returns, increasing noise, overbaking | Stop at 3. Accept trade-offs. |
 | Review without project context | Generic advice disconnected from codebase | Run from repo root |

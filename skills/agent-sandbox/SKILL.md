@@ -3,9 +3,9 @@ name: agent-sandbox
 description: Use this skill when designing, deploying, or operating the kubernetes-sigs agent-sandbox operator, authoring Sandbox / SandboxTemplate / SandboxClaim / SandboxWarmPool manifests, running AI agent code in isolated pods, tuning warm pools, debugging sandbox network policy, choosing gVisor vs Kata runtimes, or integrating the Python / Go sandbox client SDKs. Activates on mentions of agent-sandbox, agents.x-k8s.io, SandboxClaim, SandboxTemplate, SandboxWarmPool, sandbox-router, gVisor sandbox, kata sandbox, agent runtime on kubernetes, k8s-agent-sandbox, sandbox warm pool, or code interpreter sandbox.
 ---
 
-# Agent Sandbox — Kubernetes Operator for AI Agent Runtimes
+# Agent Sandbox: Kubernetes Operator for AI Agent Runtimes
 
-[`kubernetes-sigs/agent-sandbox`](https://github.com/kubernetes-sigs/agent-sandbox) is a SIG Apps subproject that provides a Kubernetes-native primitive for **isolated, stateful, singleton workloads** — the shape needed for AI agent runtimes, code interpreters, computer-use browsers, dev sandboxes, and per-user Jupyter notebooks. It fills the gap between `Deployment` (stateless, replicated) and `StatefulSet` (numbered, replicated) by modelling a long-lived pod that can be paused, resumed, scheduled for expiry, and optionally pre-warmed.
+[`kubernetes-sigs/agent-sandbox`](https://github.com/kubernetes-sigs/agent-sandbox) is a SIG Apps subproject that provides a Kubernetes-native primitive for **isolated, stateful, singleton workloads**, the shape needed for AI agent runtimes, code interpreters, computer-use browsers, dev sandboxes, and per-user Jupyter notebooks. It fills the gap between `Deployment` (stateless, replicated) and `StatefulSet` (numbered, replicated) by modelling a long-lived pod that can be paused, resumed, scheduled for expiry, and optionally pre-warmed.
 
 Current API version is `v1alpha1`. Latest release at the time this skill was written is **v0.4.5** (May 2026). The project launched at KubeCon Atlanta in November 2025, so most training data predates it. Prefer this skill over guessing.
 
@@ -16,7 +16,7 @@ Current API version is `v1alpha1`. Latest release at the time this skill was wri
 | `Sandbox`         | `agents.x-k8s.io/v1alpha1`            | The singleton pod + headless service + PVCs. Supports `replicas: 0` (paused) or `1` (running).                     | Users directly, or `SandboxClaim` controller |
 | `SandboxTemplate` | `extensions.agents.x-k8s.io/v1alpha1` | Reusable pod blueprint + shared `NetworkPolicy` per template.                                                      | Platform / infra team                        |
 | `SandboxClaim`    | `extensions.agents.x-k8s.io/v1alpha1` | Ticket-style request that binds to a template and adopts a warm pool pod or creates fresh. Carries `shutdownTime`. | Application backend                          |
-| `SandboxWarmPool` | `extensions.agents.x-k8s.io/v1alpha1` | Pool of pre-warmed `Sandbox` CRs (as of v0.3.10 — no longer bare pods). HPA-friendly via scale subresource.        | Platform / infra team                        |
+| `SandboxWarmPool` | `extensions.agents.x-k8s.io/v1alpha1` | Pool of pre-warmed `Sandbox` CRs (as of v0.3.10, no longer bare pods). HPA-friendly via scale subresource.        | Platform / infra team                        |
 
 The extensions CRDs are the normal way to use the operator in production. Raw `Sandbox` is available, but you lose warm pools, claim lifecycle, and network policy management.
 
@@ -30,7 +30,7 @@ kubectl apply -f https://github.com/kubernetes-sigs/agent-sandbox/releases/downl
 kubectl apply -f https://github.com/kubernetes-sigs/agent-sandbox/releases/download/${VERSION}/extensions.yaml
 ```
 
-Controller lands in namespace `agent-sandbox-system`. Cluster-scoped RBAC (no namespace-scoped deployment yet — issue #484). For production Kustomize, overlay the Deployment args — defaults are very conservative.
+Controller lands in namespace `agent-sandbox-system`. Cluster-scoped RBAC (no namespace-scoped deployment yet, issue #484). For production Kustomize, overlay the Deployment args, defaults are very conservative.
 
 **Minimum controller args for any serious workload:**
 
@@ -73,7 +73,7 @@ digraph choose {
 
 ## Hello World
 
-The absolute minimum — bare `Sandbox`, no template, no claim:
+The absolute minimum, bare `Sandbox`, no template, no claim:
 
 ```yaml
 apiVersion: agents.x-k8s.io/v1alpha1
@@ -148,7 +148,7 @@ spec:
 
 `SandboxClaim.status.sandbox.name` resolves to the assigned `Sandbox` within sub-second when a warm pool pod is available. `SandboxClaim.status.conditions[Ready]=True` means the pod answered its readiness probe.
 
-Lowercase `.name` — **not** `.Name`. This changed in v0.3.10 and old code may still reference the capitalized form.
+Lowercase `.name`, **not** `.Name`. This changed in v0.3.10 and old code may still reference the capitalized form.
 
 ## CLI Cheat Sheet
 
@@ -177,25 +177,25 @@ Short name: `swp` for `SandboxWarmPool`. Use `kubectl api-resources --api-group=
 
 Setting `replicas: 0` then back to `1` re-creates a pod that mounts the same PVCs, giving effective resume semantics. Useful for idle sessions that get reconnected.
 
-`shutdownTime` (on either `Sandbox` or `SandboxClaim`) hits a wall clock — when it passes, `shutdownPolicy` determines what happens. The two resources take **different enums**:
+`shutdownTime` (on either `Sandbox` or `SandboxClaim`) hits a wall clock, when it passes, `shutdownPolicy` determines what happens. The two resources take **different enums**:
 
 | Policy             | On `Sandbox`                                                 | On `SandboxClaim`                                                                                                                                                                              |
 | ------------------ | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Delete`           | Sandbox (and its Pod / Service / PVCs) deleted               | Claim deleted, cascading to backing Sandbox                                                                                                                                                    |
-| `DeleteForeground` | _(not valid — Sandbox enum is `Delete\|Retain` only)_        | Foreground-cascade delete — the Claim remains with a `deletionTimestamp` until its backing Sandbox + Pod are fully terminated, so external systems can watch shutdown progress. New in v0.3.10 |
+| `DeleteForeground` | _(not valid, Sandbox enum is `Delete\|Retain` only)_        | Foreground-cascade delete, the Claim remains with a `deletionTimestamp` until its backing Sandbox + Pod are fully terminated, so external systems can watch shutdown progress. New in v0.3.10 |
 | `Retain`           | Pod / Service deleted, Sandbox CR kept with `Expired` status | Backing Sandbox deleted, Claim kept with `Expired` status                                                                                                                                      |
 
 **Defaults are not symmetric.** `Sandbox.spec.lifecycle.shutdownPolicy` is a pointer and nil-maps to retain-on-expiry behavior (the controller only deletes when `Delete` is explicit). `SandboxClaim.spec.lifecycle.shutdownPolicy` is a plain string and its empty value is treated as `Delete`. If you want a Sandbox to self-delete on expiry, set `Delete` explicitly.
 
-## Network Policy — Secure-by-Default
+## Network Policy: Secure-by-Default
 
 Since v0.2.1, when `networkPolicyManagement: Managed` **and** `spec.networkPolicy` is omitted, the controller applies a **secure-by-default** posture:
 
 - **Ingress:** only from pods labeled `app: sandbox-router` (the SDK's router service).
 - **Egress:** allowed to `0.0.0.0/0` **except** RFC1918 (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`) and link-local (`169.254.0.0/16`, covers the node metadata server). Cluster-internal services and the Kubernetes API are effectively blocked.
-- **DNS:** the controller rewrites the pod's `dnsPolicy` to `None` and injects `dnsConfig.nameservers: [8.8.8.8, 1.1.1.1]`. You do **not** need to add a port 53 egress rule in this default mode — resolution happens against public DNS over the allowed external egress.
+- **DNS:** the controller rewrites the pod's `dnsPolicy` to `None` and injects `dnsConfig.nameservers: [8.8.8.8, 1.1.1.1]`. You do **not** need to add a port 53 egress rule in this default mode, resolution happens against public DNS over the allowed external egress.
 
-You opt out of this posture by setting **any** custom `spec.networkPolicy`. Once you do, you own the ruleset end-to-end and the DNS-injection shortcut no longer applies — add `UDP/TCP 53` egress explicitly, plus any cluster-internal destinations you need.
+You opt out of this posture by setting **any** custom `spec.networkPolicy`. Once you do, you own the ruleset end-to-end and the DNS-injection shortcut no longer applies, add `UDP/TCP 53` egress explicitly, plus any cluster-internal destinations you need.
 
 Per-template, not per-sandbox: one shared NetworkPolicy covers every `Sandbox` from the template, with per-sandbox isolation enforced via the `agents.x-k8s.io/claim-uid` label selector.
 
@@ -208,15 +208,15 @@ See `references/patterns.md` for worked network policy examples including the cu
 | `runtimeClassName`  | Kernel       | Cold start | Untrusted code? | Notes                                                                                                              |
 | ------------------- | ------------ | ---------- | --------------- | ------------------------------------------------------------------------------------------------------------------ |
 | _(unset)_           | Shared       | ~100ms     | Never           | Only for fully trusted workloads                                                                                   |
-| `gvisor`            | User-space   | ~500ms     | Yes             | Standard answer. Works on most clouds. Direct `kubectl port-forward` incompatible — use the sandbox-router service |
+| `gvisor`            | User-space   | ~500ms     | Yes             | Standard answer. Works on most clouds. Direct `kubectl port-forward` incompatible, use the sandbox-router service |
 | `kata-qemu`         | Dedicated VM | ~1-2s      | Yes             | Requires nested virt. GKE needs N2 Intel + Ubuntu nodes (not COS, not N2D)                                         |
 | `kata-vm-isolation` | Dedicated VM | ~1-2s      | Yes             | AKS-flavored Kata. Similar constraints                                                                             |
 
-Warm pools effectively zero out cold-start cost by pre-paying it — a `SandboxClaim` adopts a ready pod in sub-millisecond dispatch latency (per KEP-174).
+Warm pools effectively zero out cold-start cost by pre-paying it, a `SandboxClaim` adopts a ready pod in sub-millisecond dispatch latency (per KEP-174).
 
 ## Client SDKs at a Glance
 
-### Python — `pip install k8s-agent-sandbox`
+### Python: `pip install k8s-agent-sandbox`
 
 ```python
 from k8s_agent_sandbox import SandboxClient
@@ -232,9 +232,9 @@ sbx.files.write("out.txt", b"hello")       # plain filename, not full path
 sbx.terminate()
 ```
 
-Three connection modes, importable from `k8s_agent_sandbox.models`: `SandboxGatewayConnectionConfig` (prod, via cloud LB), `SandboxLocalTunnelConnectionConfig` (dev, auto-tunnels via `kubectl port-forward`), `SandboxDirectConnectionConfig` (in-cluster, takes `api_url`). All reach the pod through the `sandbox-router` service — one-time cluster setup.
+Three connection modes, importable from `k8s_agent_sandbox.models`: `SandboxGatewayConnectionConfig` (prod, via cloud LB), `SandboxLocalTunnelConnectionConfig` (dev, auto-tunnels via `kubectl port-forward`), `SandboxDirectConnectionConfig` (in-cluster, takes `api_url`). All reach the pod through the `sandbox-router` service, one-time cluster setup.
 
-### Go — `go get sigs.k8s.io/agent-sandbox/clients/go/sandbox`
+### Go: `go get sigs.k8s.io/agent-sandbox/clients/go/sandbox`
 
 ```go
 s, err := sandbox.New(ctx, sandbox.Options{
@@ -258,14 +258,14 @@ Sentinel errors to branch on: `ErrNotReady`, `ErrOrphanedClaim`, `ErrPortForward
 
 | Anti-Pattern                                                         | Why it bites                                                                                       | Fix                                                                                                                                                                    |
 | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Setting `spec.replicas: 3` to scale                                  | Silently ignored beyond `0\|1` — CRD validation rejects the manifest                               | Use multiple `SandboxClaim`s or scale a `SandboxWarmPool`                                                                                                              |
+| Setting `spec.replicas: 3` to scale                                  | Silently ignored beyond `0\|1`, CRD validation rejects the manifest                               | Use multiple `SandboxClaim`s or scale a `SandboxWarmPool`                                                                                                              |
 | Writing `SandboxClaim.status.sandbox.Name` (capital N)               | Broke in v0.3.10. Lowercase `name` is current                                                      | Code against `.name`; keep a fallback to `.Name` only during a staged upgrade                                                                                          |
-| Shared `PodDisruptionBudget` across warm-pool and claim-backed pods  | Controller hits a sync race during image rollout, ArgoCD PostSync hooks block, warm pool staleness | Scope PDB with `matchExpressions: agents.x-k8s.io/claim-uid Exists` — claim-backed only                                                                                |
+| Shared `PodDisruptionBudget` across warm-pool and claim-backed pods  | Controller hits a sync race during image rollout, ArgoCD PostSync hooks block, warm pool staleness | Scope PDB with `matchExpressions: agents.x-k8s.io/claim-uid Exists`, claim-backed only                                                                                |
 | Deploying warm pool sandboxes on a single node                       | Pod anti-affinity absent, AZ failure takes the whole pool                                          | Add `topologySpreadConstraints` on `topology.kubernetes.io/zone`                                                                                                       |
 | `automountServiceAccountToken: true` in a SandboxTemplate            | Default is `false` here. Setting `true` hands agents a cluster API token                           | Leave it `false`; if the agent needs API access, issue a scoped JWT via an app-layer bridge                                                                            |
 | Forgetting DNS in a **custom** `networkPolicy.egress`                | Pod can't resolve anything; every external call hangs                                              | Always open UDP+TCP 53 when you override the default policy. The secure-by-default posture handles DNS for you by injecting public nameservers; custom policies do not |
 | `automountServiceAccountToken` + `runAsUser: 0` in hardened template | Defeats the whole isolation story                                                                  | `runAsNonRoot: true`, drop all capabilities, `readOnlyRootFilesystem: true`                                                                                            |
-| Patching sandbox images via `kubectl set image`                      | Controller owns the pod — mutations get reconciled away                                            | Update the `SandboxTemplate`, then trigger a warm pool refresh                                                                                                         |
+| Patching sandbox images via `kubectl set image`                      | Controller owns the pod, mutations get reconciled away                                            | Update the `SandboxTemplate`, then trigger a warm pool refresh                                                                                                         |
 | Direct `kubectl port-forward` on a gVisor sandbox                    | Incompatible with user-space networking                                                            | Go through the `sandbox-router` service, or use the SDK's tunnel mode                                                                                                  |
 | Relying on stable warm-pool pod names                                | Warm pool adopts then re-labels via `agents.x-k8s.io/pod-name` annotation                          | Always discover pods via `agents.x-k8s.io/claim-uid` label                                                                                                             |
 
@@ -273,16 +273,16 @@ Sentinel errors to branch on: `ErrNotReady`, `ErrOrphanedClaim`, `ErrPortForward
 
 | From → To        | What breaks                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v0.1.x → v0.2.1  | Controller moved StatefulSet → Deployment. `kubectl delete statefulset agent-sandbox-controller -n agent-sandbox-system` **before** applying v0.2.1 manifests. Metrics port changed 80 → 8080. NetworkPolicy became default-deny — pods that used to reach cluster services now can't                                                                                                                                                  |
-| v0.2.x → v0.3.10 | `SandboxWarmPool` now creates `Sandbox` CRs, not bare Pods. Pre-existing pool pods are orphans (labeled `agents.x-k8s.io/pool`, no owner ref) — clean them up manually. `SandboxClaim.status.sandbox.Name` → `.name` (case). Watch for regression [#611](https://github.com/kubernetes-sigs/agent-sandbox/issues/611): if a managed pod is deleted externally, the controller enters an error loop until the `Sandbox` CR is recreated |
+| v0.1.x → v0.2.1  | Controller moved StatefulSet → Deployment. `kubectl delete statefulset agent-sandbox-controller -n agent-sandbox-system` **before** applying v0.2.1 manifests. Metrics port changed 80 → 8080. NetworkPolicy became default-deny, pods that used to reach cluster services now can't                                                                                                                                                  |
+| v0.2.x → v0.3.10 | `SandboxWarmPool` now creates `Sandbox` CRs, not bare Pods. Pre-existing pool pods are orphans (labeled `agents.x-k8s.io/pool`, no owner ref), clean them up manually. `SandboxClaim.status.sandbox.Name` → `.name` (case). Watch for regression [#611](https://github.com/kubernetes-sigs/agent-sandbox/issues/611): if a managed pod is deleted externally, the controller enters an error loop until the `Sandbox` CR is recreated |
 
 ## References
 
 For deep field-level CRD reference (every spec/status field, annotations, labels, validation rules), see `references/crds.md`.
 
-For production patterns — warm pool HPA setup, PDB scoping, image rollout refresh, Karpenter integration, multi-tenant isolation, observability, load testing — see `references/patterns.md`.
+For production patterns, warm pool HPA setup, PDB scoping, image rollout refresh, Karpenter integration, multi-tenant isolation, observability, load testing, see `references/patterns.md`.
 
-For the Python and Go client SDKs — all connection modes, timeouts, error catalog, snapshot/resume, router deployment — see `references/clients.md`.
+For the Python and Go client SDKs, all connection modes, timeouts, error catalog, snapshot/resume, router deployment, see `references/clients.md`.
 
 ## What This Skill is NOT
 

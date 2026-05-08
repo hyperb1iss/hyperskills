@@ -40,15 +40,15 @@ digraph brainstorm {
 ### Actions
 
 1. **Search Sibyl** for related patterns, past decisions, known constraints:
-   - `sibyl search "<topic keywords>"` — find prior art
-   - `sibyl search "<related architecture>"` — find relevant patterns
+   - `sibyl search "<topic keywords>"`, find prior art
+   - `sibyl search "<related architecture>"`, find relevant patterns
    - Check for existing tasks/epics on this topic
 
-2. **Surface constraints** — what's already decided? What's non-negotiable?
+2. **Surface constraints**: what's already decided? What's non-negotiable?
    - Tech stack locked? Budget constraints? Timeline?
    - Existing patterns we must follow?
 
-3. **Present prior art** — show the user what Sibyl knows before ideating:
+3. **Present prior art**: show the user what Sibyl knows before ideating:
    > "Sibyl has 3 relevant entries: [pattern X from project Y], [decision Z from last month], [gotcha W]. Want to factor these in?"
 
 ### Gate
@@ -57,7 +57,7 @@ If Sibyl has a directly applicable pattern or decision, **present it first**. Do
 
 ---
 
-## Phase 2: DIVERGE — Explore the Problem Space
+## Phase 2: DIVERGE: Explore the Problem Space
 
 **Goal:** Generate breadth. Understand what we're actually solving.
 
@@ -84,11 +84,11 @@ If Sibyl has a directly applicable pattern or decision, **present it first**. Do
 
 - Don't jump to solutions. This phase is about the PROBLEM.
 - Don't ask 5 questions at once. One at a time, build understanding.
-- Don't dismiss vague input — "make it faster" is valid; help sharpen it.
+- Don't dismiss vague input, "make it faster" is valid; help sharpen it.
 
 ---
 
-## Phase 3: CONVERGE — Define the Core Problem
+## Phase 3: CONVERGE: Define the Core Problem
 
 **Goal:** Narrow from exploration to a crisp problem statement.
 
@@ -96,7 +96,7 @@ If Sibyl has a directly applicable pattern or decision, **present it first**. Do
 
 1. **Synthesize** what was explored into a 1-2 sentence problem statement
 2. **Confirm** with the user: "Is this what we're solving?"
-3. **Identify scope boundaries** — what's IN, what's OUT
+3. **Identify scope boundaries**: what's IN, what's OUT
 
 ### Output
 
@@ -107,7 +107,7 @@ If Sibyl has a directly applicable pattern or decision, **present it first**. Do
 
 ---
 
-## Phase 4: DIVERGE — Explore Solutions
+## Phase 4: DIVERGE: Explore Solutions
 
 **Goal:** Generate multiple viable approaches. Quality through quantity.
 
@@ -121,7 +121,7 @@ If Sibyl has a directly applicable pattern or decision, **present it first**. Do
    | B: [name] | ...  | ...  | Low/Med/High | ...  |
    | C: [name] | ...  | ...  | Low/Med/High | ...  |
 
-2. **Include at least one unconventional option** — break fixation on the obvious path
+2. **Include at least one unconventional option**: break fixation on the obvious path
 
 3. **Ground in existing patterns:**
    - "This follows the pattern we used in [project X]"
@@ -132,7 +132,7 @@ If Sibyl has a directly applicable pattern or decision, **present it first**. Do
 
 ### Exploration vs Exploitation
 
-Balance like MCTS — don't fixate on the first decent idea:
+Balance like MCTS, don't fixate on the first decent idea:
 
 - If all approaches look similar → push for a **wild card** option
 - If approaches are wildly different → good, that's healthy divergence
@@ -147,7 +147,7 @@ Balance like MCTS — don't fixate on the first decent idea:
 
 ---
 
-## Phase 5: CONVERGE — Decide and Record
+## Phase 5: CONVERGE: Decide and Record
 
 **Goal:** Lock in the approach. Record the decision. Exit to action.
 
@@ -161,7 +161,7 @@ Balance like MCTS — don't fixate on the first decent idea:
    sibyl add "Brainstorm: [topic]" "Chose [approach] because [reason]. Rejected [other approaches] due to [tradeoffs]. Key constraint: [X]."
    ```
 
-3. **Define next action** — the brainstorm exits to whatever makes sense:
+3. **Define next action**: the brainstorm exits to whatever makes sense:
 
    | Next Step                  | When                                  |
    | -------------------------- | ------------------------------------- |

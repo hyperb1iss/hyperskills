@@ -3,7 +3,7 @@ name: uv
 description: Use this skill when working with Python projects, packages, scripts, environments, or dependencies using uv. Activates on mentions of uv, uv add, uv sync, uv run, uv lock, uv init, uv build, uv publish, uv export, uv python, uvx, uv tool, uv pip, uv venv, uv workspace, uv audit, uv version, pyproject.toml dependencies, Python package management, Python project setup, dependency lockfile, or virtual environments.
 ---
 
-# uv — Python Package & Project Manager
+# uv: Python Package & Project Manager
 
 uv (v0.11.11, May 2026) replaces pip, pip-tools, pipx, pyenv, virtualenv, and poetry. Written in Rust, 10-100x faster than alternatives. It is stable production software; minor versions can contain breaking changes, while patch releases are intended to be non-breaking.
 
@@ -25,7 +25,7 @@ What are you doing?
    (sdist, wheel, PyPI upload)
 ```
 
-**Critical rule:** If `pyproject.toml` exists, use project commands (`uv add`, `uv sync`, `uv run`). Never `uv pip install` in a project — it bypasses the lockfile.
+**Critical rule:** If `pyproject.toml` exists, use project commands (`uv add`, `uv sync`, `uv run`). Never `uv pip install` in a project, it bypasses the lockfile.
 
 ## Projects
 
@@ -105,7 +105,7 @@ uv export --format pylock-toml       # PEP 751 (preview)
 
 ## Scripts (PEP 723)
 
-Single-file scripts with inline dependency metadata. **Scripts with metadata run in complete isolation** — project dependencies are ignored even inside a project directory.
+Single-file scripts with inline dependency metadata. **Scripts with metadata run in complete isolation**, project dependencies are ignored even inside a project directory.
 
 ```python
 #!/usr/bin/env -S uv run --script
@@ -140,7 +140,7 @@ uv tool upgrade --all                # Upgrade all installed tools
 uv tool list --outdated              # Show available updates (0.10.10+)
 ```
 
-**Key distinction:** `uvx` creates isolated environments — tools are CLI-only, not importable. For tools needing project context (pytest, mypy), use `uv run` inside a project.
+**Key distinction:** `uvx` creates isolated environments, tools are CLI-only, not importable. For tools needing project context (pytest, mypy), use `uv run` inside a project.
 
 ## Python Management
 
@@ -175,10 +175,10 @@ my-lib = { workspace = true }
 Key behaviors:
 
 - **Single lockfile** across all members
-- **Single `requires-python`** — intersection of all members
+- **Single `requires-python`**: intersection of all members
 - Workspace members are always **editable**
 - Root `tool.uv.sources` apply to all members unless overridden
-- Config in `uv.toml` is read only from workspace root — member-level config is **ignored**
+- Config in `uv.toml` is read only from workspace root, member-level config is **ignored**
 
 ```bash
 uv workspace dir                     # Print workspace root
@@ -269,7 +269,7 @@ For dependency resolution deep dive, see `references/resolution.md`.
 | `tool.uv.sources` stripped on publish | Sources are development-only; published packages use `project.dependencies`     |
 | Workspace config inheritance          | Member-level `uv.toml` is ignored; only workspace root config applies           |
 | `link-mode` in Docker                 | Must use `copy` with cache mounts (hardlinks fail across filesystem boundaries) |
-| `exclude-newer` accepts durations     | `"30 days"`, `"1 week"`, `"PT24H"` — not just RFC 3339 timestamps               |
+| `exclude-newer` accepts durations     | `"30 days"`, `"1 week"`, `"PT24H"`, not just RFC 3339 timestamps               |
 | `uv run` uses inexact sync            | Won't remove extraneous packages by default; use `--exact` to enforce           |
 
 ## Anti-Patterns

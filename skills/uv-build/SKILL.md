@@ -3,7 +3,7 @@ name: uv-build
 description: Use this skill when building Python packages, configuring build backends, publishing to PyPI, or setting up pyproject.toml build systems. Activates on mentions of uv build, uv_build, build backend, Python packaging, sdist, wheel, pyproject.toml build-system, PEP 517, PEP 621, uv publish, package publishing, setuptools migration, hatchling, flit, build system, or Python distribution.
 ---
 
-# uv-build — Python Build Backend
+# uv-build: Python Build Backend
 
 `uv_build` is Astral's Rust-based build backend for Python packages. As of uv-build 0.11.11 (May 2026), it is the native backend documented by uv for most pure Python packages. **Pure Python packages only:** no C/Rust extensions.
 
@@ -34,9 +34,9 @@ For published packages and CI, prefer an upper bound such as `<0.12` so new mino
 
 ## The Direct Build Fast Path
 
-When uv detects `uv_build` as the backend, it **bypasses PEP 517 entirely** — calling directly into Rust code in-process. No Python subprocess, no build environment creation, no dependency installation.
+When uv detects `uv_build` as the backend, it **bypasses PEP 517 entirely**, calling directly into Rust code in-process. No Python subprocess, no build environment creation, no dependency installation.
 
-This means you can **build and publish packages without Python installed** — the entire build runs in Rust.
+This means you can **build and publish packages without Python installed**, the entire build runs in Rust.
 
 Conditions for fast path:
 
@@ -150,7 +150,7 @@ classifiers = ["Private :: Do Not Upload"]
 
 ## Editable Installs
 
-uv_build uses **static `.pth` files** for editable installs (not dynamic import hooks like setuptools). This works correctly with type checkers and IDEs out of the box — no `editable_mode = "compat"` workaround needed.
+uv_build uses **static `.pth` files** for editable installs (not dynamic import hooks like setuptools). This works correctly with type checkers and IDEs out of the box, no `editable_mode = "compat"` workaround needed.
 
 ```bash
 uv sync                  # Installs project as editable by default

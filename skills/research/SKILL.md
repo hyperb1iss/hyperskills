@@ -5,7 +5,7 @@ description: Use this skill when gathering knowledge at scale before making deci
 
 # Multi-Agent Research
 
-Wave-based knowledge gathering with deferred synthesis. Mined from 300+ real research dispatches — the pattern that consistently produces actionable intelligence.
+Wave-based knowledge gathering with deferred synthesis. Mined from 300+ real research dispatches: the pattern that consistently produces actionable intelligence.
 
 **Core insight:** Research breadth-first, synthesize after. Don't draw conclusions from the first 3 results. Deploy agents in waves, accumulate findings, then synthesize with the full picture.
 
@@ -80,7 +80,7 @@ If primary sources disagree with blog posts, trust the primary source and record
 
 ---
 
-## Phase 2: WAVE 1 — Broad Sweep
+## Phase 2: WAVE 1: Broad Sweep
 
 **Deploy the first wave of agents across the full research surface.**
 
@@ -116,9 +116,9 @@ Cite sources with URLs.
 
 ### Deployment Rules
 
-- **ALL Wave 1 agents run in background** — no dependencies between them
-- **3-4 seconds between dispatches** — avoid rate limiting
-- **Each agent writes its own file** — no shared outputs
+- **ALL Wave 1 agents run in background**: no dependencies between them
+- **3-4 seconds between dispatches**: avoid rate limiting
+- **Each agent writes its own file**: no shared outputs
 - **Group by theme:** If researching 12 topics, group into 3-4 thematic clusters
 
 ### Coverage Strategy
@@ -143,7 +143,7 @@ For technology evaluations, cover these dimensions:
 
 ### Actions
 
-1. **Read all Wave 1 outputs** — skim each research doc
+1. **Read all Wave 1 outputs**: skim each research doc
 2. **Identify gaps:**
    - Dimensions not covered?
    - Contradictory findings between agents?
@@ -151,7 +151,7 @@ For technology evaluations, cover these dimensions:
    - Missing comparisons?
 
 3. **Check for bias:**
-   - Are all findings positive? (Suspicious — look for failure cases)
+   - Are all findings positive? (Suspicious, look for failure cases)
    - Did agents only find official docs? (Need community/real-world experience)
    - Same sources cited by multiple agents? (Need diversity)
 
@@ -166,16 +166,16 @@ For technology evaluations, cover these dimensions:
 
 ---
 
-## Phase 4: WAVE 2+ — Targeted Research
+## Phase 4: WAVE 2+: Targeted Research
 
 **Fill specific gaps identified in the analysis.**
 
 ### Wave 2 Agents Are Different
 
-- **Smaller scope** — one specific question per agent
-- **Higher quality bar** — "find production experience reports, not just docs"
-- **Cross-reference** — "Agent X found [claim]. Verify this against [alternative source]"
-- **Deep reads** — "Read the full README and API docs for [library], not just the landing page"
+- **Smaller scope**: one specific question per agent
+- **Higher quality bar**: "find production experience reports, not just docs"
+- **Cross-reference**: "Agent X found [claim]. Verify this against [alternative source]"
+- **Deep reads**: "Read the full README and API docs for [library], not just the landing page"
 
 ### When to Stop
 
@@ -238,7 +238,7 @@ Stop deploying waves when:
 1. **Lead with the recommendation.** Don't make the reader wade through findings to find the answer.
 2. **Separate facts from opinions.** "PostgreSQL supports JSONB" (fact) vs "PostgreSQL is better for this use case" (opinion backed by evidence).
 3. **Include dissenting evidence.** If one source contradicts the recommendation, say so. Don't cherry-pick.
-4. **Date everything.** "As of Feb 2026, [library] is at v4.2" — research spoils fast.
+4. **Date everything.** "As of Feb 2026, [library] is at v4.2", research spoils fast.
 5. **Note confidence level.** "High confidence: well-documented. / Low confidence: based on one blog post."
 
 ---
@@ -257,7 +257,7 @@ Stop deploying waves when:
    sibyl add "Research: [topic]" "Evaluated [options]. Chose [X] because [reasons]. Key risk: [Y]. Sources: [primary URLs]. Date: [today]."
    ```
 
-3. **Archive research docs** — keep the wave outputs for reference:
+3. **Archive research docs**: keep the wave outputs for reference:
    - If in a project: `docs/research/[topic]/`
    - If general knowledge: Sibyl learning entry is sufficient
 
@@ -325,12 +325,12 @@ Synthesize: Positioning matrix + gap analysis
 
 | Anti-Pattern                         | Fix                                                                              |
 | ------------------------------------ | -------------------------------------------------------------------------------- |
-| Synthesizing after Wave 1 only       | Wait for gap analysis — premature conclusions miss nuance                        |
-| 50 agents with "research everything" | Specific scope per agent — vague prompts produce vague results                   |
-| Only official documentation          | Include community experience — docs show intent, community shows reality         |
-| No dates on findings                 | Date everything — research spoils faster than produce                            |
-| No recommendation                    | Force a decision — "more research needed" is only valid with a specific question |
-| Researching what Sibyl already knows | Always prime first — don't burn tokens re-discovering known patterns             |
+| Synthesizing after Wave 1 only       | Wait for gap analysis, premature conclusions miss nuance                        |
+| 50 agents with "research everything" | Specific scope per agent, vague prompts produce vague results                   |
+| Only official documentation          | Include community experience, docs show intent, community shows reality         |
+| No dates on findings                 | Date everything, research spoils faster than produce                            |
+| No recommendation                    | Force a decision, "more research needed" is only valid with a specific question |
+| Researching what Sibyl already knows | Always prime first, don't burn tokens re-discovering known patterns             |
 
 ---
 

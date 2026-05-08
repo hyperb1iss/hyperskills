@@ -3,11 +3,11 @@ name: ty
 description: Use this skill when type checking Python code or setting up type checking with ty. Activates on mentions of ty, ty check, ty server, Python type checking, type checker, mypy replacement, pyright replacement, type annotations, type errors, type ignore, Python types, LSP, language server, or Python static analysis.
 ---
 
-# ty — Python Type Checker & Language Server
+# ty: Python Type Checker & Language Server
 
 ty (v0.0.34, May 2026) is Astral's Rust-based Python type checker and language server. **Beta status:** 0.0.x versioning, breaking changes between versions, and no stable API yet. Astral reports 10-100x faster checks than mypy and Pyright on large projects.
 
-**Formerly "Red-Knot"** — renamed May 2025, extracted from the ruff repo to `astral-sh/ty`.
+**Formerly "Red-Knot"**, renamed May 2025, extracted from the ruff repo to `astral-sh/ty`.
 
 ## When to Use ty
 
@@ -15,7 +15,7 @@ ty (v0.0.34, May 2026) is Astral's Rust-based Python type checker and language s
 - Type checking Python code in any project
 - Setting up an LSP for Python in your editor
 
-**When to wait:** Projects heavily dependent on mypy plugins (Pydantic, Django, SQLAlchemy). ty has no plugin system and no plans to add one — first-class framework support is the stated approach instead.
+**When to wait:** Projects heavily dependent on mypy plugins (Pydantic, Django, SQLAlchemy). ty has no plugin system and no plans to add one, first-class framework support is the stated approach instead.
 
 ## How to Invoke
 
@@ -135,11 +135,11 @@ x = foo  # type: ignore
 
 ### Unknown vs Any
 
-ty distinguishes between `Any` (deliberate opt-out) and `Unknown` (inferred gap). This is the "gradual guarantee" — all code is checked, but unknowns are treated permissively rather than skipped entirely (mypy skips unannotated functions by default).
+ty distinguishes between `Any` (deliberate opt-out) and `Unknown` (inferred gap). This is the "gradual guarantee", all code is checked, but unknowns are treated permissively rather than skipped entirely (mypy skips unannotated functions by default).
 
 ### Intersection Types
 
-ty supports `A & B` intersection types natively — not available in mypy or pyright.
+ty supports `A & B` intersection types natively, not available in mypy or pyright.
 
 ### Fine-Grained Incrementality
 

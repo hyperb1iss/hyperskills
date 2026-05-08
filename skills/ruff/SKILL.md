@@ -3,7 +3,7 @@ name: ruff
 description: Use this skill when linting, formatting, or fixing Python code with ruff. Activates on mentions of ruff, ruff check, ruff format, ruff fix, ruff server, ruff analyze, Python linting, Python formatting, flake8, isort, black replacement, noqa, pycodestyle, pyflakes, lint rules, ruff config, ruff.toml, autofix, per-file-ignores, language server for Python, or Python code quality.
 ---
 
-# ruff — Python Linter & Formatter
+# ruff: Python Linter & Formatter
 
 ruff (v0.15.12, Apr 2026) is three tools in one Rust binary: linter (`ruff check`), formatter (`ruff format`), and dependency analyzer (`ruff analyze graph`). It replaces Flake8, Black, isort, pyupgrade, and dozens more.
 
@@ -17,9 +17,9 @@ uvx ruff ...        # One-off (latest)
 ruff ...            # Global install
 ```
 
-## Rule Selection — The Critical Decision
+## Rule Selection: The Critical Decision
 
-**Default rules are minimal:** only `["E4", "E7", "E9", "F"]` — catches syntax errors and undefined names but misses most quality rules. You almost certainly need to extend this.
+**Default rules are minimal:** only `["E4", "E7", "E9", "F"]`, catches syntax errors and undefined names but misses most quality rules. You almost certainly need to extend this.
 
 ### select vs extend-select
 
@@ -34,7 +34,7 @@ ruff ...            # Global install
 
 ### Recommended Selection Strategy
 
-**New project — start broad:**
+**New project, start broad:**
 
 ```toml
 [tool.ruff.lint]
@@ -52,7 +52,7 @@ select = [
 ignore = ["E501"]  # Let formatter handle line length
 ```
 
-**Library / open source — maximum strictness:**
+**Library / open source, maximum strictness:**
 
 ```toml
 [tool.ruff.lint]
@@ -78,7 +78,7 @@ ignore = [
 "**/__init__.py" = ["F401", "D104"]
 ```
 
-**Legacy migration — incremental:**
+**Legacy migration, incremental:**
 
 ```toml
 [tool.ruff.lint]
@@ -137,7 +137,7 @@ Ruff targets >99.9% parity with Black but has 23 intentional divergences. The mo
 
 ### E501 and the Formatter
 
-The formatter makes best-effort line wrapping — it **cannot** always succeed. Comments, long strings, and URLs may exceed `line-length`. Either ignore E501 or set `lint.pycodestyle.max-line-length` higher than `line-length`.
+The formatter makes best-effort line wrapping, it **cannot** always succeed. Comments, long strings, and URLs may exceed `line-length`. Either ignore E501 or set `lint.pycodestyle.max-line-length` higher than `line-length`.
 
 ## Fix Safety Model
 
@@ -190,7 +190,7 @@ preview = true       # Expands defaults from 59 to 412 rules
 explicit-preview-rules = true  # Require individual opt-in even with preview on
 ```
 
-Preview rules are NOT activated by prefix selection or `ALL` — they require preview mode enabled. Use `explicit-preview-rules = true` to control which preview rules activate individually.
+Preview rules are NOT activated by prefix selection or `ALL`, they require preview mode enabled. Use `explicit-preview-rules = true` to control which preview rules activate individually.
 
 ## Dependency Graph Analysis
 

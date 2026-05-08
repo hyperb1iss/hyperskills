@@ -3,7 +3,7 @@ name: tilt
 description: This skill should be used when the user asks to "write a Tiltfile", "configure Tilt", "set up live update", "debug Tilt", "add a resource to Tilt", "optimize Tilt builds", "view Tilt logs", "restart a Tilt resource", or mentions Tiltfile, tilt up, tilt ci, tilt down, live_update, docker_build, custom_build, k8s_resource, local_resource, or Kubernetes local development with Tilt.
 ---
 
-# Tilt — Kubernetes Dev Toolkit
+# Tilt: Kubernetes Dev Toolkit
 
 Tilt automates the local Kubernetes development loop: watch files, build images, deploy to cluster. Configuration lives in a `Tiltfile` (Starlark, a Python dialect). A **resource** bundles an image build + k8s deploy (or a local command) into a single manageable unit.
 
@@ -77,7 +77,7 @@ The Tilt API server runs on `localhost:10350` by default. All `tilt get/describe
 
 ## Live Update Decision Tree
 
-Live update replaces full image rebuilds with in-place container file syncs — seconds instead of minutes.
+Live update replaces full image rebuilds with in-place container file syncs, seconds instead of minutes.
 
 | Step                      | Purpose                                           | Ordering           |
 | ------------------------- | ------------------------------------------------- | ------------------ |
@@ -94,7 +94,7 @@ docker_build('myapp', '.', live_update=[
 ])
 ```
 
-**When live update breaks:** Changes to files outside the `docker_build` context trigger a full rebuild. Changes outside any `sync()` path also trigger a full rebuild. First `tilt up` always does a full build — live update requires a running container.
+**When live update breaks:** Changes to files outside the `docker_build` context trigger a full rebuild. Changes outside any `sync()` path also trigger a full rebuild. First `tilt up` always does a full build, live update requires a running container.
 
 ## Resource Configuration
 
@@ -123,9 +123,9 @@ local_resource('storybook',
 )
 ```
 
-**Parallelism:** Local resources run serially by default. Set `allow_parallel=True` for independent resources. Image builds default to 3 concurrent — adjust with `update_settings(max_parallel_updates=N)`.
+**Parallelism:** Local resources run serially by default. Set `allow_parallel=True` for independent resources. Image builds default to 3 concurrent, adjust with `update_settings(max_parallel_updates=N)`.
 
-**Dependencies:** `resource_deps` gates on first-ever readiness only — once a dependency is ready once, dependents unlock permanently for that session.
+**Dependencies:** `resource_deps` gates on first-ever readiness only, once a dependency is ready once, dependents unlock permanently for that session.
 
 ## Debugging Flow
 
@@ -165,8 +165,8 @@ Full state dump?      → tilt dump engine | jq .
 
 For detailed API signatures and advanced patterns, consult:
 
-- **`references/api-reference.md`** — Complete Tiltfile API catalog organized by category, Starlark language notes, ignore mechanism comparison
-- **`references/patterns.md`** — Multi-service architectures, environment config, CI integration, performance optimization, programmatic Tilt interaction, extension ecosystem
+- **`references/api-reference.md`**: Complete Tiltfile API catalog organized by category, Starlark language notes, ignore mechanism comparison
+- **`references/patterns.md`**: Multi-service architectures, environment config, CI integration, performance optimization, programmatic Tilt interaction, extension ecosystem
 
 ## Anti-Patterns
 

@@ -5,7 +5,7 @@ description: This skill should be used when designing terminal user interfaces, 
 
 # TUI Design System
 
-Universal design patterns for building exceptional terminal user interfaces. Framework-agnostic — works with Ratatui, Ink, Textual, Bubbletea, or any TUI toolkit.
+Universal design patterns for building exceptional terminal user interfaces. Framework-agnostic, works with Ratatui, Ink, Textual, Bubbletea, or any TUI toolkit.
 
 **Core philosophy:** TUIs earn their power through spatial consistency, keyboard fluency, and information density that respects human attention. Design for the expert's speed without abandoning the beginner's discoverability.
 
@@ -47,7 +47,7 @@ Choose your primary layout based on what you're building:
 
 ### Persistent Multi-Panel
 
-All panels visible simultaneously. Focus shifts between them. Users build spatial memory — "branches are always top-left."
+All panels visible simultaneously. Focus shifts between them. Users build spatial memory, "branches are always top-left."
 
 ```
 ┌─ Status ──┬─────────── Detail ──────────┐
@@ -80,7 +80,7 @@ Three-pane past/present/future navigation. Parent directory (left), current (cen
 ```
 
 **When to use:** Hierarchical data navigation (file systems, tree structures, nested configs).
-**Key rule:** Preview pane content adapts to selection type — code gets highlighting, images render, directories show contents.
+**Key rule:** Preview pane content adapts to selection type, code gets highlighting, images render, directories show contents.
 
 ### Drill-Down Stack
 
@@ -147,7 +147,7 @@ Terminals resize. Your TUI must handle it gracefully.
 
 - Define a minimum terminal size (typically 80x24). Below that, show a resize message.
 - Never crash on resize. Handle `SIGWINCH` gracefully.
-- Use constraint-based layouts (percentages, min/max, ratios) — not absolute positions.
+- Use constraint-based layouts (percentages, min/max, ratios), not absolute positions.
 - Test at 80x24, 120x40, and 200x60 to verify scaling.
 
 ---
@@ -176,16 +176,16 @@ Design keybindings in four progressive layers:
 
 **Keybinding conventions (lingua franca):**
 
-- `j`/`k` — move down/up
-- `h`/`l` — move left/right (or collapse/expand)
-- `/` — search
-- `?` — help overlay
-- `:` — command mode
-- `q` — quit (or `Esc` to go back one level)
-- `Enter` — select / confirm / drill in
-- `Tab` — switch focus between panels
-- `Space` — toggle selection
-- `g`/`G` — jump to top/bottom
+- `j`/`k`, move down/up
+- `h`/`l`, move left/right (or collapse/expand)
+- `/`, search
+- `?`, help overlay
+- `:`, command mode
+- `q`, quit (or `Esc` to go back one level)
+- `Enter`, select / confirm / drill in
+- `Tab`, switch focus between panels
+- `Space`, toggle selection
+- `g`/`G`, jump to top/bottom
 
 **Never bind:** `Ctrl+C` (interrupt), `Ctrl+Z` (suspend), `Ctrl+\` (quit signal). These belong to the terminal.
 
@@ -195,20 +195,20 @@ Design keybindings in four progressive layers:
 - **Tab** cycles focus forward, **Shift+Tab** backward
 - Focus indicator: highlighted border, color change, or cursor presence
 - Unfocused panels: dimmed or thinner borders
-- Modal dialogs create focus traps — background receives no events
+- Modal dialogs create focus traps, background receives no events
 - Nested focus: outer container routes events to focused child
 
 ### Search & Filtering
 
 The universal pattern: press `/`, type query, results filter live.
 
-- `n`/`N` — next/previous match
-- `Esc` — dismiss search
+- `n`/`N`, next/previous match
+- `Esc`, dismiss search
 - Fuzzy matching by default, `'` prefix for exact match
 - Highlight matched characters in results
 - Preview pane updates for highlighted result
 
-### Help System — Three Tiers
+### Help System: Three Tiers
 
 | Tier               | Trigger            | Content                                     | Audience      |
 | ------------------ | ------------------ | ------------------------------------------- | ------------- |
@@ -254,7 +254,7 @@ Design for graceful degradation across all three tiers:
 3. `$NO_COLOR` is set → disable all color
 4. Default → 16 ANSI colors
 
-**Golden rule:** Your TUI must be _usable_ in 16-color mode. True color _enhances_ — it never _creates_ the hierarchy.
+**Golden rule:** Your TUI must be _usable_ in 16-color mode. True color _enhances_, it never _creates_ the hierarchy.
 
 ### Semantic Color Slots
 
@@ -363,9 +363,9 @@ Use spinners for indeterminate operations. Progress bars for determinate. Show s
 
 Three layers, all required for smooth TUI rendering:
 
-1. **Double buffering** — Render to off-screen buffer, diff against previous frame, emit only changed cells
-2. **Synchronized output** — Wrap frame in `CSI ? 2026 h` ... `CSI ? 2026 l` for atomic terminal render
-3. **Batched writes** — Combine all escape sequences into a single `write()` syscall
+1. **Double buffering**: Render to off-screen buffer, diff against previous frame, emit only changed cells
+2. **Synchronized output**: Wrap frame in `CSI ? 2026 h` ... `CSI ? 2026 l` for atomic terminal render
+3. **Batched writes**: Combine all escape sequences into a single `write()` syscall
 
 ### When to Animate
 
@@ -383,7 +383,7 @@ Three layers, all required for smooth TUI rendering:
 ### Real-Time Updates
 
 - Cap refresh to 15-30 FPS for dashboards (saves CPU, prevents flicker)
-- Use differential updates — only redraw changed cells
+- Use differential updates, only redraw changed cells
 - Stream text (AI responses, logs) at a readable pace, not network burst speed
 - Background operations: show status in a status bar widget, never block the main loop
 
@@ -391,19 +391,19 @@ Three layers, all required for smooth TUI rendering:
 
 ## 7. The Seven Design Principles
 
-1. **Keyboard-first, mouse-optional** — Every feature accessible via keyboard. Mouse enhances but never replaces. `Shift+click` must bypass mouse capture for text selection.
+1. **Keyboard-first, mouse-optional**: Every feature accessible via keyboard. Mouse enhances but never replaces. `Shift+click` must bypass mouse capture for text selection.
 
-2. **Spatial consistency** — Panels stay in fixed positions. Users build mental maps. Never rearrange without explicit user action. Tabs provide stable landmarks.
+2. **Spatial consistency**: Panels stay in fixed positions. Users build mental maps. Never rearrange without explicit user action. Tabs provide stable landmarks.
 
-3. **Progressive disclosure** — Show 5 essential shortcuts in the footer. Full help behind `?`. Complete reference in docs. The floor is accessible, the ceiling is unlimited.
+3. **Progressive disclosure**: Show 5 essential shortcuts in the footer. Full help behind `?`. Complete reference in docs. The floor is accessible, the ceiling is unlimited.
 
-4. **Async everything** — Never freeze the UI. File operations, network requests, scans all run in the background with progress indication. Cancel with `Esc`.
+4. **Async everything**: Never freeze the UI. File operations, network requests, scans all run in the background with progress indication. Cancel with `Esc`.
 
-5. **Semantic color** — Color encodes meaning, not decoration. If you removed all color, the interface should still be _usable_ through layout, typography, and symbols.
+5. **Semantic color**: Color encodes meaning, not decoration. If you removed all color, the interface should still be _usable_ through layout, typography, and symbols.
 
-6. **Contextual intelligence** — Keybindings update per panel. Status bars reflect current state. Help shows what's actionable right now, not everything ever.
+6. **Contextual intelligence**: Keybindings update per panel. Status bars reflect current state. Help shows what's actionable right now, not everything ever.
 
-7. **Design in layers** — Start monochrome (usable?). Add 16 ANSI colors (readable?). Layer true color (beautiful?). Each tier must stand independently.
+7. **Design in layers**: Start monochrome (usable?). Add 16 ANSI colors (readable?). Layer true color (beautiful?). Each tier must stand independently.
 
 ---
 

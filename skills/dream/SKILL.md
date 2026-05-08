@@ -5,7 +5,7 @@ description: Use this skill to review recent conversations and consolidate learn
 
 # Dream: Conversation Review & Knowledge Consolidation
 
-Bio-inspired two-phase sleep cycle that reviews Claude Code and Codex conversations, extracts structured knowledge, and consolidates it into Sibyl. Like biological dreaming — NREM consolidates, REM discovers.
+Bio-inspired two-phase sleep cycle that reviews Claude Code and Codex conversations, extracts structured knowledge, and consolidates it into Sibyl. Like biological dreaming: NREM consolidates, REM discovers.
 
 **Core insight:** Conversations contain 10x more knowledge than what gets manually captured. Dreams extract decisions, patterns, corrections, anti-patterns, and open questions that would otherwise vanish when the session scrolls off.
 
@@ -46,7 +46,7 @@ digraph dream {
 
 ### Actions
 
-1. **Check dream state** — when was the last dream cycle?
+1. **Check dream state**: when was the last dream cycle?
 
    ```bash
    # Check Claude's auto-dream lock
@@ -98,7 +98,7 @@ Claude Code JSONL files contain one JSON object per line. Key message types to l
 | **Architecture discussion** | Longer text blocks with design reasoning | Patterns, system relationships       |
 | **Thinking blocks**         | `type: "thinking"` content               | Reasoning chains, hidden insights    |
 
-**Extraction strategy — don't read whole files.** Use targeted python extraction:
+**Extraction strategy, don't read whole files.** Use targeted python extraction:
 
 ```bash
 # Extract all user prompts (most reliable method)
@@ -200,7 +200,7 @@ Prioritize sessions for deep reading:
 
 ---
 
-## Phase 3: NREM — Structured Consolidation
+## Phase 3: NREM: Structured Consolidation
 
 **Transform raw conversation signal into structured Sibyl entities.**
 
@@ -216,7 +216,7 @@ sibyl add "Decision: [what was decided]" \
   --type episode --category decision --tags "project:[name]"
 ```
 
-**What qualifies:** Any technical choice with trade-offs — library selection, architecture pattern, API design, configuration approach.
+**What qualifies:** Any technical choice with trade-offs, library selection, architecture pattern, API design, configuration approach.
 
 #### 2. Patterns (→ Sibyl `pattern`)
 
@@ -270,7 +270,7 @@ sibyl search "[entity title keywords]" --type [type] --limit 5
 | ----------------------- | ----------------------------------------------------------- |
 | No similar entries      | Create new entity                                           |
 | Similar but older entry | Update existing if new info supersedes, or add relationship |
-| Exact duplicate         | Skip — log in dream report                                  |
+| Exact duplicate         | Skip, log in dream report                                  |
 | Contradictory entry     | Create tension entity linking both                          |
 
 ### Batch Processing
@@ -285,7 +285,7 @@ For efficiency, accumulate extractions and write them in batches:
 
 ---
 
-## Phase 4: REM — Creative Exploration
+## Phase 4: REM: Creative Exploration
 
 **Only in `deep` mode. Find unexpected connections across projects.**
 
@@ -307,7 +307,7 @@ sibyl search "tension" --type episode --limit 20
 Look for:
 
 1. **Pattern reuse:** A pattern from project A that would solve a problem in project B
-2. **Contradictory approaches:** Project A does X one way, project B does it differently — which is right?
+2. **Contradictory approaches:** Project A does X one way, project B does it differently, which is right?
 3. **Shared infrastructure gaps:** Multiple projects hitting the same limitation
 4. **Knowledge transfer:** Something learned in one domain that applies to another
 
@@ -435,7 +435,7 @@ For fast end-of-day processing:
 
 ### Sibyl Is the Primary Store
 
-Everything goes to Sibyl — not memory/\*.md files. Sibyl provides:
+Everything goes to Sibyl, not memory/\*.md files. Sibyl provides:
 
 - Semantic search (vector + BM25)
 - Relationship modeling (entity connections)
@@ -470,9 +470,9 @@ See `references/extraction-guide.md` for:
 | ---------------------------------------- | --------------------------------------------------------------------- |
 | Reading entire JSONL files               | Grep first, read targeted segments                                    |
 | Extracting trivial Q&A                   | Only extract non-obvious insights with transfer value                 |
-| Writing to memory/\*.md instead of Sibyl | Sibyl is the primary store — memory files are a narrow exception      |
-| Skipping dedup check                     | Always search Sibyl before writing — duplicates degrade graph quality |
-| Dream without orient                     | Always check when last dream ran — avoid re-processing                |
+| Writing to memory/\*.md instead of Sibyl | Sibyl is the primary store, memory files are a narrow exception      |
+| Skipping dedup check                     | Always search Sibyl before writing, duplicates degrade graph quality |
+| Dream without orient                     | Always check when last dream ran, avoid re-processing                |
 | Extracting everything from every session | Score sessions first, process high-signal ones deeply                 |
 | Ignoring Codex sessions                  | Codex conversations contain valuable engineering knowledge too        |
 

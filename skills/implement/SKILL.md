@@ -1,13 +1,13 @@
 ---
 name: implement
-description: Use this skill when writing code — building features, fixing bugs, refactoring, or any multi-step implementation work. Activates on mentions of implement, build this, code this, start coding, fix this bug, refactor, make changes, develop this feature, implementation plan, coding task, write the code, or start building.
+description: Use this skill when writing code, building features, fixing bugs, refactoring, or any multi-step implementation work. Activates on mentions of implement, build this, code this, start coding, fix this bug, refactor, make changes, develop this feature, implementation plan, coding task, write the code, or start building.
 ---
 
 # Implementation
 
 Verification-driven coding with tight feedback loops. Distilled from 21,321 tracked operations across 64+ projects, 612 debugging sessions, and 2,476 conversation histories. These are the patterns that consistently ship working code.
 
-**Core insight:** 2-3 edits then verify. 73% of fixes go unverified — that's the #1 quality gap. The difference between a clean session and a debugging spiral is verification cadence.
+**Core insight:** 2-3 edits then verify. 73% of fixes go unverified, that's the #1 quality gap. The difference between a clean session and a debugging spiral is verification cadence.
 
 ## The Sequence
 
@@ -33,21 +33,21 @@ digraph implement {
 }
 ```
 
-**ORIENT** — Read existing code before touching anything. `Grep -> Read -> Read` is the dominant opening. Sessions that read 10+ files before the first edit require fewer fix iterations. Never start with blind changes.
+**ORIENT.** Read existing code before touching anything. `Grep -> Read -> Read` is the dominant opening. Sessions that read 10+ files before the first edit require fewer fix iterations. Never start with blind changes.
 
-**PLAN** — Scale-dependent (see below). Skip for trivial fixes, write a task list for features, run a research swarm for epics.
+**PLAN.** Scale-dependent (see below). Skip for trivial fixes, write a task list for features, run a research swarm for epics.
 
-**IMPLEMENT** — Work in batches of 2-3 edits, then verify. Follow the dependency chain. Edit existing files 9:1 over creating new ones. Fix errors immediately — don't accumulate them.
+**IMPLEMENT.** Work in batches of 2-3 edits, then verify. Follow the dependency chain. Edit existing files 9:1 over creating new ones. Fix errors immediately rather than accumulating them.
 
-**VERIFY** — Typecheck is the primary gate. Run it after every 2-3 edits. Run tests after feature-complete. Run the full suite before commit.
+**VERIFY.** Typecheck is the primary gate. Run it after every 2-3 edits. Run tests after feature-complete. Run the full suite before commit.
 
-**COMMIT** — Atomic chunks, committed as you go. Verify, stage specific files, commit, then loop back to the next chunk. Many small commits per session is the norm. See **Commit Cadence** below for message anatomy.
+**COMMIT.** Atomic chunks, committed as you go. Verify, stage specific files, commit, then loop back to the next chunk. Many small commits per session is the norm. See **Commit Cadence** below for message anatomy.
 
 ---
 
 ## Code Discipline
 
-Behavioral lens that governs every phase of the loop. Adapted from Karpathy's [observations](https://x.com/karpathy/status/2015883857489522876) on LLM coding pitfalls — models "make wrong assumptions on your behalf and just run along with them without checking ... they really like to overcomplicate code and APIs, bloat abstractions ... implement a bloated construction over 1000 lines when 100 would do."
+Behavioral lens that governs every phase of the loop. Adapted from Karpathy's [observations](https://x.com/karpathy/status/2015883857489522876) on LLM coding pitfalls, models "make wrong assumptions on your behalf and just run along with them without checking ... they really like to overcomplicate code and APIs, bloat abstractions ... implement a bloated construction over 1000 lines when 100 would do."
 
 These principles bias toward caution over speed. For trivial fixes, use judgment.
 
@@ -104,7 +104,7 @@ Define verifiable success. Loop until it passes.
 | "Add validation" | Write tests for invalid inputs, then make them pass  |
 | "Fix the bug"    | Write a test that reproduces it, then make it pass   |
 | "Refactor X"     | Ensure the same tests pass before and after          |
-| "Make it work"   | Reject — name the actual signal that proves it works |
+| "Make it work"   | Reject, name the actual signal that proves it works |
 
 For multi-step work, state the plan with verification per step:
 
@@ -254,10 +254,10 @@ Can changes be made incrementally?
 
 ### Spiral Prevention (Avoid This)
 
-1. **Separate error domains** — fix ALL type errors first, THEN test failures. Never interleave.
-2. **3-strike rule** — after 3 failed attempts on same error: change approach entirely, or escalate.
-3. **Cascade depth > 3** — pause, enumerate ALL remaining issues, fix in dependency order.
-4. **Context rot** — after ~15-20 iterations, `/clear` and start fresh. A clean session with a better prompt beats accumulated corrections every time.
+1. **Separate error domains**: fix ALL type errors first, THEN test failures. Never interleave.
+2. **3-strike rule**: after 3 failed attempts on same error: change approach entirely, or escalate.
+3. **Cascade depth > 3**: pause, enumerate ALL remaining issues, fix in dependency order.
+4. **Context rot**: after ~15-20 iterations, `/clear` and start fresh. A clean session with a better prompt beats accumulated corrections every time.
 
 ### The Two-Correction Rule
 
@@ -267,7 +267,7 @@ If you've corrected the same issue twice, `/clear` and restart. Accumulated cont
 
 ## Commit Cadence
 
-Commit each logical chunk as it lands and verifies. Many small commits per session is the norm — never accumulate hours of unrelated work into one mega-commit. The COMMIT step loops back to IMPLEMENT for the next chunk.
+Commit each logical chunk as it lands and verifies. Many small commits per session is the norm, never accumulate hours of unrelated work into one mega-commit. The COMMIT step loops back to IMPLEMENT for the next chunk.
 
 ### When to commit
 
@@ -284,7 +284,7 @@ If a reviewer would want it as a separate diff, it's a separate commit.
 
 ### Mirror local style
 
-Before the first commit in any repo, run `git log -10 --oneline` and mirror the pattern. **Mirror format, not quality** — terse history doesn't lower your bar. Default to Conventional Commits when no pattern exists.
+Before the first commit in any repo, run `git log -10 --oneline` and mirror the pattern. **Mirror format, not quality**, terse history doesn't lower your bar. Default to Conventional Commits when no pattern exists.
 
 | Pattern              | Example                        |
 | -------------------- | ------------------------------ |
@@ -298,13 +298,13 @@ Conventional Commit types: `feat` (capability), `fix` (bug), `refactor` (no beha
 
 ### Message anatomy
 
-**Subject:** imperative mood, ≤76 chars, no trailing period, no filenames. "Fix null deref in token refresh" beats "Fix bug." For Conventional Commits, no emoji in the subject — it breaks parsers.
+**Subject:** imperative mood, ≤76 chars, no trailing period, no filenames. "Fix null deref in token refresh" beats "Fix bug." For Conventional Commits, no emoji in the subject, it breaks parsers.
 
-**Body** (always include one): wrap at 76 chars, separated from subject by a blank line. Explain *why* — the diff shows *what*. State facts: banish "likely", "probably", "might", "seems", "appears to". If you don't know what a change does, read more before committing. Two sentences usually suffices; mention load-bearing context a future bisect would want.
+**Body** (always include one): wrap at 76 chars, separated from subject by a blank line. Explain *why*, the diff shows *what*. State facts: banish "likely", "probably", "might", "seems", "appears to". If you don't know what a change does, read more before committing. Two sentences usually suffices; mention load-bearing context a future bisect would want.
 
 ### HEREDOC + Co-Author
 
-Always pass messages via HEREDOC to preserve formatting. Add a `Co-Authored-By` trailer that names the model — "Claude" alone doesn't disambiguate across multi-agent sessions.
+Always pass messages via HEREDOC to preserve formatting. Add a `Co-Authored-By` trailer that names the model, "Claude" alone doesn't disambiguate across multi-agent sessions.
 
 ```bash
 git commit -m "$(cat <<'EOF'
@@ -339,7 +339,7 @@ git diff --staged         # Review what you're about to commit
 git add <specific-files>  # Only files you personally touched
 ```
 
-Never `git add -A` or `git add .` (catches other agents' WIP and secrets). Never `git restore` files you didn't modify. Never `git push` without explicit request — push is the human's call. Skip planning docs, scratch files, and `.local.md` from the repo.
+Never `git add -A` or `git add .` (catches other agents' WIP and secrets). Never `git restore` files you didn't modify. Never `git push` without explicit request, push is the human's call. Skip planning docs, scratch files, and `.local.md` from the repo.
 
 ---
 
@@ -358,7 +358,7 @@ Never `git add -A` or `git add .` (catches other agents' WIP and secrets). Never
 | Premature optimization                           | Correctness first, optimize after tests pass    |
 | One mega-commit at end of session                | Commit each logical chunk as it lands           |
 | Bare titles like `fix: bug` or `update stuff`    | Specific subject + body explaining why          |
-| Skipping the body to "save time"                 | Always include a body — even two sentences      |
+| Skipping the body to "save time"                 | Always include a body, even two sentences      |
 | Filenames or paths in the subject line           | Describe the behavior, not the file             |
 | Uncertain language ("might fix", "should work")  | State facts; read more code if you don't know   |
 | `git add -A` / `git add .`                       | Stage specific files only                       |

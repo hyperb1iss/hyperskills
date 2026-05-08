@@ -7,7 +7,7 @@ description: Use this skill for cross-model code reviews where a different AI mo
 
 Cross-model validation: the authoring model writes code, a different model reviews it. Different architectures, different training distributions, no self-approval bias.
 
-**Core insight:** Single-model self-review is systematically biased — the same blind spots that let bugs through during writing let them through during review. Cross-model review catches different bug classes because the reviewer has fundamentally different failure modes.
+**Core insight:** Single-model self-review is systematically biased. The same blind spots that let bugs through during writing let them through during review. Cross-model review catches different bug classes because the reviewer has fundamentally different failure modes.
 
 ## Direction & Pre-Flight
 
@@ -23,7 +23,7 @@ Confirm the reviewer is reachable before the real call:
 | Host  | Verify command                                                                                                       | Notes                          |
 | ----- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
 | Claude | `codex --version`                                                                                                   | One-shot, no special flags     |
-| Codex | `printf 'say ok\n' \| claude -p --output-format text --no-session-persistence` with `yield_time_ms: 30000`            | Sanity ping only — see Rule 1  |
+| Codex | `printf 'say ok\n' \| claude -p --output-format text --no-session-persistence` with `yield_time_ms: 30000`            | Sanity ping only, see Rule 1  |
 
 **User defaults are authoritative.** Both CLIs read configured defaults (`~/.codex/config.toml`, `~/.claude/settings.json`). Never specify `--model`, `-m`, or `-c model=`. The only sanctioned override is reasoning effort, and only for spec review (see Effort Override Policy below).
 
@@ -43,11 +43,11 @@ Codex's shell tool yields output back to the model after `yield_time_ms` elapses
 {"cmd": "claude -p --allowedTools \"Read,Glob,Grep,Bash(git *)\" -- \"PROMPT\"", "yield_time_ms": 300000}
 ```
 
-**Common cognitive trap:** "My prompt is short, I only need 30s." Wrong — claude session setup, network, and model compute dominate; prompt length barely factors in. Always 300000.
+**Common cognitive trap:** "My prompt is short, I only need 30s." Wrong. Claude session setup, network, and model compute dominate; prompt length barely factors in. Always 300000.
 
 **Consistency rule:** once you're at 300000, stay at 300000. Reverting to 1000 between calls in the same session creates a fresh wave of orphans on top of any still running.
 
-### Rule 2: `Process running with session ID NNNN` is NOT an error — REAP, never retry
+### Rule 2: `Process running with session ID NNNN` is NOT an error: REAP, never retry
 
 When Codex returns `Process running with session ID NNNN`, the process is alive and computing in the background. The yield fired before completion. **This is normal output, not failure.**
 
@@ -107,7 +107,7 @@ The `claude` CLI has flags that take `<value...>` and greedily consume every fol
 
 **Variadic flags:** `--allowedTools` / `--allowed-tools`, `--disallowedTools` / `--disallowed-tools`, `--tools`, `--add-dir`, `--betas`, `--file`, `--mcp-config`, `--plugin-dir`.
 
-**Required form** (default to this — works regardless of flag order):
+**Required form** (default to this, works regardless of flag order):
 
 ```bash
 claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT"
@@ -120,7 +120,7 @@ claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT"
 | Prompt before flags | `claude -p "PROMPT" --allowedTools "Read,Bash(git *)"` |
 | Stdin pipe | `echo "PROMPT" \| claude -p --allowedTools "Read,Bash(git *)"` |
 
-The `codex` CLI does not have this issue — its flags are non-variadic.
+The `codex` CLI does not have this issue, its flags are non-variadic.
 
 ---
 
@@ -136,7 +136,7 @@ A bare `codex review` (no scope) is the #1 cause of Claude → Codex failures: i
 | Single commit | `codex review --commit <SHA>` |
 | Working tree (unstaged) | `codex review --uncommitted` |
 
-For anything outside this trio (spec docs, single files, custom scopes, personas), use `codex exec "PROMPT"` with explicit scope in the prompt — never bare `codex review`.
+For anything outside this trio (spec docs, single files, custom scopes, personas), use `codex exec "PROMPT"` with explicit scope in the prompt, never bare `codex review`.
 
 If `codex review` output exceeds ~100KB, the diff is too large for one pass. Split: `codex review --commit <SHA1>`, `codex review --commit <SHA2>`, or use `codex exec` with a narrowed prompt ("Review error handling only").
 
@@ -146,7 +146,7 @@ If `codex review` output exceeds ~100KB, the diff is too large for one pass. Spl
 
 **Never** pipe a review to `| tail -N` or `| head -N`. Three reasons it fails:
 
-1. **The pipe buffers until EOF.** `tail` (and `head`) read the entire upstream stream before producing output. The agent gets *nothing* until the review process exits or times out — no progress signal, no early verdict, no way to tell if the call is alive. With `claude -p`, this compounds the `yield_time_ms` problem: the wrapping shell call holds output until claude exits, then `tail` finally runs.
+1. **The pipe buffers until EOF.** `tail` (and `head`) read the entire upstream stream before producing output. The agent gets *nothing* until the review process exits or times out, no progress signal, no early verdict, no way to tell if the call is alive. With `claude -p`, this compounds the `yield_time_ms` problem: the wrapping shell call holds output until claude exits, then `tail` finally runs.
 2. **Reviews don't put the verdict at the end.** Findings are typically ordered by severity (BLOCKER first), with the summary/verdict near the top. `tail -300` discards exactly the part you need.
 3. **A file lets a human watch progress live.** `tail -f /tmp/review.txt` in another terminal shows the review streaming in real time, completely independent of the agent's call. The pipe pattern hides everything until exit.
 
@@ -168,7 +168,7 @@ git diff main...HEAD | claude -p "PROMPT" > "$out" 2>&1
 
 If `mktemp` isn't handy, use a PID + timestamp slug: `out=/tmp/codex-review-$$-$(date +%s).txt`.
 
-Echo the path before the redirect so the agent (and a human running `tail -f`) knows where to look. After the command exits, `Read` (or `cat`) the file. It persists across turns — re-read instead of re-running.
+Echo the path before the redirect so the agent (and a human running `tail -f`) knows where to look. After the command exits, `Read` (or `cat`) the file. It persists across turns, re-read instead of re-running.
 
 ---
 
@@ -246,10 +246,10 @@ Code review defers to user config. Spec review overrides higher.
 
 | What you're reviewing                | Codex effort                              | Claude effort |
 | ------------------------------------ | ----------------------------------------- | ------------- |
-| Code (commit / diff / PR / WIP)      | **No flag** — defer to `~/.codex/config.toml` | **No flag** — defer to settings |
+| Code (commit / diff / PR / WIP)      | **No flag**, defer to `~/.codex/config.toml` | **No flag**, defer to settings |
 | Spec / RFC / design doc              | `-c model_reasoning_effort="xhigh"`       | `max`         |
 
-**Why split:** specs are higher-stakes than diffs — a subtle architectural mistake compounds across the eventual implementation. Code diffs are smaller scope and the user's configured effort is fine.
+**Why split:** specs are higher-stakes than diffs, a subtle architectural mistake compounds across the eventual implementation. Code diffs are smaller scope and the user's configured effort is fine.
 
 ---
 
@@ -290,15 +290,15 @@ Run passes sequentially. Fix critical findings between passes to avoid noise com
 
 ## Prompt Engineering Rules
 
-These apply to both directions — prompts are model-agnostic.
+These apply to both directions, prompts are model-agnostic.
 
-1. **Assign a persona** — "senior security engineer" beats "review for security"
-2. **Specify what to skip** — "Skip formatting, naming style, minor docs gaps"
-3. **Require confidence scores** — only act on findings ≥ 0.7
-4. **Demand file:line citations** — vague findings aren't actionable
-5. **Ask for concrete fixes** — "Suggest a specific fix"
-6. **One domain per pass** — security-only, architecture-only
-7. **Demand a verdict** — "Verdict: patch is correct / incorrect" or "go / no-go"
+1. **Assign a persona**: "senior security engineer" beats "review for security"
+2. **Specify what to skip**: "Skip formatting, naming style, minor docs gaps"
+3. **Require confidence scores**: only act on findings ≥ 0.7
+4. **Demand file:line citations**: vague findings aren't actionable
+5. **Ask for concrete fixes**: "Suggest a specific fix"
+6. **One domain per pass**: security-only, architecture-only
+7. **Demand a verdict**: "Verdict: patch is correct / incorrect" or "go / no-go"
 
 Ready-to-use prompt templates for security, architecture, performance, error handling, and concurrency are in `references/prompts.md`.
 
@@ -308,7 +308,7 @@ Ready-to-use prompt templates for security, architecture, performance, error han
 
 | Anti-Pattern | Why It Fails | Fix |
 | ------------ | ------------ | --- |
-| Self-review (model reviews its own code) | Systematic bias — same blind spots | Cross-model: author and reviewer are different models |
+| Self-review (model reviews its own code) | Systematic bias, same blind spots | Cross-model: author and reviewer are different models |
 | "Review this code" (no specifics) | Vague → bikeshedding | Domain prompt + persona + structured output |
 | Single pass for everything | Context dilution | Multi-pass, one concern per pass |
 | No confidence threshold | Noise floods signal | Only act on ≥ 0.7 |
@@ -334,10 +334,10 @@ Ready-to-use prompt templates for security, architecture, performance, error han
 
 ## What This Skill is NOT
 
-- Not a replacement for human review — can't evaluate product direction or UX
-- Not a linter — use linters for formatting and style
-- Not infallible — 5–15% false positive rate is normal; triage findings
-- Not for self-approval — the entire point is cross-model validation
+- Not a replacement for human review, can't evaluate product direction or UX
+- Not a linter, use linters for formatting and style
+- Not infallible, 5–15% false positive rate is normal; triage findings
+- Not for self-approval, the entire point is cross-model validation
 
 ## References
 

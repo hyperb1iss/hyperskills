@@ -5,7 +5,7 @@ description: Use this skill when decomposing complex work into structured tasks 
 
 # Structured Planning
 
-Verification-driven task decomposition with Sibyl-native tracking. Mined from 200+ real planning sessions — the plans that actually survived contact with code.
+Verification-driven task decomposition with Sibyl-native tracking. Mined from 200+ real planning sessions: the plans that actually survived contact with code.
 
 **Core insight:** Plans fail when steps can't be verified. Decompose until every step has a concrete check. Track in Sibyl so plans survive context windows.
 
@@ -45,7 +45,7 @@ digraph planning {
    sibyl task list -s todo
    ```
 
-2. **Define success criteria** — what does "done" look like?
+2. **Define success criteria**: what does "done" look like?
    - Measurable outcomes (tests pass, endpoint returns X, UI renders Y)
    - NOT vague goals ("improve performance" → "p95 latency < 200ms")
 
@@ -75,7 +75,7 @@ If this is a **quick fix**, stop planning and go build. Planning a 5-minute fix 
 
 ### Actions
 
-1. **Map the impact surface** — which files/modules will this touch?
+1. **Map the impact surface**: which files/modules will this touch?
    - Spawn an Explore agent if the scope is uncertain
    - Read the actual code, don't guess from file names
 
@@ -101,7 +101,7 @@ A mental model of the change surface:
 
 ### The Verification Rule
 
-**A step without a verification method is not a step — it's a hope.**
+**A step without a verification method is not a step, it's a hope.**
 
 For each task, define:
 
@@ -242,9 +242,9 @@ After presenting, explicitly check:
 Plans change when they meet reality. When a task reveals unexpected complexity:
 
 1. **Don't force through.** Pause and reassess.
-2. **Update the plan** — add/remove/modify tasks.
-3. **Update Sibyl** — keep the tracking current.
-4. **Communicate** — "Task 3 revealed [X]. Adjusting plan: [changes]."
+2. **Update the plan**: add/remove/modify tasks.
+3. **Update Sibyl**: keep the tracking current.
+4. **Communicate**: "Task 3 revealed [X]. Adjusting plan: [changes]."
 
 ---
 
