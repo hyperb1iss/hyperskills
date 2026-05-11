@@ -9,6 +9,8 @@ Cross-model validation: the authoring model writes code, a different model revie
 
 **Core insight:** Single-model self-review is systematically biased. The same blind spots that let bugs through during writing let them through during review. Cross-model review catches different bug classes because the reviewer has fundamentally different failure modes.
 
+**How to read this skill:** patterns and decision trees below are guidelines. Pick what fits, blend when needed. The rules marked ⚠️ are different: they're real CLI behaviors (`yield_time_ms`, the `--` separator, scope flags), not procedural ceremony. Audited sessions show 366+ orphaned `claude -p` processes per session and ~7 minutes wasted per spiral when ⚠️ rules are skipped. Treat them as facts about the tool, not opinions about workflow.
+
 ## Direction & Pre-Flight
 
 Identify the host first. The host runs the _other_ model's CLI as a subprocess.
@@ -31,7 +33,7 @@ Confirm the reviewer is reachable before the real call:
 
 ## ⚠️ Codex → Claude: Three Non-Negotiable Rules
 
-These three rules cause the overwhelming majority of cross-model review failures. Audited sessions show 366+ orphaned `claude -p` processes per session, ~7 minutes wasted per spiral. Get these right on the first call.
+These three rules cause the overwhelming majority of cross-model review failures. They're not workflow preferences; they're how the `claude -p` shell tool behaves under Codex. Get them right on the first call.
 
 ### Rule 1: `yield_time_ms: 300000` on EVERY call
 
@@ -77,7 +79,7 @@ digraph reap {
 {"cmd": "claude -p --allowedTools '...' -- 'PROMPT'", "yield_time_ms": 300000}
 → "Process running with session ID 84814"
 {"cmd": "claude -p --allowedTools '...' -- 'PROMPT'", "yield_time_ms": 300000}
-→ "Process running with session ID 84815"   // 84814 still alive — orphaned
+→ "Process running with session ID 84815"   // 84814 still alive, orphaned
 {"cmd": "claude -p --allowedTools '...' -- 'PROMPT'", "yield_time_ms": 300000}
 → "Process running with session ID 84816"   // 84814 + 84815 both still alive
 ... 8 more retries ... 11+ orphans, ~7 minutes wall time
@@ -91,7 +93,7 @@ digraph reap {
 {"session_id": 84814, "yield_time_ms": 300000}        // reap, do NOT re-invoke claude -p
 → "Process running with session ID 84814"             // still computing
 {"session_id": 84814, "yield_time_ms": 300000}        // keep reaping
-→ "Process exited with code 0"                        // done — parse the output
+→ "Process exited with code 0"                        // done, parse the output
 ```
 
 **Reaping rules:**
@@ -211,8 +213,8 @@ Both CLIs scope what the reviewer can read, write, and execute. Default to the m
 | `read-only`                                  | ✓    | ✗        | ✗       | Pure review (default for review work)                |
 | `workspace-write`                            | ✓    | cwd only | ✗       | Review + apply suggested fixes                       |
 | `danger-full-access`                         | ✓    | ✓        | ✓       | Last resort; explicit user request only              |
-| `--full-auto` (alias)                        | —    | —        | —       | `--ask-for-approval never --sandbox workspace-write` |
-| `--dangerously-bypass-approvals-and-sandbox` | —    | —        | —       | Last resort; full bypass                             |
+| `--full-auto` (alias)                        | n/a  | n/a      | n/a     | `--ask-for-approval never --sandbox workspace-write` |
+| `--dangerously-bypass-approvals-and-sandbox` | n/a  | n/a      | n/a     | Last resort; full bypass                             |
 
 ### Codex working-directory and ergonomics flags
 
@@ -268,7 +270,7 @@ Tool access costs more tokens but catches bugs that need surrounding context (si
 
 ## Multi-Pass Strategy
 
-Run multiple focused passes for thorough reviews. Each pass gets a specific persona and concern domain.
+Thorough reviews benefit from multiple focused passes rather than one vague pass. Single passes dilute attention and produce shallow findings on each dimension. Each pass gets a specific persona and concern domain.
 
 | Pass             | Focus                                       | Approach                                                             |
 | ---------------- | ------------------------------------------- | -------------------------------------------------------------------- |
@@ -284,21 +286,21 @@ Run multiple focused passes for thorough reviews. Each pass gets a specific pers
 | 300+ lines or architecture change           | Full 4-pass                  |
 | Security-sensitive (auth, payments, crypto) | Always include security pass |
 
-Run passes sequentially. Fix critical findings between passes to avoid noise compounding. Stop at 3 review iterations max.
+Run passes sequentially. Fix critical findings between passes to avoid noise compounding. Three review iterations is the practical ceiling; past that, returns diminish and you start re-litigating findings rather than fixing real bugs.
 
 ---
 
-## Prompt Engineering Rules
+## Prompt Engineering Heuristics
 
-These apply to both directions, prompts are model-agnostic.
+These apply to both directions; prompts are model-agnostic and reliably improve review signal:
 
-1. **Assign a persona**: "senior security engineer" beats "review for security"
-2. **Specify what to skip**: "Skip formatting, naming style, minor docs gaps"
-3. **Require confidence scores**: only act on findings ≥ 0.7
-4. **Demand file:line citations**: vague findings aren't actionable
-5. **Ask for concrete fixes**: "Suggest a specific fix"
-6. **One domain per pass**: security-only, architecture-only
-7. **Demand a verdict**: "Verdict: patch is correct / incorrect" or "go / no-go"
+1. **Assign a persona.** "Senior security engineer" beats "review for security"
+2. **Specify what to skip.** "Skip formatting, naming style, minor docs gaps" prevents bikeshedding
+3. **Require confidence scores** and act only on findings ≥ 0.7
+4. **Demand file:line citations.** Vague findings without location aren't actionable
+5. **Ask for concrete fixes.** "Suggest a specific fix"
+6. **One domain per pass.** Security-only, architecture-only
+7. **Demand a verdict.** "Verdict: patch is correct / incorrect" or "go / no-go"
 
 Ready-to-use prompt templates for security, architecture, performance, error handling, and concurrency are in `references/prompts.md`.
 

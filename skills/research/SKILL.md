@@ -7,9 +7,11 @@ description: Use this skill when gathering knowledge at scale before making deci
 
 Wave-based knowledge gathering with deferred synthesis. Mined from 300+ real research dispatches: the pattern that consistently produces actionable intelligence.
 
-**Core insight:** Research breadth-first, synthesize after. Don't draw conclusions from the first 3 results. Deploy agents in waves, accumulate findings, then synthesize with the full picture.
+**Core insight:** Research breadth-first, synthesize after. Conclusions drawn from the first three results miss nuance the fourth wave would have surfaced. Deploying agents in waves and accumulating findings before synthesizing produces sharper recommendations.
 
-## The Process
+**How to read this skill:** the wave structure below is a shape, not a procedure. Quick mode skips most of it. Standard research uses one wave plus targeted follow-ups. Deep dives genuinely need the full pattern. Calibrate to the question, not the framework.
+
+## The Shape
 
 ```dot
 digraph research {
@@ -36,27 +38,14 @@ digraph research {
 
 ## Phase 1: PRIME
 
-**Search what you already know before spawning a single agent.**
+Lean on existing knowledge before spawning agents. Re-running research that already lives in Sibyl burns tokens and produces duplicate entries.
 
-### Actions
+### Common moves
 
-1. **Search Sibyl first:**
-
-   ```
-   sibyl search "<research topic>"
-   sibyl search "<related technology>"
-   sibyl search "<prior decision in this area>"
-   ```
-
-2. **Check for stale knowledge:**
-   - If Sibyl has entries older than 3 months on fast-moving topics (frameworks, models, cloud services) → research anyway, but use existing knowledge as baseline
-   - If Sibyl has recent entries → present them first, ask if deeper research is needed
-
-3. **Define the research question clearly:**
-   - NOT: "research databases" (too vague)
-   - YES: "compare PostgreSQL vs CockroachDB for multi-region write-heavy workloads with <10ms p99 latency requirement"
-
-4. **Set the research budget:**
+- **Search Sibyl first:** `sibyl search "<research topic>"`, `sibyl search "<related technology>"`, `sibyl search "<prior decision in this area>"`. Surface what's already known before generating new findings.
+- **Check for staleness.** Fast-moving topics (frameworks, models, cloud services) usually warrant re-research even when Sibyl has recent entries; treat the existing knowledge as a baseline. Stable topics with recent entries often don't need a fresh pass at all.
+- **Sharpen the research question.** "Research databases" is too vague to dispatch on. "Compare PostgreSQL vs CockroachDB for multi-region write-heavy workloads with <10ms p99 latency" gives agents enough scope to do useful work.
+- **Calibrate the research budget** to the decision the research is feeding:
 
    | Depth          | Agents | Time      | When                                         |
    | -------------- | ------ | --------- | -------------------------------------------- |
@@ -65,9 +54,11 @@ digraph research {
    | **Deep dive**  | 10-30  | 20-40 min | Greenfield decisions, SOTA analysis          |
    | **Exhaustive** | 30-60+ | 40-90 min | New project inception, competitive landscape |
 
-### Source Quality Contract
+### Source quality contract
 
-| Claim Type              | Required Source                                  |
+This bit is non-negotiable: the value of research collapses when claims rest on stale blog posts. Specific claim types deserve specific source standards:
+
+| Claim type              | Preferred source                                 |
 | ----------------------- | ------------------------------------------------ |
 | Current version         | Package registry, release page, or official CLI  |
 | CLI flags / config keys | Official docs or local `--help` output           |
@@ -76,22 +67,22 @@ digraph research {
 | Research papers / SOTA  | Paper, benchmark repo, or authors' artifact      |
 | Community health        | Repository activity plus issue/release cadence   |
 
-If primary sources disagree with blog posts, trust the primary source and record the discrepancy. If a fact is volatile, date it explicitly and prefer a command/source the next agent can rerun.
+When primary sources disagree with secondary ones, trust the primary source and note the discrepancy. Date volatile facts explicitly, and prefer commands/sources the next agent can rerun over screenshots that go stale.
 
 ---
 
 ## Phase 2: WAVE 1: Broad Sweep
 
-**Deploy the first wave of agents across the full research surface.**
+Deploy the first wave of agents across the full research surface. The goal is breadth; accept that some agents will produce mediocre output, that's what gap analysis is for.
 
-### Agent Design Principles
+### What good agent prompts have
 
-Each agent gets:
+Vague prompts produce vague research. Each agent benefits from:
 
 - **One specific topic** (not "research everything about X")
 - **An output file path** (no ambiguity about where to write)
 - **Search hints** (include year: "search [topic] 2026")
-- **8-12 numbered coverage items** (scope the research precisely)
+- **8-12 numbered coverage items** that scope the research precisely
 - **Source quality guidance** ("prefer official docs and GitHub repos over blog posts")
 
 ### Wave 1 Template
@@ -114,12 +105,12 @@ Use WebSearch for current information. Include dates on all facts.
 Cite sources with URLs.
 ```
 
-### Deployment Rules
+### Deployment notes
 
-- **ALL Wave 1 agents run in background**: no dependencies between them
-- **3-4 seconds between dispatches**: avoid rate limiting
-- **Each agent writes its own file**: no shared outputs
-- **Group by theme:** If researching 12 topics, group into 3-4 thematic clusters
+- **Background by default.** Research agents have no inter-dependencies, so foreground execution serializes work that should run in parallel.
+- **3-4 seconds between dispatches** avoids rate limiting in practice. Tighter cadences sometimes work, sometimes hit limits, so pace yourself.
+- **One file per agent.** Shared outputs create write contention and lose attribution.
+- **Group by theme** when researching many topics. 12 separate dispatches become 3-4 thematic clusters with clearer synthesis later.
 
 ### Coverage Strategy
 
@@ -139,21 +130,13 @@ For technology evaluations, cover these dimensions:
 
 ## Phase 3: GAP ANALYSIS
 
-**After Wave 1 completes, identify what's missing before synthesizing.**
+After Wave 1, look for what's missing before synthesizing. Premature synthesis is the most common research failure: the answer feels obvious after three docs and turns out to be wrong after eight.
 
-### Actions
+### What to look for
 
-1. **Read all Wave 1 outputs**: skim each research doc
-2. **Identify gaps:**
-   - Dimensions not covered?
-   - Contradictory findings between agents?
-   - Questions raised but not answered?
-   - Missing comparisons?
-
-3. **Check for bias:**
-   - Are all findings positive? (Suspicious, look for failure cases)
-   - Did agents only find official docs? (Need community/real-world experience)
-   - Same sources cited by multiple agents? (Need diversity)
+- **Coverage gaps**: dimensions the wave didn't touch, missing comparisons, questions raised but not answered
+- **Contradictions**: agents reaching different conclusions on the same question (often signal for verification agents)
+- **Bias signals**: all-positive findings (suspicious, look for failure cases), only-official-docs (need community experience), same sources cited repeatedly (need source diversity)
 
 ### Decision Point
 
@@ -168,25 +151,18 @@ For technology evaluations, cover these dimensions:
 
 ## Phase 4: WAVE 2+: Targeted Research
 
-**Fill specific gaps identified in the analysis.**
-
-### Wave 2 Agents Are Different
+Fill specific gaps identified in the analysis. Wave 2 agents differ from Wave 1 in shape:
 
 - **Smaller scope**: one specific question per agent
 - **Higher quality bar**: "find production experience reports, not just docs"
-- **Cross-reference**: "Agent X found [claim]. Verify this against [alternative source]"
+- **Cross-reference prompts**: "Agent X found [claim], verify against [alternative source]"
 - **Deep reads**: "Read the full README and API docs for [library], not just the landing page"
 
-### When to Stop
+### When to stop
 
-Stop deploying waves when:
+Stop deploying waves when the research question can be answered with confidence, when additional agents would produce diminishing returns, when key claims have 2+ independent sources, or when the user signals "enough, let's decide."
 
-- The research question can be answered with confidence
-- Additional agents would produce diminishing returns
-- You have >= 2 independent sources for key claims
-- The user signals "enough, let's decide"
-
-**Max 3 waves for most research.** If 3 waves haven't answered the question, the question needs reframing.
+Three waves is usually the practical ceiling. Past that, more research rarely sharpens the answer; it usually means the question itself needs reframing.
 
 ---
 
@@ -205,7 +181,7 @@ Stop deploying waves when:
 
 ### Recommendation
 
-[Clear choice with justification. Don't hedge — pick one.]
+[Clear choice with justification. Don't hedge, pick one.]
 
 ### Options Evaluated
 
@@ -229,17 +205,17 @@ Stop deploying waves when:
 
 ### Sources
 
-- [Source 1](url) — [what it contributed]
-- [Source 2](url) — [what it contributed]
+- [Source 1](url): [what it contributed]
+- [Source 2](url): [what it contributed]
 ```
 
-### Synthesis Rules
+### Synthesis principles
 
-1. **Lead with the recommendation.** Don't make the reader wade through findings to find the answer.
-2. **Separate facts from opinions.** "PostgreSQL supports JSONB" (fact) vs "PostgreSQL is better for this use case" (opinion backed by evidence).
-3. **Include dissenting evidence.** If one source contradicts the recommendation, say so. Don't cherry-pick.
-4. **Date everything.** "As of Feb 2026, [library] is at v4.2", research spoils fast.
-5. **Note confidence level.** "High confidence: well-documented. / Low confidence: based on one blog post."
+- **Lead with the recommendation.** Forcing the reader to wade through findings to find the answer is the most common synthesis failure.
+- **Separate facts from opinions.** "PostgreSQL supports JSONB" (fact) vs "PostgreSQL is better for this use case" (opinion backed by evidence). Both are useful; conflating them isn't.
+- **Include dissenting evidence.** If one source contradicts the recommendation, name it. Cherry-picked synthesis is worse than no synthesis.
+- **Date everything.** "As of [month] [year], [library] is at v4.2." Research spoils fast.
+- **Note confidence level.** "High confidence: well-documented" / "Low confidence: based on one blog post" gives the reader the calibration they need.
 
 ---
 

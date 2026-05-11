@@ -7,9 +7,11 @@ description: Use this skill before any creative work - new features, architectur
 
 Structured ideation using the Double Diamond model, grounded in persistent memory. Mined from 100+ real brainstorming sessions across production projects.
 
-**Core insight:** AI excels at divergent phases (volume, cross-domain connections). Humans excel at convergent phases (judgment, selection). This skill separates the two and uses Sibyl as institutional memory to prevent re-exploring solved problems.
+**Core insight:** AI excels at divergent phases (volume, cross-domain connections). Humans excel at convergent phases (judgment, selection). Separating the two, and using Sibyl to avoid re-exploring solved problems, is the shape that consistently produces useful brainstorms.
 
-## The Process
+**How to read this skill:** the phases below describe the natural rhythm of a good brainstorm, not a procedure to march through. Skip phases that don't apply. Revisit earlier phases when new info changes the frame. Use judgment about when to compress, when to skip to action, and when divergent exploration is actually warranted.
+
+## The Shape
 
 ```dot
 digraph brainstorm {
@@ -35,133 +37,99 @@ digraph brainstorm {
 
 ## Phase 1: GROUND (Memory-First)
 
-**Before generating a single idea, search what we already know.**
+Lean on existing knowledge before generating new ideas. The cost of a Sibyl search is low; the cost of re-discovering a pattern we already learned is high.
 
-### Actions
+### Common moves
 
-1. **Search Sibyl** for related patterns, past decisions, known constraints:
-   - `sibyl search "<topic keywords>"`, find prior art
-   - `sibyl search "<related architecture>"`, find relevant patterns
-   - Check for existing tasks/epics on this topic
+- **Search Sibyl** for related patterns, decisions, and known constraints. Useful queries: `sibyl search "<topic keywords>"`, `sibyl search "<related architecture>"`, plus a quick scan of existing tasks/epics on the topic.
+- **Surface constraints** that aren't up for debate: tech stack locks, budget, timeline, conventions you'd be foolish to violate.
+- **Present prior art** before ideating: "Sibyl has 3 relevant entries: [pattern X], [decision Z], [gotcha W]. Want to factor these in?"
 
-2. **Surface constraints**: what's already decided? What's non-negotiable?
-   - Tech stack locked? Budget constraints? Timeline?
-   - Existing patterns we must follow?
-
-3. **Present prior art**: show the user what Sibyl knows before ideating:
-   > "Sibyl has 3 relevant entries: [pattern X from project Y], [decision Z from last month], [gotcha W]. Want to factor these in?"
-
-### Gate
-
-If Sibyl has a directly applicable pattern or decision, **present it first**. Don't re-brainstorm solved problems.
+If Sibyl already has a directly applicable answer, surface it first. The brainstorm is then about whether to apply it as-is, adapt it, or genuinely diverge, not re-deriving it from scratch.
 
 ---
 
 ## Phase 2: DIVERGE: Explore the Problem Space
 
-**Goal:** Generate breadth. Understand what we're actually solving.
+**Goal:** Generate breadth. Understand what we're actually solving before reaching for solutions.
 
-### Actions
+### Common moves
 
-1. **Ask ONE question at a time** to understand intent:
-   - What's the friction/pain point?
-   - Who benefits? How do they use it today?
-   - What does success look like?
+- **Lean toward one load-bearing question at a time.** Stacking five questions buries the signal; building understanding incrementally surfaces what actually matters. The exception is when the user fires multiple parallel asks; then answer them in parallel rather than artificially serializing.
+- **Reframe the problem** from multiple angles: user view ("as a [user], I need..."), system view ("the system currently..."), constraint view ("we're bounded by...").
+- **Spawn parallel Explore agents** when the problem space is genuinely large: research how similar projects solve this, map the existing codebase surface, search for SOTA approaches.
 
-2. **Reframe the problem** from multiple angles:
-   - User perspective: "As a [user], I need..."
-   - System perspective: "The system currently..."
-   - Constraint perspective: "We're bounded by..."
-
-3. **If the problem space is large**, spawn parallel Explore agents:
-   ```
-   Agent 1: Research how similar projects solve this
-   Agent 2: Map the existing codebase surface area
-   Agent 3: Search for SOTA approaches (WebSearch)
-   ```
+The discipline here is staying in problem space when the pull toward solutions is strong. If the problem is already crisp, skip ahead. This phase exists to prevent solving the wrong thing, not to perform exploration.
 
 ### Anti-patterns
 
-- Don't jump to solutions. This phase is about the PROBLEM.
-- Don't ask 5 questions at once. One at a time, build understanding.
-- Don't dismiss vague input, "make it faster" is valid; help sharpen it.
+- Jumping to solutions before the problem frame is clear
+- Stacking questions when the answers depend on each other
+- Dismissing vague input ("make it faster" is a valid starting point; help sharpen it instead of rejecting it)
 
 ---
 
 ## Phase 3: CONVERGE: Define the Core Problem
 
-**Goal:** Narrow from exploration to a crisp problem statement.
+**Goal:** Narrow from exploration to a crisp problem statement before exploring solutions for it.
 
-### Actions
-
-1. **Synthesize** what was explored into a 1-2 sentence problem statement
-2. **Confirm** with the user: "Is this what we're solving?"
-3. **Identify scope boundaries**: what's IN, what's OUT
-
-### Output
+Synthesize the exploration into a 1-2 sentence problem statement, confirm it lands ("is this what we're solving?"), and call out scope boundaries. The output usually looks like:
 
 > **Problem:** [crisp statement]
 > **In scope:** [what we'll address]
 > **Out of scope:** [what we won't]
 > **Key constraint:** [the most important limiting factor]
 
+If the problem was already crisp coming in, this phase is a 30-second confirmation, not a deliverable.
+
 ---
 
 ## Phase 4: DIVERGE: Explore Solutions
 
-**Goal:** Generate multiple viable approaches. Quality through quantity.
+**Goal:** Generate multiple viable approaches with explicit tradeoffs.
 
-### Actions
+### Common moves
 
-1. **Present 2-3 approaches** with explicit tradeoffs:
+- **Present 2-3 approaches** with tradeoffs side-by-side. Two is the floor (otherwise it's a recommendation, not a brainstorm); past four, decision fatigue kicks in.
 
-   | Approach  | Pros | Cons | Complexity   | Risk |
-   | --------- | ---- | ---- | ------------ | ---- |
-   | A: [name] | ...  | ...  | Low/Med/High | ...  |
-   | B: [name] | ...  | ...  | Low/Med/High | ...  |
-   | C: [name] | ...  | ...  | Low/Med/High | ...  |
+  | Approach  | Pros | Cons | Complexity   | Risk |
+  | --------- | ---- | ---- | ------------ | ---- |
+  | A: [name] | ...  | ...  | Low/Med/High | ...  |
+  | B: [name] | ...  | ...  | Low/Med/High | ...  |
+  | C: [name] | ...  | ...  | Low/Med/High | ...  |
 
-2. **Include at least one unconventional option**: break fixation on the obvious path
+- **Include one unconventional option** when the obvious paths look similar. Fixation on the first decent idea is the failure mode this phase is designed to prevent.
+- **Ground in existing patterns:** "this follows what we did in [project X]" or "this diverges from our convention because [reason]".
+- **Name the verification method** for each approach so the choice connects to a concrete check (test, benchmark, visual confirmation).
 
-3. **Ground in existing patterns:**
-   - "This follows the pattern we used in [project X]"
-   - "This diverges from our convention because [reason]"
+### Exploration vs exploitation
 
-4. **For each approach, name the verification method:**
-   - How would we know it works? (Test? Benchmark? Visual check?)
+Balance like MCTS. Don't fixate on the first decent idea:
 
-### Exploration vs Exploitation
-
-Balance like MCTS, don't fixate on the first decent idea:
-
-- If all approaches look similar → push for a **wild card** option
-- If approaches are wildly different → good, that's healthy divergence
+- If all approaches look similar → push for a wild card option
+- If approaches are wildly different → that's healthy divergence
 - If the user gravitates early → present the contrarian case before converging
 
 ### Anti-patterns
 
-- Don't present 7 options. 2-3 is the sweet spot.
-- Don't present options without tradeoffs. Every option has a cost.
-- Don't present options that violate known constraints from Phase 1.
-- Don't default to the most complex solution. Start simple, add complexity only if justified.
+- Seven "maybe" options instead of 2-3 real choices with tradeoffs
+- Options presented without explicit costs (every option has one)
+- Options that quietly violate constraints surfaced in Phase 1
+- Defaulting to the most complex solution; start simple, add complexity only when justified
 
 ---
 
 ## Phase 5: CONVERGE: Decide and Record
 
-**Goal:** Lock in the approach. Record the decision. Exit to action.
+**Goal:** Lock in the approach, record the decision, exit to action.
 
-### Actions
+The user picks. Present your recommendation with conviction but don't bulldoze; the whole point of divergent exploration is preserving genuine choice. Then record the decision in Sibyl so future sessions don't re-litigate it:
 
-1. **Let the user choose.** Present your recommendation but don't bulldoze.
+```
+sibyl add "Brainstorm: [topic]" "Chose [approach] because [reason]. Rejected [other approaches] due to [tradeoffs]. Key constraint: [X]."
+```
 
-2. **Record the decision in Sibyl:**
-
-   ```
-   sibyl add "Brainstorm: [topic]" "Chose [approach] because [reason]. Rejected [other approaches] due to [tradeoffs]. Key constraint: [X]."
-   ```
-
-3. **Define next action**: the brainstorm exits to whatever makes sense:
+Hand off to whatever's next:
 
    | Next Step                  | When                                  |
    | -------------------------- | ------------------------------------- |
@@ -182,13 +150,7 @@ Balance like MCTS, don't fixate on the first decent idea:
 
 ## Quick Mode
 
-For small decisions that don't need the full diamond:
-
-1. Search Sibyl (always)
-2. Present 2 options with tradeoffs (skip problem exploration)
-3. Decide and record
-
-**Use quick mode when:** The problem is already well-understood and the user just needs help choosing between known options.
+For small decisions that don't need the full diamond: search Sibyl, present two options with tradeoffs, decide, record. Skip problem exploration entirely when the problem is already well-understood and the user just needs help choosing between known options. Most "brainstorms" are actually this.
 
 ---
 

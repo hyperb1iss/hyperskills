@@ -7,11 +7,13 @@ description: Use this skill when writing code, building features, fixing bugs, r
 
 Verification-driven coding with tight feedback loops. Distilled from 21,321 tracked operations across 64+ projects, 612 debugging sessions, and 2,476 conversation histories. These are the patterns that consistently ship working code.
 
-**Core insight:** 2-3 edits then verify. 73% of fixes go unverified, that's the #1 quality gap. The difference between a clean session and a debugging spiral is verification cadence.
+**Core insight:** Verify in tight loops, roughly every 2-3 edits. 73% of fixes go unverified across the dataset, which is the single biggest quality gap. Sessions that maintain a tight verify cadence avoid the debugging spirals that the rest of this skill is designed to prevent.
 
-## The Sequence
+**How to read this skill:** the loop and the heuristics below are calibrated for non-trivial implementation work. Trivial fixes (config, typo, single-line) shouldn't drag through five phases. Use judgment, scale planning to scope, and skip what doesn't apply. The Code Discipline section is principles that bias toward caution; for one-line changes, just make the change.
 
-Every implementation follows the same macro-sequence, regardless of scale:
+## The Loop
+
+Most implementation work flows through the same shape, regardless of scale:
 
 ```dot
 digraph implement {
@@ -33,23 +35,23 @@ digraph implement {
 }
 ```
 
-**ORIENT.** Read existing code before touching anything. `Grep -> Read -> Read` is the dominant opening. Sessions that read 10+ files before the first edit require fewer fix iterations. Never start with blind changes.
+**ORIENT.** Read existing code before touching anything. `Grep → Read → Read` is the dominant opening across the dataset. Sessions that read 10+ files before the first edit require fewer fix iterations downstream. Blind changes are the most expensive way to start.
 
-**PLAN.** Scale-dependent (see below). Skip for trivial fixes, write a task list for features, run a research swarm for epics.
+**PLAN.** Scale-dependent (see below). Trivial fixes don't need a plan; features benefit from a task list; epics earn a research swarm. The decision is "what's proportional," not "always plan."
 
-**IMPLEMENT.** Work in batches of 2-3 edits, then verify. Follow the dependency chain. Edit existing files 9:1 over creating new ones. Fix errors immediately rather than accumulating them.
+**IMPLEMENT.** Work in batches of roughly 2-3 edits, then verify. Follow the dependency chain. Edit existing files 9:1 over creating new ones; that's the observed ratio in successful sessions. Fix errors as they surface; accumulating them creates cascade-debugging.
 
-**VERIFY.** Typecheck is the primary gate. Run it after every 2-3 edits. Run tests after feature-complete. Run the full suite before commit.
+**VERIFY.** Typecheck is the primary gate, fast and cheap; run it between batches. Tests fit naturally after feature-complete. Full suite before commit.
 
-**COMMIT.** Atomic chunks, committed as you go. Verify, stage specific files, commit, then loop back to the next chunk. Many small commits per session is the norm. See **Commit Cadence** below for message anatomy.
+**COMMIT.** Atomic chunks, committed as you go. Verify, stage specific files, commit, loop back to the next chunk. Many small commits per session is the pattern that consistently outperforms one mega-commit at the end. See **Commit Cadence** below for message anatomy.
 
 ---
 
 ## Code Discipline
 
-Behavioral lens that governs every phase of the loop. Adapted from Karpathy's [observations](https://x.com/karpathy/status/2015883857489522876) on LLM coding pitfalls, models "make wrong assumptions on your behalf and just run along with them without checking ... they really like to overcomplicate code and APIs, bloat abstractions ... implement a bloated construction over 1000 lines when 100 would do."
+Principles that shape how you move through the loop, not steps to execute. Adapted from Karpathy's [observations](https://x.com/karpathy/status/2015883857489522876) on LLM coding pitfalls: models "make wrong assumptions on your behalf and just run along with them without checking ... really like to overcomplicate code and APIs, bloat abstractions ... implement a bloated construction over 1000 lines when 100 would do."
 
-These principles bias toward caution over speed. For trivial fixes, use judgment.
+These principles bias toward caution because that's where models drift. For trivial fixes, the calculus inverts; apply judgment, not the full discipline.
 
 ### Think before coding
 
@@ -168,21 +170,21 @@ Types/Models -> Backend Logic -> API Routes -> Frontend Types -> Hooks/Client ->
 
 ## Verification Cadence
 
-The single most impactful practice. Get this right and everything else follows.
+The single most impactful practice in the dataset. Tight loops here make the rest of the skill mostly unnecessary; loose loops make every other guideline harder to follow.
 
-| Gate                   | When                       | Speed               |
+| Gate                   | Typically                  | Speed               |
 | ---------------------- | -------------------------- | ------------------- |
-| **Typecheck**          | After every 2-3 edits      | Fast (primary gate) |
+| **Typecheck**          | Between edit batches       | Fast (primary gate) |
 | **Lint (autofix)**     | After implementation batch | Fast                |
 | **Tests (specific)**   | After feature complete     | Medium              |
 | **Tests (full suite)** | Before commit              | Slow                |
 | **Build**              | Before PR/deploy only      | Slowest             |
 
-### The Edit-Verify-Fix Cycle
+### The edit-verify-fix cycle
 
-The sweet spot: **3 changes -> verify -> 1 fix**. This is the most common successful pattern.
+The pattern that consistently produces clean sessions: **~3 changes → verify → 1 fix**. Sweet spot, not a hard ratio. Sometimes one edit warrants its own verify, sometimes five edits group cleanly.
 
-The expensive pattern: **2 changes -> typecheck -> 15 fixes** (type cascade). Prevent by grepping all consumers before modifying shared types.
+The pattern that produces debugging spirals: **2 changes → typecheck → 15 cascading fixes**. Prevent type cascades by grepping consumers before modifying shared types; once the cascade starts, separate fix domains (see Error Recovery).
 
 **Combined gates save time:** `turbo lint:fix typecheck --filter=pkg` runs both in one shot. Scope verification to affected packages, never the full monorepo.
 
@@ -243,25 +245,25 @@ Can changes be made incrementally?
 
 ## Error Recovery
 
-**65% of debugging sessions resolve in 1-2 iterations.** The remaining 35% risk spiraling into 6+ iterations.
+**65% of debugging sessions resolve in 1-2 iterations.** The remaining 35% risk spiraling into 6+. The patterns below are calibrated to keep you in the first bucket.
 
-### Quick Resolution (Do This)
+### Quick resolution
 
-1. Read relevant code first (79% success correlation)
-2. Form explicit hypothesis: "The issue is X because Y"
-3. Make ONE targeted fix
-4. Verify the fix worked
+- Read the relevant code first (79% success correlation in the dataset)
+- Form an explicit hypothesis: "the issue is X because Y"
+- Make one targeted fix
+- Verify the fix actually worked before moving on
 
-### Spiral Prevention (Avoid This)
+### Spiral prevention
 
-1. **Separate error domains**: fix ALL type errors first, THEN test failures. Never interleave.
-2. **3-strike rule**: after 3 failed attempts on same error: change approach entirely, or escalate.
-3. **Cascade depth > 3**: pause, enumerate ALL remaining issues, fix in dependency order.
-4. **Context rot**: after ~15-20 iterations, `/clear` and start fresh. A clean session with a better prompt beats accumulated corrections every time.
+- **Separate error domains.** Fix all type errors before chasing test failures; interleaving the two is how cascades compound.
+- **3-strike heuristic.** Three failed attempts on the same error is the signal to change approach entirely or escalate, not to try variation #4.
+- **Cascade depth > 3.** Pause, enumerate all remaining issues, then fix in dependency order rather than reactive whack-a-mole.
+- **Context rot.** After ~15-20 iterations, `/clear` and start fresh. A clean session with a better prompt usually outperforms accumulated corrections.
 
-### The Two-Correction Rule
+### Two-correction rule
 
-If you've corrected the same issue twice, `/clear` and restart. Accumulated context noise defeats accuracy.
+Correcting the same issue twice is the signal to `/clear` and restart. Context noise compounds faster than fixes resolve it.
 
 ---
 

@@ -5,11 +5,13 @@ description: Use this skill for code reviews using the Codex CLI from a Claude-h
 
 # Cross-Model Code Review with Codex CLI
 
-Cross-model validation using the `codex` binary directly. Claude writes code, Codex reviews it, different architecture, different training distribution, no self-approval bias.
+Cross-model validation using the `codex` binary directly. Claude writes code, Codex reviews it. Different architecture, different training distribution, no self-approval bias.
 
 **Core insight:** Single-model self-review is systematically biased. Cross-model review catches different bug classes because the reviewer has fundamentally different blind spots than the author.
 
-**Prerequisite:** The `codex` CLI must be installed and authenticated. Verify with `codex --version`. User defaults are configured in `~/.codex/config.toml`, respect them.
+**How to read this skill:** the patterns and decision trees below are guidelines. Pick what fits, blend when needed. The rules marked ⚠️ are different: they're real `codex` CLI behaviors, not procedural ceremony. Skipping the scope flag genuinely hangs the call; piping to `tail` genuinely loses output. Treat ⚠️ rules as facts about the tool, not opinions about workflow.
+
+**Prerequisite:** The `codex` CLI must be installed and authenticated. Verify with `codex --version`. User defaults live in `~/.codex/config.toml`; respect them.
 
 **Direction:** Claude → Codex only. For the bidirectional skill (also handles Codex → Claude with the `claude -p` gotchas around `yield_time_ms` and variadic flags), use `/hyperskills:cross-model-review` instead.
 
@@ -104,13 +106,13 @@ Specs are higher-stakes than diffs, a subtle architectural mistake compounds acr
 The standard review before opening a PR. Use for any non-trivial change.
 
 ```
-Step 1 — Structured review (catches correctness + general issues):
+Step 1, structured review (catches correctness + general issues):
   codex review --base main
 
-Step 2 — Security deep-dive (if code touches auth, input handling, or APIs):
+Step 2, security deep-dive (if code touches auth, input handling, or APIs):
   codex exec "<security prompt from references/prompts.md>"
 
-Step 3 — Fix findings, then re-review:
+Step 3, fix findings, then re-review:
   codex review --base main
 ```
 
@@ -167,7 +169,7 @@ codex exec --sandbox read-only \
 
 ### Pattern 7: Ralph Loop (Implement → Review → Fix)
 
-Iterative quality enforcement. Max 3 iterations.
+Iterative quality enforcement. Three iterations is the practical ceiling; past that, returns diminish and you start re-litigating findings rather than fixing real bugs.
 
 ```
 Iteration 1:
@@ -181,15 +183,13 @@ Iteration 2:
 
 Iteration 3 (final):
   codex review --base main → clean or accept trade-offs
-
-STOP after 3 iterations. Diminishing returns beyond this.
 ```
 
 ---
 
 ## Multi-Pass Strategy
 
-For thorough reviews, run multiple focused passes instead of one vague pass. Each pass gets a specific persona and concern domain.
+Thorough reviews benefit from multiple focused passes rather than one vague pass. Single passes dilute attention across dimensions and produce shallow findings on each. Each pass gets a specific persona and concern domain.
 
 | Pass             | Focus                                       | Mode                                  |
 | ---------------- | ------------------------------------------- | ------------------------------------- |
@@ -242,15 +242,17 @@ digraph review_decision {
 
 ---
 
-## Prompt Engineering Rules
+## Prompt Engineering Heuristics
 
-1. **Assign a persona**: "senior security engineer" beats "review for security"
-2. **Specify what to skip**: "Skip formatting, naming style, minor docs gaps"
-3. **Require confidence scores**: only act on findings ≥ 0.7
-4. **Demand file:line citations**: vague findings without location aren't actionable
-5. **Ask for concrete fixes**: "Suggest a specific fix" not "this is a problem"
-6. **One domain per pass**: security-only, architecture-only
-7. **Demand a verdict**: "Verdict: patch is correct / incorrect" or "go / no-go"
+These reliably improve review signal quality:
+
+1. **Assign a persona.** "Senior security engineer" beats "review for security"
+2. **Specify what to skip.** "Skip formatting, naming style, minor docs gaps" prevents bikeshedding
+3. **Require confidence scores** and act only on findings ≥ 0.7
+4. **Demand file:line citations.** Vague findings without location aren't actionable
+5. **Ask for concrete fixes.** "Suggest a specific fix" not "this is a problem"
+6. **One domain per pass.** Security-only, architecture-only
+7. **Demand a verdict.** "Verdict: patch is correct / incorrect" or "go / no-go"
 
 Ready-to-use prompt templates are in `references/prompts.md`.
 

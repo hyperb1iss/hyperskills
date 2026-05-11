@@ -7,9 +7,11 @@ description: Use this skill when decomposing complex work into structured tasks 
 
 Verification-driven task decomposition with Sibyl-native tracking. Mined from 200+ real planning sessions: the plans that actually survived contact with code.
 
-**Core insight:** Plans fail when steps can't be verified. Decompose until every step has a concrete check. Track in Sibyl so plans survive context windows.
+**Core insight:** Plans fail when steps can't be verified. Decomposition that lands in concrete checks survives contact with reality; abstract bullets don't. Tracking in Sibyl lets plans outlive the context window that produced them.
 
-## The Process
+**How to read this skill:** the phases below describe the rhythm of a useful planning pass, not a procedure to march through. Skip planning entirely for small clear work, compress phases when the answers are obvious, and treat the first plan as a hypothesis. Replanning is the rule, not the exception.
+
+## The Shape
 
 ```dot
 digraph planning {
@@ -34,76 +36,47 @@ digraph planning {
 
 ## Phase 1: SCOPE
 
-**Bound the work before exploring it.**
+Bound the work before decomposing it. The goal is calibrating planning depth to actual scope, not generating a deliverable.
 
-### Actions
+### Common moves
 
-1. **Search Sibyl** for related tasks, decisions, prior plans:
+- **Search Sibyl** for related tasks, decisions, and prior plans: `sibyl search "<feature keywords>"`, `sibyl task list -s todo`. Cheap and often surfaces an already-decomposed predecessor.
+- **Define success criteria** in measurable terms ("tests pass", "endpoint returns X", "p95 latency < 200ms") instead of vague goals like "improve performance".
+- **Identify constraints**: files that shouldn't change, dependencies to respect, timeline or budget pressure.
+- **Calibrate planning depth** to scope:
 
-   ```
-   sibyl search "<feature keywords>"
-   sibyl task list -s todo
-   ```
+  | Scale         | Description                | Planning depth             |
+  | ------------- | -------------------------- | -------------------------- |
+  | **Quick fix** | < 3 files, clear solution  | Skip planning, go build    |
+  | **Feature**   | 3-10 files, known patterns | Light plan (this skill)    |
+  | **Epic**      | 10+ files, new patterns    | Full plan + orchestration  |
+  | **Redesign**  | Architecture change        | Full plan + research first |
 
-2. **Define success criteria**: what does "done" look like?
-   - Measurable outcomes (tests pass, endpoint returns X, UI renders Y)
-   - NOT vague goals ("improve performance" → "p95 latency < 200ms")
-
-3. **Identify constraints:**
-   - Files/modules that CAN'T change
-   - Dependencies that must be respected
-   - Timeline or budget considerations
-
-4. **Classify complexity:**
-
-   | Scale         | Description                | Planning Depth             |
-   | ------------- | -------------------------- | -------------------------- |
-   | **Quick fix** | < 3 files, clear solution  | Skip to implementation     |
-   | **Feature**   | 3-10 files, known patterns | Light plan (this skill)    |
-   | **Epic**      | 10+ files, new patterns    | Full plan + orchestration  |
-   | **Redesign**  | Architecture change        | Full plan + research first |
-
-### Gate
-
-If this is a **quick fix**, stop planning and go build. Planning a 5-minute fix is waste.
+If the work is a quick fix, stop planning and go build. Planning a five-minute change is pure overhead.
 
 ---
 
 ## Phase 2: EXPLORE
 
-**Understand the codebase surface area before decomposing.**
+Understand the codebase surface before decomposing it. Plans built from filenames alone fall apart at contact with the actual code.
 
-### Actions
+### Common moves
 
-1. **Map the impact surface**: which files/modules will this touch?
-   - Spawn an Explore agent if the scope is uncertain
-   - Read the actual code, don't guess from file names
+- **Map the impact surface**: which files and modules will this touch? Read the actual code rather than guessing from names; spawn an Explore agent when scope is genuinely uncertain.
+- **Identify existing patterns**: how does similar functionality already work? What conventions apply (naming, file structure, test patterns)?
+- **Trace dependencies**: what must exist before this can work, and what breaks if we change X?
 
-2. **Identify existing patterns:**
-   - How does similar functionality work in this codebase?
-   - What conventions exist? (naming, file structure, test patterns)
-
-3. **Find the dependencies:**
-   - What must exist before this can work?
-   - What will break if we change X?
-
-### Output
-
-A mental model of the change surface:
-
-> "This touches: [module A] (new endpoint), [module B] (type changes), [module C] (tests). Pattern follows [existing feature X]. Depends on [infrastructure Y] being available."
+You're aiming for a mental model you can articulate: "this touches module A (new endpoint), module B (type changes), module C (tests); pattern follows existing feature X; depends on infrastructure Y being available." If you can't write that sentence, decomposition will rest on guesses.
 
 ---
 
 ## Phase 3: DECOMPOSE
 
-**Break work into verifiable steps. Every step must have a check.**
+Break the work into steps you can actually verify. The discipline that separates plans-that-survive from plans-that-fail is connecting each step to a concrete check.
 
-### The Verification Rule
+### The verification heuristic
 
-**A step without a verification method is not a step, it's a hope.**
-
-For each task, define:
+A step without a verification method is a hope, not a step. Push every task toward a concrete check before considering it decomposed. For each task, the useful fields are:
 
 | Field          | Description                     |
 | -------------- | ------------------------------- |
@@ -124,12 +97,12 @@ For each task, define:
 | `curl/httpie` | API endpoint changes                     |
 | `manual`      | Only when no automation exists           |
 
-### Decomposition Heuristics
+### Decomposition heuristics
 
-- **2-5 minute tasks** are the sweet spot. If a task takes > 15 minutes, break it further.
-- **One concern per task.** "Add endpoint AND write tests" is two tasks.
-- **Order by dependency, not difficulty.** Foundation first.
-- **Mark parallelizable tasks.** Tasks with no shared files can run simultaneously.
+- **2-5 minute tasks** tend to be the sweet spot. Tasks running longer than 15 minutes usually deserve to be split.
+- **One concern per task.** "Add endpoint AND write tests" is two tasks; treat conjunctions in task titles as splitting hints.
+- **Order by dependency, not difficulty.** Foundation first; later tasks build on earlier ones.
+- **Mark parallelizable tasks.** Tasks with no shared files can run simultaneously, which matters once you hand off to orchestration.
 
 ### Task Format
 
@@ -166,17 +139,15 @@ Wave 4 (polish):      Task 6, Task 7  [parallel, depends on Wave 3]
 
 ## Phase 4: VERIFY & APPROVE
 
-**Review the plan before executing it.**
+Sanity-check the plan before presenting it. The goal isn't ceremony; it's catching the obvious failure modes that turn plans into churn.
 
-### Self-Check
+### Worth confirming before presenting
 
-Before presenting to the user, verify:
-
-- [ ] Every task has a verification method
-- [ ] Dependencies form a DAG (no cycles)
-- [ ] No two parallel tasks modify the same files
-- [ ] Total scope matches the original success criteria
-- [ ] Nothing is over-engineered (YAGNI check)
+- Every task has a verification method (the most common gap)
+- Dependencies form a DAG, no cycles
+- No two parallel tasks touch the same files
+- Total scope still matches the success criteria from Phase 1
+- Nothing snuck in that you don't actually need yet (YAGNI)
 
 ### Present for Approval
 
@@ -204,47 +175,25 @@ Show the plan as a structured list with waves:
 - [ ] Task 5: [title] → verify: [method] (depends: 3, 4)
 ```
 
-### Gap Analysis
+### Gap analysis
 
-After presenting, explicitly check:
-
-- "Is there anything missing from this plan?"
-- "Should any of these tasks be combined or split further?"
-- "Are the success criteria right?"
+Once the plan is on the page, ask whether anything's missing, whether tasks should be combined or split further, and whether the success criteria still feel right. The user often spots gaps you can't because they hold context you don't.
 
 ---
 
 ## Phase 5: TRACK
 
-**Register the plan in Sibyl for persistence.**
+Register the plan in Sibyl so it survives the context window that produced it. Skip this for very small plans that'll be done in a single session, but anything spanning days or sessions benefits from durable tracking.
 
-### Actions
+```
+sibyl task create --title "[Feature]" -d "[success criteria]" --complexity epic
+sibyl task create --title "Task 1: [title]" -e [epic-id] -d "[implementation + verify]"
+sibyl add "Plan: [feature]" "[N] tasks across [M] waves. Key decisions: [architectural choices]. Dependencies: [critical path]."
+```
 
-1. **Create a Sibyl task** for the feature:
+### Adaptive replanning
 
-   ```
-   sibyl task create --title "[Feature]" -d "[success criteria]" --complexity epic
-   ```
-
-2. **Create sub-tasks** for each plan step:
-
-   ```
-   sibyl task create --title "Task 1: [title]" -e [epic-id] -d "[implementation + verify]"
-   ```
-
-3. **Record the plan decision:**
-   ```
-   sibyl add "Plan: [feature]" "[N] tasks across [M] waves. Key decisions: [architectural choices]. Dependencies: [critical path]."
-   ```
-
-### Adaptive Replanning
-
-Plans change when they meet reality. When a task reveals unexpected complexity:
-
-1. **Don't force through.** Pause and reassess.
-2. **Update the plan**: add/remove/modify tasks.
-3. **Update Sibyl**: keep the tracking current.
-4. **Communicate**: "Task 3 revealed [X]. Adjusting plan: [changes]."
+Plans meet reality and reality usually wins. When a task surfaces unexpected complexity, pause and reassess instead of forcing through. Adjust the task list, update Sibyl, and surface the change: "task 3 revealed X, adjusting plan: [changes]." Replanning is a feature of the workflow, not evidence the original plan was bad.
 
 ---
 
@@ -259,15 +208,17 @@ Once the plan is approved, hand off to the right tool:
 | Large epic, 15+ tasks          | Orchestrate with Epic Parallel Build strategy |
 | Needs more research first      | `/hyperskills:research` before executing      |
 
-### Trust Gradient for Execution
+### Trust gradient for execution
 
-| Phase             | Review Level                                   | When                             |
+Heavy review on every task accumulates noise; zero review accumulates risk. Lean toward heavier review early and lighter review once patterns prove stable:
+
+| Phase             | Review level                                   | Typically                        |
 | ----------------- | ---------------------------------------------- | -------------------------------- |
 | **Full ceremony** | Implement + spec review + `cross-model-review` | First 3-4 tasks                  |
 | **Standard**      | Implement + spec review                        | Tasks 5-8, patterns stabilized   |
 | **Light**         | Implement + quick verify                       | Late tasks, established patterns |
 
-This is earned confidence, not cutting corners. Run `/hyperskills:cross-model-review` for any task that touches auth, payments, migrations, or data integrity, regardless of phase.
+This is earned confidence, not cutting corners. The gradient resets if a task departs from the established pattern. Stay heavy for anything touching auth, payments, migrations, or data integrity regardless of where you are in the plan.
 
 ---
 

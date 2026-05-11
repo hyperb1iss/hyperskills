@@ -7,9 +7,11 @@ description: Use this skill to review recent conversations and consolidate learn
 
 Bio-inspired two-phase sleep cycle that reviews Claude Code and Codex conversations, extracts structured knowledge, and consolidates it into Sibyl. Like biological dreaming: NREM consolidates, REM discovers.
 
-**Core insight:** Conversations contain 10x more knowledge than what gets manually captured. Dreams extract decisions, patterns, corrections, anti-patterns, and open questions that would otherwise vanish when the session scrolls off.
+**Core insight:** Conversations contain ~10x more knowledge than what gets manually captured. Dreams extract decisions, patterns, corrections, anti-patterns, and open questions that would otherwise vanish when sessions scroll off.
 
-## The Process
+**How to read this skill:** the phases below describe the rhythm of a useful dream cycle, not a procedure to march through. Quick naps compress most of it, deep sleeps stretch it out. The non-negotiable bits are extraction quality (Sibyl entries that meet the bar in `references/extraction-guide.md`) and dedup discipline (every write checked against existing entries). Process shape adapts; quality bar doesn't.
+
+## The Shape
 
 ```dot
 digraph dream {
@@ -42,9 +44,9 @@ digraph dream {
 
 ## Phase 1: ORIENT
 
-**Understand the dream landscape before processing.**
+Get the lay of the land before harvesting. Re-processing already-dreamed sessions wastes tokens and creates duplicate entries.
 
-### Actions
+### Common moves
 
 1. **Check dream state**: when was the last dream cycle?
 
@@ -83,9 +85,9 @@ digraph dream {
 
 ## Phase 2: HARVEST
 
-**Read conversations and identify extractable knowledge.**
+Read conversations and identify extractable knowledge. The trick is reading targeted segments rather than entire JSONL files; most session content is routine, and only specific patterns carry transferable signal.
 
-### Reading Claude Code Sessions
+### Reading Claude Code sessions
 
 Claude Code JSONL files contain one JSON object per line. Key message types to look for:
 
@@ -196,15 +198,15 @@ Prioritize sessions for deep reading:
 | New library/tool adoption      | +2    | grep for "install", "add", package names       |
 | Simple Q&A session             | -1    | Short session with no tool calls               |
 
-**Process top-scored sessions first.** For quick nap mode, only process the top 3.
+Process top-scored sessions first; quick nap mode usually caps at the top 3. Low-signal sessions can be skipped entirely. Extracting from a Q&A session about syntax produces noise, not knowledge.
 
 ---
 
-## Phase 3: NREM: Structured Consolidation
+## Phase 3: NREM, Structured Consolidation
 
-**Transform raw conversation signal into structured Sibyl entities.**
+Transform raw conversation signal into structured Sibyl entities. This is where the quality bar matters most: a duplicate-laden, vague-titled Sibyl is worse than a smaller, sharper one.
 
-### Extraction Categories
+### Extraction categories
 
 For each significant finding, classify and write to Sibyl:
 
@@ -260,7 +262,7 @@ sibyl add "Tension: [the unresolved question]" \
 
 ### Deduplication
 
-**Before writing ANY entity to Sibyl, check for existing similar entries:**
+Before writing any entity to Sibyl, check for existing similar entries. This bit is non-negotiable; the value of the graph collapses when duplicates accumulate.
 
 ```bash
 sibyl search "[entity title keywords]" --type [type] --limit 5
@@ -285,9 +287,9 @@ For efficiency, accumulate extractions and write them in batches:
 
 ---
 
-## Phase 4: REM: Creative Exploration
+## Phase 4: REM, Creative Exploration
 
-**Only in `deep` mode. Find unexpected connections across projects.**
+Only in `deep` mode. Find unexpected connections across projects, the cross-pollination phase that biological REM is named after.
 
 ### Cross-Project Pattern Detection
 
@@ -351,12 +353,12 @@ Score existing entities by: `base_importance * recency_factor * reference_count`
 
 ## Phase 5: REPORT
 
-**Generate a dream summary and record the dream cycle.**
+Generate a dream summary and record the cycle itself. The report serves two audiences: the user (so they can see what landed) and future dreams (which check this entry to avoid re-processing).
 
 ### Dream Report Structure
 
 ```markdown
-## Dream Report — [date]
+## Dream Report: [date]
 
 ### Sessions Reviewed
 
@@ -375,7 +377,7 @@ Score existing entities by: `base_importance * recency_factor * reference_count`
 
 ### Highlights
 
-1. [Most significant finding — 1-2 sentences]
+1. [Most significant finding, 1-2 sentences]
 2. [Second most significant]
 3. [Third most significant]
 

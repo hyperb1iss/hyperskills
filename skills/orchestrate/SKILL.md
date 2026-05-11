@@ -5,9 +5,9 @@ description: Use this skill when orchestrating multi-agent work at scale - resea
 
 # Multi-Agent Orchestration
 
-Meta-orchestration patterns mined from 597+ real agent dispatches across production codebases. This skill tells you WHICH strategy to use, HOW to structure prompts, and WHEN to use background vs foreground.
+Meta-orchestration patterns mined from 597+ real agent dispatches across production codebases. The skill maps orchestration strategy to work shape, prompt structure to agent type, and background/foreground to dependency graph.
 
-**Core principle:** Choose the right orchestration strategy for the work, partition agents by independence, inject context to enable parallelism, and adapt review overhead to trust level.
+**Core principle:** Match the strategy to the work, partition agents by independence, inject enough context that parallelism is real, and let review overhead adapt as trust earns itself. The strategies below are reference patterns. Pick the one that fits, blend two when the work is mixed, invent your own when the patterns don't match.
 
 ## Strategy Selection
 
@@ -105,18 +105,18 @@ Create a comprehensive research doc at [OUTPUT_PATH]/[filename].md covering:
 Include code examples where possible. Use WebSearch and WebFetch to get current docs.
 ```
 
-**Key rules:**
+**What good research-agent prompts share:**
 
-- Every agent gets an explicit output file path (no ambiguity)
-- Include search hints: "search [TECH] 2026" (agents need recency guidance)
-- Numbered coverage list (8-12 items) scopes the research precisely
-- ALL agents run in background -- no dependencies between research topics
+- Explicit output file path (no ambiguity about where to write)
+- Search hints with year ("search [TECH] 2026") so agents have recency guidance
+- Numbered coverage list (8-12 items) that scopes the research precisely
+- Background dispatch by default, since research topics have no inter-dependencies
 
-### Dispatch Cadence
+### Dispatch cadence
 
-- 3-4 seconds between agent dispatches
-- Group into thematic waves of 10-20 agents
-- 15-25 minute gaps between waves for gap analysis
+- 3-4 seconds between agent dispatches usually avoids rate limits
+- Thematic waves of 10-20 agents tend to be the manageable size
+- 15-25 minute gaps between waves give space for gap analysis on early returns
 
 ---
 
@@ -195,23 +195,23 @@ Only stage files YOU created. Check `git status` before committing.
 Do NOT stage files from other agents.
 ```
 
-**Key rules:**
+**What good build-agent prompts share:**
 
-- Every agent gets its own directory scope -- NO OVERLAP
-- Provide existing patterns to follow ("Follow pattern from X")
-- Include infrastructure context ("Redis available at X")
-- Explicit git hygiene instructions (critical with 30+ parallel agents)
-- Task IDs for traceability
+- Each agent gets its own directory scope; overlapping file ownership produces merge conflicts and lost work
+- Existing patterns to follow ("Follow pattern from X"), which saves the agent from inventing one
+- Infrastructure context ("Redis available at X"), which prevents the agent from re-discovering what already exists
+- Explicit git hygiene; with 30+ parallel agents this is load-bearing, not optional
+- Task IDs for traceability across the swarm
 
-### Git Coordination for Parallel Agents
+### Git coordination for parallel agents
 
-When running 10+ agents concurrently:
+When running 10+ agents concurrently, a few realities matter:
 
-1. **Expect index.lock contention** -- agents will retry automatically
-2. **Each agent commits only its own files** -- prompt must say this explicitly
-3. **No agent should run `git add .`** -- only specific files
-4. **Monitor with `git log --oneline -20`** periodically
-5. **No agent should push** -- orchestrator handles push after integration
+- **`index.lock` contention is expected.** Agents retry automatically, don't try to prevent it
+- **Each agent commits only its own files.** The prompt has to say this explicitly or agents will scoop up siblings' WIP
+- **`git add .` and `git add -A` are out.** Specific paths only
+- **Monitor with `git log --oneline -20`** periodically to spot stalled or off-pattern agents
+- **Push is the orchestrator's call**, not the agent's, after integration
 
 ---
 
@@ -242,18 +242,18 @@ Trust Gradient (adapt over time):
     Late tasks:   Implement only (pattern proven, high confidence)
 ```
 
-### Trust Gradient
+### Trust gradient
 
-As the session progresses and patterns prove reliable, progressively lighten review overhead:
+As patterns prove reliable, lighten review overhead instead of running full ceremony on every task. The cost of full review on the 12th identical CRUD endpoint is real and the signal-to-noise drops:
 
-| Phase              | Review Overhead                         | When                                   |
+| Phase              | Review overhead                         | Typically                              |
 | ------------------ | --------------------------------------- | -------------------------------------- |
 | **Full ceremony**  | Implement + Spec Review + Code Review   | First 3-4 tasks                        |
-| **Standard**       | Implement + Spec Review                 | Tasks 5-8, or after patterns stabilize |
+| **Standard**       | Implement + Spec Review                 | Tasks 5-8, after patterns stabilize    |
 | **Light**          | Implement + quick spot-check            | Late tasks with established patterns   |
 | **Cost-optimized** | Use the host's configured fast reviewer | Formulaic review passes                |
 
-This is NOT cutting corners -- it's earned confidence. If a late task deviates from the pattern, escalate back to full ceremony.
+This is earned confidence, not cutting corners. The gradient resets when a task departs from the established pattern; escalate back to full ceremony for anything genuinely new.
 
 ---
 
@@ -306,12 +306,12 @@ IMPORTANT for [DOMAIN] code:
 After fixing, run `[TOOL_COMMAND] [PATH]` to verify zero issues remain.
 ```
 
-**Key rules:**
+**What good sweep-agent prompts share:**
 
-- Provide issue counts by category (not just "fix everything")
-- Include domain-specific guidance (agents need to know WHY patterns exist)
-- Partition by directory to prevent overlap
-- Run in waves: fix -> verify -> fix remaining -> verify
+- Issue counts by category, not "fix everything", so agents have a target to verify against
+- Domain-specific guidance so agents understand *why* patterns exist (otherwise they cargo-cult or override)
+- Directory partitioning to prevent overlap
+- Wave shape: fix → verify → fix remaining → verify, until the issue count converges
 
 ---
 
@@ -437,12 +437,12 @@ digraph bg_fg {
 }
 ```
 
-**Rules observed from 597+ dispatches:**
+**Patterns observed across 597+ dispatches:**
 
-- Research agents with no immediate dependency -> BACKGROUND (100% of the time)
-- Code-writing agents -> FOREGROUND (even if parallel)
-- Review/validation gates -> FOREGROUND (blocks pipeline)
-- Sequential dependencies -> FOREGROUND, one at a time
+- Research agents with no immediate dependency → background (essentially always)
+- Code-writing agents → foreground, even when running in parallel
+- Review/validation gates → foreground, since they block pipeline progress
+- Sequential dependencies → foreground, one at a time
 
 ---
 
@@ -532,22 +532,22 @@ Report format:
 
 ## Context Injection: The Parallelism Enabler
 
-Agents can work independently BECAUSE the orchestrator pre-loads them with all context they need. Without this, agents would need to explore first, serializing the work.
+Parallel agents only work in parallel when the orchestrator front-loads context. Without it, every agent re-explores the codebase before doing useful work and the parallelism collapses into serialized discovery.
 
-**Always inject:**
+**Worth injecting into most prompts:**
 
-- Absolute file paths (never relative)
-- Existing patterns to follow ("Follow pattern from `src/auth/jwt.py`")
+- Absolute file paths, not relative (agents may run from unexpected cwds)
+- Existing patterns to follow ("follow pattern from `src/auth/jwt.py`")
 - Available infrastructure ("Redis at `app.state.redis`")
-- Design language/conventions ("SilkCircuit Neon palette")
-- Tool usage hints ("Use WebSearch to find...")
-- Git instructions ("Only stage YOUR files")
+- Design language and conventions ("SilkCircuit Neon palette")
+- Tool usage hints ("use WebSearch to find...")
+- Git instructions ("only stage YOUR files")
 
-**For parallel agents, duplicate shared context:**
+**For parallel agents:**
 
-- Copy the same context block into each agent's prompt
-- Explicit exclusion notes ("11-Sibyl is handled by another agent")
-- Shared utilities described identically
+- Duplicate the shared context block into each prompt. Context isn't free, but redundant context beats serialized exploration
+- Add explicit exclusion notes ("agent 11-Sibyl handles X, don't touch it")
+- Describe shared utilities identically across prompts to prevent drift
 
 ---
 
