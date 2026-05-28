@@ -13,7 +13,7 @@ Verification-driven coding with tight feedback loops. Distilled from 21,321 trac
 
 ## The Loop
 
-Most implementation work flows through the same shape, regardless of scale:
+Implementation work composes from five things that must all be true by the time a chunk ships. Not a fixed order; the graph below shows the natural dependencies and the loop-backs that are routine in practice.
 
 ```dot
 digraph implement {
@@ -35,15 +35,22 @@ digraph implement {
 }
 ```
 
-**ORIENT.** Read existing code before touching anything. `Grep → Read → Read` is the dominant opening across the dataset. Sessions that read 10+ files before the first edit require fewer fix iterations downstream. Blind changes are the most expensive way to start.
+- **Oriented.** Existing code is read before anything gets touched. `Grep → Read → Read` is the dominant opening across the dataset. Sessions that read 10+ files before the first edit require fewer fix iterations downstream. Blind changes are the most expensive way to start.
 
-**PLAN.** Scale-dependent (see below). Trivial fixes don't need a plan; features benefit from a task list; epics earn a research swarm. The decision is "what's proportional," not "always plan."
+- **Planned.** Decomposition exists at the right scale. Trivial fixes don't need a plan; features benefit from a task list; epics earn a research swarm. The decision is "what's proportional," not "always plan."
 
-**IMPLEMENT.** Work in batches of roughly 2-3 edits, then verify. Follow the dependency chain. Edit existing files 9:1 over creating new ones; that's the observed ratio in successful sessions. Fix errors as they surface; accumulating them creates cascade-debugging.
+- **Implemented.** Work happens in batches of roughly 2-3 edits, then verifies. Follow the dependency chain. Edit existing files 9:1 over creating new ones; that's the observed ratio in successful sessions. Fix errors as they surface; accumulating them creates cascade-debugging.
 
-**VERIFY.** Typecheck is the primary gate, fast and cheap; run it between batches. Tests fit naturally after feature-complete. Full suite before commit.
+- **Verified.** Typecheck is the primary gate, fast and cheap; run it between batches. Tests fit naturally after feature-complete. Full suite before commit.
 
-**COMMIT.** Atomic chunks, committed as you go. Verify, stage specific files, commit, loop back to the next chunk. Many small commits per session is the pattern that consistently outperforms one mega-commit at the end. See **Commit Cadence** below for message anatomy.
+- **Committed.** Atomic chunks, committed as you go. Stage specific files, commit, loop back to the next chunk. Many small commits per session is the pattern that consistently outperforms one mega-commit at the end. See **Commit Cadence** below for message anatomy.
+
+**Trajectories that compose these:**
+
+- **Typo fix**: Oriented (read the file) → Implemented → Verified (typecheck) → Committed. No Planned needed.
+- **Standard feature**: Oriented → Planned → Implemented → Verified → Committed → loop back into Implemented for the next chunk.
+- **Bug with cascade**: Oriented → Implemented → Verified (fails) → re-Implemented → Verified (passes) → Committed. The dashed VERIFY → IMPLEMENT edge above is this case.
+- **Epic with phases**: Oriented → Planned (decomposition) → (Implemented → Verified → Committed) per phase → re-Oriented when the next phase changes the picture.
 
 ---
 
