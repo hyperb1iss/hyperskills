@@ -32,7 +32,7 @@ Models already know how to write React components, Kubernetes manifests, and PyT
 
 hyperskills is built around an agent workflow. Brainstorming structured by the Double Diamond. Wave-based research with deferred synthesis. Verification-driven planning and implementation. Cross-model peer review that catches what self-review misses. Six orchestration strategies for multi-agent work. Conversation consolidation that pulls signal out of past sessions into persistent memory. The process skills are the heart of it, mined from thousands of real dispatches and tens of thousands of tracked operations.
 
-Domain skills round out the toolbox where models have stale or missing knowledge: the agent-sandbox Kubernetes operator (too new for training data), current Astral Python tooling, Tilt operational decision trees, and terminal UI design that survives across emulators.
+Domain skills round out the toolbox where models have stale or missing knowledge: current Astral Python tooling, Tilt operational decision trees, and terminal UI design that survives across emulators.
 
 Each skill encodes procedural knowledge, decision trees, anti-patterns, and current SOTA. None prescribes a strict workflow. They give you knowledge and framing; you decide when to reach for them. Skills carry procedural knowledge in-context; [Sibyl](https://github.com/hyperb1iss/sibyl) carries decisions, patterns, and learnings across sessions. 16 skills, all installable independently.
 
@@ -80,7 +80,7 @@ A few combinations come up often, more as observation than prescription:
 | Python project work     | uv, ruff, ty, uv-build                                |
 | Knowledge consolidation | dream pulls insights from past sessions into Sibyl    |
 
-Domain skills (git, tilt, agent-sandbox, tui-design, uv, ruff, ty, uv-build) plug in wherever the work touches their territory. Any skill can loop back when new questions emerge.
+Domain skills (git, tilt, tui-design, uv, ruff, ty, uv-build) plug in wherever the work touches their territory. Any skill can loop back when new questions emerge.
 
 ## 🔮 Skills
 
@@ -178,14 +178,6 @@ Tilt operational guide. CLI commands for log viewing, resource management, and d
 /hyperskills:tilt
 ```
 
-#### `agent-sandbox`: Kubernetes Operator for AI Agent Runtimes
-
-Operational guide for the [`kubernetes-sigs/agent-sandbox`](https://github.com/kubernetes-sigs/agent-sandbox) operator. SIG Apps subproject, launched at KubeCon Atlanta in November 2025, so most training data predates it. Covers the four CRDs (Sandbox, SandboxTemplate, SandboxClaim, SandboxWarmPool), install and upgrade hazards, warm pool HPA tuning, PDB scoping gotchas, isolation runtime selection (gVisor, Kata), network policy patterns, Karpenter integration, and the Python and Go SDK surface.
-
-```bash
-/hyperskills:agent-sandbox
-```
-
 #### `tui-design`: Terminal UI Design System
 
 Framework-agnostic TUI design patterns. Layout paradigm selector, interaction model decision trees, terminal color theory, visual hierarchy techniques, data visualization, and animation patterns. Works with Ratatui, Ink, Textual, Bubbletea, or any TUI toolkit. Includes a Unicode visual catalog and a gallery of real TUI app design patterns.
@@ -245,7 +237,6 @@ Skills with reference files for the deep-dive material:
 | `cross-model-review` | `prompts.md`: ready-to-use review prompt templates                                            |
 | `dream`              | `conversation-formats.md`, `extraction-guide.md`: session schemas and memory extraction rules |
 | `tilt`               | `api-reference.md`, `patterns.md`: full Tiltfile API and power patterns                       |
-| `agent-sandbox`      | `crds.md`, `patterns.md`, `clients.md`: CRD fields, production patterns, SDK deep-dive        |
 | `tui-design`         | `visual-catalog.md`, `app-patterns.md`: Unicode catalog and app gallery                       |
 | `uv`                 | `configuration.md`, `docker-ci.md`, `resolution.md`: uv config, CI patterns, resolver details |
 | `ruff`               | `configuration.md`, `rules.md`: Ruff config and rule catalog snapshot                         |

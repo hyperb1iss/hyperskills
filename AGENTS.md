@@ -42,12 +42,6 @@ hyperskills/
 │   │   └── references/
 │   │       ├── api-reference.md
 │   │       └── patterns.md
-│   ├── agent-sandbox/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   │       ├── crds.md
-│   │       ├── patterns.md
-│   │       └── clients.md
 │   ├── tui-design/
 │   │   ├── SKILL.md
 │   │   └── references/
@@ -295,7 +289,6 @@ Before committing, verify:
 | `dream`              | ~2,300 | 2 files    | Process — conversation memory consolidation      |
 | `git`                | ~1,200 | none       | Domain — git operations                          |
 | `tilt`               | ~2,500 | 2 files    | Domain — Kubernetes dev                          |
-| `agent-sandbox`      | ~2,000 | 3 files    | Domain — agent-sandbox Kubernetes operator       |
 | `tui-design`         | ~3,000 | 2 files    | Domain — terminal UI                             |
 | `uv`                 | ~3,000 | 3 files    | Domain — Python package management               |
 | `ruff`               | ~2,800 | 2 files    | Domain — Python linting & formatting             |
@@ -313,7 +306,7 @@ When adding a new skill, it should fit one of these categories:
 
 **Domain skills** — specialized knowledge for a specific technology or practice:
 
-- `git`, `tilt`, `agent-sandbox`, `tui-design`, `uv`, `ruff`, `ty`, `uv-build`
+- `git`, `tilt`, `tui-design`, `uv`, `ruff`, `ty`, `uv-build`
 - These tend to be reference-heavy with decision trees and lookup tables
 
 ## Writing Style
