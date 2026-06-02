@@ -11,15 +11,17 @@ Pass prompts as the final argument to the reviewer CLI:
 codex exec "PROMPT_TEXT_HERE"
 
 # Codex-hosted session (Claude reviews) — basic
-claude -p "PROMPT_TEXT_HERE"
+# The `env -u ANTHROPIC_API_KEY` prefix is required: Codex exports the key, and
+# `claude -p` would otherwise bill per-token to the API instead of your subscription.
+env -u ANTHROPIC_API_KEY claude -p "PROMPT_TEXT_HERE"
 
 # Codex-hosted session (Claude reviews) — with read-only tool access
 # The `--` is required: --allowedTools is variadic and will swallow the prompt without it.
-claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT_TEXT_HERE"
+env -u ANTHROPIC_API_KEY claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT_TEXT_HERE"
 
 # Or pipe a diff into either
 git diff main...HEAD | codex exec "PROMPT_TEXT_HERE"
-git diff main...HEAD | claude -p "PROMPT_TEXT_HERE"
+git diff main...HEAD | env -u ANTHROPIC_API_KEY claude -p "PROMPT_TEXT_HERE"
 ```
 
 For Codex's structured `codex review` command, prompts aren't needed — it has its own review format.
@@ -27,6 +29,8 @@ For Codex's structured `codex review` command, prompts aren't needed — it has 
 **Claude CLI gotcha:** Variadic flags (`--allowedTools`, `--allowed-tools`, `--disallowedTools`, `--tools`, `--add-dir`, `--betas`, `--file`, `--mcp-config`, `--plugin-dir`) greedily consume every following argument until the next flag. Always either put the prompt before the flag, separate it with `--`, or feed it via stdin.
 
 **Codex sandbox gotcha:** When Codex is the host, run `claude -p` with `yield_time_ms: 300000`. The default 1000ms yield returns empty output and `Process running with session ID NNNN` while claude is still working — do not retry, reap `session_id: NNNN` until it exits. See SKILL.md for details.
+
+**Billing gotcha:** Codex exports `ANTHROPIC_API_KEY`, which outranks subscription OAuth in Claude Code's auth precedence. In `-p` mode the key is used silently, so the review bills per-token to the API instead of your Pro/Max plan. Prefix every spawning `claude -p` call with `env -u ANTHROPIC_API_KEY`. See SKILL.md Rule 4.
 
 ## General Review
 

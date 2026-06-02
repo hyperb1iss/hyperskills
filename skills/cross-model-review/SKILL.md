@@ -22,18 +22,18 @@ Identify the host first. The host runs the _other_ model's CLI as a subprocess.
 
 Confirm the reviewer is reachable before the real call:
 
-| Host   | Verify command                                                                                             | Notes                        |
-| ------ | ---------------------------------------------------------------------------------------------------------- | ---------------------------- |
-| Claude | `codex --version`                                                                                          | One-shot, no special flags   |
-| Codex  | `printf 'say ok\n' \| claude -p --output-format text --no-session-persistence` with `yield_time_ms: 30000` | Sanity ping only, see Rule 1 |
+| Host   | Verify command                                                                                                                      | Notes                             |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| Claude | `codex --version`                                                                                                                   | One-shot, no special flags        |
+| Codex  | `printf 'say ok\n' \| env -u ANTHROPIC_API_KEY claude -p --output-format text --no-session-persistence` with `yield_time_ms: 30000` | Sanity ping only, see Rules 1 & 4 |
 
 **User defaults are authoritative.** Both CLIs read configured defaults (`~/.codex/config.toml`, `~/.claude/settings.json`). Never specify `--model`, `-m`, or `-c model=`. The only sanctioned override is reasoning effort, and only for spec review (see Effort Override Policy below).
 
 ---
 
-## ⚠️ Codex → Claude: Three Non-Negotiable Rules
+## ⚠️ Codex → Claude: Four Non-Negotiable Rules
 
-These three rules cause the overwhelming majority of cross-model review failures. They're not workflow preferences; they're how the `claude -p` shell tool behaves under Codex. Get them right on the first call.
+Rules 1–3 cause the overwhelming majority of cross-model review failures. They're not workflow preferences; they're how the `claude -p` shell tool behaves under Codex. Rule 4 doesn't break the review; it silently bills it to the wrong account. Get all four right on the first call.
 
 ### Rule 1: `yield_time_ms: 300000` on EVERY call
 
@@ -124,6 +124,23 @@ claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT"
 
 The `codex` CLI does not have this issue, its flags are non-variadic.
 
+### Rule 4: Strip `ANTHROPIC_API_KEY` so the review bills to your subscription
+
+Codex — and most shells that touch the Anthropic API — export `ANTHROPIC_API_KEY` into the environment. Child `claude -p` calls inherit it, and Claude Code's auth precedence ranks the API key **above** your Pro/Max subscription OAuth. Interactive `claude` prompts once before using a stray key and remembers your choice; `-p` (non-interactive) mode uses the key **silently, on every call**. The review still works — it just bills per-token against the API instead of drawing from your plan. Nothing surfaces it until the invoice does, which is why interactive sessions can read "Max" in `/status` while the headless review path quietly meters to API.
+
+**The rule:** prefix every spawning `claude -p` call with `env -u ANTHROPIC_API_KEY`. That strips the variable for just that call, so Claude falls through to the subscription credentials stored by `/login`.
+
+```json
+{
+  "cmd": "env -u ANTHROPIC_API_KEY claude -p --allowedTools \"Read,Glob,Grep,Bash(git *)\" -- \"PROMPT\"",
+  "yield_time_ms": 300000
+}
+```
+
+The prefix goes on the **spawning** call only — reaping calls (Rule 2) are bare `session_id` polls with no command, so there is nothing to strip.
+
+**Precedence trap:** `CLAUDE_CODE_OAUTH_TOKEN` ranks _below_ `ANTHROPIC_API_KEY`, so exporting an OAuth token does **not** rescue you while the key is present — stripping is mandatory either way. The fallback only lands on the plan if a prior interactive `/login` (Pro/Max) wrote `~/.claude/.credentials.json`; without those creds, `claude -p` has nothing to fall through to.
+
 ---
 
 ## ⚠️ Claude → Codex: One Non-Negotiable Rule
@@ -163,9 +180,9 @@ out=$(mktemp -t codex-review-pre-pr.XXXXXX) && echo "$out"
 codex review --base main > "$out" 2>&1
 codex exec --sandbox read-only "PROMPT" > "$out" 2>&1
 
-# Codex → Claude (yield_time_ms: 300000 still required on the shell call)
-claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT" > "$out" 2>&1
-git diff main...HEAD | claude -p "PROMPT" > "$out" 2>&1
+# Codex → Claude (yield_time_ms: 300000 + env -u ANTHROPIC_API_KEY still required — Rules 1 & 4)
+env -u ANTHROPIC_API_KEY claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT" > "$out" 2>&1
+git diff main...HEAD | env -u ANTHROPIC_API_KEY claude -p "PROMPT" > "$out" 2>&1
 ```
 
 If `mktemp` isn't handy, use a PID + timestamp slug: `out=/tmp/codex-review-$$-$(date +%s).txt`.
@@ -191,6 +208,8 @@ Match the row to what you're actually reviewing. The current skill historically 
 | **Spec / RFC / design doc** | Markdown prose                                       | `codex exec -c model_reasoning_effort="xhigh" "Review docs/design/RFC.md ..."` | `cat docs/design/RFC.md \| claude -p "PROMPT"` (max effort, see policy) |
 | **Focused investigation**   | Custom (security, perf)                              | `codex exec "You are a senior <DOMAIN> engineer. Analyze <CONCERN> ..."`       | `claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT"`     |
 | **Ralph loop**              | Implement → review → fix                             | Repeat any of the above × 3 max                                                | Repeat any of the above × 3 max                                         |
+
+**Billing:** every `claude -p` in the Codex → Claude column assumes the `env -u ANTHROPIC_API_KEY` prefix from Rule 4 — the cells omit it for width. Drop the prefix and the review silently meters to the API instead of your subscription.
 
 **Common scope mistakes:**
 
@@ -264,7 +283,7 @@ For Codex-hosted sessions, choose based on depth:
 | **Piped diff**  | `git diff ... \| claude -p "PROMPT"`                                | Quick review; reviewer sees only the diff. Faster, cheaper.                                                  |
 | **Tool access** | `claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT"` | Architecture/security/cross-file deep-dive. Reviewer can trace data flow across files the diff doesn't show. |
 
-Tool access costs more tokens but catches bugs that need surrounding context (signatures defined elsewhere, downstream consumers, similar patterns).
+Tool access costs more tokens but catches bugs that need surrounding context (signatures defined elsewhere, downstream consumers, similar patterns). Both shapes take the `env -u ANTHROPIC_API_KEY` prefix (Rule 4) so the cost lands on your subscription, not the API.
 
 ---
 
@@ -320,6 +339,7 @@ Ready-to-use prompt templates for security, architecture, performance, error han
 | `yield_time_ms: 1000` (or any value < 300000) on `claude -p`            | Yields empty output before claude responds; model treats as failure and retries                                                        | `yield_time_ms: 300000` on EVERY call, no exceptions                                                                          |
 | Reverting `yield_time_ms` mid-session (300000 → 1000 between calls)     | New orphans pile on top of existing ones                                                                                               | Pick 300000 once, keep it for every call                                                                                      |
 | Re-invoking `claude -p` after `Process running with session ID NNNN`    | Spawns a parallel claude; original still working                                                                                       | Reap with `{"session_id": NNNN, "yield_time_ms": 300000}` until exit code                                                     |
+| `claude -p` from Codex with `ANTHROPIC_API_KEY` in the env              | Key outranks subscription OAuth; `-p` uses it silently → review bills per-token to the API, not your plan                              | Prefix the spawning call: `env -u ANTHROPIC_API_KEY claude -p ...`                                                            |
 | Bare `codex review` (no scope flag)                                     | Hangs or produces 100KB+ blob output                                                                                                   | Always pass `--base <ref>`, `--commit <SHA>`, or `--uncommitted`                                                              |
 | `codex review` output > 100KB                                           | Diff too large for one pass                                                                                                            | Split per commit, or use `codex exec` with narrower prompt                                                                    |
 | `timeout 30 codex review` or `timeout 30 claude -p`                     | Reviews legitimately take 30s–5min                                                                                                     | No timeout, or `timeout 300` minimum                                                                                          |
