@@ -99,6 +99,7 @@ If the problem was already crisp coming in, this phase is a 30-second confirmati
   | C: [name] | ...  | ...  | Low/Med/High | ...  |
 
 - **Include one unconventional option** when the obvious paths look similar. Fixation on the first decent idea is the failure mode this phase is designed to prevent.
+- **Carry one subtractive option.** The judo move at the approach altitude: alongside the options that build something, include the one that builds less or nothing. Reuse an existing system, solve it with config, or delete the need entirely. The cheapest complexity is what you never write, and it rarely makes the list unless you force it on.
 - **Ground in existing patterns:** "this follows what we did in [project X]" or "this diverges from our convention because [reason]".
 - **Name the verification method** for each approach so the choice connects to a concrete check (test, benchmark, visual confirmation).
 
@@ -116,6 +117,7 @@ Balance like MCTS. Don't fixate on the first decent idea:
 - Options presented without explicit costs (every option has one)
 - Options that quietly violate constraints surfaced in Phase 1
 - Defaulting to the most complex solution; start simple, add complexity only when justified
+- Every option builds something; none asks what we could remove or reuse instead
 
 ---
 

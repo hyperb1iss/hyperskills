@@ -279,11 +279,11 @@ Before committing, verify:
 
 | Skill                | Tokens | References | Domain                                           |
 | -------------------- | ------ | ---------- | ------------------------------------------------ |
-| `brainstorm`         | ~2,500 | none       | Process — ideation                               |
-| `plan`               | ~2,800 | none       | Process — decomposition                          |
+| `brainstorm`         | ~2,600 | none       | Process — ideation                               |
+| `plan`               | ~2,900 | none       | Process — decomposition                          |
 | `research`           | ~3,200 | none       | Process — knowledge gathering                    |
 | `orchestrate`        | ~4,000 | none       | Process — multi-agent dispatch                   |
-| `implement`          | ~4,200 | 1 file     | Process — implementation                         |
+| `implement`          | ~4,500 | 1 file     | Process — implementation                         |
 | `codex-review`       | ~2,000 | 1 file     | Process — Codex-specific review (Claude → Codex) |
 | `cross-model-review` | ~2,400 | 1 file     | Process — bidirectional cross-model review       |
 | `dream`              | ~2,300 | 2 files    | Process — conversation memory consolidation      |

@@ -74,6 +74,16 @@ You're aiming for a mental model you can articulate: "this touches module A (new
 
 Break the work into steps you can actually verify. The discipline that separates plans-that-survive from plans-that-fail is connecting each step to a concrete check.
 
+### Measure twice: look for the reframe first
+
+The most expensive plan is one that faithfully decomposes the wrong shape: tidy tasks, clean DAG, all building something that didn't need to exist. Before breaking work down, spend one pass hunting the judo move that shrinks it.
+
+- **Can a reframe collapse the task list?** A different shape might turn ten tasks into three. Reframe before you decompose, not after you've built.
+- **Does the codebase already own this?** Reusing an existing pattern, module, or canonical helper beats decomposing a bespoke build of the same thing.
+- **What can we not build?** The cheapest task is the one you strike from the plan. Delete a mode, a layer, a config surface rather than scheduling work to construct it.
+
+Measure twice, cut once: confirm this is the simplest shape, then decompose it.
+
 ### The verification heuristic
 
 A step without a verification method is a hope, not a step. Push every task toward a concrete check before considering it decomposed. For each task, the useful fields are:
@@ -148,6 +158,7 @@ Sanity-check the plan before presenting it. The goal isn't ceremony; it's catchi
 - No two parallel tasks touch the same files
 - Total scope still matches the success criteria from Phase 1
 - Nothing snuck in that you don't actually need yet (YAGNI)
+- No task survives that a reframe could delete (the judo check from Phase 3)
 
 ### Present for Approval
 
@@ -230,6 +241,7 @@ This is earned confidence, not cutting corners. The gradient resets if a task de
 | Tasks without verification             | Add a concrete check or split the task       |
 | Parallel tasks touching the same files | Sequence them or repartition ownership       |
 | Planning from filenames only           | Read the actual code path before decomposing |
+| Decomposing a bad shape into tasks     | Hunt the judo move before you decompose      |
 | Treating the first plan as permanent   | Replan when reality reveals new constraints  |
 
 ---

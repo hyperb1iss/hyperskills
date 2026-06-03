@@ -88,6 +88,24 @@ Minimum code that solves the problem. Nothing speculative.
 
 The test: would a senior engineer call this overcomplicated? If yes, simplify.
 
+### The judo move
+
+Simplicity first is defensive: don't add bloat. The judo move is offensive: when bloat is already mounting, hunt the restructuring that makes it vanish. Same behavior, dramatically simpler shape, a design that feels inevitable in hindsight.
+
+Mounting complexity is the cue, not the cost of doing business. When a change starts sprouting special cases, a function won't stop growing, or you reach for a cast to make the types agree, stop and look for the move before pushing through. Models drift toward elaborating complexity; the discipline is to reach for the eraser first.
+
+| Smell                                                     | The judo move                                                          |
+| --------------------------------------------------------- | ---------------------------------------------------------------------- |
+| New `if` bolted onto an unrelated flow for one case       | Pull the case behind its own abstraction, or reframe so it can't arise |
+| A wrapper that just forwards to another function          | Delete it; call through directly                                       |
+| The same conditional copy-pasted across call sites        | Extract the decision into one home: a helper, a type, a model          |
+| Feature logic living in a shared/util module              | Move it to the module that owns the concept, its canonical home        |
+| `any`/`unknown`/casts smoothing over a shape you distrust | Make the type honest; let the contract carry the invariant             |
+| Generic "magic" hiding a simple data-shape assumption     | Boring, explicit, direct code beats clever indirection                 |
+| Independent async steps run in sequence                   | Run them in parallel; let related state land atomically                |
+
+The test: are you **deleting** complexity or **relocating** it? Rearranging the same concepts into tidier piles isn't a judo move; removing a concept, a branch, a layer, or a mode is. If the diff only moved the mess, keep looking.
+
 ### Surgical changes
 
 Touch only what you must. Clean up only your own mess.
@@ -376,6 +394,8 @@ Never `git add -A` or `git add .` (catches other agents' WIP and secrets). Never
 | "Improving" code adjacent to your change         | Stay surgical; touch only what's asked          |
 | Touching comments you don't understand           | Leave them; not your scope                      |
 | Bloated abstraction for single-use code          | Write the function; abstract when reused        |
+| Pushing through mounting complexity              | Stop; hunt the judo move that deletes it        |
+| Rearranging complexity instead of removing it    | Delete a concept, branch, or layer, not tidy it |
 | Vague "make it work" goal                        | Define a verifiable check first                 |
 
 ---
