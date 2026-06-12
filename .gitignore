@@ -47,3 +47,11 @@ node_modules/
 # Temp
 *.bak
 *.tmp
+
+# Local research corpus — mined from private session histories, stays out
+# of the public repo (durable learnings live in Sibyl)
+/research/*
+!/research/security-best-practices-2026.md
+
+# Generated artifacts
+/README.pdf
