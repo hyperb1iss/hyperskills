@@ -13,6 +13,8 @@ Cross-model validation using the `codex` binary directly. Claude writes code, Co
 
 **Prerequisite:** The `codex` CLI must be installed and authenticated. Verify with `codex --version`. User defaults live in `~/.codex/config.toml`; respect them.
 
+**On Pi:** when the pi-nova xreview extension is installed, prefer `/xreview` — it wraps external `codex exec --sandbox read-only` with stdin closed and returns structured Verdict/Findings/Fix Queue. Manual bash calls from Pi follow the same ⚠️ rules below.
+
 **Direction:** Claude → Codex only. For the bidirectional skill (also handles Codex → Claude with the `claude -p` gotchas around `yield_time_ms` and variadic flags), use `/hyperskills:cross-model-review` instead.
 
 ---

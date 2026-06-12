@@ -9,6 +9,33 @@ Meta-orchestration patterns mined from 597+ real agent dispatches across product
 
 **Core principle:** Match the strategy to the work, partition agents by independence, inject enough context that parallelism is real, and let review overhead adapt as trust earns itself. The strategies below are reference patterns. Pick the one that fits, blend two when the work is mixed, invent your own when the patterns don't match.
 
+## Dispatch Surface by Host
+
+The strategies are host-agnostic; the fan-out verb differs:
+
+| Host              | Fan-out surface                                                | Notes                                                          |
+| ----------------- | -------------------------------------------------------------- | --------------------------------------------------------------- |
+| Claude Code       | `Agent` tool — parallel calls in one block, background for swarms | Worktree isolation via the agent's isolation option            |
+| Codex             | `spawn_agent` with a role-appropriate `agent_type`              | Use only when subagent work is actually warranted              |
+| Pi (pi-nova pack) | `dispatch` tool with `"mode": "parallel"`                       | Children inherit the safety gate via `PI_CODING_AGENT_DIR`     |
+
+Pi dispatch task shape:
+
+```json
+{
+  "mode": "parallel",
+  "tasks": [
+    {
+      "agent": "worker",
+      "task": "Implement <task> in <path>. Run <verification>. Return summary, files changed, and patch notes.",
+      "tools": ["read", "grep", "find", "ls", "bash", "edit", "write"]
+    }
+  ]
+}
+```
+
+On Pi, builder children should use worktree isolation and return branch/patch info for review — never auto-merge child output. Use the reservation budget cap for large waves so scheduling stops before runaway spend.
+
 ## Strategy Selection
 
 ```dot

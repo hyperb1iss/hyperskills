@@ -107,6 +107,7 @@ Cite sources with URLs.
 
 ### Deployment notes
 
+- **Use the host's fan-out verb.** Claude Code: parallel background `Agent` calls. Codex: `spawn_agent`. Pi (pi-nova pack): the `dispatch` tool with `"mode": "parallel"` researcher tasks — keep each task narrow, source-quality explicit, and output-oriented.
 - **Background by default.** Research agents have no inter-dependencies, so foreground execution serializes work that should run in parallel.
 - **3-4 seconds between dispatches** avoids rate limiting in practice. Tighter cadences sometimes work, sometimes hit limits, so pace yourself.
 - **One file per agent.** Shared outputs create write contention and lose attribution.

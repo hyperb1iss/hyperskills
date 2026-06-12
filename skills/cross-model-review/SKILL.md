@@ -15,10 +15,11 @@ Cross-model validation: the authoring model writes code, a different model revie
 
 Identify the host first. The host runs the _other_ model's CLI as a subprocess.
 
-| Current host | You invoke   | Direction                     |
-| ------------ | ------------ | ----------------------------- |
-| Claude Code  | `codex` CLI  | Claude writes → Codex reviews |
-| Codex        | `claude` CLI | Codex writes → Claude reviews |
+| Current host      | You invoke                          | Direction                     |
+| ----------------- | ----------------------------------- | ----------------------------- |
+| Claude Code       | `codex` CLI                         | Claude writes → Codex reviews |
+| Codex             | `claude` CLI                        | Codex writes → Claude reviews |
+| Pi (pi-nova pack) | `/xreview` (wraps `codex exec`)     | Pi writes → Codex reviews     |
 
 Confirm the reviewer is reachable before the real call:
 
@@ -26,6 +27,9 @@ Confirm the reviewer is reachable before the real call:
 | ------ | ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
 | Claude | `codex --version`                                                                                                                   | One-shot, no special flags        |
 | Codex  | `printf 'say ok\n' \| env -u ANTHROPIC_API_KEY claude -p --output-format text --no-session-persistence` with `yield_time_ms: 30000` | Sanity ping only, see Rules 1 & 4 |
+| Pi     | `codex --version`                                                                                                                   | Same binary as Claude host        |
+
+**On Pi:** prefer `/xreview` when the xreview extension is installed — it shells out to `codex exec --sandbox read-only` with stdin closed and injects Verdict, Findings, and Fix Queue back into the session. Scope explicitly: `/xreview` reviews the working tree, `/xreview main` reviews since a base ref; put any focused concern in the prompt before running it. Manual bash fallback follows the Claude-host rules below. Treat PASS as evidence only for the reviewed scope.
 
 **User defaults are authoritative.** Both CLIs read configured defaults (`~/.codex/config.toml`, `~/.claude/settings.json`). Never specify `--model`, `-m`, or `-c model=`. The only sanctioned override is reasoning effort, and only for spec review (see Effort Override Policy below).
 
