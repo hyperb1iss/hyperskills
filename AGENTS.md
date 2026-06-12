@@ -277,23 +277,25 @@ Before committing, verify:
 
 ## Existing Skill Inventory
 
-| Skill                | Tokens | References | Domain                                           |
-| -------------------- | ------ | ---------- | ------------------------------------------------ |
-| `brainstorm`         | ~2,600 | none       | Process — ideation                               |
-| `plan`               | ~2,900 | none       | Process — decomposition                          |
-| `research`           | ~3,200 | none       | Process — knowledge gathering                    |
-| `orchestrate`        | ~4,000 | none       | Process — multi-agent dispatch                   |
-| `implement`          | ~4,500 | 1 file     | Process — implementation                         |
-| `codex-review`       | ~2,000 | 1 file     | Process — Codex-specific review (Claude → Codex) |
-| `cross-model-review` | ~2,400 | 1 file     | Process — bidirectional cross-model review       |
-| `dream`              | ~2,300 | 2 files    | Process — conversation memory consolidation      |
-| `git`                | ~1,200 | none       | Domain — git operations                          |
-| `tilt`               | ~2,500 | 2 files    | Domain — Kubernetes dev                          |
-| `tui-design`         | ~3,000 | 2 files    | Domain — terminal UI                             |
-| `uv`                 | ~3,000 | 3 files    | Domain — Python package management               |
-| `ruff`               | ~2,800 | 2 files    | Domain — Python linting & formatting             |
-| `ty`                 | ~2,500 | 2 files    | Domain — Python type checking                    |
-| `uv-build`           | ~2,500 | none       | Domain — Python build backend                    |
+Sizes drift as skills evolve — check with `wc -w skills/*/SKILL.md` instead of trusting a table.
+
+| Skill                | References | Domain                                           |
+| -------------------- | ---------- | ------------------------------------------------ |
+| `brainstorm`         | none       | Process — ideation                               |
+| `plan`               | none       | Process — decomposition                          |
+| `research`           | none       | Process — knowledge gathering                    |
+| `orchestrate`        | none       | Process — multi-agent dispatch                   |
+| `implement`          | 1 file     | Process — implementation                         |
+| `codex-review`       | 1 file     | Process — Codex-specific review (Claude → Codex) |
+| `cross-model-review` | 1 file     | Process — bidirectional cross-model review       |
+| `dream`              | 2 files    | Process — conversation memory consolidation      |
+| `git`                | none       | Domain — git operations                          |
+| `tilt`               | 2 files    | Domain — Kubernetes dev                          |
+| `tui-design`         | 2 files    | Domain — terminal UI                             |
+| `uv`                 | 3 files    | Domain — Python package management               |
+| `ruff`               | 2 files    | Domain — Python linting & formatting             |
+| `ty`                 | 2 files    | Domain — Python type checking                    |
+| `uv-build`           | none       | Domain — Python build backend                    |
 
 ## Skill Categories
 
