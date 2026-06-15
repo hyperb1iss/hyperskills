@@ -55,6 +55,27 @@ git checkout --theirs Cargo.lock && cargo generate-lockfile && git add Cargo.loc
 git checkout --theirs secrets.yaml && sops updatekeys secrets.yaml && git add secrets.yaml
 ```
 
+## Verify Before You Trust
+
+Regenerating or rebasing is not the same as verifying the result. In a concurrent monorepo, prove it.
+
+**Clean-room lockfile check** -- after a rebase that touches a lockfile, regenerate in a throwaway worktree and byte-diff before trusting the auto-regen (lockfile tooling silently drops importers mid-rebase):
+
+```bash
+git worktree add /tmp/lockcheck HEAD
+(cd /tmp/lockcheck && pnpm install --lockfile-only)
+diff -q /tmp/lockcheck/pnpm-lock.yaml ./pnpm-lock.yaml && echo "IDENTICAL to clean-room regen"
+git worktree remove /tmp/lockcheck
+```
+
+**Prove a rebase preserved intent** -- `range-diff` shows exactly which commits changed and how:
+
+```bash
+git tag pre-rebase-$(date +%Y%m%d-%H%M%S)   # before rewriting
+git rebase --onto <new-base> <old-base> <branch>
+git range-diff <old-base>...<branch>         # every differing commit should be intentional
+```
+
 ## Archaeology
 
 ```bash
@@ -78,6 +99,7 @@ git bisect start && git bisect bad HEAD && git bisect good v1.0.0
 3. **Regenerate lock files** -- never merge them
 4. **Backup branch before destructive ops:** `git branch backup-$(date +%Y%m%d-%H%M%S)`
 5. **Never commit large binaries** -- use Git LFS
+6. **Prove history rewrites** -- tag the pre-rewrite head, then `range-diff` after a rebase to confirm every changed commit is intentional
 
 ## Anti-Patterns
 
@@ -88,6 +110,9 @@ git bisect start && git bisect bad HEAD && git bisect good v1.0.0
 | Using `--force`                      | Use `--force-with-lease` only when approved     |
 | Running recovery commands by habit   | Inspect `status`, `log`, and `reflog` first     |
 | Staging unrelated work               | `git add <specific-files>`                      |
+| `git checkout <commit> -- <paths>` then committing | It **stages silently**; check `git diff --cached --name-only` before each commit or it swallows unintended files |
+| Trusting an auto-regenerated lockfile | Verify in a throwaway worktree + byte-diff before relying on it |
+| Assuming a rebase kept your commits   | Prove it with `git range-diff <old>...<new>`    |
 
 ## What This Skill is NOT
 

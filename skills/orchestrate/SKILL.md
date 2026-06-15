@@ -394,6 +394,19 @@ Wait for all to complete, then:
 - Recommendations: prioritized action items
 ```
 
+### Read-only review brief (hardening)
+
+A reviewer that can edit, checkout, or mutate state is a liability in a fan-out. Bound every read-only reviewer/auditor explicitly:
+
+- **Sandbox the agent:** "Do NOT edit, checkout, switch branches, or mutate any state. Read only."
+- **Read without checkout:** give the exact diff range plus `git show <ref>:<path>` / `git diff <base>..<head>` so the agent inspects the change without touching the working tree.
+- **Prior findings to verify:** hand it the open findings so it confirms or refutes rather than re-deriving from scratch.
+- **Prioritized risk lenses:** name the attack/failure categories that matter most (header smuggling, RLS bypass, apply-time CRD pruning, etc.) so coverage is deliberate, not generic.
+
+**Synthesis -- adjudicate, don't vote-count.** When reviewers disagree, gather primary evidence (live read-only state, a render, the spec) and let it decide. Independent convergence -- two agents finding the same issue without coordination -- is a severity signal, not noise.
+
+**Commit ownership for review/fix waves:** the orchestrator commits, agents report. Re-run the agent's tightest test and spot-check its load-bearing claims before trusting a self-reported PASS -- the implementer never self-assigns PASS.
+
 ---
 
 ## Strategy 6: Full Lifecycle
@@ -619,6 +632,8 @@ When running 10+ background agents:
 | Keep full review ceremony for every late task   | Apply the trust gradient after patterns prove stable          |
 | Let agents run `git add .` or `git push`        | Explicit git hygiene in every build prompt                    |
 | Dispatch background agents for integration code | Background is for research; coordinate code changes           |
+| Let read-only reviewers edit or checkout        | Sandbox the brief: read via `git show <ref>:<path>`, never mutate |
+| Vote-count contradicting reviewers              | Adjudicate against ground truth (live state, a render, the spec)  |
 
 ## Hyperskills Integration
 
