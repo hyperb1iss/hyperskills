@@ -10,18 +10,29 @@ Pass prompts as the final argument to the reviewer CLI:
 # Claude-hosted session (Codex reviews)
 codex exec "PROMPT_TEXT_HERE"
 
-# Codex-hosted session (Claude reviews) — basic
-# The `env -u ANTHROPIC_API_KEY` prefix is required: Codex exports the key, and
-# `claude -p` would otherwise bill per-token to the API instead of your subscription.
-env -u ANTHROPIC_API_KEY claude -p "PROMPT_TEXT_HERE"
+# Codex-hosted session (Claude reviews) — preferred shell shape.
+# Run the tool call with yield_time_ms: 300000. Use rc, not status: zsh reserves status.
+prompt=$(mktemp -t claude-review-prompt.XXXXXX.md)
+out=$(mktemp -t claude-review-output.XXXXXX.txt)
+printf '%s\n' "PROMPT_TEXT_HERE" > "$prompt"
+printf 'prompt_file=%s\nreview_output=%s\n' "$prompt" "$out"
+if env -u ANTHROPIC_API_KEY claude -p --output-format text \
+  --allowedTools "Read,Glob,Grep,Bash(git *)" -- "$(cat "$prompt")" \
+  > "$out" 2>&1; then
+  rc=0
+else
+  rc=$?
+fi
+printf 'claude_exit=%s\nreview_output=%s\n' "$rc" "$out"
+exit "$rc"
+```
 
-# Codex-hosted session (Claude reviews) — with read-only tool access
-# The `--` is required: --allowedTools is variadic and will swallow the prompt without it.
-env -u ANTHROPIC_API_KEY claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT_TEXT_HERE"
+For quick diff-only sketches, still capture output to a file:
 
-# Or pipe a diff into either
+```bash
 git diff main...HEAD | codex exec "PROMPT_TEXT_HERE"
-git diff main...HEAD | env -u ANTHROPIC_API_KEY claude -p "PROMPT_TEXT_HERE"
+out=$(mktemp -t claude-review-output.XXXXXX.txt)
+git diff main...HEAD | env -u ANTHROPIC_API_KEY claude -p "PROMPT_TEXT_HERE" > "$out" 2>&1
 ```
 
 For Codex's structured `codex review` command, prompts aren't needed — it has its own review format.
@@ -31,6 +42,8 @@ For Codex's structured `codex review` command, prompts aren't needed — it has 
 **Codex sandbox gotcha:** When Codex is the host, run `claude -p` with `yield_time_ms: 300000`. The default 1000ms yield returns empty output and `Process running with session ID NNNN` while claude is still working — do not retry, reap `session_id: NNNN` until it exits. See SKILL.md for details.
 
 **Billing gotcha:** Codex exports `ANTHROPIC_API_KEY`, which outranks subscription OAuth in Claude Code's auth precedence. In `-p` mode the key is used silently, so the review bills per-token to the API instead of your Pro/Max plan. Prefix every spawning `claude -p` call with `env -u ANTHROPIC_API_KEY`. See SKILL.md Rule 4.
+
+**Wrapper gotcha:** If the shell needs to capture the exit code, use `rc=$?` or `exit_code=$?`. Do not assign to `status`; zsh treats it as read-only.
 
 ## General Review
 

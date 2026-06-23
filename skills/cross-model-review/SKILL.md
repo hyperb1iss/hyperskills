@@ -9,25 +9,25 @@ Cross-model validation: the authoring model writes code, a different model revie
 
 **Core insight:** Single-model self-review is systematically biased. The same blind spots that let bugs through during writing let them through during review. Cross-model review catches different bug classes because the reviewer has fundamentally different failure modes.
 
-**How to read this skill:** patterns and decision trees below are guidelines. Pick what fits, blend when needed. The rules marked ⚠️ are different: they're real CLI behaviors (`yield_time_ms`, the `--` separator, scope flags), not procedural ceremony. Audited sessions show 366+ orphaned `claude -p` processes per session and ~7 minutes wasted per spiral when ⚠️ rules are skipped. Treat them as facts about the tool, not opinions about workflow.
+**How to read this skill:** patterns and decision trees below are guidelines. Pick what fits, blend when needed. The rules marked ⚠️ are different: they're real CLI behaviors (`yield_time_ms`, the `--` separator, scope flags), not procedural ceremony. A Jun 2026 audit across 4k+ Claude/Codex JSONL conversations found `claude -p` failures clustering around these mechanics, plus zsh wrapper mistakes. Treat them as facts about the tool, not opinions about workflow.
 
 ## Direction & Pre-Flight
 
 Identify the host first. The host runs the _other_ model's CLI as a subprocess.
 
-| Current host      | You invoke                          | Direction                     |
-| ----------------- | ----------------------------------- | ----------------------------- |
-| Claude Code       | `codex` CLI                         | Claude writes → Codex reviews |
-| Codex             | `claude` CLI                        | Codex writes → Claude reviews |
-| Pi (pi-nova pack) | `/xreview` (wraps `codex exec`)     | Pi writes → Codex reviews     |
+| Current host      | You invoke                      | Direction                     |
+| ----------------- | ------------------------------- | ----------------------------- |
+| Claude Code       | `codex` CLI                     | Claude writes → Codex reviews |
+| Codex             | `claude` CLI                    | Codex writes → Claude reviews |
+| Pi (pi-nova pack) | `/xreview` (wraps `codex exec`) | Pi writes → Codex reviews     |
 
 Confirm the reviewer is reachable before the real call:
 
-| Host   | Verify command                                                                                                                      | Notes                             |
-| ------ | ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| Claude | `codex --version`                                                                                                                   | One-shot, no special flags        |
-| Codex  | `printf 'say ok\n' \| env -u ANTHROPIC_API_KEY claude -p --output-format text --no-session-persistence` with `yield_time_ms: 30000` | Sanity ping only, see Rules 1 & 4 |
-| Pi     | `codex --version`                                                                                                                   | Same binary as Claude host        |
+| Host   | Verify command                                                                                                                       | Notes                             |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------- |
+| Claude | `codex --version`                                                                                                                    | One-shot, no special flags        |
+| Codex  | `printf 'say ok\n' \| env -u ANTHROPIC_API_KEY claude -p --output-format text --no-session-persistence` with `yield_time_ms: 300000` | Sanity ping only, see Rules 1 & 4 |
+| Pi     | `codex --version`                                                                                                                    | Same binary as Claude host        |
 
 **On Pi:** prefer `/xreview` when the xreview extension is installed — it shells out to `codex exec --sandbox read-only` with stdin closed and injects Verdict, Findings, and Fix Queue back into the session. Scope explicitly: `/xreview` reviews the working tree, `/xreview main` reviews since a base ref; put any focused concern in the prompt before running it. Manual bash fallback follows the Claude-host rules below. Treat PASS as evidence only for the reviewed scope.
 
@@ -145,6 +145,47 @@ The prefix goes on the **spawning** call only — reaping calls (Rule 2) are bar
 
 **Precedence trap:** `CLAUDE_CODE_OAUTH_TOKEN` ranks _below_ `ANTHROPIC_API_KEY`, so exporting an OAuth token does **not** rescue you while the key is present — stripping is mandatory either way. The fallback only lands on the plan if a prior interactive `/login` (Pro/Max) wrote `~/.claude/.credentials.json`; without those creds, `claude -p` has nothing to fall through to.
 
+### Codex → Claude Gold Path
+
+Use this launch shape unless the review scope forces a different one. It bakes in the four rules, captures output to a file, and avoids the zsh `status` variable trap found in failed sessions.
+
+```bash
+prompt=$(mktemp -t claude-review-prompt.XXXXXX.md)
+out=$(mktemp -t claude-review-output.XXXXXX.txt)
+cat > "$prompt" <<'PROMPT'
+You are an independent senior code reviewer.
+
+Review the current branch for correctness, security, and maintainability.
+Cite file:line for each finding, include confidence, and skip style nits.
+Verdict: PASS or FAIL.
+PROMPT
+printf 'prompt_file=%s\nreview_output=%s\n' "$prompt" "$out"
+if env -u ANTHROPIC_API_KEY claude -p --output-format text \
+  --allowedTools "Read,Glob,Grep,Bash(git *),Bash(rg *)" \
+  -- "$(cat "$prompt")" > "$out" 2>&1; then
+  rc=0
+else
+  rc=$?
+fi
+printf 'claude_exit=%s\nreview_output=%s\n' "$rc" "$out"
+exit "$rc"
+```
+
+Run that shell command through Codex with `yield_time_ms: 300000` and a normal output budget such as `max_output_tokens: 20000`.
+
+**Why this shape survives real failures:**
+
+| Element                     | Why it matters                                                 |
+| --------------------------- | -------------------------------------------------------------- |
+| `prompt` + `out` temp files | Preserves the prompt and full review output across turns       |
+| `env -u ANTHROPIC_API_KEY`  | Prevents silent API-key billing                                |
+| `-- "PROMPT"`               | Stops variadic tool flags from swallowing the prompt           |
+| `rc`, not `status`          | `status` is read-only in zsh; assigning it kills the wrapper   |
+| `> "$out" 2>&1`             | Keeps long reviews out of the agent context and readable later |
+| `yield_time_ms: 300000`     | Lets the first call complete or yield a reapable session       |
+
+If this yields `Process running with session ID NNNN`, reap that session exactly as Rule 2 says. The initial output already printed `review_output=...`, so read that file after the process exits.
+
 ---
 
 ## ⚠️ Claude → Codex: One Non-Negotiable Rule
@@ -195,9 +236,30 @@ Echo the path before the redirect so the agent (and a human running `tail -f`) k
 
 ---
 
+## Codex → Claude Failure Triage
+
+When a `claude -p` review fails, classify the failure before changing tactics. Most failures are wrapper mechanics, not model quality.
+
+| Symptom                                                 | Meaning                                   | Recovery                                                                           |
+| ------------------------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------- |
+| `Process running with session ID NNNN`                  | The review is alive; Codex yielded early  | Reap `session_id` with `yield_time_ms: 300000`; never re-run the command           |
+| `Input must be provided either through stdin...`        | A variadic flag swallowed the prompt      | Re-run once with `--` before the prompt, or use the gold-path template             |
+| `zsh: read-only variable: status`                       | The shell wrapper assigned `status=$?`    | Rename the variable to `rc` or `exit_code`; the Claude invocation may have worked  |
+| Exit `124`                                              | A shell `timeout` killed the review       | Remove `timeout`; if an external guard is mandatory, use a much longer one         |
+| Exit `130`, exit `143`, or `aborted by user`            | The process was interrupted or terminated | Read the output file first; do not infer a review verdict from the exit code alone |
+| `write_stdin failed: stdin is closed`                   | The host lost the reaping handle          | Read the output file if printed; otherwise re-run once with the gold-path template |
+| `Execution error` with little output                    | Claude runner failed after launch         | Inspect the output file, then retry once with a narrower prompt or diff packet     |
+| `Unable to connect to API`, spend limit, or auth errors | External auth/billing/network state       | Stop retrying; surface the exact error and ask for auth or quota repair            |
+
+**Timeout policy:** default to no shell `timeout` around `claude -p`. Codex already has the reap loop, and real reviews in the audited logs exceeded 180-240 seconds often enough that short timeouts created false failures.
+
+---
+
 ## Review Modes Matrix
 
 Match the row to what you're actually reviewing. The current skill historically documented 5 patterns; real usage covers many more.
+
+The Codex → Claude cells below show scope shape only. For actual execution, wrap the chosen scope in the gold-path launcher above so `env -u ANTHROPIC_API_KEY`, file capture, zsh-safe `rc`, and `yield_time_ms: 300000` all stay intact.
 
 | Mode                        | Scope                                                | Claude → Codex                                                                 | Codex → Claude                                                          |
 | --------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
@@ -346,8 +408,10 @@ Ready-to-use prompt templates for security, architecture, performance, error han
 | `claude -p` from Codex with `ANTHROPIC_API_KEY` in the env              | Key outranks subscription OAuth; `-p` uses it silently → review bills per-token to the API, not your plan                              | Prefix the spawning call: `env -u ANTHROPIC_API_KEY claude -p ...`                                                            |
 | Bare `codex review` (no scope flag)                                     | Hangs or produces 100KB+ blob output                                                                                                   | Always pass `--base <ref>`, `--commit <SHA>`, or `--uncommitted`                                                              |
 | `codex review` output > 100KB                                           | Diff too large for one pass                                                                                                            | Split per commit, or use `codex exec` with narrower prompt                                                                    |
-| `timeout 30 codex review` or `timeout 30 claude -p`                     | Reviews legitimately take 30s–5min                                                                                                     | No timeout, or `timeout 300` minimum                                                                                          |
+| `timeout 30 codex review` or `timeout 180 claude -p`                    | Reviews legitimately take 30s–5min+; short shell timeouts produced false exit-124 failures                                             | No shell timeout by default; if required externally, make it much longer than the Codex reap window                           |
 | `codex exec "PROMPT" \| tail -300` or `claude -p "PROMPT" \| tail -300` | Pipe buffers until EOF (no progress signal); discards summary/verdict (usually near top); slurps full review into agent context window | Redirect to a file: `... > /tmp/review.txt 2>&1`. Then `head`, `rg severity`, `sed`-by-range. Human can `tail -f` separately. |
+| Printing `review_output=/tmp/...` but not redirecting Claude there      | The file path exists but the review output stays in the tool stream or disappears on interrupt                                         | Always run `claude ... > "$out" 2>&1` after echoing the path                                                                  |
+| Assigning `status=$?` in Codex shell snippets                           | zsh reserves `status` as a read-only variable; the wrapper fails after the review                                                      | Use `rc=$?` or `exit_code=$?`                                                                                                 |
 | `<<'EOF'` heredoc when prompt references env vars                       | Single-quoted heredoc blocks expansion; vars stay literal                                                                              | Use `<<EOF` (unquoted) when interpolation is needed                                                                           |
 | Trying `claude ultrareview` first                                       | Many orgs block ("Remote sessions are disabled by your organization's policy")                                                         | Local `claude -p` first; ultrareview is opt-in                                                                                |
 | Style/formatting comments in review                                     | LLMs default to bikeshedding                                                                                                           | Always include "Skip: formatting, naming, minor docs"                                                                         |
