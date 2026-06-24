@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Skills-16-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="16 Skills">
+  <img src="https://img.shields.io/badge/Skills-17-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="17 Skills">
   <img src="https://img.shields.io/badge/skills.sh-Compatible-ff6ac1?style=for-the-badge&logo=vercel&logoColor=white" alt="skills.sh">
 </p>
 
@@ -77,6 +77,7 @@ A few combinations come up often, more as observation than prescription:
 | Architecture decision   | brainstorm, research                                  |
 | Large refactor          | plan, orchestrate, implement, cross-model-review      |
 | Bug fix                 | implement (the skill scales itself for trivial fixes) |
+| Opening a PR            | super-good-pr, then announce it in your own voice     |
 | Python project work     | uv, ruff, ty, uv-build                                |
 | Knowledge consolidation | dream pulls insights from past sessions into Sibyl    |
 
@@ -148,6 +149,14 @@ The Claude → Codex direction in depth. `codex review` (structured diff) and `c
 
 ```bash
 /hyperskills:codex-review
+```
+
+#### `super-good-pr`: Reviewer-First PR Descriptions
+
+What a PR description is actually for: handing a human the mental model fast, proving the parts they'd doubt, and being honest about what you didn't do. Lead with why, prove every claim with a receipt (test counts, file names, exact errors), name the load-bearing invariant, stay honest about blast radius. Carries the section spine, the emoji palette (and the AI-slop set to avoid), and repo-template integration.
+
+```bash
+/hyperskills:super-good-pr
 ```
 
 #### `dream`: Conversation Memory Consolidation
