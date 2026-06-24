@@ -47,12 +47,12 @@ Lean on existing knowledge before spawning agents. Re-running research that alre
 - **Sharpen the research question.** "Research databases" is too vague to dispatch on. "Compare PostgreSQL vs CockroachDB for multi-region write-heavy workloads with <10ms p99 latency" gives agents enough scope to do useful work.
 - **Calibrate the research budget** to the decision the research is feeding:
 
-   | Depth          | Agents | Time      | When                                         |
-   | -------------- | ------ | --------- | -------------------------------------------- |
-   | **Quick scan** | 2-3    | 2-5 min   | Known domain, just need latest info          |
-   | **Standard**   | 5-10   | 10-15 min | Technology evaluation, architecture options  |
-   | **Deep dive**  | 10-30  | 20-40 min | Greenfield decisions, SOTA analysis          |
-   | **Exhaustive** | 30-60+ | 40-90 min | New project inception, competitive landscape |
+  | Depth          | Agents | Time      | When                                         |
+  | -------------- | ------ | --------- | -------------------------------------------- |
+  | **Quick scan** | 2-3    | 2-5 min   | Known domain, just need latest info          |
+  | **Standard**   | 5-10   | 10-15 min | Technology evaluation, architecture options  |
+  | **Deep dive**  | 10-30  | 20-40 min | Greenfield decisions, SOTA analysis          |
+  | **Exhaustive** | 30-60+ | 40-90 min | New project inception, competitive landscape |
 
 ### Source quality contract
 

@@ -133,13 +133,13 @@ sibyl add "Brainstorm: [topic]" "Chose [approach] because [reason]. Rejected [ot
 
 Hand off to whatever's next:
 
-   | Next Step                  | When                                  |
-   | -------------------------- | ------------------------------------- |
-   | `/hyperskills:plan`        | Complex feature needing decomposition |
-   | `/hyperskills:research`    | Need deeper investigation first       |
-   | `/hyperskills:orchestrate` | Ready to dispatch agents              |
-   | Direct implementation      | Simple enough to just build           |
-   | Write a spec               | Needs formal documentation            |
+| Next Step                  | When                                  |
+| -------------------------- | ------------------------------------- |
+| `/hyperskills:plan`        | Complex feature needing decomposition |
+| `/hyperskills:research`    | Need deeper investigation first       |
+| `/hyperskills:orchestrate` | Ready to dispatch agents              |
+| Direct implementation      | Simple enough to just build           |
+| Write a spec               | Needs formal documentation            |
 
 ### Output
 

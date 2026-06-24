@@ -13,11 +13,11 @@ Meta-orchestration patterns mined from 597+ real agent dispatches across product
 
 The strategies are host-agnostic; the fan-out verb differs:
 
-| Host              | Fan-out surface                                                | Notes                                                          |
-| ----------------- | -------------------------------------------------------------- | --------------------------------------------------------------- |
-| Claude Code       | `Agent` tool — parallel calls in one block, background for swarms | Worktree isolation via the agent's isolation option            |
-| Codex             | `spawn_agent` with a role-appropriate `agent_type`              | Use only when subagent work is actually warranted              |
-| Pi (pi-nova pack) | `dispatch` tool with `"mode": "parallel"`                       | Children inherit the safety gate via `PI_CODING_AGENT_DIR`     |
+| Host              | Fan-out surface                                                   | Notes                                                      |
+| ----------------- | ----------------------------------------------------------------- | ---------------------------------------------------------- |
+| Claude Code       | `Agent` tool — parallel calls in one block, background for swarms | Worktree isolation via the agent's isolation option        |
+| Codex             | `spawn_agent` with a role-appropriate `agent_type`                | Use only when subagent work is actually warranted          |
+| Pi (pi-nova pack) | `dispatch` tool with `"mode": "parallel"`                         | Children inherit the safety gate via `PI_CODING_AGENT_DIR` |
 
 Pi dispatch task shape:
 
@@ -273,12 +273,12 @@ Trust Gradient (adapt over time):
 
 As patterns prove reliable, lighten review overhead instead of running full ceremony on every task. The cost of full review on the 12th identical CRUD endpoint is real and the signal-to-noise drops:
 
-| Phase              | Review overhead                         | Typically                              |
-| ------------------ | --------------------------------------- | -------------------------------------- |
-| **Full ceremony**  | Implement + Spec Review + Code Review   | First 3-4 tasks                        |
-| **Standard**       | Implement + Spec Review                 | Tasks 5-8, after patterns stabilize    |
-| **Light**          | Implement + quick spot-check            | Late tasks with established patterns   |
-| **Cost-optimized** | Use the host's configured fast reviewer | Formulaic review passes                |
+| Phase              | Review overhead                         | Typically                            |
+| ------------------ | --------------------------------------- | ------------------------------------ |
+| **Full ceremony**  | Implement + Spec Review + Code Review   | First 3-4 tasks                      |
+| **Standard**       | Implement + Spec Review                 | Tasks 5-8, after patterns stabilize  |
+| **Light**          | Implement + quick spot-check            | Late tasks with established patterns |
+| **Cost-optimized** | Use the host's configured fast reviewer | Formulaic review passes              |
 
 This is earned confidence, not cutting corners. The gradient resets when a task departs from the established pattern; escalate back to full ceremony for anything genuinely new.
 
@@ -336,7 +336,7 @@ After fixing, run `[TOOL_COMMAND] [PATH]` to verify zero issues remain.
 **What good sweep-agent prompts share:**
 
 - Issue counts by category, not "fix everything", so agents have a target to verify against
-- Domain-specific guidance so agents understand *why* patterns exist (otherwise they cargo-cult or override)
+- Domain-specific guidance so agents understand _why_ patterns exist (otherwise they cargo-cult or override)
 - Directory partitioning to prevent overlap
 - Wave shape: fix → verify → fix remaining → verify, until the issue count converges
 
@@ -623,15 +623,15 @@ When running 10+ background agents:
 
 ## Anti-Patterns
 
-| Anti-Pattern                                    | Fix                                                           |
-| ----------------------------------------------- | ------------------------------------------------------------- |
-| Dispatch agents that touch the same files       | Partition by directory/module; one owner per scope            |
-| Run independent research agents foreground      | Background research; synthesize after completion              |
-| Send 50 agents with "fix everything" prompts    | Give each agent a specific scope, issue list, and done signal |
-| Skip the scout phase for build sprints          | Explore first to map dependencies and file ownership          |
-| Keep full review ceremony for every late task   | Apply the trust gradient after patterns prove stable          |
-| Let agents run `git add .` or `git push`        | Explicit git hygiene in every build prompt                    |
-| Dispatch background agents for integration code | Background is for research; coordinate code changes           |
+| Anti-Pattern                                    | Fix                                                               |
+| ----------------------------------------------- | ----------------------------------------------------------------- |
+| Dispatch agents that touch the same files       | Partition by directory/module; one owner per scope                |
+| Run independent research agents foreground      | Background research; synthesize after completion                  |
+| Send 50 agents with "fix everything" prompts    | Give each agent a specific scope, issue list, and done signal     |
+| Skip the scout phase for build sprints          | Explore first to map dependencies and file ownership              |
+| Keep full review ceremony for every late task   | Apply the trust gradient after patterns prove stable              |
+| Let agents run `git add .` or `git push`        | Explicit git hygiene in every build prompt                        |
+| Dispatch background agents for integration code | Background is for research; coordinate code changes               |
 | Let read-only reviewers edit or checkout        | Sandbox the brief: read via `git show <ref>:<path>`, never mutate |
 | Vote-count contradicting reviewers              | Adjudicate against ground truth (live state, a render, the spec)  |
 

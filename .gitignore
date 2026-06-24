@@ -53,5 +53,9 @@ node_modules/
 /research/*
 !/research/security-best-practices-2026.md
 
+# Internal calibration sets — real PR exemplars are repo- and team-specific
+# (often internal), so they stay local and out of the public repo
+skills/*/references/canonical-prs.md
+
 # Generated artifacts
 /README.pdf

@@ -103,16 +103,16 @@ git bisect start && git bisect bad HEAD && git bisect good v1.0.0
 
 ## Anti-Patterns
 
-| Anti-Pattern                         | Fix                                             |
-| ------------------------------------ | ----------------------------------------------- |
-| Manually merging generated lockfiles | Take one side, regenerate with the package tool |
-| Rebasing a shared branch             | Merge or create a new branch                    |
-| Using `--force`                      | Use `--force-with-lease` only when approved     |
-| Running recovery commands by habit   | Inspect `status`, `log`, and `reflog` first     |
-| Staging unrelated work               | `git add <specific-files>`                      |
+| Anti-Pattern                                       | Fix                                                                                                              |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Manually merging generated lockfiles               | Take one side, regenerate with the package tool                                                                  |
+| Rebasing a shared branch                           | Merge or create a new branch                                                                                     |
+| Using `--force`                                    | Use `--force-with-lease` only when approved                                                                      |
+| Running recovery commands by habit                 | Inspect `status`, `log`, and `reflog` first                                                                      |
+| Staging unrelated work                             | `git add <specific-files>`                                                                                       |
 | `git checkout <commit> -- <paths>` then committing | It **stages silently**; check `git diff --cached --name-only` before each commit or it swallows unintended files |
-| Trusting an auto-regenerated lockfile | Verify in a throwaway worktree + byte-diff before relying on it |
-| Assuming a rebase kept your commits   | Prove it with `git range-diff <old>...<new>`    |
+| Trusting an auto-regenerated lockfile              | Verify in a throwaway worktree + byte-diff before relying on it                                                  |
+| Assuming a rebase kept your commits                | Prove it with `git range-diff <old>...<new>`                                                                     |
 
 ## What This Skill is NOT
 
