@@ -284,10 +284,10 @@ Sizes drift as skills evolve — check with `wc -w skills/*/SKILL.md` instead of
 | `brainstorm`         | none       | Process — ideation                               |
 | `plan`               | none       | Process — decomposition                          |
 | `research`           | none       | Process — knowledge gathering                    |
-| `orchestrate`        | none       | Process — multi-agent dispatch                   |
-| `implement`          | 1 file     | Process — implementation                         |
+| `orchestrate`        | 1 file     | Process — multi-agent dispatch                   |
+| `implement`          | 2 files    | Process — implementation                         |
 | `codex-review`       | 1 file     | Process — Codex-specific review (Claude → Codex) |
-| `cross-model-review` | 1 file     | Process — bidirectional cross-model review       |
+| `cross-model-review` | 2 files    | Process — bidirectional cross-model review       |
 | `dream`              | 2 files    | Process — conversation memory consolidation      |
 | `git`                | none       | Domain — git operations                          |
 | `tilt`               | 2 files    | Domain — Kubernetes dev                          |
