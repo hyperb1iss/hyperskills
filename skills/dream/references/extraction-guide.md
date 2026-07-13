@@ -148,13 +148,13 @@ digraph entity_selection {
 1. **Exact match check:**
 
    ```bash
-   sibyl search "[exact entity title]" --type [type] --limit 3
+   sibyl search "[exact entity title]" --limit 3
    ```
 
 2. **Semantic similarity check:**
 
    ```bash
-   sibyl search "[key concepts from the extraction]" --type [type] --limit 5
+   sibyl search "[key concepts from the extraction]" --limit 5
    ```
 
 3. **Decision matrix:**
@@ -164,7 +164,7 @@ digraph entity_selection {
    | No matches                     | Create new entity                                             |
    | Same topic, older info         | Update existing entity (note: Sibyl tracks temporal validity) |
    | Same topic, same info          | Skip — already captured                                       |
-   | Same topic, contradictory info | Create new entity + tension entity linking both               |
+   | Same topic, contradictory info | New evidence supersedes: correct the old entry in place, titled "Correction: ..." — genuinely unresolved: tension entity linking both |
    | Related but distinct           | Create new entity with RELATED_TO relationship                |
 
 ### Within a Single Dream Cycle

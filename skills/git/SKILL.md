@@ -150,7 +150,7 @@ Multiple agents (and humans) work the same repo concurrently. Causation decides 
 | Signal                                | Move                                                                                                          |
 | ------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | Ambiguous churn in shared files       | Restore churn your own commands generated; leave others' work untouched — even in the same file                 |
-| Co-edited file, mixed hunks           | Stage only your hunks; `git commit --only <file>` sidesteps concurrent staging noise                            |
+| Co-edited file, mixed hunks           | Stage only your hunks (`git add -p`, or a hand-built patch via `git apply --cached --unidiff-zero`), then commit the index — `git commit <file>`/`--only` commits the worktree copy and swallows unstaged sibling hunks |
 | `index.lock`                          | Triage before removing: size + owning process (`lsof`/`ps`). Zero bytes and no holder = stale; live owner = wait |
 | Another agent's rebase in progress    | Hold your verified commit — but a blocker must reproduce before you report it, and after repeated blocked turns escalate with pid + age as a question, not a fact |
 | Branch checked out in another worktree | Work there; don't steal the checkout                                                                            |

@@ -31,7 +31,7 @@ A bare `codex review` (no scope) is the #1 cause of failures: it hangs or produc
 | Single commit           | `codex review --commit <SHA>` |
 | Working tree (unstaged) | `codex review --uncommitted`  |
 
-For anything outside this trio (spec docs, single files, custom personas, focused passes), use `codex exec "PROMPT"` with explicit scope in the prompt, never bare `codex review` — `codex review --base` rejects a custom prompt, so custom prompt means `codex exec`.
+Scoped `codex review` also accepts custom instructions as a trailing `[PROMPT]` argument (as of Jul 2026: `codex review --base main "focus on error handling"`), so a focused pass keeps structured review behavior. Reach for `codex exec "PROMPT"` when the artifact isn't a diff at all — spec docs, single files outside version control, freeform investigations — never bare `codex review`.
 
 If `codex review` output exceeds ~100KB, the diff is too large for one pass. Split per commit, or use `codex exec` with a narrower prompt ("Review error handling only"). Large `codex exec` transcripts are a different animal — see When the Review Hangs.
 

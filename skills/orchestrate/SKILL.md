@@ -451,7 +451,7 @@ Arm every watcher with a named exit condition, a remediation rung, an iteration 
 Correctness gates don't measure scope: a 397-file sprawl shipped with 549 green tests and two passing cross-model reviews, and the human killed it in seconds from the diffstat. At each wave boundary, run a shape check distinct from the verify gate:
 
 ```bash
-git diff --name-only origin/main...HEAD | awk -F/ '{print $1"/"$2}' | sort | uniq -c | sort -nr
+git diff --name-only origin/${BASE:-main}...HEAD | awk -F/ '{print $1"/"$2}' | sort | uniq -c | sort -nr   # BASE = the PR's actual base ref
 ```
 
 Classify the diff by top-level path against the mission and ask which pieces prove the MVP, not which pieces merely exist. When local gates are green and the pull is toward polishing validators, enumerate the remaining external-evidence tasks instead.

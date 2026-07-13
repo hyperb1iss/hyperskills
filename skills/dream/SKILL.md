@@ -47,7 +47,7 @@ Get the lay of the land before harvesting. Re-processing already-dreamed session
 1. **Check dream state:** when did the last cycle run? The dream-report entry in Sibyl is the cross-host anchor:
 
    ```bash
-   sibyl search "dream report" --type episode --limit 3
+   sibyl search "dream report" --limit 3
    ```
 
 2. **Discover conversation sources:**
@@ -138,7 +138,7 @@ Verb and flag shapes live in the `sibyl` skill and the live `--help` — CLI sur
 Before writing, check for existing entries — the value of the graph collapses when duplicates accumulate. Dedup the extraction set against itself first (multiple sessions repeat the same insight), then check each survivor against Sibyl:
 
 ```bash
-sibyl search "[entity title keywords]" --type [type] --limit 5
+sibyl search "[entity title keywords]" --limit 5
 ```
 
 | Finding                 | Action                                                      |
@@ -162,7 +162,7 @@ Only in `deep` mode and mining runs. Find unexpected connections across projects
 
 ### Connection Discovery
 
-Pull the graph wide (`sibyl explore` by type for patterns and error patterns; search for unresolved tensions), then look for:
+Pull the graph wide (`sibyl search` sweeps per kind — patterns, error patterns, unresolved tensions; walk `sibyl explore related` from the anchors it surfaces), then look for:
 
 1. **Pattern reuse:** a pattern from project A that would solve a problem in project B
 2. **Contradictory approaches:** project A does X one way, project B does it differently — which is right?
@@ -184,7 +184,7 @@ Candidates still pass the net-new-delta gate — a repeat proves demand, not abs
 
 ### Staleness Detection
 
-Scan the graph for aging entities (`sibyl explore --type pattern,rule`). For anything older than ~90 days: is the project still active, has the technology moved, does the pattern still hold? Resolve with the same write-time maintenance moves applied graph-wide — supersede in place, retire the risk with dated evidence, or tag `stale,needs-review` for a human.
+Scan the graph for aging entities (kind-scoped `sibyl search` sweeps; exact verb shapes live in the `sibyl` skill). For anything older than ~90 days: is the project still active, has the technology moved, does the pattern still hold? Resolve with the same write-time maintenance moves applied graph-wide — supersede in place, retire the risk with dated evidence, or tag `stale,needs-review` for a human.
 
 ---
 

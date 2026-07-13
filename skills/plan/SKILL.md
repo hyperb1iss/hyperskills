@@ -199,7 +199,7 @@ Once the plan is approved, hand off to the right tool:
 
 ### Wave-boundary shape check
 
-Tests and reviews measure correctness; nothing downstream measures sprawl unless the plan gave it a fence. At each wave boundary, check shape too: classify the branch diff by top-level path against the mission (`git diff --name-only origin/main...HEAD | awk -F/ '{print $1"/"$2}' | sort | uniq -c | sort -nr`) and ask which pieces prove the MVP, not which pieces merely exist. The next-spec-gap loop is the engine of unattended work and the engine of accidental empires — the non-goals fence from Phase 4 is what this check reads.
+Tests and reviews measure correctness; nothing downstream measures sprawl unless the plan gave it a fence. At each wave boundary, check shape too: classify the branch diff by top-level path against the mission (`git diff --name-only origin/${BASE:-main}...HEAD | awk -F/ '{print $1"/"$2}' | sort | uniq -c | sort -nr   # BASE = the PR's actual base ref`) and ask which pieces prove the MVP, not which pieces merely exist. The next-spec-gap loop is the engine of unattended work and the engine of accidental empires — the non-goals fence from Phase 4 is what this check reads.
 
 ### Trust gradient for execution
 

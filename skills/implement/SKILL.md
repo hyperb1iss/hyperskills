@@ -314,7 +314,7 @@ If a reviewer would want it as a separate diff, it's a separate commit.
 Correctness gates can't see sprawl: a 397-file manifest factory shipped 549 green tests and two passing cross-model reviews, and died in seconds from the diffstat. At each commit boundary, glance at the shape, not just the gates:
 
 ```bash
-git diff --name-only origin/main...HEAD | awk -F/ '{print $1"/"$2}' | sort | uniq -c | sort -nr
+git diff --name-only origin/${BASE:-main}...HEAD | awk -F/ '{print $1"/"$2}' | sort | uniq -c | sort -nr   # BASE = the PR's actual base ref
 ```
 
 Classify by top-level path against the mission and ask: would the human veto this from the diffstat? A commit boundary is also a memory boundary — the natural moment to capture a gotcha before the next chunk buries it.
