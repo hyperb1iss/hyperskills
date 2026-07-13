@@ -45,6 +45,69 @@ For Codex's structured `codex review` command, prompts aren't needed — it has 
 
 **Wrapper gotcha:** If the shell needs to capture the exit code, use `rc=$?` or `exit_code=$?`. Do not assign to `status`; zsh treats it as read-only.
 
+## Dispatch Brief Anatomy
+
+The slots that repeatedly produce sharp reviews. Compose per dispatch — not every slot fires every time, but round-2+ briefs always carry the findings ledger (see SKILL.md, The Review Loop).
+
+```
+[Original ask — verbatim]   The user asked: "<paste the user's exact words>"
+[Scope]                     Review exactly <base>..<SHA> / only these files: <list>. Nothing else.
+[Persona]                   You are a senior <domain> engineer.
+[Receipts already run]      Assume these passed locally: <exact commands + counts>. Do not re-run them.
+[Ambient failures]          <known pre-existing failure> fails on this branch for unrelated reasons — not this diff.
+[Risk areas]                I am least confident about <the implementer's own doubts>.
+[Output contract]           Verdict: PASS or FAIL. Findings ordered by severity, with confidence >= 0.7
+                            and file:line. Residual risk: short notes only. State the evidence tier you
+                            actually reached (executed / static analysis / traced).
+[Probe]                     Prove the code works, don't just confirm it exists.
+[Anti-sycophancy]           If it's build-ready, say so plainly — do not invent findings to seem useful.
+[Orientation suppression]   Do not run Sibyl, do not load skills — review from the repo only.
+```
+
+The orientation-suppression slot doubles as an independence lever: a reviewer that loads the author's memory inherits the author's assumptions. Carrying the user's ask verbatim (not your paraphrase) guards against brief-inherited intent bias — invite the reviewer to challenge your interpretation of it.
+
+## Fix Re-Verification (binary)
+
+For round 2+ of a review loop, per finding:
+
+```
+Round <N> re-review. Prior finding, verbatim:
+<finding>
+Claimed fix: commit <SHA>.
+Verify ONLY whether this fix fully closes that finding. Do not implement anything.
+Also flag any new bug the fix itself introduced.
+Verdict: FIXED or NOT-FIXED: <one concise sentence>.
+```
+
+## Fact-Check (per-claim verdicts)
+
+For anything human-facing — specs, decks, digests, docs, skills. Give the fact-checker read access to the fact sources (`--add-dir`, repo root); its best catches are invented infrastructure, not prose problems.
+
+```
+Fact-check the claims below against the repository. For EACH claim, return a verdict line:
+CONFIRMED / STALE / WRONG / NOT-FOUND — with file:line evidence and the corrected fact
+if stale or wrong. Close with a counted scorecard:
+"N checked, N verified, N wrong, N imprecise, N unverifiable."
+
+Claims:
+1. <claim>
+2. <claim>
+```
+
+A clean fact-check does not discharge the author's own final pass over the artifact.
+
+## Consult (no verdict)
+
+Artifact-mediated design consultation on an undecided question. Set a deadline and a degraded fallback before dispatching so the consult never blocks the decision; convergence between models is the confidence signal to proceed.
+
+```
+Read <design doc path>. Open question: <the undecided thing>.
+Challenge the framing, name the tensions honestly, and say which option you would
+take and why. This is a consultation, not a gate — no verdict needed.
+```
+
+The consulted model validates and critiques; it does not author.
+
 ## General Review
 
 Best as the first pass. Broad coverage across all dimensions.
