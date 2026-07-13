@@ -7,30 +7,11 @@ description: Use this skill when decomposing complex work into structured tasks 
 
 Verification-driven task decomposition with Sibyl-native tracking. Mined from 200+ real planning sessions: the plans that actually survived contact with code.
 
-**Core insight:** Plans fail when steps can't be verified. Decomposition that lands in concrete checks survives contact with reality; abstract bullets don't. Tracking in Sibyl lets plans outlive the context window that produced them.
+**Core insight:** Plans fail when steps can't be verified. Decomposition that lands in concrete checks survives contact with reality; abstract bullets don't. And a plan is a durable artifact consumed by autonomous runs and other agents, not chat exhaust — tracking in Sibyl and the repo lets it outlive the context window that produced it.
 
 **How to read this skill:** the phases below describe the rhythm of a useful planning pass, not a procedure to march through. Skip planning entirely for small clear work, compress phases when the answers are obvious, and treat the first plan as a hypothesis. Replanning is the rule, not the exception.
 
-## The Shape
-
-```dot
-digraph planning {
-    rankdir=TB;
-    node [shape=box];
-
-    "1. SCOPE" [style=filled, fillcolor="#e8e8ff"];
-    "2. EXPLORE" [style=filled, fillcolor="#ffe8e8"];
-    "3. DECOMPOSE" [style=filled, fillcolor="#e8ffe8"];
-    "4. VERIFY & APPROVE" [style=filled, fillcolor="#fff8e0"];
-    "5. TRACK" [style=filled, fillcolor="#e8e8ff"];
-
-    "1. SCOPE" -> "2. EXPLORE";
-    "2. EXPLORE" -> "3. DECOMPOSE";
-    "3. DECOMPOSE" -> "4. VERIFY & APPROVE";
-    "4. VERIFY & APPROVE" -> "5. TRACK";
-    "4. VERIFY & APPROVE" -> "3. DECOMPOSE" [label="gaps found", style=dashed];
-}
-```
+The shape: SCOPE → EXPLORE → DECOMPOSE → VERIFY & APPROVE → TRACK, with a loop back to DECOMPOSE when review finds gaps.
 
 ---
 
@@ -42,6 +23,7 @@ Bound the work before decomposing it. The goal is calibrating planning depth to 
 
 - **Search Sibyl** for related tasks, decisions, and prior plans: `sibyl search "<feature keywords>"`, `sibyl task list -s todo`. Cheap and often surfaces an already-decomposed predecessor.
 - **Define success criteria** in measurable terms ("tests pass", "endpoint returns X", "p95 latency < 200ms") instead of vague goals like "improve performance".
+- **Write completion criteria an autonomous run can consume**: complete AND validated — what proves each wave, plus review gates at wave checkpoints when stakes warrant. A run that can't close every gate ends blocked with receipts and a runbook for the remaining gates; blocked-cleanly is a legitimate terminal state, fake-done is not.
 - **Identify constraints**: files that shouldn't change, dependencies to respect, timeline or budget pressure.
 - **Calibrate planning depth** to scope:
 
@@ -65,6 +47,7 @@ Understand the codebase surface before decomposing it. Plans built from filename
 - **Map the impact surface**: which files and modules will this touch? Read the actual code rather than guessing from names; spawn an Explore agent when scope is genuinely uncertain.
 - **Identify existing patterns**: how does similar functionality already work? What conventions apply (naming, file structure, test patterns)?
 - **Trace dependencies**: what must exist before this can work, and what breaks if we change X?
+- **Dig up the repo's real gate commands** — package scripts, hooks, CI jobs — so every task's Verify field can name a copy-paste runnable command instead of vague "run CI".
 
 You're aiming for a mental model you can articulate: "this touches module A (new endpoint), module B (type changes), module C (tests); pattern follows existing feature X; depends on infrastructure Y being available." If you can't write that sentence, decomposition will rest on guesses.
 
@@ -82,7 +65,9 @@ The most expensive plan is one that faithfully decomposes the wrong shape: tidy 
 - **Does the codebase already own this?** Reusing an existing pattern, module, or canonical helper beats decomposing a bespoke build of the same thing.
 - **What can we not build?** The cheapest task is the one you strike from the plan. Delete a mode, a layer, a config surface rather than scheduling work to construct it.
 
-Measure twice, cut once: confirm this is the simplest shape, then decompose it.
+Ambition of the destination and complexity of the mechanism are separate dials — pressure-test both. Plans get bounced for timidity as often as implementations get bounced for sprawl; the bar is usefulness, not smallness. Two questions calibrate the mechanism: **how long does this live?** (a two-week component earns no release pipeline) and **what's the riskiest narrow path?** — slice canary-first, one concrete end-to-end proof before generalizing.
+
+Measure twice, cut once: confirm this is the simplest shape that reaches the real destination, then decompose it.
 
 ### The verification heuristic
 
@@ -95,24 +80,19 @@ A step without a verification method is a hope, not a step. Push every task towa
 | **Verify**     | How to confirm it works         |
 | **Depends on** | Which tasks must complete first |
 
-### Verification Methods
+### Name the real gates
 
-| Method        | When to Use                              |
-| ------------- | ---------------------------------------- |
-| `typecheck`   | Type changes, interface additions        |
-| `test`        | Logic, edge cases, integrations          |
-| `lint`        | Style, formatting, import order          |
-| `build`       | Build system changes                     |
-| `visual`      | UI changes (screenshot or browser check) |
-| `curl/httpie` | API endpoint changes                     |
-| `manual`      | Only when no automation exists           |
+"Verify: tests pass" is a placeholder; `moon run core:test && moon run core:lint` is a gate. Use the repo's actual commands — found during EXPLORE — so every Verify field is copy-paste runnable. Reserve manual verification for surfaces with genuinely no automation, and say why.
 
 ### Decomposition heuristics
 
-- **2-5 minute tasks** tend to be the sweet spot. Tasks running longer than 15 minutes usually deserve to be split.
+- **Slice size is a negotiated dial, not a constant.** Small slices verify tightly; larger slices buy throughput but decay corrections faster and drift scope further, so they need proportionally stronger pinned invariants and wave-boundary recall. And slice size only matters if progress integrates — parallel work that can't merge makes worktrees, not cumulative progress.
 - **One concern per task.** "Add endpoint AND write tests" is two tasks; treat conjunctions in task titles as splitting hints.
-- **Order by dependency, not difficulty.** Foundation first; later tasks build on earlier ones.
 - **Mark parallelizable tasks.** Tasks with no shared files can run simultaneously, which matters once you hand off to orchestration.
+
+### Pin what priors will erase
+
+Deliberately-open decisions ("the result is 0..N PRs, agent's choice") are exactly what models re-narrow to conventional shapes over long runs. Write them into the plan as named invariants, verbatim, with rejected alternatives preserved rather than deleted — then re-read them at wave boundaries and before touching adjacent surface. When the user drops a constraint mid-planning, it lands in the plan the same turn it's spoken: conversational corrections decay, pinned ones don't.
 
 ### Task Format
 
@@ -134,17 +114,6 @@ A step without a verification method is a hope, not a step. Push every task towa
 - [ ] [specific assertion about behavior]
 ```
 
-### Parallelizability Markers
-
-Mark tasks that can run simultaneously for orchestration:
-
-```
-Wave 1 (foundation):  Task 1, Task 2  [parallel]
-Wave 2 (core):        Task 3, Task 4  [parallel, depends on Wave 1]
-Wave 3 (integration): Task 5          [sequential, depends on Wave 2]
-Wave 4 (polish):      Task 6, Task 7  [parallel, depends on Wave 3]
-```
-
 ---
 
 ## Phase 4: VERIFY & APPROVE
@@ -159,6 +128,13 @@ Sanity-check the plan before presenting it. The goal isn't ceremony; it's catchi
 - Total scope still matches the success criteria from Phase 1
 - Nothing snuck in that you don't actually need yet (YAGNI)
 - No task survives that a reframe could delete (the judo check from Phase 3)
+- The plan names its **non-goals** — the adjacent things it deliberately does not build. Downstream gates measure correctness, not sprawl; the fence is what wave-boundary checks read.
+
+### Fact-audit before build
+
+A plan handed to implementation is a set of claims, not orders. Before executing — yours or inherited — label each load-bearing claim VERIFIED / STALE / WRONG against the live repo and deployment, veto phases whose premises fail, and fold findings into the plan itself: patch the spec, don't comment on it. A plan older than the tree it describes gets this pass automatically.
+
+Iterate the plan to convergence. Spec defects are the most expensive class, so review a plan until it holds up ("until we love it"), not until an iteration counter expires — the caps on code-review loops exist to stop re-litigating the same finding and don't apply here.
 
 ### Present for Approval
 
@@ -168,8 +144,8 @@ Show the plan as a structured list with waves:
 ## Plan: [Feature Name]
 
 **Success criteria:** [measurable outcome]
+**Non-goals:** [adjacent things this deliberately does not build]
 **Estimated tasks:** [N] across [M] waves
-**Parallelizable:** [X]% of tasks can run in parallel
 
 ### Wave 1: Foundation
 
@@ -194,17 +170,17 @@ Once the plan is on the page, ask whether anything's missing, whether tasks shou
 
 ## Phase 5: TRACK
 
-Register the plan in Sibyl so it survives the context window that produced it. Skip this for very small plans that'll be done in a single session, but anything spanning days or sessions benefits from durable tracking.
+Make the plan durable. Skip this only when losing the plan would cost nothing to reconstruct — compaction, crashes, and other agents needing pickup all count as "spanning sessions" even inside one sitting.
 
-```
-sibyl task create --title "[Feature]" -d "[success criteria]" --complexity epic
-sibyl task create --title "Task 1: [title]" -e [epic-id] -d "[implementation + verify]"
-sibyl add "Plan: [feature]" "[N] tasks across [M] waves. Key decisions: [architectural choices]. Dependencies: [critical path]."
-```
+**The plan doc is durable state, not chat exhaust.** For anything spanning compactions, sessions, or agents, the plan lives in the repo (graduate it from scratch dirs once it's load-bearing) and doubles as the progress ledger: current stack truth, wave-numbered statuses, the named next step, a memory checkpoint id. Write decisions into it before executing them — a decision that lives only in conversation doesn't survive the context window.
+
+Mirror the plan into Sibyl as an epic with linked tasks and a pinned plan note ("[N] tasks across [M] waves, key decisions, critical path"); the sibyl skill carries the current invocation shapes. Task subjects mirror the plan's own IDs (R1.1, Wave 3) so the graph and the doc stay joinable.
 
 ### Adaptive replanning
 
 Plans meet reality and reality usually wins. When a task surfaces unexpected complexity, pause and reassess instead of forcing through. Adjust the task list, update Sibyl, and surface the change: "task 3 revealed X, adjusting plan: [changes]." Replanning is a feature of the workflow, not evidence the original plan was bad.
+
+After any pivot or section fix, thread it through the whole artifact: sweep for the dead vocabulary and stale table rows until every remaining hit is provably intentional — rejected-alternatives sections are the legitimate survivors. The dominant spec-revision failure is fixing one section without threading it through the others.
 
 ---
 
@@ -219,17 +195,25 @@ Once the plan is approved, hand off to the right tool:
 | Large epic, 15+ tasks          | Orchestrate with Epic Parallel Build strategy |
 | Needs more research first      | `/hyperskills:research` before executing      |
 
+**Package by review surface, not action count.** Phases become rollout gates inside one PR unless reviewer domains or behavior isolation force a split. Over-serialization is compliance theater; a ten-PR plan is as wrong as a one-blob plan.
+
+### Wave-boundary shape check
+
+Tests and reviews measure correctness; nothing downstream measures sprawl unless the plan gave it a fence. At each wave boundary, check shape too: classify the branch diff by top-level path against the mission (`git diff --name-only origin/main...HEAD | awk -F/ '{print $1"/"$2}' | sort | uniq -c | sort -nr`) and ask which pieces prove the MVP, not which pieces merely exist. The next-spec-gap loop is the engine of unattended work and the engine of accidental empires — the non-goals fence from Phase 4 is what this check reads.
+
 ### Trust gradient for execution
 
 Heavy review on every task accumulates noise; zero review accumulates risk. Lean toward heavier review early and lighter review once patterns prove stable:
 
-| Phase             | Review level                                   | Typically                        |
-| ----------------- | ---------------------------------------------- | -------------------------------- |
-| **Full ceremony** | Implement + spec review + `cross-model-review` | First 3-4 tasks                  |
-| **Standard**      | Implement + spec review                        | Tasks 5-8, patterns stabilized   |
-| **Light**         | Implement + quick verify                       | Late tasks, established patterns |
+| Review level      | What it includes                               | When it applies                             |
+| ----------------- | ---------------------------------------------- | ------------------------------------------- |
+| **Full ceremony** | Implement + spec review + `cross-model-review` | Early waves, high stakes, unproven patterns |
+| **Standard**      | Implement + spec review                        | Mid-plan waves once patterns stabilize      |
+| **Light**         | Implement + quick verify                       | Late waves on established patterns          |
 
 This is earned confidence, not cutting corners. The gradient resets if a task departs from the established pattern. Stay heavy for anything touching auth, payments, migrations, or data integrity regardless of where you are in the plan.
+
+More review is not free: review-fix loops are a monotonic scope ratchet unless responses triage blockers from follow-ups and the fix pass carries a pre-declared file budget.
 
 ---
 
@@ -243,12 +227,15 @@ This is earned confidence, not cutting corners. The gradient resets if a task de
 | Planning from filenames only           | Read the actual code path before decomposing |
 | Decomposing a bad shape into tasks     | Hunt the judo move before you decompose      |
 | Treating the first plan as permanent   | Replan when reality reveals new constraints  |
+| Plan doc that lives only in chat       | Write it to the repo before executing        |
+| Open decision left unpinned            | Prior drift re-narrows it; pin it verbatim   |
+| Green gates as proof of shape          | Wave-boundary diff check against non-goals   |
 
 ---
 
 ## What This Skill is NOT
 
 - **Not required for simple tasks.** If the solution is obvious, just build it.
-- **Not a design doc generator.** Plans are action lists, not architecture documents.
+- **Not an architecture essay — and not a bare checklist either.** The plan carries decisions, pinned invariants, and rejected alternatives (the things prior-drift erases), and never its own making-of: review sausage and version stories stay out of the artifact.
 - **Not a blocker.** If the user says "just start building," start building. You can plan in parallel.
 - **Not rigid.** Plans adapt. The first plan is a hypothesis.
