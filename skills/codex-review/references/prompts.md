@@ -39,6 +39,8 @@ For each finding:
 
 Skip: formatting, naming style, minor documentation gaps.
 Overall verdict: "patch is correct" or "patch is incorrect" with justification.
+
+Prove the code works, don't just confirm it exists.
 ```
 
 ## Security Deep-Dive
@@ -159,25 +161,71 @@ For each finding:
 Skip: single-threaded code paths, non-concurrent modules.
 ```
 
-## Custom Template Skeleton
+## Review Brief Anatomy
 
-For domain-specific reviews, use this skeleton:
+For domain-specific or high-stakes reviews, build the brief from these slots. Annotations say what each slot buys; drop a slot only when it genuinely doesn't apply.
 
 ```
-You are a [specific role] reviewing a code change for [specific domain].
+[VERBATIM ASK] The user's original request, quoted exactly:
+"<paste>"
+Challenge my interpretation if the change doesn't match it.
+    -- guards against intent bias inherited from the author's paraphrase
 
-Analyze the diff between current branch and main:
-1. [Specific check 1]
-2. [Specific check 2]
-3. [Specific check 3]
-...
+[SCOPE] Review exactly: <base..head | file list | commit SHA>.
+Do not review adjacent work on this branch.
+    -- an unpinned reviewer wanders into diff tourism
 
-For each finding:
-- [Required output field 1]
-- [Required output field 2]
-- Affected file and line range
-- Concrete fix with code example
-- Confidence: 0.0-1.0
+[PERSONA] You are a <specific role> reviewing for <specific domain>.
 
-Skip: [explicitly list what to ignore].
+[KEYSTONE] The load-bearing claim is: <claim>. Attack it first;
+the whole change rides on it.
+
+[ASSUMED PASSED] Assume these already passed locally: <exact commands>.
+Static review only; do not re-run them.
+    -- stops the reviewer burning its budget re-verifying green gates
+
+[KNOWN FAILURES] Ambient failures you will see and should ignore: <list>.
+    -- pre-declaring them prevents false findings
+
+[ANTI-SYCOPHANCY] If the change is sound, say so plainly. Do not invent
+findings to seem useful. Sharp critique, not validation.
+
+[INDEPENDENCE] Do not use memory tools or load skills.
+    -- keeps the second opinion independent of the author's trail
+
+[OUTPUT CONTRACT]
+Verdict: PASS or FAIL
+Findings: ordered by severity, confidence >= 0.7, file:line evidence
+Residual risk: short notes only
+Skip: <explicitly list what to ignore>
+
+Prove the code works, don't just confirm it exists.
+```
+
+## Re-Review (Fix Verification)
+
+Every round after the first carries the ledger and narrows — never re-run the broad prompt.
+
+```
+You reviewed this change and raised these findings:
+
+1. <finding verbatim> — claimed fix: <commit SHA or description>
+2. <finding verbatim> — claimed fix: <...>
+
+Verify each fix actually landed, with receipts — do not take the author's
+word. Hunt for bugs the fixes introduced. Do not re-litigate settled
+trade-offs.
+
+Per prior finding, verdict: FIXED or NOT-FIXED with evidence.
+New findings: only if introduced by the fixes.
+```
+
+Final convergence round, one-line contract:
+
+```
+Verify only whether the prior blockers are resolved. Return exactly one of:
+- PASS
+- NEEDS_CHANGES: <one concise sentence>
+
+Do not implement anything.
 ```

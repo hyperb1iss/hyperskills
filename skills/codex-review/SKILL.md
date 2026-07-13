@@ -9,7 +9,9 @@ Cross-model validation using the `codex` binary directly. Claude writes code, Co
 
 **Core insight:** Single-model self-review is systematically biased. Cross-model review catches different bug classes because the reviewer has fundamentally different blind spots than the author.
 
-**How to read this skill:** the patterns and decision trees below are guidelines. Pick what fits, blend when needed. The rules marked ⚠️ are different: they're real `codex` CLI behaviors, not procedural ceremony. Skipping the scope flag genuinely hangs the call; piping to `tail` genuinely loses output. Treat ⚠️ rules as facts about the tool, not opinions about workflow.
+**Scope the independence claim honestly:** a different model breaks self-review bias — nothing else. It does not catch shared-training staleness (version, SOTA, and ecosystem claims need live primary sources no matter how many models agreed) or intent misreads inherited from the brief (carry the user's verbatim ask into the prompt and ask the reviewer to challenge the interpretation).
+
+**How to read this skill:** the patterns and decision tables below are guidelines. Pick what fits, blend when needed. The rules marked ⚠️ are different: they're real `codex` CLI behaviors, not procedural ceremony. Skipping the scope flag genuinely hangs the call; piping to `tail` genuinely loses output. Treat ⚠️ rules as facts about the tool, not opinions about workflow.
 
 **Prerequisite:** The `codex` CLI must be installed and authenticated. Verify with `codex --version`. User defaults live in `~/.codex/config.toml`; respect them.
 
@@ -29,9 +31,11 @@ A bare `codex review` (no scope) is the #1 cause of failures: it hangs or produc
 | Single commit           | `codex review --commit <SHA>` |
 | Working tree (unstaged) | `codex review --uncommitted`  |
 
-For anything outside this trio (spec docs, single files, custom personas, focused passes), use `codex exec "PROMPT"` with explicit scope in the prompt, never bare `codex review`.
+For anything outside this trio (spec docs, single files, custom personas, focused passes), use `codex exec "PROMPT"` with explicit scope in the prompt, never bare `codex review` — `codex review --base` rejects a custom prompt, so custom prompt means `codex exec`.
 
-If output exceeds ~100KB, the diff is too large for one pass. Split per commit, or use `codex exec` with a narrower prompt ("Review error handling only").
+If `codex review` output exceeds ~100KB, the diff is too large for one pass. Split per commit, or use `codex exec` with a narrower prompt ("Review error handling only"). Large `codex exec` transcripts are a different animal — see When the Review Hangs.
+
+**Pin the surface, freeze the target.** On a dirty or multi-workstream branch, give an explicit file list or pipe the exact diff into `codex exec` — an unpinned reviewer wanders into diff tourism. Don't edit the reviewed code while the review runs; fill the wait with work that's read-only relative to the reviewed diff. Any edit after the verdict voids it: re-review exactly the delta, so the blocker is closed rather than hand-waved.
 
 ---
 
@@ -55,6 +59,23 @@ codex exec --sandbox read-only "PROMPT" > "$out" 2>&1
 ```
 
 If `mktemp` isn't handy: `out=/tmp/codex-review-$$-$(date +%s).txt`. Echo the path before the redirect so a human running `tail -f` knows where to look. After exit, `Read` (or `cat`) the file. It persists across turns, re-read instead of re-running.
+
+Adjacent tool fact: under `--sandbox read-only`, Codex silently can't write a report file the prompt asks for. Capture via redirect or `--output-last-message`, never "write your report to X".
+
+---
+
+## When the Review Hangs
+
+Even correctly-scoped reviews hang — it's the top operational failure in the field. The output file is the liveness instrument: judge by growth and process state, never elapsed time. Slow with growing output is often a quality signal — a fast rubber stamp on a big surface is suspicious.
+
+| Signal                         | Move                                                                                                                                                        |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Output file growing            | Keep waiting; it's working                                                                                                                                  |
+| Empty file, process tree alive | Wait one more window, then isolate variables (as of Jul 2026, wedged MCP servers and startup hooks are the usual culprits)                                  |
+| Empty file, process wedged     | Kill only that process tree; retry once with fewer degrees of freedom — exact diff on stdin, narrower file list, lower effort. Same question, less payload |
+| Retry also sticks              | Pre-declare the give-up, record the failed review honestly                                                                                                  |
+
+Never spawn a duplicate alongside a live reviewer — reap the one you have. And size alone is not the failure signal: a 1MB+ `codex exec` transcript can be a successful deep exploration with the verdict at the tail — grep for verdict and severity markers instead of dumping the trace. The real failure shape is no output growth, or growth with no convergence toward a verdict.
 
 ---
 
@@ -82,7 +103,7 @@ If `mktemp` isn't handy: `out=/tmp/codex-review-$$-$(date +%s).txt`. Echo the pa
 | `--full-auto`                                | Alias for `--ask-for-approval never --sandbox workspace-write` |
 | `--dangerously-bypass-approvals-and-sandbox` | Last resort; explicit user request only                        |
 | `-C <DIR>` / `--cd <DIR>`                    | Run in another worktree without `cd`                           |
-| `--skip-git-repo-check`                      | Running from a non-repo directory                              |
+| `--skip-git-repo-check`                      | Running from `/tmp` or any non-repo dir (trips the git trust check) |
 | `--add-dir <DIR>`                            | Extend read access to another path                             |
 | `--ephemeral`                                | One-shot session, no persistence                               |
 | `--json` / `--output-last-message <FILE>`    | Capture structured output to a file                            |
@@ -97,7 +118,9 @@ If `mktemp` isn't handy: `out=/tmp/codex-review-$$-$(date +%s).txt`. Echo the pa
 
 Specs are higher-stakes than diffs, a subtle architectural mistake compounds across the eventual implementation. Code diffs are smaller scope and the user's configured effort is fine.
 
-**Never** specify `--model`, `-m`, or `-c model=` to override the model itself. User config is authoritative.
+**Scope before effort.** Effort amplifies whatever the scope is; the xhigh override applies to an already-scoped spec review. An unscoped "verify everything" prompt at xhigh diverges instead of deepening (observed: 80k lines of transcript, no verdict). When a review must converge, narrow the scope — and consider lower effort, not higher — with an explicit convergence budget in the prompt ("be surgical, converge to a verdict").
+
+**Never** specify `--model`, `-m`, or `-c model=` to override the model itself. User config is authoritative. The gate's value is the full agentic Codex with repo access — not a one-shot API call.
 
 ---
 
@@ -114,27 +137,13 @@ Step 1, structured review (catches correctness + general issues):
 Step 2, security deep-dive (if code touches auth, input handling, or APIs):
   codex exec "<security prompt from references/prompts.md>"
 
-Step 3, fix findings, then re-review:
+Step 3, fix findings, then re-review carrying the ledger (see Pattern 5):
   codex review --base main
 ```
 
-### Pattern 2: Commit-Level Review
+The same shape works per-commit (`codex review --commit <SHA>`) and mid-development on the working tree (`codex review --uncommitted`).
 
-Quick check after each meaningful commit.
-
-```bash
-codex review --commit <SHA>
-```
-
-### Pattern 3: WIP Check
-
-Review uncommitted work mid-development. Catches issues before they're baked in.
-
-```bash
-codex review --uncommitted
-```
-
-### Pattern 4: Focused Investigation
+### Pattern 2: Focused Investigation
 
 Surgical deep-dive on a specific concern (error handling, concurrency, data flow).
 
@@ -145,7 +154,7 @@ codex exec --sandbox read-only \
    risk, suggest a concrete fix. Confidence threshold: 0.7."
 ```
 
-### Pattern 5: Spec / RFC Review
+### Pattern 3: Spec / RFC Review
 
 Reviewing prose (markdown design docs) before code is written.
 
@@ -158,7 +167,7 @@ codex exec -c model_reasoning_effort="xhigh" --sandbox read-only \
    End with a one-paragraph go/no-go verdict."
 ```
 
-### Pattern 6: Single-File / Focused-Path Review
+### Pattern 4: Single-File / Focused-Path Review
 
 Review one file or directory rather than a full diff.
 
@@ -169,23 +178,13 @@ codex exec --sandbox read-only \
    file:line evidence."
 ```
 
-### Pattern 7: Ralph Loop (Implement → Review → Fix)
+### Pattern 5: Ralph Loop (Implement → Review → Fix)
 
-Iterative quality enforcement. Three iterations is the practical ceiling; past that, returns diminish and you start re-litigating findings rather than fixing real bugs.
+Iterative quality enforcement. Round 1 is broad and hostile. Every later round carries the ledger: enumerate the prior round's findings verbatim plus the fixes claimed, and ask the reviewer to (a) verify each fix with receipts, (b) hunt bugs the fixes introduced, (c) not re-litigate settled trade-offs. Scope decays per round: broad → blockers-only → convergence check with a one-line contract ("PASS / NEEDS_CHANGES: \<one sentence>"). For specs, log rounds in a Review History section of the artifact — the loop's state lives in the artifact, not chat exhaust. Re-review templates are in `references/prompts.md`.
 
-```
-Iteration 1:
-  Claude → implement feature
-  codex review --base main → findings
-  Claude → fix critical/high findings
+**The budget is convergence, not a count.** Keep iterating while each round yields a new confirmed finding or verifies a fix; stop when rounds oscillate or re-litigate. Three rounds is the default expectation, not a wall — a fifth round that catches real bugs is fine, while a third round re-arguing round one is already over budget. This budget governs the loop you drive; inbound bot or human feedback streams get fresh re-triage every round and are never capped.
 
-Iteration 2:
-  codex review --base main → verify fixes + catch remaining
-  Claude → fix remaining issues
-
-Iteration 3 (final):
-  codex review --base main → clean or accept trade-offs
-```
+**The fix loop is a scope ratchet.** Before touching code after a round: triage blockers vs follow-ups, pre-declare a file budget ("three files unless tests force otherwise"), and treat document-why-not as a legitimate response to absence findings. Blockers require changed-line causality; suggestions may cover nearby risk; pre-existing debt becomes follow-up tasks, not in-loop fixes. Unbounded review-response is how a loop ends up editing 120 files.
 
 ---
 
@@ -200,7 +199,9 @@ Thorough reviews benefit from multiple focused passes rather than one vague pass
 | **Architecture** | Coupling, abstractions, API consistency     | `codex exec` with architecture prompt |
 | **Performance**  | O(n²), N+1 queries, memory leaks            | `codex exec` with performance prompt  |
 
-Run passes sequentially. Fix critical findings between passes to avoid noise compounding.
+Run passes sequentially — fixing critical findings between passes — when the diff is changing under review. On a frozen artifact, parallel lens-locked passes (one concern each, explicit non-goals) produce additive non-overlapping findings and finish faster.
+
+Line counts are rough guides; scale passes to risk and surface, not arithmetic:
 
 | Change size                                 | Strategy                       |
 | ------------------------------------------- | ------------------------------ |
@@ -211,74 +212,62 @@ Run passes sequentially. Fix critical findings between passes to avoid noise com
 
 ---
 
-## Decision Tree: Which Pattern?
+## Consuming the Findings
 
-```dot
-digraph review_decision {
-    rankdir=TB;
-    node [shape=diamond];
+Reviewer output is input, not orders. Re-verify each finding against ground truth — code, git history, live data — before any edit. Three dispositions, always reported: fix now / intentional-keep with named rationale / can't-verify, flagged to the human. "Verified, no code change" is a legitimate outcome; one session disproved 3 of 4 findings and changed nothing. Argue wrong findings down with receipts, never silently drop them. Two independently-briefed reviewers converging on the same bug upgrades it to confirmed.
 
-    "What's the artifact?" -> "Code (diff)" [label="git changes"];
-    "What's the artifact?" -> "Spec (markdown)" [label="design doc"];
-    "What's the artifact?" -> "Single file/dir" [label="focused"];
+Codex's characteristic misses to check first:
 
-    node [shape=box];
-    "Code (diff)" -> "When?" [shape=diamond];
-    "When?" -> "Pre-commit" [label="writing"];
-    "When?" -> "Pre-PR" [label="branch ready"];
-    "When?" -> "Post-commit" [label="just committed"];
-    "When?" -> "Investigating" [label="specific concern"];
+| Failure mode        | Check                                                    |
+| ------------------- | -------------------------------------------------------- |
+| Temporal scope      | Did it review the commit state the finding claims?       |
+| Near-name confusion | Is the cited artifact the one actually changed?          |
+| Invented flags/APIs | Does the suggested flag or function exist? Run `--help`  |
+| Stale-at-fix-time   | Was the complaint valid at review time but now resolved? |
 
-    "Pre-commit" -> "Pattern 3: WIP Check";
-    "Pre-PR" -> "How big?" [shape=diamond];
-    "Post-commit" -> "Pattern 2: Commit Review";
-    "Investigating" -> "Pattern 4: Focused Investigation";
-
-    "How big?" -> "Pattern 1: Pre-PR Review" [label="< 300 lines"];
-    "How big?" -> "Full Multi-Pass" [label=">= 300 lines"];
-
-    "Spec (markdown)" -> "Pattern 5: Spec Review";
-    "Single file/dir" -> "Pattern 6: Focused-Path";
-}
-```
+Close the loop both directions: when a defect class is fixed, fold it into the repo's standing review prompt or CI gate so the next reviewer inherits it. When a reviewer keeps hallucinating the same ghost, fix what reviewers ingest — scrub the stale doc it keeps importing. And seed the next review with prior gotchas from memory; they make a sharp hypothesis list.
 
 ---
 
 ## Prompt Engineering Heuristics
 
-These reliably improve review signal quality:
+The non-obvious levers that reliably improve review signal quality:
 
-1. **Assign a persona.** "Senior security engineer" beats "review for security"
-2. **Specify what to skip.** "Skip formatting, naming style, minor docs gaps" prevents bikeshedding
-3. **Require confidence scores** and act only on findings ≥ 0.7
-4. **Demand file:line citations.** Vague findings without location aren't actionable
-5. **Ask for concrete fixes.** "Suggest a specific fix" not "this is a problem"
-6. **One domain per pass.** Security-only, architecture-only
-7. **Demand a verdict.** "Verdict: patch is correct / incorrect" or "go / no-go"
+1. **Specify what to skip.** "Skip formatting, naming style, minor docs gaps" prevents bikeshedding
+2. **Require confidence scores** and act only on findings ≥ 0.7
+3. **One domain per pass.** Security-only, architecture-only
+4. **Demand a verdict.** "Verdict: patch is correct / incorrect" or "go / no-go"
 
-Ready-to-use prompt templates are in `references/prompts.md`.
+The full brief anatomy (verbatim ask, keystone claim, assumed-passed receipts, anti-sycophancy, no-memory line) and ready-to-use templates are in `references/prompts.md`.
 
 ---
 
 ## Anti-Patterns
 
-| Anti-Pattern                                                        | Why It Fails                                                                                                            | Fix                                                                                                                         |
-| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Bare `codex review` (no scope flag)                                 | Hangs or produces 100KB+ blob output                                                                                    | Always pass `--base <ref>`, `--commit <SHA>`, or `--uncommitted`                                                            |
-| `codex review` output > 100KB                                       | Diff too large for one pass                                                                                             | Split per commit, or use `codex exec` with narrower prompt                                                                  |
-| `timeout 30 codex review`                                           | Reviews legitimately take 30s–5min                                                                                      | No timeout, or `timeout 300` minimum                                                                                        |
-| `codex exec "PROMPT" \| tail -300` or `codex review ... \| tail -N` | Pipe buffers until EOF (no progress); cuts the summary/verdict (usually near top); dumps full review into agent context | Redirect to file: `... > /tmp/review.txt 2>&1`, then `head`, `rg severity`, `sed`-by-range. Human can `tail -f` separately. |
-| "Review this code" (no specifics)                                   | Vague, produces bikeshedding                                                                                            | Specific domain prompts with persona                                                                                        |
-| Single pass for everything                                          | Context dilution, shallow on every dimension                                                                            | Multi-pass with one concern per pass                                                                                        |
-| Self-review (Claude reviews Claude's code)                          | Systematic bias, models approve their own patterns                                                                      | Cross-model: Claude writes, Codex reviews                                                                                   |
-| No confidence threshold                                             | Noise floods signal, 0.3 confidence wastes time                                                                         | Only act on ≥ 0.7 confidence                                                                                                |
-| Style comments in review                                            | LLMs default to bikeshedding                                                                                            | "Skip: formatting, naming, minor docs"                                                                                      |
-| > 3 review iterations                                               | Diminishing returns, increasing noise, overbaking                                                                       | Stop at 3. Accept trade-offs.                                                                                               |
-| Review without project context                                      | Generic advice disconnected from codebase                                                                               | Run from repo root                                                                                                          |
-| MCP wrapper around `codex`                                          | Unnecessary indirection over a CLI binary                                                                               | Call `codex` directly via Bash                                                                                              |
-| Hardcoding `--model` / `-m` / `-c model=`                           | Overrides user config; stale model names                                                                                | Defer to `~/.codex/config.toml`                                                                                             |
-| Effort override on routine code review                              | Wastes tokens, ignores user defaults                                                                                    | `-c model_reasoning_effort="xhigh"` is for spec review only                                                                 |
-| `--full-auto` for pure review                                       | Grants write access the review doesn't need                                                                             | `--sandbox read-only` for review; `--full-auto` only when applying fixes                                                    |
+| Anti-Pattern                                   | Why It Fails                                                 | Fix                                                                      |
+| ---------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| Bare `codex review` (no scope flag)            | Hangs or produces blob output                                | Exactly one scope flag — see the ⚠️ scope rule                           |
+| Piping review output to `tail -N`              | Buffers until EOF; cuts the verdict                          | Redirect to a file — see the ⚠️ capture rule                             |
+| `timeout 30 codex review`                      | Reviews legitimately take 30s–5min                           | No timeout, or `timeout 300` minimum                                     |
+| Treating transcript size as the failure signal | A 1MB+ `codex exec` transcript can be a successful deep dive | Judge by growth and convergence to a verdict (When the Review Hangs)     |
+| "Review this code" (no specifics)              | Vague, produces bikeshedding                                 | Specific domain prompts with persona                                     |
+| Single pass for everything                     | Context dilution, shallow on every dimension                 | Multi-pass with one concern per pass                                     |
+| Self-review (Claude reviews Claude's code)     | Systematic bias, models approve their own patterns           | Cross-model: Claude writes, Codex reviews                                |
+| No confidence threshold                        | Noise floods signal, 0.3 confidence wastes time              | Only act on ≥ 0.7 confidence                                             |
+| Style comments in review                       | LLMs default to bikeshedding                                 | "Skip: formatting, naming, minor docs"                                   |
+| Re-litigating settled findings across rounds   | Over budget regardless of round count                        | Budget is convergence — stop when rounds oscillate, not at a number      |
+| Review without project context                 | Generic advice disconnected from codebase                    | Run from repo root                                                       |
+| Recurring reviewer hallucination               | The ghost usually lives in a doc reviewers ingest            | Scrub the stale doc; don't re-argue it every round                       |
+| MCP wrapper around `codex`                     | Unnecessary indirection over a CLI binary                    | Call `codex` directly via Bash                                           |
+| Hardcoding `--model` / `-m` / `-c model=`      | Overrides user config; stale model names                     | Defer to `~/.codex/config.toml`                                          |
+| Effort override on routine code review         | Wastes tokens, ignores user defaults                         | `-c model_reasoning_effort="xhigh"` is for spec review only              |
+| `--full-auto` for pure review                  | Grants write access the review doesn't need                  | `--sandbox read-only` for review; `--full-auto` only when applying fixes |
+
+---
+
+## When Codex Can't Run
+
+The gate is non-fungible. When it can't run (quota, CLI wedge, MCP failure), fall down the ladder with the weaker guarantee named: fresh-context same-model review is the floor, different-family is the premium. Disclose the substitution in the wrap and the PR body, and let the human decide whether to proceed. A blocked review channel never produces a PASS.
 
 ---
 
@@ -286,7 +275,8 @@ Ready-to-use prompt templates are in `references/prompts.md`.
 
 - **Not a replacement for human review.** Cross-model review catches bugs but can't evaluate product direction or UX.
 - **Not a linter.** Don't use Codex review for formatting or style.
-- **Not infallible.** 5–15% false positive rate is normal. Triage findings.
+- **Not a staleness check.** Version and SOTA claims need live primary sources regardless of how many models agreed.
+- **Not infallible.** 5–15% false positive rate is normal. Triage findings (see Consuming the Findings).
 - **Not for self-approval.** The whole point is cross-model validation. Don't use Claude to review Claude's code.
 
 ## References
