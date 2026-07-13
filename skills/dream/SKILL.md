@@ -1,13 +1,13 @@
 ---
 name: dream
-description: Use this skill to review recent conversations and consolidate learnings into Sibyl. Activates on mentions of dream, dreaming, consolidate memory, review conversations, what did we learn, sleep cycle, reflect on sessions, consolidate knowledge, memory maintenance, nightly review, digest sessions, or dream mode.
+description: Use this skill to review recent conversations and consolidate learnings into Sibyl. Activates on mentions of dream, dreaming, consolidate memory, review conversations, what did we learn, sleep cycle, reflect on sessions, consolidate knowledge, memory maintenance, nightly review, digest sessions, transcript mining, session archaeology, or dream mode.
 ---
 
 # Dream: Conversation Review & Knowledge Consolidation
 
 Bio-inspired two-phase sleep cycle that reviews Claude Code and Codex conversations, extracts structured knowledge, and consolidates it into Sibyl. Like biological dreaming: NREM consolidates, REM discovers.
 
-**Core insight:** Conversations contain ~10x more knowledge than what gets manually captured. Dreams extract decisions, patterns, corrections, anti-patterns, and open questions that would otherwise vanish when sessions scroll off.
+**Core insight:** inline capture gets the gotchas — as of Jul 2026 the Remember beat fires at volume, per-slice, mid-session. Dreams hunt what no single session can see: gotchas that repeat across sessions, instruction phrases that persist in the prompt stream, cross-project connections, and the blind spots of otherwise good capture (harness friction, the user's unblock one-liners). Dreams are the backstop and the telescope, not the primary channel.
 
 **How to read this skill:** the phases below describe the rhythm of a useful dream cycle, not a procedure to march through. Quick naps compress most of it, deep sleeps stretch it out. The non-negotiable bits are extraction quality (Sibyl entries that meet the bar in `references/extraction-guide.md`) and dedup discipline (every write checked against existing entries). Process shape adapts; quality bar doesn't.
 
@@ -15,30 +15,26 @@ Bio-inspired two-phase sleep cycle that reviews Claude Code and Codex conversati
 
 ```dot
 digraph dream {
-    rankdir=TB;
+    rankdir=LR;
     node [shape=box];
 
-    "1. ORIENT" [style=filled, fillcolor="#e8e8ff"];
-    "2. HARVEST" [style=filled, fillcolor="#ffe8e8"];
-    "3. NREM: Consolidate" [style=filled, fillcolor="#e8ffe8"];
-    "4. REM: Explore" [style=filled, fillcolor="#fff8e0"];
-    "5. REPORT" [style=filled, fillcolor="#e8e8ff"];
-
-    "1. ORIENT" -> "2. HARVEST";
-    "2. HARVEST" -> "3. NREM: Consolidate";
-    "3. NREM: Consolidate" -> "4. REM: Explore";
-    "4. REM: Explore" -> "5. REPORT";
+    "ORIENT" -> "HARVEST" -> "NREM: Consolidate" -> "REPORT";
+    "NREM: Consolidate" -> "REM: Explore" [label="deep mode"];
+    "REM: Explore" -> "REPORT";
 }
 ```
 
 ### Depth Modes
 
-| Mode           | Sessions             | Focus                         | When                       |
-| -------------- | -------------------- | ----------------------------- | -------------------------- |
-| **Quick nap**  | Last 1-3             | Extract from today's work     | End of day, `/dream quick` |
-| **Full sleep** | Last 5-15            | Standard consolidation cycle  | Default `/dream`           |
-| **Deep sleep** | All since last dream | Cross-project synthesis + REM | `/dream deep`              |
-| **Lucid**      | Specific session(s)  | Targeted extraction           | `/dream <session-id>`      |
+| Mode           | Sessions                    | Focus                               | When                                         |
+| -------------- | --------------------------- | ----------------------------------- | -------------------------------------------- |
+| **Quick nap**  | Last 1-3                    | Extract from today's work           | End of day, `/dream quick`                   |
+| **Full sleep** | Last 5-15                   | Standard consolidation cycle        | Default `/dream`                             |
+| **Deep sleep** | All since last dream        | Cross-project synthesis + REM       | `/dream deep`                                |
+| **Lucid**      | Specific session(s)         | Targeted extraction                 | `/dream <session-id>`                        |
+| **Mining run** | Whole corpus (weeks-months) | Fan-out miners → merge → skill-diff | User-dispatched; composes with `orchestrate` |
+
+A mining run is the at-scale form: parallel miners over the transcript corpus, findings merged, consolidation landing as skill and contract patches as much as graph entities.
 
 ---
 
@@ -48,36 +44,23 @@ Get the lay of the land before harvesting. Re-processing already-dreamed session
 
 ### Common moves
 
-1. **Check dream state**: when was the last dream cycle?
+1. **Check dream state:** when did the last cycle run? The dream-report entry in Sibyl is the cross-host anchor:
 
    ```bash
-   # Check Claude's auto-dream lock
-   stat ~/.claude/projects/*/memory/.consolidate-lock 2>/dev/null | grep -A1 "Modify"
-
-   # Check Sibyl for recent dream entries
    sibyl search "dream report" --type episode --limit 3
    ```
 
 2. **Discover conversation sources:**
 
-   **Claude Code sessions:**
-
    ```bash
-   # Find recent sessions across ALL projects (last 7 days)
+   # Claude Code sessions across ALL projects (last 7 days)
    find ~/.claude/projects -name "*.jsonl" -not -path "*/subagents/*" -mtime -7 -exec ls -lt {} + | head -30
-   ```
 
-   **Codex sessions:**
-
-   ```bash
-   # Find recent Codex rollouts
+   # Codex rollouts
    find ~/.codex/sessions -name "rollout-*.jsonl" -mtime -7 -exec ls -lt {} + | head -30
    ```
 
-3. **Count the harvest:**
-   - How many sessions since last dream?
-   - Which projects were active?
-   - Any notably long or complex sessions? (file size > 100KB = rich conversation)
+3. **Count the harvest:** how many sessions since the last dream, which projects were active, any notably long or complex sessions? (file size > 100KB = rich conversation)
 
 4. **Set dream scope** based on depth mode and available sessions.
 
@@ -85,120 +68,46 @@ Get the lay of the land before harvesting. Re-processing already-dreamed session
 
 ## Phase 2: HARVEST
 
-Read conversations and identify extractable knowledge. The trick is reading targeted segments rather than entire JSONL files; most session content is routine, and only specific patterns carry transferable signal.
+Read conversations and identify extractable knowledge. The trick is reading targeted segments rather than entire files; most session content is routine, and only specific patterns carry transferable signal.
 
-### Reading Claude Code sessions
+### What to look for
 
-Claude Code JSONL files contain one JSON object per line. Key message types to look for:
+| Content Type                   | Where to Find                                          | What to Extract                                                           |
+| ------------------------------ | ------------------------------------------------------ | ------------------------------------------------------------------------- |
+| **User corrections**           | User messages following assistant errors               | Anti-patterns, wrong assumptions                                          |
+| **User unblock one-liners**    | Short user messages that resolve a stall               | The incantation is the learning ("need to run `./gx setup env --legacy`") |
+| **Technical decisions**        | Assistant text blocks with rationale                   | Decision + alternatives considered                                        |
+| **Taste directives**           | User standing rules stated mid-task                    | Durable preferences ("preserve the pretty PR body")                       |
+| **Debugging chains**           | Sequences of failed → fixed attempts                   | Error patterns, root causes                                               |
+| **Evidence-trust calibration** | Green signals that lied (tests passed, behavior broke) | Which check missed what, and the compensating verification                |
+| **Tool limits hit**            | Tool hangs or failures at a size/shape boundary        | The exact boundary as a condition, not a ban                              |
+| **Retired risks**              | Investigations that cleared a suspected problem        | Dated evidence closing the risk — no lingering fake TODOs                 |
+| **Tool invocations**           | `tool_use` blocks (Bash, Edit, etc.)                   | Commands that worked, error patterns                                      |
+| **Architecture discussion**    | Longer text blocks with design reasoning               | Patterns, system relationships                                            |
+| **Thinking blocks**            | `type: "thinking"` content                             | Reasoning chains, hidden insights                                         |
 
-| Content Type                | Where to Find                            | What to Extract                      |
-| --------------------------- | ---------------------------------------- | ------------------------------------ |
-| **User corrections**        | User messages following assistant errors | Anti-patterns, wrong assumptions     |
-| **Technical decisions**     | Assistant text blocks with rationale     | Decision + alternatives considered   |
-| **Tool invocations**        | `tool_use` blocks (Bash, Edit, etc.)     | Commands that worked, error patterns |
-| **Debugging chains**        | Sequences of failed → fixed attempts     | Error patterns, root causes          |
-| **Architecture discussion** | Longer text blocks with design reasoning | Patterns, system relationships       |
-| **Thinking blocks**         | `type: "thinking"` content               | Reasoning chains, hidden insights    |
+### Extraction mechanics
 
-**Extraction strategy, don't read whole files.** Use targeted python extraction:
+Grep scores, python extracts. Claude Code JSONL nests content arrays inside message objects, so line-level grep like `'"role":"user"'` matches assistant messages that quote user content — use grep only for signal counts, python parsing for the actual pull. High-signal fields: `ai-title` (session topic at a glance), `message.model` (which model authored the session), Codex `session_meta` (cwd, branch, model). Schemas, discovery commands, and working extraction snippets for both formats live in `references/conversation-formats.md`.
 
-```bash
-# Extract all user prompts (most reliable method)
-python3 -c "
-import json, sys
-with open('session.jsonl') as f:
-    for line in f:
-        obj = json.loads(line)
-        if obj.get('type') == 'user':
-            content = obj.get('message', {}).get('content', '')
-            if isinstance(content, str) and len(content) > 20 and not content.startswith('<'):
-                print(content[:300])
-"
-
-# Extract assistant decisions and rationale
-python3 -c "
-import json
-with open('session.jsonl') as f:
-    for line in f:
-        obj = json.loads(line)
-        if obj.get('type') == 'assistant':
-            for block in obj.get('message', {}).get('content', []):
-                if isinstance(block, dict) and block.get('type') == 'text':
-                    text = block['text']
-                    if any(kw in text.lower() for kw in ['because', 'root cause', 'the issue', 'approach', 'trade-off']):
-                        if len(text) > 100:
-                            print(text[:400])
-                            print('---')
-"
-
-# Get session titles (best way to understand session topics at a glance)
-for f in ~/.claude/projects/-Users-bliss-dev-*/*.jsonl; do
-  title=\$(grep -m1 '"ai-title"' "\$f" 2>/dev/null | python3 -c "import sys,json; print(json.loads(next(sys.stdin)).get('aiTitle',''))" 2>/dev/null)
-  [[ -n "\$title" ]] && echo "\$(du -h "\$f" | cut -f1)  \$(basename "\$(dirname "\$f")"): \$title"
-done | sort -rh | head -20
-```
-
-**Why python over grep:** Claude Code JSONL has nested JSON structures (content arrays inside message objects). Simple grep patterns like `'"role":"user"'` match across the entire line, producing false positives from assistant messages that quote user content. Python parsing is slower but precise. Use grep only for initial signal scoring (counts), then python for actual extraction.
-
-For promising sessions (high correction count, long duration, many tool calls), read key segments more deeply using `Read` tool on the JSONL file with offset/limit.
-
-### Reading Codex Sessions
-
-Codex rollouts at `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl` use a different format. See `references/conversation-formats.md` for the full schema.
-
-```bash
-# Find Codex sessions with substantial content
-find ~/.codex/sessions -name "rollout-*.jsonl" -mtime -7 -size +10k
-
-# Get Codex session metadata (cwd, branch, model)
-python3 -c "
-import json
-with open('rollout.jsonl') as f:
-    for line in f:
-        obj = json.loads(line)
-        if obj.get('type') == 'session_meta':
-            p = obj['payload']
-            print(f'cwd: {p.get(\"cwd\")}')
-            print(f'model: {p.get(\"model_provider\")}')
-            print(f'branch: {p.get(\"git\", {}).get(\"branch\")}')
-            break
-"
-
-# Extract user messages from Codex (payload.role == 'user')
-python3 -c "
-import json
-with open('rollout.jsonl') as f:
-    for line in f:
-        obj = json.loads(line)
-        if obj.get('type') == 'response_item':
-            p = obj.get('payload', {})
-            if p.get('role') == 'user':
-                for c in p.get('content', []):
-                    if c.get('type') == 'input_text':
-                        text = c['text']
-                        if not text.startswith('#') and not text.startswith('<') and len(text) > 20:
-                            print(text[:200])
-"
-
-# Extract function calls
-grep '"function_call"' rollout.jsonl | grep -v '"function_call_output"'
-```
+For promising sessions (high correction count, long duration, many tool calls), read key segments more deeply using `Read` with offset/limit on the JSONL.
 
 ### Signal Scoring
 
 Prioritize sessions for deep reading:
 
-| Signal                         | Score | How to Detect                                  |
-| ------------------------------ | ----- | ---------------------------------------------- |
-| User corrections present       | +3    | grep for negation words in user messages       |
-| Multiple error-fix cycles      | +2    | tool_use errors followed by successful retries |
-| Long session (>50 messages)    | +1    | line count of JSONL                            |
-| Cross-project references       | +2    | mentions of other project paths                |
-| Architecture/design discussion | +2    | grep for design keywords                       |
-| New library/tool adoption      | +2    | grep for "install", "add", package names       |
-| Simple Q&A session             | -1    | Short session with no tool calls               |
+| Signal                                 | Score | How to Detect                                                                          |
+| -------------------------------------- | ----- | -------------------------------------------------------------------------------------- |
+| User corrections present               | +3    | grep for negation words in user messages                                               |
+| Gotcha also seen in a previous session | +3    | the repeat is the capture trigger — write it as a gate, test, or invariant, not a note |
+| Multiple error-fix cycles              | +2    | tool_use errors followed by successful retries                                         |
+| Cross-project references               | +2    | mentions of other project paths                                                        |
+| Architecture/design discussion         | +2    | grep for design keywords                                                               |
+| New library/tool adoption              | +2    | grep for "install", "add", package names                                               |
+| Long session (>50 messages)            | +1    | line count of JSONL                                                                    |
+| Simple Q&A session                     | -1    | short session with no tool calls                                                       |
 
-Process top-scored sessions first; quick nap mode usually caps at the top 3. Low-signal sessions can be skipped entirely. Extracting from a Q&A session about syntax produces noise, not knowledge.
+Process top-scored sessions first; quick nap mode usually caps at the top 3. Low-signal sessions can be skipped entirely — extracting from a Q&A session about syntax produces noise, not knowledge. Mind the skew: capture discipline favors domain learnings, but the repeats that burn sessions are usually harness and tooling friction (cwd drift, path bases, quoting, flag shapes). That friction clears the bar.
 
 ---
 
@@ -206,63 +115,27 @@ Process top-scored sessions first; quick nap mode usually caps at the top 3. Low
 
 Transform raw conversation signal into structured Sibyl entities. This is where the quality bar matters most: a duplicate-laden, vague-titled Sibyl is worse than a smaller, sharper one.
 
+### Write-time discipline
+
+- **Date-stamp volatile claims.** Versions, SOTA, and live state carry an as-of date so future recall can age them — a 25-day-old "latest version" memory nearly caused a wrong downgrade. Recalled memory is a lead, not gospel; write entries that age visibly.
+- **Supersede, don't append.** When a finding contradicts an existing entry, correct the old entry in place — including why the obvious fix is a dead end — and title corrections as corrections ("Correction: retain local Supabase PVCs in Tilt").
+- **The quality test:** could a future session turn this into a gate, a constraint, or an executable recipe? If not, it's trivia. Full bar and worked examples in `references/extraction-guide.md`.
+
 ### Extraction categories
 
-For each significant finding, classify and write to Sibyl:
+| Category                        | Sibyl home                     | What qualifies                                                                                                                                     |
+| ------------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Decisions**                   | `episode`, category `decision` | Technical choices with trade-offs: library selection, architecture, API design. Record rationale, alternatives, and provenance (who decided, when) |
+| **Patterns**                    | `pattern`                      | Reusable approaches that worked. The bar: would this be useful in a different project?                                                             |
+| **Corrections / anti-patterns** | `error_pattern`                | Mistakes that got corrected — the user said "that's wrong," or something broke and was debugged to root cause                                      |
+| **Rules**                       | `rule`                         | Hard constraints discovered through experience. "Always X when Y." "Never Z because W."                                                            |
+| **Open questions / tensions**   | `episode`, category `tension`  | Raised but unanswered; contradictions between approaches; deferred decisions                                                                       |
 
-#### 1. Decisions (→ Sibyl `episode` with category `decision`)
-
-```bash
-sibyl add "Decision: [what was decided]" \
-  "[rationale]. Alternatives considered: [list]. Context: [project/feature]. Date: [date]." \
-  --type episode --category decision --tags "project:[name]"
-```
-
-**What qualifies:** Any technical choice with trade-offs, library selection, architecture pattern, API design, configuration approach.
-
-#### 2. Patterns (→ Sibyl `pattern`)
-
-```bash
-sibyl add "Pattern: [name]" \
-  "[description]. When to use: [context]. Example: [brief code/approach]. Discovered in: [project]." \
-  --type pattern --category "[domain]" --tags "project:[name]" --languages "[lang]"
-```
-
-**What qualifies:** Reusable approaches that worked well. The bar: would this be useful in a different project?
-
-#### 3. Corrections / Anti-Patterns (→ Sibyl `error_pattern`)
-
-```bash
-sibyl add "Anti-pattern: [what went wrong]" \
-  "Wrong approach: [what was tried]. Why it failed: [root cause]. Correct approach: [what worked]. Context: [project]." \
-  --type error_pattern --category "[domain]" --tags "project:[name]"
-```
-
-**What qualifies:** Mistakes that were corrected. The user said "no" or "that's wrong" or something broke and was debugged.
-
-#### 4. Rules (→ Sibyl `rule`)
-
-```bash
-sibyl add "Rule: [the rule]" \
-  "[explanation]. Why: [rationale]. Applies to: [scope]. Discovered: [date]." \
-  --type rule --category "[domain]" --tags "project:[name]"
-```
-
-**What qualifies:** Hard constraints discovered through experience. "Always X when Y." "Never Z because W."
-
-#### 5. Open Questions / Tensions (→ Sibyl `episode` with category `tension`)
-
-```bash
-sibyl add "Tension: [the unresolved question]" \
-  "Context: [what prompted this]. Options considered: [list]. Blocking: [what it blocks]. Needs: [what would resolve it]." \
-  --type episode --category tension --tags "project:[name]"
-```
-
-**What qualifies:** Questions that were raised but not answered. Contradictions between approaches. Deferred decisions.
+Verb and flag shapes live in the `sibyl` skill and the live `--help` — CLI surfaces drift under skills, and installs differ. When a kind or flag is rejected, adapt the capture to what the install accepts rather than dropping it.
 
 ### Deduplication
 
-Before writing any entity to Sibyl, check for existing similar entries. This bit is non-negotiable; the value of the graph collapses when duplicates accumulate.
+Before writing, check for existing entries — the value of the graph collapses when duplicates accumulate. Dedup the extraction set against itself first (multiple sessions repeat the same insight), then check each survivor against Sibyl:
 
 ```bash
 sibyl search "[entity title keywords]" --type [type] --limit 5
@@ -275,147 +148,60 @@ sibyl search "[entity title keywords]" --type [type] --limit 5
 | Exact duplicate         | Skip, log in dream report                                   |
 | Contradictory entry     | Create tension entity linking both                          |
 
-### Batch Processing
+Track what was written for the dream report.
 
-For efficiency, accumulate extractions and write them in batches:
+### When a write fails
 
-1. Read and extract from all harvested sessions
-2. Deduplicate the extraction set itself (multiple sessions may contain the same insight)
-3. Check each against Sibyl
-4. Write new entities
-5. Track what was written for the dream report
+The extraction still ships: paste it verbatim into the dream report flagged **NOT captured**, queue it for flush (pending-writes queue, or file memory as the backstop), and hand the user the exact flush command. The next cycle reports which parked learnings finally landed. An unwritten memory that's visible is a queue; one that's silent is a loss.
 
 ---
 
 ## Phase 4: REM, Creative Exploration
 
-Only in `deep` mode. Find unexpected connections across projects, the cross-pollination phase that biological REM is named after.
-
-### Cross-Project Pattern Detection
-
-```bash
-# What patterns exist across multiple projects?
-sibyl explore --type pattern --limit 50
-
-# What error patterns keep recurring?
-sibyl explore --type error_pattern --limit 30
-
-# What tensions are unresolved?
-sibyl search "tension" --type episode --limit 20
-```
+Only in `deep` mode and mining runs. Find unexpected connections across projects, the cross-pollination phase that biological REM is named after.
 
 ### Connection Discovery
 
-Look for:
+Pull the graph wide (`sibyl explore` by type for patterns and error patterns; search for unresolved tensions), then look for:
 
-1. **Pattern reuse:** A pattern from project A that would solve a problem in project B
-2. **Contradictory approaches:** Project A does X one way, project B does it differently, which is right?
-3. **Shared infrastructure gaps:** Multiple projects hitting the same limitation
-4. **Knowledge transfer:** Something learned in one domain that applies to another
+1. **Pattern reuse:** a pattern from project A that would solve a problem in project B
+2. **Contradictory approaches:** project A does X one way, project B does it differently — which is right?
+3. **Shared infrastructure gaps:** multiple projects hitting the same limitation
+4. **Knowledge transfer:** something learned in one domain that applies to another
 
-For each discovered connection:
+Record each connection as an episode (category `cross-project`) naming both projects and the implication.
 
-```bash
-# Record the cross-project insight
-sibyl add "Cross-project: [insight]" \
-  "[description]. Connects: [project A] and [project B]. Implication: [what to do about it]." \
-  --type episode --category cross-project --tags "project:[A],project:[B]"
-```
+### Prompt-Stream Telemetry
+
+The user's own prompts are encoding telemetry. Diff recurring instruction phrases against the contract and skills, in both directions:
+
+| Signal                           | Reading                                                                                  |
+| -------------------------------- | ---------------------------------------------------------------------------------------- |
+| Phrase vanished month-over-month | The encoding landed ("commit as you go" went 11 → 2 → 0 → 0 as the contract absorbed it) |
+| Phrase persists across months    | Codify-next candidate                                                                    |
+
+Candidates still pass the net-new-delta gate — a repeat proves demand, not absence. The gap is often execution consistency, not missing rules.
 
 ### Staleness Detection
 
-```bash
-# Find old entities that may be outdated
-sibyl explore --type pattern,rule --limit 100
-```
-
-For each entity older than 90 days:
-
-- Is the project still active? (check git log)
-- Has the technology changed? (check versions)
-- Does the pattern still apply? (check current code)
-
-Mark stale entities:
-
-```bash
-sibyl entity update <entity-id> --tags "stale,needs-review"
-```
-
-### Importance Decay
-
-Score existing entities by: `base_importance * recency_factor * reference_count`
-
-- Entities referenced in recent sessions → boost
-- Entities not referenced in 60+ days → flag for review
-- Entities contradicted by newer findings → mark as superseded
+Scan the graph for aging entities (`sibyl explore --type pattern,rule`). For anything older than ~90 days: is the project still active, has the technology moved, does the pattern still hold? Resolve with the same write-time maintenance moves applied graph-wide — supersede in place, retire the risk with dated evidence, or tag `stale,needs-review` for a human.
 
 ---
 
 ## Phase 5: REPORT
 
-Generate a dream summary and record the cycle itself. The report serves two audiences: the user (so they can see what landed) and future dreams (which check this entry to avoid re-processing).
+The report serves two audiences: the user (what landed) and future dreams (which check this entry to avoid re-processing). Four fields are required; everything else is optional:
 
-### Dream Report Structure
+- **Coverage:** sessions reviewed, projects, time span — what the next cycle's orient checks
+- **Dedup receipts:** entities created / updated / duplicates skipped — the counts that prove dedup ran
+- **Highlights:** the 2-3 findings worth a human's attention
+- **Parked writes:** learnings that failed to write, verbatim, flagged NOT captured, with the flush command
 
-```markdown
-## Dream Report: [date]
+Record the report itself in Sibyl as an episode (category `dream-report`, tagged `dream`) — it is the anchor the next cycle's orient searches for.
 
-### Sessions Reviewed
+### Beyond the Graph
 
-- [count] Claude Code sessions across [count] projects
-- [count] Codex sessions
-- Time span: [earliest] to [latest]
-- Projects: [list]
-
-### Knowledge Extracted
-
-- **[N] decisions** recorded
-- **[N] patterns** discovered/updated
-- **[N] anti-patterns** captured
-- **[N] rules** established
-- **[N] tensions** identified
-
-### Highlights
-
-1. [Most significant finding, 1-2 sentences]
-2. [Second most significant]
-3. [Third most significant]
-
-### Cross-Project Insights (deep mode only)
-
-- [Connection discovered between projects]
-- [Pattern that applies more broadly than originally thought]
-
-### Stale Knowledge Flagged
-
-- [Entity that may need review]
-
-### Dream Metrics
-
-- Sessions processed: [N]
-- Entities created: [N]
-- Entities updated: [N]
-- Duplicates skipped: [N]
-- Sibyl calls: [N]
-```
-
-### Record the Dream
-
-```bash
-# Record the dream cycle itself
-sibyl add "Dream Report: [date]" \
-  "[full dream report content]" \
-  --type episode --category dream-report --tags "dream,maintenance"
-```
-
-### Update Memory Files (Optional)
-
-If significant learnings should be immediately available to Claude Code sessions (not just via Sibyl search), write key findings to the relevant project's memory:
-
-```bash
-# Only for high-impact findings that affect session behavior
-# Most knowledge should live in Sibyl, not flat files
-```
+When a pattern is process-shaped and cross-project, its durable home may be a skill or the contract rather than the graph. Gate every proposed skill edit on net-new delta: re-read the target skill first — most of what a run rediscovers is already written down.
 
 ---
 
@@ -429,7 +215,7 @@ For fast end-of-day processing:
 4. Write to Sibyl
 5. One-paragraph dream report
 
-**Skip:** REM phase, staleness detection, cross-project analysis, memory file updates.
+**Skip:** the whole REM phase — cross-project analysis, prompt-stream telemetry, staleness detection.
 
 ---
 
@@ -445,7 +231,11 @@ Everything goes to Sibyl, not memory/\*.md files. Sibyl provides:
 - Cross-project visibility (shared graph)
 - Multi-machine access (network service)
 
-Memory files are only updated for critical session-level behaviors that need to be in Claude Code's native context window.
+Memory files are only updated for critical session-level behaviors that need to be in the host's native context window.
+
+### Transcript Archaeology
+
+The harvest mechanics double as work-product recovery: grep `message.model` for authorship, extract Write/Edit tool calls to see exactly which files a session produced. This has recovered PR bodies whose /tmp originals died with a reboot.
 
 ### Conversation Formats
 
@@ -453,16 +243,16 @@ See `references/conversation-formats.md` for:
 
 - Claude Code JSONL schema (TranscriptMessage types, content blocks)
 - Codex rollout JSONL schema (session_meta, response_item, event_msg, turn_context)
-- Useful grep patterns for each format
+- Session discovery, extraction snippets, and useful grep patterns for each format
 
 ### Extraction Quality
 
 See `references/extraction-guide.md` for:
 
-- What makes a good vs bad extraction
+- What makes a good vs bad extraction, including the gate/constraint/recipe test
 - Sibyl entity type selection guide
 - Deduplication strategies
-- Examples of high-quality dream extractions
+- Examples of high-quality dream extractions across the full taxonomy
 
 ---
 
@@ -476,6 +266,8 @@ See `references/extraction-guide.md` for:
 | Skipping dedup check                     | Always search Sibyl before writing, duplicates degrade graph quality |
 | Dream without orient                     | Always check when last dream ran, avoid re-processing                |
 | Extracting everything from every session | Score sessions first, process high-signal ones deeply                |
+| Dropping a capture on a rejected flag    | Check live `--help`, adapt the kind to what the install accepts      |
+| Losing a failed write silently           | Park it verbatim in the report and queue the flush                   |
 | Ignoring Codex sessions                  | Codex conversations contain valuable engineering knowledge too       |
 
 ---
@@ -483,6 +275,6 @@ See `references/extraction-guide.md` for:
 ## What This Skill is NOT
 
 - **Not a replacement for Auto Dream.** Auto Dream manages memory/\*.md housekeeping. This skill extracts knowledge into Sibyl.
-- **Not real-time.** Dreams process past conversations. For live knowledge capture, use `sibyl add` directly during sessions.
+- **Not real-time.** Dreams process past conversations. For live knowledge capture, use the Remember beat (`sibyl` skill) at the moment of learning.
 - **Not a full conversation replay.** We extract signal, not transcripts. Sibyl stores insights, not chat logs.
 - **Not automatic (yet).** Invoke with `/dream`. Future: SessionEnd hook for automatic NREM processing.

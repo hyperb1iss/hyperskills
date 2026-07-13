@@ -4,17 +4,22 @@
 
 ### High-Value Extractions
 
-| Signal                             | Sibyl Type                     | Example                                                                               |
-| ---------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------- |
-| User corrects assistant's approach | `error_pattern`                | "Don't use `uv pip` — use `uv add` for project dependencies"                          |
-| Technical decision with trade-offs | `episode` (category: decision) | "Chose Temporal over BullMQ because workflow visibility matters more than simplicity" |
-| Non-obvious debugging insight      | `pattern`                      | "FalkorDB WRONGTYPE errors mean the key schema changed — run FLUSHALL on dev"         |
-| Reusable code pattern              | `pattern`                      | "Use `select!` with heartbeat future for long-running Temporal activities"            |
-| Hard constraint discovered         | `rule`                         | "Never commit .env files — gradial uses SOPS for secrets"                             |
-| Unresolved question deferred       | `episode` (category: tension)  | "Should Sibyl use Graphiti's built-in community detection or custom?"                 |
-| New tool/library adoption          | `episode` (category: decision) | "Adopted better-auth for v2 — replacing next-auth due to multi-tenant needs"          |
-| Performance finding                | `pattern`                      | "Batch Sibyl writes via REST API, not individual CLI calls — 10x faster"              |
-| Configuration quirk                | `error_pattern`                | "moon workspace requires `.moon/toolchains.yml` even if empty"                        |
+| Signal                             | Sibyl Type                     | Example                                                                                       |
+| ---------------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------- |
+| User corrects assistant's approach | `error_pattern`                | "Don't use `uv pip` — use `uv add` for project dependencies"                                  |
+| Technical decision with trade-offs | `episode` (category: decision) | "Chose Temporal over BullMQ because workflow visibility matters more than simplicity"         |
+| Non-obvious debugging insight      | `pattern`                      | "FalkorDB WRONGTYPE errors mean the key schema changed — run FLUSHALL on dev"                 |
+| Reusable code pattern              | `pattern`                      | "Use `select!` with heartbeat future for long-running Temporal activities"                    |
+| Hard constraint discovered         | `rule`                         | "Never commit .env files — gradial uses SOPS for secrets"                                     |
+| Unresolved question deferred       | `episode` (category: tension)  | "Should Sibyl use Graphiti's built-in community detection or custom?"                         |
+| New tool/library adoption          | `episode` (category: decision) | "Adopted better-auth for v2 — replacing next-auth due to multi-tenant needs"                  |
+| Performance finding                | `pattern`                      | "Batch Sibyl writes via REST API, not individual CLI calls — 10x faster"                      |
+| Configuration quirk                | `error_pattern`                | "moon workspace requires `.moon/toolchains.yml` even if empty"                                |
+| User unblock one-liner             | `pattern` or `rule`            | "need to run `./gx setup env --legacy`" — the incantation is the learning                     |
+| Taste directive / standing rule    | `rule`                         | "Preserve the pretty PR body; prove rebases with range-diff"                                  |
+| Evidence-trust calibration         | `error_pattern`                | "Green render + unit suites missed four live-behavior failures in this lane"                  |
+| Tool limit hit                     | `rule` (conditional)           | "git-iris PR generation hangs above ~174 files / 24k lines — condition, not ban"              |
+| Retired risk                       | `episode` (category: decision) | "Postgres-off risk disproven, evidence attached — closed so it doesn't linger as a fake TODO" |
 
 ### Skip These (Low/No Value)
 
@@ -72,6 +77,31 @@ Before writing an extraction, ask: **"Would this be useful in a different projec
 - Yes → Write it
 - Maybe → Write it with narrow scope tags
 - No → Skip it
+
+### The Gate Test
+
+The strongest entries become active constraints, not trivia: a future session should be able to turn the entry into a **gate, a constraint, or an executable recipe**. Observed payoffs: an `error_pattern` written mid-incident powered an instant diagnosis hours later ("next time any workflow 403s with 'for installation,' the diagnosis is one recall away"); a 409 gotcha resurfaced in a refactor and was promoted to a hard verification gate. If the entry can only be read, not acted on, sharpen it until it names the trigger condition and the move.
+
+### Wider Taxonomy: Worked Examples
+
+The highest-leverage captures are often not technical gotchas. Same format, same bar:
+
+```
+"Trust calibration: this lane's render + unit suites stayed green while four live
+behaviors broke (as of 2026-07). Before trusting green here, drive the affected
+flow — the suites don't cover live composition."
+→ Yes: names the lying signal, the lane, and the compensating check.
+
+"Tool limit: git-iris PR generation hung twice at 174 files / 24k lines of draft
+diff with zero output (2026-06). Condition, not ban: fine below the boundary;
+write the body manually from validation receipts above it."
+→ Yes: exact boundary captured as a condition — the tool gets re-admitted once
+PRs are right-sized.
+
+"Risk retired: 'Postgres may be off in staging' disproven 2026-04, evidence
+attached. Closed so it doesn't linger as a fake TODO in future sessions."
+→ Yes: dated evidence retires the risk instead of letting it haunt the backlog.
+```
 
 ---
 
