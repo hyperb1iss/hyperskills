@@ -141,7 +141,7 @@ Atomic while working; collapse only when the history itself stops serving the re
 
 ### Commit bodies
 
-Compose multi-line bodies via `git commit -F -` heredoc or a message file — stacked `-m` flags keep each paragraph as one unwrapped line and burn amend cycles. Wrap at 76 characters; length checks are backstops, not the mechanism. Verify the recorded message after any shell-composed body (`git log -1 --format=%B`) — zsh eats backticks and word-splits.
+Compose multi-line bodies via `git commit -F -` with a single-quoted heredoc (`<<'EOF'`) or a message file — stacked `-m` flags keep each paragraph as one unwrapped line and burn amend cycles. The quoting is load-bearing: an unquoted heredoc executes backticks and `$()` inside the message before Git sees it. Wrap at 76 characters; length checks are backstops, not the mechanism. Verify the recorded message after any shell-composed body (`git log -1 --format=%B`).
 
 ## Shared-Repo Coexistence
 
@@ -158,7 +158,7 @@ Multiple agents (and humans) work the same repo concurrently. Causation decides 
 
 ## Hooks
 
-Hooks are receipts, not friction — wait them out and cite their output. A new hook failure gets fixed, never bypassed (pre-warm the build cache, fix the type error). The bypass window is narrow: the failure is known, named, pre-existing, and unrelated to your diff — or the hook physically can't run here — plus equivalent gates ran green, and the bypass is disclosed in the wrap-up. Some hosts mechanically block `--no-verify`; respect it. Auto-fixing hooks can rewrite unrelated files: diff after every commit and restore hook-only noise so the change stays scoped.
+Hooks are receipts, not friction — wait them out and cite their output. A new hook failure gets fixed, never bypassed (pre-warm the build cache, fix the type error). The bypass window is narrow: the failure is known, named, pre-existing, and unrelated to your diff — or the hook physically can't run here — plus equivalent gates ran green, and the bypass is disclosed in the wrap-up. Some hosts mechanically block `--no-verify`; respect it. Auto-fixing hooks can rewrite unrelated files: diff after every commit, and before restoring a hook-touched file confirm it carried no one else's edits pre-hook — `git restore` discards the whole worktree copy, not just the hook's hunks.
 
 ## Non-Interactive Surgery
 
