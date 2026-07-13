@@ -43,16 +43,17 @@ Lean on existing knowledge before spawning agents. Re-running research that alre
 ### Common moves
 
 - **Search Sibyl first:** `sibyl search "<research topic>"`, `sibyl search "<related technology>"`, `sibyl search "<prior decision in this area>"`. Surface what's already known before generating new findings.
-- **Check for staleness.** Fast-moving topics (frameworks, models, cloud services) usually warrant re-research even when Sibyl has recent entries; treat the existing knowledge as a baseline. Stable topics with recent entries often don't need a fresh pass at all.
+- **Check for staleness.** Fast-moving topics (frameworks, models, cloud services) usually warrant re-research even when Sibyl has recent entries; treat the existing knowledge as a baseline. Stable topics with recent entries often don't need a fresh pass at all. One class is never exempt: version, "latest", and SOTA facts expire no matter how recent the entry feels — recalled memory routes the investigation, live state decides. Re-verify those against the primary source before they drive a dispatch or a recommendation. Same rot law for prior research docs: anything older than the reality it describes gets a per-claim liveness check against live sources and current code before it shapes a decision.
+- **Premise-check the target.** Confirm the data, repo, or question actually exists — and disambiguate which one — before any agent launches. A wave pointed at a wrong or empty target manufactures findings.
 - **Sharpen the research question.** "Research databases" is too vague to dispatch on. "Compare PostgreSQL vs CockroachDB for multi-region write-heavy workloads with <10ms p99 latency" gives agents enough scope to do useful work.
 - **Calibrate the research budget** to the decision the research is feeding:
 
-  | Depth          | Agents | Time      | When                                         |
-  | -------------- | ------ | --------- | -------------------------------------------- |
-  | **Quick scan** | 2-3    | 2-5 min   | Known domain, just need latest info          |
-  | **Standard**   | 5-10   | 10-15 min | Technology evaluation, architecture options  |
-  | **Deep dive**  | 10-30  | 20-40 min | Greenfield decisions, SOTA analysis          |
-  | **Exhaustive** | 30-60+ | 40-90 min | New project inception, competitive landscape |
+  | Depth          | Agents | When                                         |
+  | -------------- | ------ | -------------------------------------------- |
+  | **Quick scan** | 2-3    | Known domain, just need latest info          |
+  | **Standard**   | 5-10   | Technology evaluation, architecture options  |
+  | **Deep dive**  | 10-30  | Greenfield decisions, SOTA analysis          |
+  | **Exhaustive** | 30-60+ | New project inception, competitive landscape |
 
 ### Source quality contract
 
@@ -69,6 +70,8 @@ This bit is non-negotiable: the value of research collapses when claims rest on 
 
 When primary sources disagree with secondary ones, trust the primary source and note the discrepancy. Date volatile facts explicitly, and prefer commands/sources the next agent can rerun over screenshots that go stale.
 
+**The hierarchy: a version-pinned artifact you can actually run beats official docs, which beat blog posts, which beat memory.** Names that cross a system boundary — metric names, config keys, CRD fields — get read from the actual emitter or consumer at the pinned version. And facts reported by your own research agents are claims, not evidence: before synthesis builds on a load-bearing claim, open the primary source yourself.
+
 ---
 
 ## Phase 2: WAVE 1: Broad Sweep
@@ -81,6 +84,7 @@ Vague prompts produce vague research. Each agent benefits from:
 
 - **One specific topic** (not "research everything about X")
 - **An output file path** (no ambiguity about where to write)
+- **Temporal grounding** (current month stated, memory declared stale, `[unverified]` flags required)
 - **Search hints** (include year: "search [topic] 2026")
 - **8-12 numbered coverage items** that scope the research precisely
 - **Source quality guidance** ("prefer official docs and GitHub repos over blog posts")
@@ -101,15 +105,18 @@ Create a research doc at docs/research/[filename].md covering:
 7. Community health (stars, activity, maintenance)
 8. Comparison with alternatives (name 2-3 specific alternatives)
 
+Current month is [MONTH YEAR]. Your training data is stale — do NOT
+answer from memory for versions, features, pricing, or capabilities.
 Use WebSearch for current information. Include dates on all facts.
-Cite sources with URLs.
+Cite sources with URLs. Flag any claim you can't pin to a primary
+source as [unverified].
 ```
 
 ### Deployment notes
 
 - **Use the host's fan-out verb.** Claude Code: parallel background `Agent` calls. Codex: `spawn_agent`. Pi (pi-nova pack): the `dispatch` tool with `"mode": "parallel"` researcher tasks — keep each task narrow, source-quality explicit, and output-oriented.
 - **Background by default.** Research agents have no inter-dependencies, so foreground execution serializes work that should run in parallel.
-- **3-4 seconds between dispatches** avoids rate limiting in practice. Tighter cadences sometimes work, sometimes hit limits, so pace yourself.
+- **Mind the delegation gate.** Some hosts (Codex, as of Jul 2026) only allow spawning subagents when the user explicitly asked for delegation. Without that ask, run the research lanes sequentially yourself.
 - **One file per agent.** Shared outputs create write contention and lose attribution.
 - **Group by theme** when researching many topics. 12 separate dispatches become 3-4 thematic clusters with clearer synthesis later.
 
@@ -127,6 +134,8 @@ For technology evaluations, cover these dimensions:
 | **Cost**        | What does it cost at our scale?   |
 | **Migration**   | How hard is it to adopt/abandon?  |
 
+**Run an internal lane alongside the web wave.** When research feeds a decision about an existing system, the decisive constraint usually lives in your own repo or live state — the auth pattern, session semantics, or pinned version the winning option must survive. Finding it is a grep, not a research agent, and it costs zero agents. A web-perfect answer can still ship a broken migration.
+
 ---
 
 ## Phase 3: GAP ANALYSIS
@@ -138,6 +147,7 @@ After Wave 1, look for what's missing before synthesizing. Premature synthesis i
 - **Coverage gaps**: dimensions the wave didn't touch, missing comparisons, questions raised but not answered
 - **Contradictions**: agents reaching different conclusions on the same question (often signal for verification agents)
 - **Bias signals**: all-positive findings (suspicious, look for failure cases), only-official-docs (need community experience), same sources cited repeatedly (need source diversity)
+- **False consensus**: agents — or a second model — converging on the same version or SOTA fact is not confirmation; shared training data agrees with itself. A live registry or release-page fetch settles version claims, never vote count.
 
 ### Decision Point
 
@@ -161,15 +171,17 @@ Fill specific gaps identified in the analysis. Wave 2 agents differ from Wave 1 
 
 ### When to stop
 
-Stop deploying waves when the research question can be answered with confidence, when additional agents would produce diminishing returns, when key claims have 2+ independent sources, or when the user signals "enough, let's decide."
+Stop deploying waves when the research question can be answered with confidence, when key claims have 2+ independent sources, or when the user signals "enough, let's decide." The real stopper is yield: a wave that surfaces no new load-bearing findings is the last wave.
 
-Three waves is usually the practical ceiling. Past that, more research rarely sharpens the answer; it usually means the question itself needs reframing.
+Kill low-yield lanes out loud mid-wave — "this search isn't paying rent" — and re-anchor to a higher-signal source rather than re-running variants of the same walk.
+
+Three waves is a sound default budget, not a hard stop. Waves that keep surfacing new load-bearing findings can continue past it; waves that oscillate instead of narrowing mean the question itself needs reframing.
 
 ---
 
 ## Phase 5: SYNTHESIZE
 
-**Combine all findings into actionable intelligence. This is where the magic happens.**
+**Combine all findings into actionable intelligence.**
 
 ### Synthesis Structure
 
@@ -228,11 +240,7 @@ Three waves is usually the practical ceiling. Past that, more research rarely sh
 
 1. **Present the synthesis** to the user with a clear recommendation
 
-2. **Record in Sibyl:**
-
-   ```
-   sibyl add "Research: [topic]" "Evaluated [options]. Chose [X] because [reasons]. Key risk: [Y]. Sources: [primary URLs]. Date: [today]."
-   ```
+2. **Record in Sibyl.** The capture carries: options evaluated, the choice and why, the key risk, primary source URLs, and today's date. Use the `sibyl` skill for the current verbs — CLI shapes drift faster than skills. If the capture fails (server down, verb changed), park the entry verbatim in the synthesis flagged "NOT captured" — never silently drop the Record beat, and never block on it.
 
 3. **Archive research docs**: keep the wave outputs for reference:
    - If in a project: `docs/research/[topic]/`
@@ -246,6 +254,10 @@ Three waves is usually the practical ceiling. Past that, more research rarely sh
    | `/hyperskills:plan`        | Decision made, ready to decompose implementation |
    | `/hyperskills:orchestrate` | Decision made, work is parallelizable            |
    | Direct implementation      | Research confirmed a simple path                 |
+
+### The exit artifact
+
+Research output is not a build contract. Before it feeds `plan`, force the product cuts: the first workflow, the minimal boundaries, one vertical slice. When the decision is "build," prefer exiting into the riskiest narrow slice — a canary wedge that proves or breaks the approach before anything gets polished — over a fleet-wide plan. Triage findings as adopt / borrow the ideas / ignore with confidence.
 
 ---
 
@@ -264,37 +276,12 @@ For focused questions that don't need the full wave protocol:
 
 ## Research Patterns by Type
 
-### Technology Evaluation
-
-```
-Wave 1: Official docs + GitHub README for each option (parallel)
-Wave 2: Production experience + benchmarks (parallel)
-Synthesize: Comparison matrix + recommendation
-```
-
-### Codebase Archaeology
-
-```
-Wave 1: Explore agents mapping each subsystem (parallel)
-Wave 2: Grep for specific patterns / usage (parallel)
-Synthesize: Architecture diagram + dependency map
-```
-
-### SOTA Analysis
-
-```
-Wave 1: WebSearch for latest papers, blog posts, releases (parallel)
-Wave 2: Deep read the most relevant 3-5 sources (parallel)
-Synthesize: What's genuinely novel vs rehashed + recommendation
-```
-
-### Competitive Landscape
-
-```
-Wave 1: Feature matrix for each competitor (parallel)
-Wave 2: Pricing, community size, trajectory (parallel)
-Synthesize: Positioning matrix + gap analysis
-```
+| Type                      | The non-obvious move                                                                                                                                                                                     |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Technology evaluation** | Wave 2 hunts production experience reports and benchmarks, not more docs — and the internal lane runs alongside the whole time.                                                                            |
+| **Codebase archaeology**  | Synthesize into an architecture diagram + dependency map, not prose. Often it IS the internal lane of a larger evaluation.                                                                                 |
+| **SOTA analysis**         | Vet headline claims for comparability — same benchmark version? harness released? tuned on test? gold leakage? — and verdict as "adopt the architecture, ignore the ritual." A debunked premise is a first-class result. |
+| **Competitive landscape** | Absence is a finding: report what nobody is doing as deliberately as what everyone is. Verify from opened artifacts, not search-result snippets.                                                           |
 
 ---
 
@@ -314,6 +301,6 @@ Synthesize: Positioning matrix + gap analysis
 ## What This Skill is NOT
 
 - **Not a substitute for reading code.** If the answer is in the codebase, read the codebase.
-- **Not an infinite loop.** Max 3 waves. If that's not enough, reframe the question.
+- **Not an infinite loop.** Three waves is the default budget; the stopper is yield, not count. When waves oscillate instead of narrowing, reframe the question.
 - **Not required for known domains.** If you already know the answer, just say so and cite your knowledge.
 - **Not a delay tactic.** Research serves a decision. If no decision follows, the research was waste.
