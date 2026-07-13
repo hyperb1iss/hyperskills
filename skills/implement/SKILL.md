@@ -5,9 +5,9 @@ description: Use this skill when writing code, building features, fixing bugs, r
 
 # Implementation
 
-Verification-driven coding with tight feedback loops. Distilled from 21,321 tracked operations across 64+ projects, 612 debugging sessions, and 2,476 conversation histories. These are the patterns that consistently ship working code.
+Verification-driven coding with tight feedback loops. Distilled from 21,321 tracked operations across 64+ projects, 612 debugging sessions, and ~600 transcribed working sessions from the Apr–Jul 2026 corpus. These are the patterns that consistently ship working code.
 
-**Core insight:** Verify in tight loops, roughly every 2-3 edits. 73% of fixes go unverified across the dataset, which is the single biggest quality gap. Sessions that maintain a tight verify cadence avoid the debugging spirals that the rest of this skill is designed to prevent.
+**Core insight:** Verify in tight loops, roughly every 2-3 edits — 73% of fixes go unverified across the dataset, the single biggest quality gap. And proof lives where the artifact is *consumed*, not where it was produced: green producer gates are necessary, never sufficient.
 
 **How to read this skill:** the loop and the heuristics below are calibrated for non-trivial implementation work. Trivial fixes (config, typo, single-line) shouldn't drag through five phases. Use judgment, scale planning to scope, and skip what doesn't apply. The Code Discipline section is principles that bias toward caution; for one-line changes, just make the change.
 
@@ -35,13 +35,13 @@ digraph implement {
 }
 ```
 
-- **Oriented.** Existing code is read before anything gets touched. `Grep → Read → Read` is the dominant opening across the dataset. Sessions that read 10+ files before the first edit require fewer fix iterations downstream. Blind changes are the most expensive way to start.
+- **Oriented.** Existing code is read before anything gets touched. `Grep → Read → Read` is the dominant opening across the dataset. Sessions that read 10+ files before the first edit require fewer fix iterations downstream. Blind changes are the most expensive way to start. Before creating any new structure — module, config surface, CLI group, error type — locate the nearest in-repo exemplar and clone its shape; the repo usually solved this kind of thing once already.
 
 - **Planned.** Decomposition exists at the right scale. Trivial fixes don't need a plan; features benefit from a task list; epics earn a research swarm. The decision is "what's proportional," not "always plan."
 
-- **Implemented.** Work happens in batches of roughly 2-3 edits, then verifies. Follow the dependency chain. Edit existing files 9:1 over creating new ones; that's the observed ratio in successful sessions. Fix errors as they surface; accumulating them creates cascade-debugging.
+- **Implemented.** Work happens in batches of roughly 2-3 edits, then verifies. Build in dependency order (types → logic → surfaces), held loosely: migrations get written AFTER the code that needs them, and frontend drives backend changes as often as the reverse. Edit existing files 9:1 over creating new ones; that's the observed ratio in successful sessions. Fix errors as they surface; accumulating them creates cascade-debugging.
 
-- **Verified.** Typecheck is the primary gate, fast and cheap; run it between batches. Tests fit naturally after feature-complete. Full suite before commit.
+- **Verified.** Typecheck is the primary inner-loop gate, fast and cheap; run it between batches. Tests fit naturally after feature-complete. Full suite before commit — and the proof ladder continues past green gates to the consumption boundary (see Verification Cadence).
 
 - **Committed.** Atomic chunks, committed as you go. Stage specific files, commit, loop back to the next chunk. Many small commits per session is the pattern that consistently outperforms one mega-commit at the end. See **Commit Cadence** below for message anatomy.
 
@@ -74,6 +74,8 @@ Don't assume. Don't hide confusion. Surface tradeoffs.
 
 ORIENT (read the code) is the prerequisite. This principle is what to do with what you find: name the gaps, don't paper over them.
 
+At security boundaries and other high-stakes forks, weak evidence for what the user's words denote is a stop-and-ask. For ambiguous directives elsewhere, announce which reading you took before executing: "treating 'this' as the GitOps path."
+
 ### Simplicity first
 
 Minimum code that solves the problem. Nothing speculative.
@@ -84,9 +86,10 @@ Minimum code that solves the problem. Nothing speculative.
 | Build abstractions for single-use code         | Inline first; abstract when reused           |
 | Add "flexibility" or configurability not asked | Hardcode now; parameterize on demand         |
 | Handle errors for impossible scenarios         | Trust internal invariants; validate at edges |
+| Add a fallback, alias, or compat shim          | Check ship status first: pre-ship, delete the old shape and tighten to final — compat is a change that needs a pitch |
 | Write 200 lines when 50 would do               | Rewrite tighter                              |
 
-The test: would a senior engineer call this overcomplicated? If yes, simplify.
+Two tests: would a senior engineer call this overcomplicated? And how long does this code live? Lifespan scales architecture — a two-week throwaway earns no pipeline. The bar is usefulness, not smallness.
 
 ### The judo move
 
@@ -117,6 +120,7 @@ Touch only what you must. Clean up only your own mess.
 | Match existing style even if you'd do it differently   | Local consistency beats your preferences        |
 | Notice unrelated dead code → mention, don't delete     | Other branches/agents may rely on it            |
 | Remove imports/vars/funcs _your_ changes orphaned      | Clean up after yourself                         |
+| Fix labels/counts/error text your change made untruthful | Fix the lie in the same commit; stale renders as stale, not fresh |
 | Leave pre-existing dead code alone                     | Outside your remit unless explicitly asked      |
 | Don't touch comments you don't understand              | Karpathy: "side effects ... orthogonal to task" |
 
@@ -143,6 +147,12 @@ For multi-step work, state the plan with verification per step:
 
 Strong success criteria let you loop independently. Weak criteria require constant clarification.
 
+### Scope doubt
+
+"Are we overengineering?" — from the user or your own gut — gets adjudication, not reassurance: an honest verdict, the carrying cost of the extra structure quantified, and over-built work parked unpushed with revival criteria rather than silently deleted.
+
+Entering a review-fix round, triage blockers from follow-ups and declare a file budget before touching code — review loops ratchet scope monotonically (one observed loop: 8 rounds, 63 files; re-anchored to 6). "Documented why not" is a legitimate response to an absence finding.
+
 ---
 
 ## Scale Selection
@@ -163,47 +173,18 @@ Strategy changes dramatically based on scope. Pick the right weight class:
 
 ---
 
-## Dependency Chain
-
-Build things in this order. Validated across fullstack, Rust, and monorepo projects:
-
-```
-Types/Models -> Backend Logic -> API Routes -> Frontend Types -> Hooks/Client -> UI Components -> Tests
-```
-
-**Fullstack (Python + TypeScript):**
-
-1. Database model + migration
-2. Service/business logic layer
-3. API routes (FastAPI or tRPC)
-4. Frontend API client
-5. React hooks wrapping API calls
-6. UI components consuming hooks
-7. Lint -> typecheck -> test -> commit
-
-**Rust:**
-
-1. Error types (`thiserror` enum with `#[from]`)
-2. Type definitions (structs, enums)
-3. Core logic (`impl` blocks)
-4. Module wiring (`mod.rs` re-exports)
-5. `cargo check` -> `cargo clippy` -> `cargo test`
-
-**Key finding:** Database migrations are written AFTER the code that needs them. Frontend drives backend changes as often as the reverse.
-
----
-
 ## Verification Cadence
 
 The single most impactful practice in the dataset. Tight loops here make the rest of the skill mostly unnecessary; loose loops make every other guideline harder to follow.
 
-| Gate                   | Typically                  | Speed               |
-| ---------------------- | -------------------------- | ------------------- |
-| **Typecheck**          | Between edit batches       | Fast (primary gate) |
-| **Lint (autofix)**     | After implementation batch | Fast                |
-| **Tests (specific)**   | After feature complete     | Medium              |
-| **Tests (full suite)** | Before commit              | Slow                |
-| **Build**              | Before PR/deploy only      | Slowest             |
+| Gate                   | Typically                  | Speed                    |
+| ---------------------- | -------------------------- | ------------------------ |
+| **Typecheck**          | Between edit batches       | Fast (inner-loop gate)   |
+| **Lint (autofix)**     | After implementation batch | Fast                     |
+| **Tests (specific)**   | After feature complete     | Medium                   |
+| **Tests (full suite)** | Before commit              | Slow                     |
+| **Build**              | Before PR/deploy           | Slowest                  |
+| **Consumption check**  | Before calling it done     | Varies (the final proof) |
 
 ### The edit-verify-fix cycle
 
@@ -220,19 +201,36 @@ The pattern that produces debugging spirals: **2 changes → typecheck → 15 ca
 - Truncate verbose output: `2>&1 | tail -20`
 - Wrap tests with timeout: `timeout 120 uv run pytest`
 
+### Proof lives at the consumption boundary
+
+Typecheck through build prove the *producer*. "It works" is proven where the artifact is consumed:
+
+| Artifact         | Consumption check                                                 |
+| ---------------- | ----------------------------------------------------------------- |
+| Rendered config  | Render the composed output; grep it for the motivating invariant  |
+| Package/library  | Clean-clone install — no sibling checkout or cache to hide breaks |
+| UI               | Drive the real surface (agent-browser), not just the test         |
+| CLI              | Real invocation in a clean env, including the zero-arg case       |
+| Deployed service | Walk the ladder: merged → synced → applied → running              |
+
+Assert the motivating invariant in the consumed form, not "renders without error" — a wildcard can be accepted syntactically and still match nothing. When a symptom persists after a "fix," walk the promotion ladder before reopening the code: merged is not deployed, and the label is not the artifact. Review passes are not a substitute; a bogus foreign key survived multiple model reviews and died only on real apply.
+
+### A green check must demonstrably do the work
+
+Hollow greens are a named defect class: cached runs replayed as fresh, test filters matching zero tests, 7-second no-op CI jobs, env-gated suites silently skipping. A receipt carries a nonzero executed count, a plausible duration, a real exit code, uncached execution when the claim matters, and an invocation matching the gate that will judge the work (same flags, same env, the literal CI command). "Suspiciously fast" and "0 passed; N filtered out" are defects in the gate, not passes.
+
+Two more signal rules:
+
+- **Flake is a verdict, not a shrug.** It needs legs: the failure trace doesn't intersect the diff, the same failure shows on main or a sibling branch, a CI-shaped local run passes. Recurrence revokes the verdict, no matter who applied the label.
+- **A guard you haven't watched fire is decoration.** New gate or detector: induce the exact failure it exists to catch and show it tripping — and staying quiet on normal — before shipping it.
+
+### Felt surfaces need instruments
+
+"Buttery, gorgeous, no jank" becomes named acceptance criteria before work starts. Perf and visual loops need an objective signal — a metric, telemetry, a repro harness — before iteration two; loops judged by the next screenshot become random walks. For interactive perf, size the unit of work to the interaction delta before touching scheduling or concurrency. When the surface is one you can't observe (TUI feel, hardware, another machine), the human is the sensor: hand them a pre-registered expected outcome and a discriminating tell.
+
 ---
 
 ## Decision Trees
-
-### Read vs Edit
-
-```
-Familiar file you edited this session?
-  Yes -> Edit directly (verify after)
-  No  -> Read it this session?
-    Yes -> Edit
-    No  -> Read first (79% of quick fixes start with reading)
-```
 
 ### Subagents vs Direct Work
 
@@ -257,38 +255,40 @@ Can changes be made incrementally?
         Implement gaps as focused tasks
 ```
 
-### Bug Fix vs Feature vs Refactor
-
-| Type         | Cadence                                                                  | Typical Cycles |
-| ------------ | ------------------------------------------------------------------------ | -------------- |
-| **Bug fix**  | Grep error -> Read 2-5 files -> Edit 1-3 files -> Test -> Commit         | 1-2            |
-| **Feature**  | Plan -> Models -> API -> Frontend -> Test -> Commit                      | 5-15           |
-| **Refactor** | Audit -> Gap analysis -> Incremental migration -> Verify parity          | 10-30+         |
-| **Upgrade**  | Research changelog -> Identify breaking changes -> Bump -> Fix consumers | Variable       |
-
 ---
 
 ## Error Recovery
 
-**65% of debugging sessions resolve in 1-2 iterations.** The remaining 35% risk spiraling into 6+. The patterns below are calibrated to keep you in the first bucket.
+Most debugging resolves in 1-2 iterations when the red signal is classified before anything gets fixed. Misclassification is where thrash starts.
 
-### Quick resolution
+### Name the failure class first
 
-- Read the relevant code first (79% success correlation in the dataset)
-- Form an explicit hypothesis: "the issue is X because Y"
-- Make one targeted fix
-- Verify the fix actually worked before moving on
+| Red signal smells like        | Response                                                                                                          |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Install/env, runner syntax    | Fix the environment; don't touch code                                                             |
+| Stale artifact or cache       | Rebuild, cache-bust, confirm the running thing is your build                                       |
+| Self-induced parallel race    | Rerun sequentially once; don't serialize forever                                                   |
+| Pre-existing / inherited      | Prove it by absence (your signature missing, base red in the same place), then rebase — don't "fix" it in-branch |
+| Probe contradicts known state | Audit the probe first: timeouts, regexes, auth freshness                                           |
+| Actual code                   | Explicit hypothesis ("X because Y") → one targeted fix → verify                                    |
+
+CI red: download the raw log to a file with its exit code, collapse the cascade to its root, and reproduce with the exact CI command — approximations have missed real bugs. Full protocol in `references/recovery.md`.
+
+### Fix the class, bound the fix
+
+A reported bug is a sample from a population. Before patching the symptom, check whether sibling call sites are just getting lucky; fix once at the choke point; after the fix, sweep the population for the same defect. Generalize the diagnosis, bound the fix — sibling fixes ship as their own scoped follow-ups, never an accidental cross-product refactor.
 
 ### Spiral prevention
 
 - **Separate error domains.** Fix all type errors before chasing test failures; interleaving the two is how cascades compound.
-- **3-strike heuristic.** Three failed attempts on the same error is the signal to change approach entirely or escalate, not to try variation #4.
+- **3-strike heuristic.** Three failed attempts on the same error demands a genuinely new hypothesis one level deeper — not variation #4, and never an adjacent refactor mid-bug. Persistence spends its budget on depth, not breadth; and the done-bar belongs to the user, so stopping isn't yours to call alone.
 - **Cascade depth > 3.** Pause, enumerate all remaining issues, then fix in dependency order rather than reactive whack-a-mole.
-- **Context rot.** After ~15-20 iterations, `/clear` and start fresh. A clean session with a better prompt usually outperforms accumulated corrections.
+- **Second occurrence of the same issue.** That's a durable-capture trigger: a regression test, a pinned invariant, or a memory entry, plus a level switch to fix the class. Restart is the last resort, not the reflex.
+- **Re-entry.** After compaction, handoff, or resumption, re-derive state from the repo and re-read pinned invariants before touching adjacent code. A fresh session is the fallback when re-grounding fails, not a scheduled event.
 
-### Two-correction rule
+### Incident mode
 
-Correcting the same issue twice is the signal to `/clear` and restart. Context noise compounds faster than fixes resolve it.
+Production on fire changes the grammar: freeze mutations and go read-only, park in-flight work so the fix diff stays pure, run two tracks (hotfix pinned to the deployed revision plus a clean main-based PR for the durable fix), and convert every scar into a guard, test, or runbook line before closing. Full shape in `references/recovery.md`.
 
 ---
 
@@ -308,6 +308,16 @@ Commit each logical chunk as it lands and verifies. Many small commits per sessi
 | Verification fails or edit is speculative       | Don't commit    |
 
 If a reviewer would want it as a separate diff, it's a separate commit.
+
+### Shape checkpoint
+
+Correctness gates can't see sprawl: a 397-file manifest factory shipped 549 green tests and two passing cross-model reviews, and died in seconds from the diffstat. At each commit boundary, glance at the shape, not just the gates:
+
+```bash
+git diff --name-only origin/main...HEAD | awk -F/ '{print $1"/"$2}' | sort | uniq -c | sort -nr
+```
+
+Classify by top-level path against the mission and ask: would the human veto this from the diffstat? A commit boundary is also a memory boundary — the natural moment to capture a gotcha before the next chunk buries it.
 
 ### Mirror local style
 
@@ -331,7 +341,7 @@ Conventional Commit types: `feat` (capability), `fix` (bug), `refactor` (no beha
 
 ### HEREDOC + Co-Author
 
-Always pass messages via HEREDOC to preserve formatting. Add a `Co-Authored-By` trailer that names the model, "Claude" alone doesn't disambiguate across multi-agent sessions.
+Compose messages via HEREDOC (or `git commit -F <file>`) to preserve formatting — `-m` flags keep each paragraph on one unwrapped line and burn amend cycles. Add a `Co-Authored-By` trailer that names the model, "Claude" alone doesn't disambiguate across multi-agent sessions.
 
 ```bash
 git commit -m "$(cat <<'EOF'
@@ -346,15 +356,11 @@ EOF
 )"
 ```
 
-### Examples
+Backstop the wrap after committing (a check, not the mechanism):
 
-| Bad                        | Good                                              |
-| -------------------------- | ------------------------------------------------- |
-| `fix: bug`                 | `fix(api): resolve null deref in token refresh`   |
-| `update stuff`             | `chore(deps): bump axios to 1.7.4`                |
-| `WIP`                      | `feat(auth): scaffold magic-link sign-in flow`    |
-| `Added new file for users` | `feat(users): add bulk import endpoint`           |
-| `feat: it works now`       | `feat(search): add fuzzy matching to user lookup` |
+```bash
+git log -1 --format=%B | awk 'length($0) > 76 && $0 !~ /^(Co-Authored-By:|https?:\/\/)/ { print "over 76 chars: " $0; bad=1 } END { exit bad }'
+```
 
 ### Multi-agent staging
 
@@ -366,7 +372,7 @@ git diff --staged         # Review what you're about to commit
 git add <specific-files>  # Only files you personally touched
 ```
 
-Never `git add -A` or `git add .` (catches other agents' WIP and secrets). Never `git restore` files you didn't modify. Never `git push` without explicit request, push is the human's call. Skip planning docs, scratch files, and `.local.md` from the repo.
+Never `git add -A` or `git add .` (catches other agents' WIP and secrets). Never `git restore` files you didn't modify. Never push `main`/`master` or tags — those need an explicit go-ahead. Pushing your own PR/feature branch in a shareable state is normal: re-fetch first, and after a history rewrite use `--force-with-lease` pinned to the just-fetched SHA. When in doubt whether a branch is yours, ask. Skip planning docs, scratch files, and `.local.md` from the repo.
 
 ---
 
@@ -375,13 +381,13 @@ Never `git add -A` or `git add .` (catches other agents' WIP and secrets). Never
 | Anti-Pattern                                     | Fix                                             |
 | ------------------------------------------------ | ----------------------------------------------- |
 | 20+ edits without verification                   | Verify every 2-3 edits                          |
-| Fix without verifying the fix (73% of fixes!)    | One fix, one verify, repeat                     |
+| Fix without verifying the fix                    | One fix, one verify, repeat                     |
 | `fix -> fix -> fix` chains without checking      | Always verify between fixes                     |
 | Editing without reading first                    | Read the file immediately before editing        |
 | Writing tests from memory                        | Read actual function signatures first           |
 | Changing shared types without grepping consumers | `Grep` all usages before modifying shared types |
 | Mixing move and change in one commit             | Move first commit, change second commit         |
-| Debugging spiral past 3 attempts                 | Change approach or escalate                     |
+| Debugging spiral past 3 attempts                 | New hypothesis one level deeper, never wider    |
 | Premature optimization                           | Correctness first, optimize after tests pass    |
 | One mega-commit at end of session                | Commit each logical chunk as it lands           |
 | Bare titles like `fix: bug` or `update stuff`    | Specific subject + body explaining why          |
@@ -389,7 +395,8 @@ Never `git add -A` or `git add .` (catches other agents' WIP and secrets). Never
 | Filenames or paths in the subject line           | Describe the behavior, not the file             |
 | Uncertain language ("might fix", "should work")  | State facts; read more code if you don't know   |
 | `git add -A` / `git add .`                       | Stage specific files only                       |
-| `git push` without explicit request              | Push is the human's call; never autonomous      |
+| Pushing `main`/`master` or tags autonomously     | Explicit go-ahead only; your own PR branch is fine |
+| Acting on review findings without a file budget  | Triage blockers vs follow-ups; declare the budget first |
 | Silently picking one interpretation              | Surface options; ask before committing to one   |
 | "Improving" code adjacent to your change         | Stay surgical; touch only what's asked          |
 | Touching comments you don't understand           | Leave them; not your scope                      |
@@ -402,13 +409,13 @@ Never `git add -A` or `git add .` (catches other agents' WIP and secrets). Never
 
 ## Cross-Model Review
 
-For high-stakes changes, run `/hyperskills:cross-model-review` after implementation. A different reviewer model has different blind spots than the author and catches real bugs: migration idempotency, PII in debug logging, empty-array edge cases, missing batch limits. Use `/hyperskills:codex-review` only when you specifically want the Claude → Codex direction with `codex review` subcommand semantics.
+For high-stakes changes, run `/hyperskills:cross-model-review` after implementation. A different reviewer model breaks self-review bias and catches real bugs: migration idempotency, PII in debug logging, empty-array edge cases, missing batch limits. It does not protect against shared-training staleness — version, SOTA, and ecosystem claims need live primary sources no matter how many models agreed. Use `/hyperskills:codex-review` only when you specifically want the Claude → Codex direction with `codex review` subcommand semantics.
 
 ---
 
 ## References
 
-For quantitative benchmarks and implementation archetype templates, consult `references/benchmarks.md`.
+For quantitative benchmarks and implementation archetype templates, consult `references/benchmarks.md`. For the full CI-triage protocol, flake evidence standard, and incident-mode grammar, consult `references/recovery.md`.
 
 ---
 

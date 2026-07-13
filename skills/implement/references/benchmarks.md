@@ -71,6 +71,17 @@ Research swarm -> Task graph with dependencies -> Wave dispatch (3-7 agents per 
 
 ---
 
+## Typical Cycles by Task Type
+
+| Type         | Cadence                                                                  | Typical Cycles |
+| ------------ | ------------------------------------------------------------------------ | -------------- |
+| **Bug fix**  | Grep error -> Read 2-5 files -> Edit 1-3 files -> Test -> Commit         | 1-2            |
+| **Feature**  | Plan -> Models -> API -> Frontend -> Test -> Commit                      | 5-15           |
+| **Refactor** | Audit -> Gap analysis -> Incremental migration -> Verify parity          | 10-30+         |
+| **Upgrade**  | Research changelog -> Identify breaking changes -> Bump -> Fix consumers | Variable       |
+
+---
+
 ## Context Engineering Budget
 
 | Item                        | Tokens            |
@@ -78,13 +89,14 @@ Research swarm -> Task graph with dependencies -> Wave dispatch (3-7 agents per 
 | Baseline system + CLAUDE.md | ~20k              |
 | Usable budget (200k window) | ~180k             |
 | Target utilization          | 40-60%            |
-| Context rot threshold       | ~15-20 iterations |
+| Context rot onset (debugging spirals, old dataset) | ~15-20 iterations |
 
 ### Context Preservation Strategies
 
 - **Subagent delegation:** Research and verbose operations in separate context windows
 - **Just-in-time loading:** Glob/Grep to discover, Read on demand (don't pre-load everything)
 - **`/clear` between unrelated tasks:** Kitchen-sink sessions kill performance
+- **Mid-task drift:** Re-ground from the repo and pinned invariants at every re-entry; marathon sessions (11-20 hours, Apr-Jul 2026 corpus) stayed coherent by re-reading the playbook per phase, not by clearing
 - **After compaction:** Always preserve modified file list and test commands
 
 ---
