@@ -8,7 +8,7 @@
     {
       "name": "hyperskills",
       "source": "./",
-      "description": "Focused AI agent skills for integrated planning, research, implementation, review, memory, git, Kubernetes dev, TUI design, and Python tooling"
+      "description": "Focused AI agent skills for integrated planning, research, implementation, image generation, review, memory, git, Kubernetes dev, TUI design, and Python tooling"
     }
   ]
 }

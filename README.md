@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Skills-16-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="16 Skills">
+  <img src="https://img.shields.io/badge/Skills-17-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="17 Skills">
   <img src="https://img.shields.io/badge/skills.sh-Compatible-ff6ac1?style=for-the-badge&logo=vercel&logoColor=white" alt="skills.sh">
 </p>
 
@@ -34,7 +34,7 @@ hyperskills is built around an agent workflow. Brainstorming structured by the D
 
 Domain skills round out the toolbox where models have stale or missing knowledge: current Astral Python tooling, Tilt operational decision trees, and terminal UI design that survives across emulators.
 
-Each skill encodes procedural knowledge, decision trees, anti-patterns, and current SOTA. None prescribes a strict workflow. They give you knowledge and framing; you decide when to reach for them. Skills carry procedural knowledge in-context; [Sibyl](https://github.com/hyperb1iss/sibyl) carries decisions, patterns, and learnings across sessions. 16 skills, all installable independently.
+Each skill encodes procedural knowledge, decision trees, anti-patterns, and current SOTA. None prescribes a strict workflow. They give you knowledge and framing; you decide when to reach for them. Skills carry procedural knowledge in-context; [Sibyl](https://github.com/hyperb1iss/sibyl) carries decisions, patterns, and learnings across sessions. 17 skills, all installable independently.
 
 ## ⚡ Installation
 
@@ -55,6 +55,7 @@ npx skills add hyperbliss/hyperskills --all
 # Pick what you need
 npx skills add hyperbliss/hyperskills --skill implement
 npx skills add hyperbliss/hyperskills --skill orchestrate
+npx skills add hyperbliss/hyperskills --skill codex-imagegen
 ```
 
 ### Manual
@@ -77,6 +78,7 @@ A few combinations come up often, more as observation than prescription:
 | Architecture decision   | brainstorm, research                                  |
 | Large refactor          | plan, orchestrate, implement, cross-model-review      |
 | Bug fix                 | implement (the skill scales itself for trivial fixes) |
+| Raster asset delegation | codex-imagegen from any shell-capable agent harness   |
 | Opening a PR            | super-good-pr, then announce it in your own voice     |
 | Python project work     | uv, ruff, ty, uv-build                                |
 | Knowledge consolidation | dream pulls insights from past sessions into Sibyl    |
@@ -149,6 +151,19 @@ The Claude → Codex direction in depth. `codex review` (structured diff, custom
 
 ```bash
 /hyperskills:codex-review
+```
+
+#### `codex-imagegen`: Codex Image Generation Delegation
+
+Generate or edit raster assets from Claude Code, Pi, Cursor, or another
+shell-capable harness by delegating to Codex's built-in `$imagegen` capability.
+Uses headless `codex exec` as the zero-setup path, keeps the desktop UI out of
+the loop, fans independent images out concurrently, carries edit invariants and
+reference-image roles, verifies every final workspace artifact, and supports
+optional threaded refinement through `codex mcp-server`.
+
+```bash
+/hyperskills:codex-imagegen
 ```
 
 #### `super-good-pr`: Reviewer-First PR Descriptions
