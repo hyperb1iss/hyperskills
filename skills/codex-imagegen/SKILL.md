@@ -112,6 +112,12 @@ NOTES: <material limitations, or none>
 IMAGEGEN_BRIEF
 ```
 
+`codex exec` refuses to launch when `-C` targets a directory outside a trusted
+git repository, failing with `Not inside a trusted directory and
+--skip-git-repo-check was not specified.` Add `--skip-git-repo-check` only when
+the workspace is deliberately not a git repo, such as a scratchpad or temporary
+build area. Inside a project repo, omit the flag and keep the trust check.
+
 For multiple input images, add one `-i` argument per file and preserve the same
 ordering in the brief. Use absolute paths when the leader and Codex might resolve
 working directories differently.
@@ -182,6 +188,10 @@ Codex's receipt is a claim until the leader verifies the filesystem artifact.
 5. Return the final path, final prompt, generation mode, and verification notes
    to the user. Never reduce the handoff to "done."
 
+`codex exec` may echo the final receipt twice in one output stream, once as
+streamed agent output and once as the final message. Duplicate receipt text is
+one run, not two; count generations by process invocations.
+
 If Codex generated successfully but failed to move the selected image, use the
 exact staging path from its receipt and copy it non-destructively into the
 workspace. Never hunt broadly through another user's generated-image history or
@@ -214,6 +224,7 @@ path. Do not make MCP configuration a prerequisite for one-shot generation.
 | Failure                                                     | Response                                                                                                                             |
 | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | `codex` missing                                             | Report that the Codex CLI is required and include the failed command.                                                                |
+| Launch fails with `Not inside a trusted directory`          | Add `--skip-git-repo-check` for a deliberately non-git workspace, or point `-C` at the trusted repo.                                 |
 | Authentication or entitlement failure                       | Preserve the exact error and ask the user to repair Codex access. Do not retry blindly.                                              |
 | `$imagegen` or built-in image tool unavailable              | Report the capability gap. Do not claim the desktop app will fix it.                                                                 |
 | Built-in tool fails once                                    | Read the error, correct a specific prompt or input issue, and retry once.                                                            |
