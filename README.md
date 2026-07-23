@@ -168,7 +168,7 @@ optional threaded refinement through `codex mcp-server`.
 
 #### `super-good-pr`: Reviewer-First PR Descriptions
 
-What a PR description is actually for: handing a human the mental model fast, proving the parts they'd doubt, and being honest about what you didn't do. Lead with why, prove every claim with a receipt, name the load-bearing invariant, stay honest about blast radius. And because a body is born once but lives for weeks: surgical read-modify-write maintenance (never regenerate), SHA-keyed receipt refresh after every push, squash rewrites that carry the story into the body, and review-thread disposition ledgers. Carries the section spine, the emoji palette (and the AI-slop set to avoid), and repo-template integration.
+What a PR description is actually for: handing a human the mental model fast, proving the parts they'd doubt, and being honest about what you didn't do. Lead with why, prove every claim with a receipt, name the load-bearing invariant, stay honest about blast radius. And because a body is born once but lives for weeks: surgical read-modify-write maintenance (never regenerate), SHA-keyed receipt refresh after every push, squash rewrites that carry the story into the body, and review-thread disposition ledgers. Carries the section spine, the emoji palette (and the AI-slop set to avoid), repo-template integration, and diagram guidance — topology and flow changes get native mermaid in the body, chosen by change shape.
 
 ```bash
 /hyperskills:super-good-pr

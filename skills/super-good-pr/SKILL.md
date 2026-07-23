@@ -31,7 +31,7 @@ Use the headers that carry weight for this change. Each is a `##` with a semanti
 3. **`## 💡 What this is`** — the core, two to four sentences. Lead with the mental model; kill the naive primitive here if there is one.
 4. **`## 🤔 Why we need it & what it replaces`** — the old world and why it falls short; what's deliberately _not_ built and why the obvious version was dangerous; the blast-radius framing ("dark by default", "non-X deployments untouched").
 5. **`## 🎯 The invariant / anchor`** _(when there's one load-bearing property)_ — the single thing to anchor the review on. Optional but powerful; skip it if the change has no single crux.
-6. **`## 🛠️ How it works`** — a numbered, sub-headed walkthrough a reviewer follows cold. Name files. Name patterns by name. This is where most of the body lives.
+6. **`## 🛠️ How it works`** — a numbered, sub-headed walkthrough a reviewer follows cold. Name files. Name patterns by name. This is where most of the body lives. Topology, flow, and ordering changes get a diagram here (see Diagrams and visual enrichment below).
 7. **Domain deep-dives** _(as needed)_ — `## 🗄️ The database`, `## 🔗 Identity, end to end`. Add one when a subsystem deserves its own focused pass.
 8. **`## 🚦 Rollout sequencing (and why it's safe)`** _(for anything deployed)_ — the order of operations, what's safe to stop at, what the old path keeps doing, and the expected day-one surprises: the alert that fires legitimately, the manual step that remains.
 9. **`## 🔁 What changed since the last review round`** _(on re-review)_ — the delta. Credit reviewers by handle. Mark security/critical fixes (🛡️ / 🚨). This is how a re-reviewer reloads without re-reading.
@@ -50,6 +50,28 @@ The Validation section is where trust is won or lost. Rules:
 - Receipts are keyed to a SHA. Any rebase, squash, or amend expires them — re-run the gates against the new head and re-stamp the body. Stale green is a lie with a timestamp.
 - Prefer integration-level proof with before/after state over local-test narration. If the PR ships a guard, show the guard tripping — the induced failure is the receipt.
 - After posting or editing, read the rendered body once. That pass catches quoting mangles, stale timestamps, and claims the final diff no longer supports.
+
+## Diagrams and visual enrichment
+
+When a PR changes topology — services, request paths, data flow, state machines, deployment shape — prose makes the reviewer rebuild the picture in their head. Hand them the picture instead. GitHub renders ```` ```mermaid ```` fenced blocks natively, so a diagram costs nothing to ship and lives in the body itself.
+
+| Change shape                                   | Visual                                          |
+| ---------------------------------------------- | ----------------------------------------------- |
+| Service/network topology, request path changes | Mermaid `flowchart` — before/after pair         |
+| Protocol, handshake, cross-service call order  | Mermaid `sequenceDiagram`                       |
+| State machine or lifecycle changes             | Mermaid `stateDiagram-v2`                       |
+| Schema relationships, new tables/FKs           | Mermaid `erDiagram`                             |
+| Rollout phases and gates                       | Mermaid `flowchart` with the safe-stop points   |
+| UI changes                                     | Screenshot or short clip, drag-dropped as attachment |
+
+Rules that keep diagrams load-bearing:
+
+- **Mermaid first.** It renders natively, survives branch deletion, edits like text on later refreshes, and never 404s. Reach for an image only when mermaid can't express it.
+- **Before/after beats single-state.** For a topology change, two small diagrams (old path, new path) — or one diagram with the removed edge visibly styled out — show the delta the way a diff shows code.
+- **Draw at the invariant's altitude.** The diagram shows the property the review anchors on — the new hop, the moved boundary, the enforced ordering — not every box in the system. If it needs a legend, it's too big.
+- **A diagram is a factual claim.** A redesign that changes the shape expires it exactly like a receipt — refresh it with the rest of the body, and include it in the post-edit rendered-body read (a mermaid syntax error renders as an ugly error block, not a diagram).
+- **SVG caveat.** GitHub's drag-drop attachments accept PNG/JPG/GIF/MP4 but not SVG. An SVG must live in the repo and be referenced by URL, which couples the body to a file that can move or vanish — prefer mermaid, or export to PNG and attach.
+- **Decorative diagrams are slop.** A diagram restating a trivial diff ("handler calls service") costs reviewer time instead of saving it. Draw only what prose can't carry in one read.
 
 ## Maintaining the body
 
