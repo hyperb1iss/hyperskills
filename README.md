@@ -139,18 +139,10 @@ Seven orchestration strategies mined from 597+ real agent dispatches: Research S
 
 #### `cross-model-review`: Bidirectional Cross-Model Code Review
 
-The author model writes, a different model reviews — and the independence claim is scoped honestly: it breaks self-review bias, not shared-training staleness. Works in either direction: Claude Code calls Codex via `codex review`, and Codex calls Claude via `claude -p`, whose gnarly gotchas (the `yield_time_ms: 300000` rule, the `--` separator for variadic flags, output capture to a file rather than `tail`) are all documented. Now covers the receiving half too: findings are claims to verify, findings-ledger re-review loops that converge instead of churning, verdict freshness (a PASS covers a SHA), the hang playbook, and a labeled degradation ladder. Beyond code review: claim-level fact-checks, diagnosis checks before fix mode, and artifact-mediated design consults.
+The author model writes, a different model reviews — and the independence claim is scoped honestly: it breaks self-review bias, not shared-training staleness. Works in either direction: Claude Code calls Codex via `codex review` (structured diff, custom prompt supported) or `codex exec` (freeform deep-dive), and Codex calls Claude via `claude -p`, whose gnarly gotchas (the `yield_time_ms: 300000` rule, the `--` separator for variadic flags, the `ANTHROPIC_API_KEY` billing trap, output capture to a file rather than `tail`) are all documented. Covers the receiving half too: findings are claims to verify, findings-ledger re-review loops that converge instead of churning, verdict freshness (a PASS covers a SHA), the hang playbook for both directions, and a labeled degradation ladder. Beyond code review: claim-level fact-checks, diagnosis checks before fix mode, and artifact-mediated design consults.
 
 ```bash
 /hyperskills:cross-model-review
-```
-
-#### `codex-review`: Codex-Specific Code Review
-
-The Claude → Codex direction in depth. `codex review` (structured diff, custom prompt supported) and `codex exec` (freeform deep-dive), multi-pass strategy, the Ralph Loop with a convergence budget instead of a hard round cap, the hang playbook (output-file growth is the discriminator, never elapsed time), and honest degradation when the reviewer can't run. Reach for `cross-model-review` when you want bidirectional coverage; reach for this one when you specifically want Codex reviewing from a Claude session.
-
-```bash
-/hyperskills:codex-review
 ```
 
 #### `codex-imagegen`: Codex Image Generation Delegation
@@ -257,8 +249,7 @@ Skills with reference files for the deep-dive material:
 | Skill                | Reference Files                                                                               |
 | -------------------- | --------------------------------------------------------------------------------------------- |
 | `implement`          | `benchmarks.md`, `recovery.md`: quantitative data from 21k operations, error-recovery detail  |
-| `codex-review`       | `prompts.md`: ready-to-use review prompt templates                                            |
-| `cross-model-review` | `prompts.md`, `failure-recovery.md`: review prompts, hang ladder and failure triage           |
+| `cross-model-review` | `prompts.md`, `failure-recovery.md`: review prompts, hang ladders and failure triage          |
 | `orchestrate`        | `dispatch-briefs.md`: copyable worker, reviewer, and research dispatch briefs                 |
 | `dream`              | `conversation-formats.md`, `extraction-guide.md`: session schemas and memory extraction rules |
 | `tilt`               | `api-reference.md`, `patterns.md`: full Tiltfile API and power patterns                       |

@@ -21,17 +21,15 @@ hyperskills/
 │   ├── implement/
 │   │   ├── SKILL.md
 │   │   └── references/
-│   │       └── benchmarks.md
-│   ├── codex-review/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   │       └── prompts.md
+│   │       ├── benchmarks.md
+│   │       └── recovery.md
 │   ├── codex-imagegen/
 │   │   └── SKILL.md
 │   ├── cross-model-review/
 │   │   ├── SKILL.md
 │   │   └── references/
-│   │       └── prompts.md
+│   │       ├── prompts.md
+│   │       └── failure-recovery.md
 │   ├── dream/
 │   │   ├── SKILL.md
 │   │   └── references/
@@ -288,7 +286,6 @@ Sizes drift as skills evolve — check with `wc -w skills/*/SKILL.md` instead of
 | `research`           | none       | Process — knowledge gathering                    |
 | `orchestrate`        | 1 file     | Process — multi-agent dispatch                   |
 | `implement`          | 2 files    | Process — implementation                         |
-| `codex-review`       | 1 file     | Process — Codex-specific review (Claude → Codex) |
 | `codex-imagegen`     | none       | Process — Codex image generation delegation      |
 | `cross-model-review` | 2 files    | Process — bidirectional cross-model review       |
 | `dream`              | 2 files    | Process — conversation memory consolidation      |
@@ -306,7 +303,7 @@ When adding a new skill, it should fit one of these categories:
 
 **Process skills** — HOW to approach a class of work:
 
-- `brainstorm`, `plan`, `research`, `orchestrate`, `implement`, `codex-review`, `codex-imagegen`, `cross-model-review`, `dream`
+- `brainstorm`, `plan`, `research`, `orchestrate`, `implement`, `codex-imagegen`, `cross-model-review`, `dream`
 - These tend to be workflow-heavy with phases and decision gates
 
 **Domain skills** — specialized knowledge for a specific technology or practice:

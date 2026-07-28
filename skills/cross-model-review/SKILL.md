@@ -1,6 +1,6 @@
 ---
 name: cross-model-review
-description: Use this skill for cross-model code reviews where a different AI model reviews code written by the current model, and for cross-model fact-checks, diagnosis checks, and design consults. Activates on mentions of cross-model review, peer review, second opinion, review my code, review this PR, review changes, independent review, unbiased review, different model review, cross-check code, code review, confer with codex, fact-check this doc, or check my conclusion.
+description: Use this skill for cross-model code reviews where a different AI model reviews code written by the current model, and for cross-model fact-checks, diagnosis checks, and design consults. Covers both directions - Claude calling Codex, and Codex calling Claude. Activates on mentions of cross-model review, codex review, code review with codex, codex check, codex exec review, gpt review, run codex, peer review, second opinion, review my code, review this PR, review changes, independent review, unbiased review, different model review, cross-check code, code review, confer with codex, fact-check this doc, or check my conclusion.
 ---
 
 # Cross-Model Code Review
@@ -168,9 +168,9 @@ A bare `codex review` (no scope) is the #1 cause of Claude → Codex failures: i
 | Single commit           | `codex review --commit <SHA>` |
 | Working tree (unstaged) | `codex review --uncommitted`  |
 
-For anything outside this trio (spec docs, single files, custom scopes, personas), use `codex exec "PROMPT"` with explicit scope in the prompt, never bare `codex review`.
+Scoped `codex review` also takes custom instructions as a trailing `[PROMPT]` argument (as of Jul 2026: `codex review --base main "focus on error handling"`), so a focused pass keeps structured review behavior. Reach for `codex exec "PROMPT"` when the artifact isn't a diff at all: spec docs, single files outside version control, freeform investigations. Never bare `codex review`.
 
-If `codex review` output exceeds ~100KB, the diff is too large for one pass. Split: `codex review --commit <SHA1>`, `codex review --commit <SHA2>`, or use `codex exec` with a narrowed prompt ("Review error handling only").
+If `codex review` output exceeds ~100KB, the diff is too large for one pass. Split: `codex review --commit <SHA1>`, `codex review --commit <SHA2>`, or use `codex exec` with a narrowed prompt ("Review error handling only"). Large `codex exec` transcripts are a different animal: size alone is not a failure signal, see `references/failure-recovery.md`.
 
 ---
 
@@ -295,6 +295,15 @@ Findings are claims, not orders. Re-verify each in code, git history, or live da
 | Intentional keep | Verified, but the code is right     | Name the rationale; argue wrong findings down with receipts, never silently drop |
 | Can't verify     | Needs live data or human judgment   | Flag to the human                                                    |
 
+Characteristic reviewer misses to check first, whichever model reviewed:
+
+| Failure mode        | Check                                                    |
+| ------------------- | -------------------------------------------------------- |
+| Temporal scope      | Did it review the commit state the finding claims?       |
+| Near-name confusion | Is the cited artifact the one actually changed?          |
+| Invented flags/APIs | Does the suggested flag or function exist? Run `--help`  |
+| Stale-at-fix-time   | Was the complaint valid at review time but now resolved? |
+
 Report the disposition ledger ("took 4, declined 3 with reasons, flagged 2") — on the PR when humans are watching. Scorecard the reviewer ("4 right, 3 wrong, 2 nits") to calibrate trust. Two independently-briefed reviewers converging on the same bug upgrades it to confirmed.
 
 **Scope membrane for fix passes:** review-fix loops are a monotonic scope ratchet — pointed at a PR and told to iterate until clean, a reviewer will eventually touch 100 files. Pre-declare a file budget before the fix pass. Blockers need changed-line causality; suggestions may cover nearby risk; everything else is a follow-up. Cheap nits on a PASS still get adopted. Give push-triggered reviewers a named stop condition: green with only non-blocking suggestions = done.
@@ -317,12 +326,16 @@ Both CLIs scope what the reviewer can read, write, and execute. Default to the m
 
 ### Codex flags worth knowing (as of Jul 2026)
 
-| Flag                                | When                                                                                       |
-| ----------------------------------- | ------------------------------------------------------------------------------------------ |
-| `--skip-git-repo-check`             | Running from a non-repo directory                                                          |
-| `--add-dir <DIR>`                   | Extend read access to another path                                                         |
-| `--json` / `--output-last-message`  | Capture the verdict; read-only sandboxes silently fail to write a requested report file    |
-| `-c model_reasoning_effort="xhigh"` | Spec/RFC review only (see Effort Override Policy)                                          |
+| Flag                                         | When                                                                                    |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `--skip-git-repo-check`                      | Running from `/tmp` or any non-repo dir (trips the git trust check)                     |
+| `--add-dir <DIR>`                            | Extend read access to another path                                                      |
+| `-C <DIR>` / `--cd <DIR>`                    | Run in another worktree without `cd`                                                    |
+| `--ephemeral`                                | One-shot session, no persistence                                                        |
+| `--full-auto`                                | Alias for `--ask-for-approval never --sandbox workspace-write`; only when applying fixes |
+| `--dangerously-bypass-approvals-and-sandbox` | Last resort; explicit user request only                                                 |
+| `--json` / `--output-last-message`           | Capture the verdict; read-only sandboxes silently fail to write a requested report file |
+| `-c model_reasoning_effort="xhigh"`          | Spec/RFC review only (see Effort Override Policy)                                       |
 
 Version-pinned CLI flags are the fastest-rotting content a skill can carry — a documented `--sandbox` form was already rejected by a newer codex build in the field. When the installed CLI disagrees with this table, the CLI wins; flag the skill for a patch.
 
@@ -379,7 +392,18 @@ Thorough reviews use multiple focused passes rather than one vague pass — sing
 | **Architecture** | Coupling, abstractions, API consistency     | Tool-access mode for full file context                               |
 | **Performance**  | O(n²), N+1 queries, memory leaks            | Focused investigation with performance persona                       |
 
-Ceremony scales with blast radius, not line count: security-sensitive changes (auth, payments, crypto) always get the security pass; the user can waive the loop for trivial diffs and demand more for big ones. Fix critical findings between passes to avoid noise compounding. Spec-level review and code-level verification are complements, not substitutes — they catch the same invariant at different altitudes.
+Run passes sequentially — fixing critical findings between passes — when the diff is changing under review. On a frozen artifact, parallel lens-locked passes (one concern each, explicit non-goals) produce additive non-overlapping findings and finish faster.
+
+Line counts are rough guides; scale passes to risk and surface, not arithmetic:
+
+| Change size                                 | Strategy                       |
+| ------------------------------------------- | ------------------------------ |
+| < 50 lines, single concern                  | Single scoped review           |
+| 50-300 lines, feature work                  | Scoped review + security pass  |
+| 300+ lines or architecture change           | Full 4-pass                    |
+| Security-sensitive (auth, payments, crypto) | Always include security pass   |
+
+Ceremony scales with blast radius, not line count: security-sensitive changes (auth, payments, crypto) always get the security pass; the user can waive the loop for trivial diffs and demand more for big ones. Spec-level review and code-level verification are complements, not substitutes — they catch the same invariant at different altitudes.
 
 ---
 
@@ -416,6 +440,9 @@ Ready-to-use prompt templates — security, architecture, performance, error han
 | `claude -p` from Codex with `ANTHROPIC_API_KEY` in the env              | Review silently bills per-token to the API                                                                                             | `env -u ANTHROPIC_API_KEY` on the spawning call — see Rule 4                                                                  |
 | Bare `codex review` (no scope flag)                                     | Hangs or produces 100KB+ blob output                                                                                                   | Exactly one scope flag — see the Claude → Codex rule                                                                          |
 | Shell `timeout` wrapped around a review                                 | Reviews legitimately take 30s–5min+; false exit-124 failures                                                                           | No shell timeout by default — see Failure Recovery                                                                              |
+| Treating transcript size as the failure signal                          | A 1MB+ `codex exec` transcript can be a successful deep dive                                                                           | Judge by output growth and convergence to a verdict — see `references/failure-recovery.md`                                      |
+| `--full-auto` for a pure review                                         | Grants write access the review doesn't need                                                                                            | `--sandbox read-only`; `--full-auto` only when the pass applies fixes                                                           |
+| Effort override on routine code review                                  | Wastes tokens, ignores user defaults                                                                                                   | `-c model_reasoning_effort="xhigh"` is spec review only — see Effort Override Policy                                            |
 | Piping a review to `tail -300` / `head -300`                            | Pipe buffers until EOF; discards the verdict (usually near the top)                                                                    | Redirect to a file — see Capture Output to a File                                                                             |
 | Printing `review_output=/tmp/...` but not redirecting Claude there      | The path exists but the output never lands there                                         | Always run `claude ... > "$out" 2>&1` after echoing the path                                                                  |
 | Assigning `status=$?` in Codex shell snippets                           | zsh reserves `status` as read-only                                                                                                     | Use `rc=$?` — see the Gold Path                                                                                               |

@@ -53,6 +53,8 @@ The slots that repeatedly produce sharp reviews. Compose per dispatch — not ev
 [Original ask — verbatim]   The user asked: "<paste the user's exact words>"
 [Scope]                     Review exactly <base>..<SHA> / only these files: <list>. Nothing else.
 [Persona]                   You are a senior <domain> engineer.
+[Keystone]                  The load-bearing claim is: <claim>. Attack it first; the whole
+                            change rides on it.
 [Receipts already run]      Assume these passed locally: <exact commands + counts>. Do not re-run them.
 [Ambient failures]          <known pre-existing failure> fails on this branch for unrelated reasons — not this diff.
 [Risk areas]                I am least confident about <the implementer's own doubts>.

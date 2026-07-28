@@ -409,7 +409,7 @@ Never `git add -A` or `git add .` (catches other agents' WIP and secrets). Never
 
 ## Cross-Model Review
 
-For high-stakes changes, run `/hyperskills:cross-model-review` after implementation. A different reviewer model breaks self-review bias and catches real bugs: migration idempotency, PII in debug logging, empty-array edge cases, missing batch limits. It does not protect against shared-training staleness — version, SOTA, and ecosystem claims need live primary sources no matter how many models agreed. Use `/hyperskills:codex-review` only when you specifically want the Claude → Codex direction with `codex review` subcommand semantics.
+For high-stakes changes, run `/hyperskills:cross-model-review` after implementation. A different reviewer model breaks self-review bias and catches real bugs: migration idempotency, PII in debug logging, empty-array edge cases, missing batch limits. It does not protect against shared-training staleness — version, SOTA, and ecosystem claims need live primary sources no matter how many models agreed.
 
 ---
 
