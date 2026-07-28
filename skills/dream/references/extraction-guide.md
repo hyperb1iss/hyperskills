@@ -39,7 +39,7 @@
 
 ### Bad Extractions (Don't Write These)
 
-```
+```text
 "Fixed the auth bug"
 → No: What bug? What was the root cause? What's the transferable insight?
 
@@ -52,7 +52,7 @@
 
 ### Good Extractions
 
-```
+```text
 "JWT refresh tokens fail silently when Redis TTL expires before token expiry.
 Root cause: token service catches WRONGTYPE error but swallows it.
 Fix: Add explicit type check before SET, regenerate token on type mismatch.
@@ -86,7 +86,7 @@ The strongest entries become active constraints, not trivia: a future session sh
 
 The highest-leverage captures are often not technical gotchas. Same format, same bar:
 
-```
+```text
 "Trust calibration: this lane's render + unit suites stayed green while four live
 behaviors broke (as of 2026-07). Before trusting green here, drive the affected
 flow — the suites don't cover live composition."
@@ -159,13 +159,13 @@ digraph entity_selection {
 
 3. **Decision matrix:**
 
-   | Search Result                  | Action                                                        |
-   | ------------------------------ | ------------------------------------------------------------- |
-   | No matches                     | Create new entity                                             |
-   | Same topic, older info         | Update existing entity (note: Sibyl tracks temporal validity) |
-   | Same topic, same info          | Skip — already captured                                       |
+   | Search Result                  | Action                                                                                                                                |
+   | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+   | No matches                     | Create new entity                                                                                                                     |
+   | Same topic, older info         | Update existing entity (note: Sibyl tracks temporal validity)                                                                         |
+   | Same topic, same info          | Skip — already captured                                                                                                               |
    | Same topic, contradictory info | New evidence supersedes: correct the old entry in place, titled "Correction: ..." — genuinely unresolved: tension entity linking both |
-   | Related but distinct           | Create new entity with RELATED_TO relationship                |
+   | Related but distinct           | Create new entity with RELATED_TO relationship                                                                                        |
 
 ### Within a Single Dream Cycle
 
@@ -206,7 +206,7 @@ Consistent tags make future search and REM exploration effective.
 
 ### Input: Claude Code Session Excerpt
 
-```
+```text
 User: "the SessionEnd hook isn't firing when I close the terminal"
 Assistant: [investigates, finds the issue]
 Assistant: "The problem is that SessionEnd only fires on clean exits —

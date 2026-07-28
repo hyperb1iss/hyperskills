@@ -49,7 +49,7 @@ Choose your primary layout based on what you're building:
 
 All panels visible simultaneously. Focus shifts between them. Users build spatial memory, "branches are always top-left."
 
-```
+```text
 ┌─ Status ──┬─────────── Detail ──────────┐
 ├─ Files ───┤                              │
 │ > file.rs │  diff content here...        │
@@ -70,7 +70,7 @@ All panels visible simultaneously. Focus shifts between them. Users build spatia
 
 Three-pane past/present/future navigation. Parent directory (left), current (center), preview (right).
 
-```
+```text
 ┌── Parent ──┬── Current ──┬── Preview ────────┐
 │   ..       │ > config/   │ port: 8080        │
 │   src/     │   lib/      │ host: localhost    │
@@ -93,7 +93,7 @@ Three-pane past/present/future navigation. Parent directory (left), current (cen
 
 Self-contained widget panels with independent data. All information visible at once, no navigation required.
 
-```
+```text
 ┌─── CPU ──────────────┬─── Memory ──────────┐
 │ ▁▂▃▅▇█▇▅▃▂▁▂▃▅▇     │ ████████░░ 78%      │
 │ core0: 45% core1: 67%│ 12.4G / 16.0G       │
@@ -297,7 +297,7 @@ Color is one tool among several. Use them in combination:
 
 Create depth without borders by layering background lightness:
 
-```
+```text
 bg.base (darkest) → bg.surface → bg.overlay (lightest)
 ```
 

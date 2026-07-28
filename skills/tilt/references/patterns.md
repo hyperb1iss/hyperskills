@@ -189,7 +189,7 @@ docker_build('myco/api', '.', ignore=[
 
 Place in the same directory as the Tiltfile. Uses `.dockerignore` syntax. Prevents rebuilds but does NOT affect Docker build context.
 
-```
+```text
 # .tiltignore
 *.md
 docs/

@@ -276,12 +276,12 @@ For focused questions that don't need the full wave protocol:
 
 ## Research Patterns by Type
 
-| Type                      | The non-obvious move                                                                                                                                                                                     |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Technology evaluation** | Wave 2 hunts production experience reports and benchmarks, not more docs — and the internal lane runs alongside the whole time.                                                                            |
-| **Codebase archaeology**  | Synthesize into an architecture diagram + dependency map, not prose. Often it IS the internal lane of a larger evaluation.                                                                                 |
+| Type                      | The non-obvious move                                                                                                                                                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Technology evaluation** | Wave 2 hunts production experience reports and benchmarks, not more docs — and the internal lane runs alongside the whole time.                                                                                          |
+| **Codebase archaeology**  | Synthesize into an architecture diagram + dependency map, not prose. Often it IS the internal lane of a larger evaluation.                                                                                               |
 | **SOTA analysis**         | Vet headline claims for comparability — same benchmark version? harness released? tuned on test? gold leakage? — and verdict as "adopt the architecture, ignore the ritual." A debunked premise is a first-class result. |
-| **Competitive landscape** | Absence is a finding: report what nobody is doing as deliberately as what everyone is. Verify from opened artifacts, not search-result snippets.                                                           |
+| **Competitive landscape** | Absence is a finding: report what nobody is doing as deliberately as what everyone is. Verify from opened artifacts, not search-result snippets.                                                                         |
 
 ---
 

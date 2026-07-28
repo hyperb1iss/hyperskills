@@ -28,15 +28,15 @@ On Pi, builder children should use worktree isolation and return branch/patch in
 
 ## Strategy Selection
 
-| Strategy                    | When                                     | Agents    | Background | Key Pattern                                       |
-| --------------------------- | ---------------------------------------- | --------- | ---------- | ------------------------------------------------- |
-| **Research Swarm**          | Knowledge gathering, docs, SOTA research | 10-60+    | Yes (100%) | Fan-out, each writes own doc                      |
-| **Epic Parallel Build**     | Plan with independent epics/features     | 20-60+    | Yes (90%+) | Wave dispatch by subsystem                        |
-| **Sequential Pipeline**     | Dependent tasks, shared files            | 3-15      | No (0%)    | Implement -> Review -> Fix chain                  |
-| **Parallel Sweep**          | Same fix/transform across modules        | 4-10      | No (0%)    | Partition by directory, fan-out                   |
-| **Multi-Dimensional Audit** | Quality gates, deep assessment           | 6-9       | No (0%)    | Same code, different review lenses                |
+| Strategy                    | When                                     | Agents    | Background | Key Pattern                                            |
+| --------------------------- | ---------------------------------------- | --------- | ---------- | ------------------------------------------------------ |
+| **Research Swarm**          | Knowledge gathering, docs, SOTA research | 10-60+    | Yes (100%) | Fan-out, each writes own doc                           |
+| **Epic Parallel Build**     | Plan with independent epics/features     | 20-60+    | Yes (90%+) | Wave dispatch by subsystem                             |
+| **Sequential Pipeline**     | Dependent tasks, shared files            | 3-15      | No (0%)    | Implement -> Review -> Fix chain                       |
+| **Parallel Sweep**          | Same fix/transform across modules        | 4-10      | No (0%)    | Partition by directory, fan-out                        |
+| **Multi-Dimensional Audit** | Quality gates, deep assessment           | 6-9       | No (0%)    | Same code, different review lenses                     |
 | **Fleet/Stack Maintenance** | Many PRs/branches, shared review context | 1         | No (0%)    | Inventory first, serial fixer, evidence-based closures |
-| **Full Lifecycle**          | New project from scratch                 | All above | Mixed      | Research -> Plan -> Build -> Review -> Harden     |
+| **Full Lifecycle**          | New project from scratch                 | All above | Mixed      | Research -> Plan -> Build -> Review -> Harden          |
 
 Serial is a dispatch mode, not a fallback: thirteen open PRs sharing review context got one inventory-first serial fixer, not a fan-out. Before any long unattended loop, ask whether progress accumulates between iterations — without auto-merge, an overnight loop makes parallel worktrees, not cumulative progress; one long worker beats many orphaned ones. Design loops for mid-run patching; they will need upgrades while running.
 
@@ -54,7 +54,7 @@ Mass-deploy background agents to build a knowledge corpus. Each agent researches
 
 ### The Pattern
 
-```
+```text
 Phase 1: Deploy research army (ALL BACKGROUND)
     Wave 1 (10-20 agents): Core technology research
     Wave 2 (10-20 agents): Specialized topics, integrations
@@ -92,7 +92,7 @@ Deploy background agents to implement independent features/epics simultaneously.
 
 ### The Pattern
 
-```
+```text
 Phase 1: Scout (FOREGROUND)
     - Deploy one Explore agent to map the codebase
     - Identify dependency chains and independent workstreams
@@ -162,7 +162,7 @@ Execute dependent tasks one at a time with review gates. Each task builds on the
 
 ### The Pattern
 
-```
+```text
 For each task:
     1. Dispatch implementer (FOREGROUND)
     2. Dispatch spec reviewer (FOREGROUND)
@@ -207,7 +207,7 @@ Apply the same transformation across partitioned areas of the codebase. Every ag
 
 ### The Pattern
 
-```
+```text
 Phase 1: Analyze the scope
     - Run the tool (ruff, ty, etc.) to get full issue list
     - Auto-fix what you can
@@ -246,7 +246,7 @@ Deploy multiple reviewers to examine the same code from different angles simulta
 
 ### The Pattern
 
-```
+```text
 Dispatch 6 parallel reviewers (ALL FOREGROUND):
     1. Code quality & safety reviewer
     2. Integration correctness reviewer
@@ -360,18 +360,18 @@ digraph bg_fg {
 
 The brief is where the orchestrator's context advantage transfers to the worker. Role, task, and report format are table stakes; these slots are the ones that earn their place:
 
-| Slot                 | What it does                                                                               |
-| -------------------- | ------------------------------------------------------------------------------------------ |
-| Verbatim user ask    | Paraphrase inherits your misreadings; let the worker challenge your interpretation          |
-| Scope fence          | Own these files only; you are not alone in the codebase                                     |
-| Done-means block     | Checkable exit conditions plus a blocked-escape hatch; commit rights stated explicitly      |
-| CURRENT TRUTH        | Dated fact sheet so workers diff against pinned reality, not training-data guesses         |
-| Known traps          | Each with its failure mechanism, not just "be careful"                                      |
-| Settled decisions    | What not to re-litigate                                                                     |
-| Receipts already run | Exact commands and counts, so worker effort goes to residual risk                           |
-| Epistemic rules      | Evidence format, confidence floor, `[unverified]` labels, finding caps, skip nits           |
+| Slot                 | What it does                                                                                 |
+| -------------------- | -------------------------------------------------------------------------------------------- |
+| Verbatim user ask    | Paraphrase inherits your misreadings; let the worker challenge your interpretation           |
+| Scope fence          | Own these files only; you are not alone in the codebase                                      |
+| Done-means block     | Checkable exit conditions plus a blocked-escape hatch; commit rights stated explicitly       |
+| CURRENT TRUTH        | Dated fact sheet so workers diff against pinned reality, not training-data guesses           |
+| Known traps          | Each with its failure mechanism, not just "be careful"                                       |
+| Settled decisions    | What not to re-litigate                                                                      |
+| Receipts already run | Exact commands and counts, so worker effort goes to residual risk                            |
+| Epistemic rules      | Evidence format, confidence floor, `[unverified]` labels, finding caps, skip nits            |
 | Capability grants    | Concrete verbs ("you can restart X", "read the db pod directly") — never "use your judgment" |
-| Standing corrections | Every user veto from this session, verbatim — conversation context decays over long spans   |
+| Standing corrections | Every user veto from this session, verbatim — conversation context decays over long spans    |
 
 Not every brief needs every slot: a research brief leans on CURRENT TRUTH and epistemic rules, a build brief on the scope fence and done-means block. Full copyable templates live in `references/dispatch-briefs.md`.
 
@@ -417,11 +417,11 @@ Launching is the easy half. The craft is distinguishing slow from stuck, keeping
 
 ### Slow vs stuck
 
-| Signal             | Move                                                                                                                                     |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Signal              | Move                                                                                                                                                                         |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Long job goes quiet | Escalate poll windows geometrically, then switch to independent progress signals (pgrep, artifact growth, diff-stat trajectory) — never just more waiting on its own chatter |
-| Suspected dead     | Killing needs evidence too — check for a write midstream before terminating                                                                |
-| Slow but alive     | Patience is a value ("guesses don't deploy apps"); queue latency is not a failure signal                                                   |
+| Suspected dead      | Killing needs evidence too — check for a write midstream before terminating                                                                                                  |
+| Slow but alive      | Patience is a value ("guesses don't deploy apps"); queue latency is not a failure signal                                                                                     |
 
 ### Watcher contract
 
@@ -450,21 +450,21 @@ An orchestrated run ends in one of two named states — never fake-done, never s
 
 ## Anti-Patterns
 
-| Anti-Pattern                                     | Fix                                                                    |
-| ------------------------------------------------ | ---------------------------------------------------------------------- |
-| Dispatch agents that touch the same files        | Partition by directory/module; one owner per scope                     |
-| Run independent research agents foreground       | Background research; synthesize after completion                       |
-| Send 50 agents with "fix everything" prompts     | Give each agent a specific scope, issue list, and done signal          |
-| Skip the scout phase for build sprints           | Explore first to map dependencies and file ownership                   |
-| Keep full review ceremony for every late task    | Apply the trust gradient after patterns prove stable                   |
-| Let agents run `git add .` or `git push`         | Explicit git hygiene in every build prompt                             |
-| Background an agent whose output nothing merges  | Backgrounding code needs worktree isolation plus an integration path   |
-| Treat `index.lock` as fatal — or clean it blind  | Lock-owner forensics: live owner → hand off; none → stale, clean and go |
-| Ship the full fleet without a calibration wave   | Small first wave validates the method; corrections bake into wave 2    |
-| Let correctness gates stand in for shape checks  | Shape checkpoint at every wave boundary; diffstat against the mission  |
-| Merge a failed worker's oversized blob           | Salvage the idea, reimplement smaller                                  |
-| Let read-only reviewers edit or checkout         | Sandbox the brief: read via `git show <ref>:<path>`, never mutate      |
-| Vote-count contradicting reviewers               | Adjudicate against ground truth (live state, a render, the spec)       |
+| Anti-Pattern                                    | Fix                                                                     |
+| ----------------------------------------------- | ----------------------------------------------------------------------- |
+| Dispatch agents that touch the same files       | Partition by directory/module; one owner per scope                      |
+| Run independent research agents foreground      | Background research; synthesize after completion                        |
+| Send 50 agents with "fix everything" prompts    | Give each agent a specific scope, issue list, and done signal           |
+| Skip the scout phase for build sprints          | Explore first to map dependencies and file ownership                    |
+| Keep full review ceremony for every late task   | Apply the trust gradient after patterns prove stable                    |
+| Let agents run `git add .` or `git push`        | Explicit git hygiene in every build prompt                              |
+| Background an agent whose output nothing merges | Backgrounding code needs worktree isolation plus an integration path    |
+| Treat `index.lock` as fatal — or clean it blind | Lock-owner forensics: live owner → hand off; none → stale, clean and go |
+| Ship the full fleet without a calibration wave  | Small first wave validates the method; corrections bake into wave 2     |
+| Let correctness gates stand in for shape checks | Shape checkpoint at every wave boundary; diffstat against the mission   |
+| Merge a failed worker's oversized blob          | Salvage the idea, reimplement smaller                                   |
+| Let read-only reviewers edit or checkout        | Sandbox the brief: read via `git show <ref>:<path>`, never mutate       |
+| Vote-count contradicting reviewers              | Adjudicate against ground truth (live state, a render, the spec)        |
 
 ## References
 
@@ -472,15 +472,15 @@ Full copyable templates — research brief, sweep brief, worker brief, read-only
 
 ## Hyperskills Integration
 
-| Skill                | Use With                | When                                       |
-| -------------------- | ----------------------- | ------------------------------------------ |
-| `brainstorm`         | Full Lifecycle          | Before research when the direction is open |
-| `research`           | Research Swarm          | Knowledge gathering before decisions       |
-| `plan`               | Epic Parallel Build     | Convert scope into dependency-safe waves   |
-| `implement`          | All build strategies    | Execution loop and verification cadence    |
-| `cross-model-review` | All strategies          | Independent quality gate; security lens in audits |
-| `git`                | Epic Parallel Build     | Multi-agent staging, rebases, recovery     |
-| `dream`              | Full Lifecycle          | Capture durable learnings after large runs |
+| Skill                | Use With             | When                                              |
+| -------------------- | -------------------- | ------------------------------------------------- |
+| `brainstorm`         | Full Lifecycle       | Before research when the direction is open        |
+| `research`           | Research Swarm       | Knowledge gathering before decisions              |
+| `plan`               | Epic Parallel Build  | Convert scope into dependency-safe waves          |
+| `implement`          | All build strategies | Execution loop and verification cadence           |
+| `cross-model-review` | All strategies       | Independent quality gate; security lens in audits |
+| `git`                | Epic Parallel Build  | Multi-agent staging, rebases, recovery            |
+| `dream`              | Full Lifecycle       | Capture durable learnings after large runs        |
 
 ## What This Skill is NOT
 

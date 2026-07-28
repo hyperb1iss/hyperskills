@@ -11,7 +11,7 @@ uv replaces pip, pip-tools, pipx, pyenv, virtualenv, and poetry. Written in Rust
 
 ## Workflow Decision Tree
 
-```
+```text
 What are you doing?
 ├─ Running a standalone script? ──────────────────── Scripts workflow
 │  (single .py file, no project context needed)

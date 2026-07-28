@@ -34,12 +34,12 @@ On a "stale info" rejection, diagnose with `ls-remote` before any retry. Observe
 
 When a parent PR squash-merges, its commits vanish from main's ancestry — a plain rebase replays them as ghosts. Detect the merge type first: squash, rebase-merge, and merge-commit each leave different ancestry.
 
-| Situation                                  | Move                                                                                                                |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| Parent PR squash-merged                    | `git rebase --onto <new-base> <old-base-sha>` — only your own commits replay                                          |
+| Situation                                  | Move                                                                                                                   |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| Parent PR squash-merged                    | `git rebase --onto <new-base> <old-base-sha>` — only your own commits replay                                           |
 | Replay keeps conflicting / branch polluted | Rebuild as main + delta: one `git diff --binary` patch from the backup, applied onto fresh main; prove with range-diff |
-| Pushing fixes to an old branch             | Verify PR open-state first — a squash-merged PR's branch is dead                                                      |
-| Stacked chain                              | Cascade bottom-up with `--onto`, per-level backup, push bottom-first (validators diff against `origin/<base>`)        |
+| Pushing fixes to an old branch             | Verify PR open-state first — a squash-merged PR's branch is dead                                                       |
+| Stacked chain                              | Cascade bottom-up with `--onto`, per-level backup, push bottom-first (validators diff against `origin/<base>`)         |
 
 ## Pre-Surgery Ref Reality
 
@@ -55,11 +55,11 @@ Local refs and the forge's view routinely disagree. Before any history surgery:
 
 Conflicts are intent-merges, not side-picks. Read all three index stages (`git show :1:<file> :2:<file> :3:<file>`) plus the pre-rebase tip before resolving, and ask: did upstream obsolete this branch's mechanism? When main replaced it with a newer abstraction, plug your feature into main's shape instead of resurrecting the old one. Preserve invariant-explaining comments — they're load-bearing. Pace by risk class (slower on security-sensitive files). Close with a mechanical conflict-marker scan; survivors are real.
 
-| Situation                                           | Strategy                                                                                     |
-| --------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Situation                                           | Strategy                                                                                               |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | Encoded artifact (lockfile, SOPS, generated schema) | Never text-merge the encoding. Merge the meaning, re-encode with the canonical tool, roundtrip-verify. |
-| Simple content conflict                             | Resolve as a union of both sides' intent; prefer the smallest diff.                           |
-| Large structural conflict                           | Consider `--ours`/`--theirs` + manual reapply of the smaller side.                            |
+| Simple content conflict                             | Resolve as a union of both sides' intent; prefer the smallest diff.                                    |
+| Large structural conflict                           | Consider `--ours`/`--theirs` + manual reapply of the smaller side.                                     |
 
 ### Lock files
 
@@ -75,21 +75,21 @@ Same shape for any generated lockfile. Fold the regenerated lockfile back into t
 
 Ownership and review state decide, not pushed-ness:
 
-| Situation                                       | Use                                                                          |
-| ----------------------------------------------- | ----------------------------------------------------------------------------- |
-| Your own PR branch behind main (pushed or not)  | Rebase + pinned-lease push. Hold pushes while a review is actively reading.    |
-| Branch checked out in another worktree          | Work there; don't steal the checkout.                                          |
-| Genuinely shared branch (others based work on it) | **Never rebase.** Merge, or `git revert` for published mistakes.              |
-| Cleaning up messy commits before PR             | `git rebase -i` with squash/fixup                                              |
+| Situation                                         | Use                                                                         |
+| ------------------------------------------------- | --------------------------------------------------------------------------- |
+| Your own PR branch behind main (pushed or not)    | Rebase + pinned-lease push. Hold pushes while a review is actively reading. |
+| Branch checked out in another worktree            | Work there; don't steal the checkout.                                       |
+| Genuinely shared branch (others based work on it) | **Never rebase.** Merge, or `git revert` for published mistakes.            |
+| Cleaning up messy commits before PR               | `git rebase -i` with squash/fixup                                           |
 
 Ceremony scales with collaborator count — a solo repo can live on main — but the push-boundary rules hold regardless.
 
 ## Undo Operations
 
-| What happened                     | Fix                                                                                                                      |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| What happened                           | Fix                                                                                                                                                                                                    |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Uncommit / squash (keep changes staged) | `git reset --soft <captured-sha>` — never a moving ref. `reset --soft origin/main` mid-squash silently staged reverts of newly-landed main when the ref moved. Re-check base movement before amending. |
-| Need to recover something lost    | Inspect `reflog`, `status`, and `log` first, then `git checkout HEAD@{N}` — never fire recovery commands speculatively     |
+| Need to recover something lost          | Inspect `reflog`, `status`, and `log` first, then `git checkout HEAD@{N}` — never fire recovery commands speculatively                                                                                 |
 
 ## Verify Before You Trust
 
@@ -120,24 +120,24 @@ git range-diff "$old_base".."$backup" origin/main..HEAD   # explicit ranges — 
 
 Match the proof to the claim:
 
-| Claim to prove                              | Proof                                                                            |
-| ------------------------------------------- | --------------------------------------------------------------------------------- |
-| Replay preserved per-commit intent          | `git range-diff <old-base>..<old-tip> <new-base>..<new-tip>` (explicit ranges)     |
+| Claim to prove                              | Proof                                                                                             |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Replay preserved per-commit intent          | `git range-diff <old-base>..<old-tip> <new-base>..<new-tip>` (explicit ranges)                    |
 | Squash/reshuffle left the tree identical    | `git rev-parse HEAD^{tree}` equality vs the backup ref — sharper than range-diff for N→1 squashes |
-| Cherry-pick / second PR carries same change | `git patch-id --stable` on both                                                    |
-| Nothing stranded before deletion            | `git branch --contains` + dry-run prune                                            |
-| Merge captured everything                   | Content-parity diff after the merge event                                          |
+| Cherry-pick / second PR carries same change | `git patch-id --stable` on both                                                                   |
+| Nothing stranded before deletion            | `git branch --contains` + dry-run prune                                                           |
+| Merge captured everything                   | Content-parity diff after the merge event                                                         |
 
 ## History Serves Its Readers
 
 Atomic while working; collapse only when the history itself stops serving the reviewer.
 
-| Concern                                                | Move                                                                                                        |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| Squashing a reviewed branch                            | The PR body inherits the narrative — enumerate the logical commits the squash removed. Human-authored PR titles, bodies, and drafts are read-only absent explicit instruction. |
-| Post-review fixes                                      | `git commit --fixup=<logical-parent>` + autosquash, not a "review fix" blob. Fix at the introducing commit when CI reads history (diffs `HEAD~1`) rather than the tree. |
+| Concern                                                     | Move                                                                                                                                                                                                                                                   |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Squashing a reviewed branch                                 | The PR body inherits the narrative — enumerate the logical commits the squash removed. Human-authored PR titles, bodies, and drafts are read-only absent explicit instruction.                                                                         |
+| Post-review fixes                                           | `git commit --fixup=<logical-parent>` + autosquash, not a "review fix" blob. Fix at the introducing commit when CI reads history (diffs `HEAD~1`) rather than the tree.                                                                                |
 | PR ancestry poisoned (wrong-base merge, CODEOWNERS dragnet) | The forge computes review surface from ancestry — merge gymnastics to dodge a force-push is worse than the force-push. Recover: push the clean replacement first, close the old PR with a pointer comment naming the replacement and why, then reopen. |
-| Stale failed check inherited from a closed PR          | `git commit --amend --no-edit` mints a fresh SHA with the same tree.                                           |
+| Stale failed check inherited from a closed PR               | `git commit --amend --no-edit` mints a fresh SHA with the same tree.                                                                                                                                                                                   |
 
 ### Commit bodies
 
@@ -147,14 +147,14 @@ Compose multi-line bodies via `git commit -F -` with a single-quoted heredoc (`<
 
 Multiple agents (and humans) work the same repo concurrently. Causation decides ownership.
 
-| Signal                                | Move                                                                                                          |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Ambiguous churn in shared files       | Restore churn your own commands generated; leave others' work untouched — even in the same file                 |
-| Co-edited file, mixed hunks           | Stage only your hunks (`git add -p`, or a hand-built patch via `git apply --cached --unidiff-zero`), then commit the index — `git commit <file>`/`--only` commits the worktree copy and swallows unstaged sibling hunks |
-| `index.lock`                          | Triage before removing: size + owning process (`lsof`/`ps`). Zero bytes and no holder = stale; live owner = wait |
-| Another agent's rebase in progress    | Hold your verified commit — but a blocker must reproduce before you report it, and after repeated blocked turns escalate with pid + age as a question, not a fact |
-| Branch checked out in another worktree | Work there; don't steal the checkout                                                                            |
-| Multi-worktree edits                  | Edit tools root at the original cwd — identity-check (`git branch --show-current` + `pwd`) before editing; status-check every involved worktree after |
+| Signal                                 | Move                                                                                                                                                                                                                    |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ambiguous churn in shared files        | Restore churn your own commands generated; leave others' work untouched — even in the same file                                                                                                                         |
+| Co-edited file, mixed hunks            | Stage only your hunks (`git add -p`, or a hand-built patch via `git apply --cached --unidiff-zero`), then commit the index — `git commit <file>`/`--only` commits the worktree copy and swallows unstaged sibling hunks |
+| `index.lock`                           | Triage before removing: size + owning process (`lsof`/`ps`). Zero bytes and no holder = stale; live owner = wait                                                                                                        |
+| Another agent's rebase in progress     | Hold your verified commit — but a blocker must reproduce before you report it, and after repeated blocked turns escalate with pid + age as a question, not a fact                                                       |
+| Branch checked out in another worktree | Work there; don't steal the checkout                                                                                                                                                                                    |
+| Multi-worktree edits                   | Edit tools root at the original cwd — identity-check (`git branch --show-current` + `pwd`) before editing; status-check every involved worktree after                                                                   |
 
 ## Hooks
 
@@ -179,19 +179,19 @@ Agent hosts have no tty:
 
 ## Anti-Patterns
 
-| Anti-Pattern                                       | Fix                                                                                                              |
-| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Manually merging generated lockfiles               | Take one side, regenerate with the package tool                                                                  |
-| Trusting a lockfile check that never installs      | Verify with the gate's exact command (`pnpm install --frozen-lockfile`) in a throwaway worktree                  |
-| Plain rebase over a squash-merged base             | `git rebase --onto <new-base> <old-base-sha>` — only your commits replay                                          |
-| Merge gymnastics to dodge a force-push on a PR branch | Proper rebase + pinned-lease push — ancestry poisoning triggers review dragnets                                 |
-| Rebasing a genuinely shared branch                 | Merge, or create a new branch                                                                                     |
-| Using `--force`                                    | Pinned `--force-with-lease` only when approved                                                                    |
-| Stacked `-m` flags for multi-line commit bodies    | `git commit -F -` heredoc or a message file                                                                       |
-| Running recovery commands by habit                 | Inspect `status`, `log`, and `reflog` first                                                                       |
-| Staging unrelated work                             | `git add <specific-files>`; `git commit --only <file>` under concurrency                                          |
-| `git checkout <commit> -- <paths>` then committing | It **stages silently**; check `git diff --cached --name-only` before each commit or it swallows unintended files |
-| Assuming a rebase kept your commits                | Prove it — explicit-range `range-diff`, tree-hash, or patch-id per the proofs table                               |
+| Anti-Pattern                                          | Fix                                                                                                              |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Manually merging generated lockfiles                  | Take one side, regenerate with the package tool                                                                  |
+| Trusting a lockfile check that never installs         | Verify with the gate's exact command (`pnpm install --frozen-lockfile`) in a throwaway worktree                  |
+| Plain rebase over a squash-merged base                | `git rebase --onto <new-base> <old-base-sha>` — only your commits replay                                         |
+| Merge gymnastics to dodge a force-push on a PR branch | Proper rebase + pinned-lease push — ancestry poisoning triggers review dragnets                                  |
+| Rebasing a genuinely shared branch                    | Merge, or create a new branch                                                                                    |
+| Using `--force`                                       | Pinned `--force-with-lease` only when approved                                                                   |
+| Stacked `-m` flags for multi-line commit bodies       | `git commit -F -` heredoc or a message file                                                                      |
+| Running recovery commands by habit                    | Inspect `status`, `log`, and `reflog` first                                                                      |
+| Staging unrelated work                                | `git add <specific-files>`; `git commit --only <file>` under concurrency                                         |
+| `git checkout <commit> -- <paths>` then committing    | It **stages silently**; check `git diff --cached --name-only` before each commit or it swallows unintended files |
+| Assuming a rebase kept your commits                   | Prove it — explicit-range `range-diff`, tree-hash, or patch-id per the proofs table                              |
 
 ## What This Skill is NOT
 

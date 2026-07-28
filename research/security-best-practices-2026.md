@@ -30,7 +30,7 @@ The integration of **Large Action Models (LAMs)** and **ReAct (Reasoning + Actin
 
 ### Essential Tools Stack
 
-```
+```text
 Reconnaissance     -> Nmap, Shodan, theHarvester
 Vulnerability Scan -> Nessus, OpenVAS, Nuclei
 Exploitation       -> Metasploit Framework, Canvas
@@ -156,7 +156,7 @@ Must-Have Features:
 
 ### SOAR Playbook Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                    SOAR Platform                         │
 ├─────────────────────────────────────────────────────────┤
@@ -213,7 +213,7 @@ Modern platforms combine deterministic playbooks with AI agents:
 
 ### Core Principles
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                    ZERO TRUST TENETS                     │
 ├─────────────────────────────────────────────────────────┤
@@ -235,7 +235,7 @@ Modern platforms combine deterministic playbooks with AI agents:
 
 ### Implementation Pillars (CISA ZTMM)
 
-```
+```text
 ┌─────────┬─────────┬─────────┬─────────┬─────────┐
 │Identity │ Device  │ Network │   App   │  Data   │
 ├─────────┼─────────┼─────────┼─────────┼─────────┤
@@ -288,7 +288,7 @@ Key metrics to track:
 
 #### SBOM Maturity Levels
 
-```
+```text
 Level 1 (Minimum):    Component list, versions, suppliers
 Level 2 (Recommended): + Dependency graph, hashes, licenses
 Level 3 (Aspirational): + Provenance, vulnerability status, EOL info
@@ -373,7 +373,7 @@ cosign verify --certificate-identity user@example.com \
 
 ### Modern Pipeline Architecture
 
-```
+```text
 Code → SAST → SCA → Build → Sign → DAST/IAST → Deploy → Runtime
   │      │      │      │      │        │          │        │
   │      │      │      │      │        │          │        └─ CWPP/CSPM
@@ -433,7 +433,7 @@ Key principles:
 
 ### Agent Architecture
 
-```
+```text
 ┌──────────────────────────────────────────────────────────┐
 │                    Agentic SOC                            │
 ├──────────────────────────────────────────────────────────┤

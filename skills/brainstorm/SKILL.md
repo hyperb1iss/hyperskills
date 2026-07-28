@@ -128,7 +128,7 @@ Concede without defending sunk work, then diagnose the pressure that produced th
 
 Present your recommendation with conviction. Route to the user only the forks they actually own — product policy, risk appetite, taste — and decide the rest with your own judgment, saying so. End in one precise consent question, not a menu of everything; that preserves genuine choice without mush. When the user's answer is a cleaner model than your question, adopt it out loud. Then record the decision in Sibyl so future sessions don't re-litigate it:
 
-```
+```bash
 sibyl add "Brainstorm: [topic]" "Chose [approach] because [reason]. Rejected [other approaches] due to [tradeoffs]. Key constraint: [X]."
 ```
 

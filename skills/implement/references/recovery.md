@@ -6,16 +6,16 @@ Deep-dive companions to the Error Recovery and Verification Cadence sections of 
 
 CI red gets a taxonomy before any edit. Misclassification is where thrash starts; each class gets a different response.
 
-| Failure class            | Tell                                                        | Response                                                        |
-| ------------------------ | ----------------------------------------------------------- | --------------------------------------------------------------- |
-| Infra noise              | LFS budget exceeded, checkout death, runner lost comms      | Rerun or report; the checks never reached lint/tests            |
-| Install/env              | First gate fails on package install, missing workspace link | Fix the environment; don't touch code                           |
-| Runner/shell syntax      | Error points at the invocation, not the diff                | Fix the command; the patch was never exercised                  |
-| Stale artifact           | "Missing" symbols that exist in source; old `dist`/`.d.ts`  | Rebuild, cache-bust, confirm the running thing is your build    |
-| Self-induced race        | Parallel jobs building the same output                      | Rerun sequentially once; don't serialize permanently            |
-| Base drift / pre-existing | Same failure on main at your base commit                   | Exonerate by absence, then rebase — don't "fix" it in-branch    |
-| Downstream cascade       | Jobs failing because an upstream image/step never produced  | Collapse to the root; ignore the echoes                         |
-| Actual code              | None of the above                                           | Hypothesis → targeted fix → verify with the judging invocation  |
+| Failure class             | Tell                                                        | Response                                                       |
+| ------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------- |
+| Infra noise               | LFS budget exceeded, checkout death, runner lost comms      | Rerun or report; the checks never reached lint/tests           |
+| Install/env               | First gate fails on package install, missing workspace link | Fix the environment; don't touch code                          |
+| Runner/shell syntax       | Error points at the invocation, not the diff                | Fix the command; the patch was never exercised                 |
+| Stale artifact            | "Missing" symbols that exist in source; old `dist`/`.d.ts`  | Rebuild, cache-bust, confirm the running thing is your build   |
+| Self-induced race         | Parallel jobs building the same output                      | Rerun sequentially once; don't serialize permanently           |
+| Base drift / pre-existing | Same failure on main at your base commit                    | Exonerate by absence, then rebase — don't "fix" it in-branch   |
+| Downstream cascade        | Jobs failing because an upstream image/step never produced  | Collapse to the root; ignore the echoes                        |
+| Actual code               | None of the above                                           | Hypothesis → targeted fix → verify with the judging invocation |
 
 ### Log handling
 

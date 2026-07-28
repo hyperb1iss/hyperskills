@@ -4,7 +4,7 @@ How to add new skills to this plugin. Read this before creating or modifying any
 
 ## Project Structure
 
-```
+```text
 hyperskills/
 ├── .claude-plugin/
 │   ├── plugin.json          # Plugin manifest (version, keywords, metadata)
@@ -179,7 +179,7 @@ Tables, decision trees, and procedures. Prefer tables over prose:
 
 For skills with extensive reference material, use progressive disclosure:
 
-```
+```text
 skills/<skill-name>/
 ├── SKILL.md                    # Core procedures (~2,000 words)
 └── references/

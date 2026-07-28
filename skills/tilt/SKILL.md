@@ -129,7 +129,7 @@ local_resource('storybook',
 
 ## Debugging Flow
 
-```
+```text
 Service crashing?     → tilt logs -f <resource> --source runtime
 Build failing?        → tilt logs -f <resource> --source build
                         tilt docker -- build <args>  (reproduces Tilt's exact build)

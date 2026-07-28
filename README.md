@@ -238,7 +238,7 @@ uv_build backend guidance for pure Python packages, module discovery, namespace 
 
 Skills use progressive disclosure. Light when you don't need depth, deep when you do.
 
-```
+```text
 Level 1: Metadata (name + description)     ← Always in context, ~100 words
 Level 2: SKILL.md body                     ← Loaded when the skill triggers, 1,500-3,000 words
 Level 3: references/                       ← Loaded on demand, no length cap

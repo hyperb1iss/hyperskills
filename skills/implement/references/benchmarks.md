@@ -28,7 +28,7 @@ Quantitative data from 21,321 tracked operations across 64+ projects.
 
 ### The Quick Fix
 
-```
+```text
 Read error -> Grep for pattern -> Read 2-3 files -> Edit 1-2 files -> Verify -> Commit
 ```
 
@@ -38,7 +38,7 @@ Read error -> Grep for pattern -> Read 2-3 files -> Edit 1-2 files -> Verify -> 
 
 ### The Feature Build
 
-```
+```text
 Orient (read existing patterns) -> Plan (task list) -> Implement layer-by-layer
   -> Verify per layer (typecheck + lint) -> Tests -> Commit
 ```
@@ -49,7 +49,7 @@ Orient (read existing patterns) -> Plan (task list) -> Implement layer-by-layer
 
 ### The Research-First Build
 
-```
+```text
 Dispatch 3-7 research agents -> Synthesize findings -> Write spec/plan
   -> Implement in dependency order -> Verify -> Cross-model review -> Commit
 ```
@@ -60,7 +60,7 @@ Dispatch 3-7 research agents -> Synthesize findings -> Write spec/plan
 
 ### The Parallel Epic
 
-```
+```text
 Research swarm -> Task graph with dependencies -> Wave dispatch (3-7 agents per wave)
   -> Collect outputs -> Integration -> Full verification suite -> Commit
 ```
@@ -84,11 +84,11 @@ Research swarm -> Task graph with dependencies -> Wave dispatch (3-7 agents per 
 
 ## Context Engineering Budget
 
-| Item                        | Tokens            |
-| --------------------------- | ----------------- |
-| Baseline system + CLAUDE.md | ~20k              |
-| Usable budget (200k window) | ~180k             |
-| Target utilization          | 40-60%            |
+| Item                                               | Tokens            |
+| -------------------------------------------------- | ----------------- |
+| Baseline system + CLAUDE.md                        | ~20k              |
+| Usable budget (200k window)                        | ~180k             |
+| Target utilization                                 | 40-60%            |
 | Context rot onset (debugging spirals, old dataset) | ~15-20 iterations |
 
 ### Context Preservation Strategies

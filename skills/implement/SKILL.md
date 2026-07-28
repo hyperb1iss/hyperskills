@@ -7,7 +7,7 @@ description: Use this skill when writing code, building features, fixing bugs, r
 
 Verification-driven coding with tight feedback loops. Distilled from 21,321 tracked operations across 64+ projects, 612 debugging sessions, and ~600 transcribed working sessions from the Apr–Jul 2026 corpus. These are the patterns that consistently ship working code.
 
-**Core insight:** Verify in tight loops, roughly every 2-3 edits — 73% of fixes go unverified across the dataset, the single biggest quality gap. And proof lives where the artifact is *consumed*, not where it was produced: green producer gates are necessary, never sufficient.
+**Core insight:** Verify in tight loops, roughly every 2-3 edits — 73% of fixes go unverified across the dataset, the single biggest quality gap. And proof lives where the artifact is _consumed_, not where it was produced: green producer gates are necessary, never sufficient.
 
 **How to read this skill:** the loop and the heuristics below are calibrated for non-trivial implementation work. Trivial fixes (config, typo, single-line) shouldn't drag through five phases. Use judgment, scale planning to scope, and skip what doesn't apply. The Code Discipline section is principles that bias toward caution; for one-line changes, just make the change.
 
@@ -80,14 +80,14 @@ At security boundaries and other high-stakes forks, weak evidence for what the u
 
 Minimum code that solves the problem. Nothing speculative.
 
-| Don't                                          | Do                                           |
-| ---------------------------------------------- | -------------------------------------------- |
-| Add features beyond what was asked             | Solve exactly the stated problem             |
-| Build abstractions for single-use code         | Inline first; abstract when reused           |
-| Add "flexibility" or configurability not asked | Hardcode now; parameterize on demand         |
-| Handle errors for impossible scenarios         | Trust internal invariants; validate at edges |
+| Don't                                          | Do                                                                                                                   |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Add features beyond what was asked             | Solve exactly the stated problem                                                                                     |
+| Build abstractions for single-use code         | Inline first; abstract when reused                                                                                   |
+| Add "flexibility" or configurability not asked | Hardcode now; parameterize on demand                                                                                 |
+| Handle errors for impossible scenarios         | Trust internal invariants; validate at edges                                                                         |
 | Add a fallback, alias, or compat shim          | Check ship status first: pre-ship, delete the old shape and tighten to final — compat is a change that needs a pitch |
-| Write 200 lines when 50 would do               | Rewrite tighter                              |
+| Write 200 lines when 50 would do               | Rewrite tighter                                                                                                      |
 
 Two tests: would a senior engineer call this overcomplicated? And how long does this code live? Lifespan scales architecture — a two-week throwaway earns no pipeline. The bar is usefulness, not smallness.
 
@@ -113,16 +113,16 @@ The test: are you **deleting** complexity or **relocating** it? Rearranging the 
 
 Touch only what you must. Clean up only your own mess.
 
-| Rule                                                   | Why                                             |
-| ------------------------------------------------------ | ----------------------------------------------- |
-| Don't "improve" adjacent code, comments, or formatting | Pollutes the diff; outside your scope           |
-| Don't refactor code that isn't broken                  | Scope creep expands blast radius                |
-| Match existing style even if you'd do it differently   | Local consistency beats your preferences        |
-| Notice unrelated dead code → mention, don't delete     | Other branches/agents may rely on it            |
-| Remove imports/vars/funcs _your_ changes orphaned      | Clean up after yourself                         |
+| Rule                                                     | Why                                                               |
+| -------------------------------------------------------- | ----------------------------------------------------------------- |
+| Don't "improve" adjacent code, comments, or formatting   | Pollutes the diff; outside your scope                             |
+| Don't refactor code that isn't broken                    | Scope creep expands blast radius                                  |
+| Match existing style even if you'd do it differently     | Local consistency beats your preferences                          |
+| Notice unrelated dead code → mention, don't delete       | Other branches/agents may rely on it                              |
+| Remove imports/vars/funcs _your_ changes orphaned        | Clean up after yourself                                           |
 | Fix labels/counts/error text your change made untruthful | Fix the lie in the same commit; stale renders as stale, not fresh |
-| Leave pre-existing dead code alone                     | Outside your remit unless explicitly asked      |
-| Don't touch comments you don't understand              | Karpathy: "side effects ... orthogonal to task" |
+| Leave pre-existing dead code alone                       | Outside your remit unless explicitly asked                        |
+| Don't touch comments you don't understand                | Karpathy: "side effects ... orthogonal to task"                   |
 
 The test: every changed line should trace directly to the user's request.
 
@@ -139,7 +139,7 @@ Define verifiable success. Loop until it passes.
 
 For multi-step work, state the plan with verification per step:
 
-```
+```text
 1. [Step] → verify: [check]
 2. [Step] → verify: [check]
 3. [Step] → verify: [check]
@@ -203,7 +203,7 @@ The pattern that produces debugging spirals: **2 changes → typecheck → 15 ca
 
 ### Proof lives at the consumption boundary
 
-Typecheck through build prove the *producer*. "It works" is proven where the artifact is consumed:
+Typecheck through build prove the _producer_. "It works" is proven where the artifact is consumed:
 
 | Artifact         | Consumption check                                                 |
 | ---------------- | ----------------------------------------------------------------- |
@@ -234,7 +234,7 @@ Two more signal rules:
 
 ### Subagents vs Direct Work
 
-```
+```text
 Self-contained with a clear deliverable?
   Yes -> Produces verbose output (tests, logs, research)?
     Yes -> Subagent (keeps context clean)
@@ -246,7 +246,7 @@ Self-contained with a clear deliverable?
 
 ### Refactoring Approach
 
-```
+```text
 Can changes be made incrementally?
   Yes -> Move first, THEN consolidate (separate commits)
         New code alongside old, remove old only after tests pass
@@ -263,14 +263,14 @@ Most debugging resolves in 1-2 iterations when the red signal is classified befo
 
 ### Name the failure class first
 
-| Red signal smells like        | Response                                                                                                          |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Install/env, runner syntax    | Fix the environment; don't touch code                                                             |
-| Stale artifact or cache       | Rebuild, cache-bust, confirm the running thing is your build                                       |
-| Self-induced parallel race    | Rerun sequentially once; don't serialize forever                                                   |
+| Red signal smells like        | Response                                                                                                         |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Install/env, runner syntax    | Fix the environment; don't touch code                                                                            |
+| Stale artifact or cache       | Rebuild, cache-bust, confirm the running thing is your build                                                     |
+| Self-induced parallel race    | Rerun sequentially once; don't serialize forever                                                                 |
 | Pre-existing / inherited      | Prove it by absence (your signature missing, base red in the same place), then rebase — don't "fix" it in-branch |
-| Probe contradicts known state | Audit the probe first: timeouts, regexes, auth freshness                                           |
-| Actual code                   | Explicit hypothesis ("X because Y") → one targeted fix → verify                                    |
+| Probe contradicts known state | Audit the probe first: timeouts, regexes, auth freshness                                                         |
+| Actual code                   | Explicit hypothesis ("X because Y") → one targeted fix → verify                                                  |
 
 CI red: download the raw log to a file with its exit code, collapse the cascade to its root, and reproduce with the exact CI command — approximations have missed real bugs. Full protocol in `references/recovery.md`.
 
@@ -357,27 +357,27 @@ Never `git add -A` or `git add .` (catches other agents' WIP and secrets), never
 
 ## Anti-Patterns
 
-| Anti-Pattern                                     | Fix                                             |
-| ------------------------------------------------ | ----------------------------------------------- |
-| 20+ edits without verification                   | Verify every 2-3 edits                          |
-| Fix without verifying the fix                    | One fix, one verify, repeat                     |
-| `fix -> fix -> fix` chains without checking      | Always verify between fixes                     |
-| Accepting a green check you didn't read          | Nonzero executed count, real duration, the gate's own command |
-| Writing tests from memory                        | Read actual function signatures first           |
-| Changing shared types without grepping consumers | `Grep` all usages before modifying shared types |
-| Mixing move and change in one commit             | Move first commit, change second commit         |
-| Debugging spiral past 3 attempts                 | New hypothesis one level deeper, never wider    |
-| One mega-commit at end of session                | Commit each logical chunk as it lands           |
-| Bare or hedged commit messages (`fix: bug`, "might fix") | Specific subject, body explaining why, facts not guesses |
-| `git add -A` / `git add .`                       | Stage specific files only                       |
-| Pushing `main`/`master` or tags autonomously     | Explicit go-ahead only; your own PR branch is fine |
-| Acting on review findings without a file budget  | Triage blockers vs follow-ups; declare the budget first |
-| Silently picking one interpretation              | Surface options; ask before committing to one   |
-| "Improving" code adjacent to your change         | Stay surgical; touch only what's asked          |
-| Touching comments you don't understand           | Leave them; not your scope                      |
-| Bloated abstraction for single-use code          | Write the function; abstract when reused        |
-| Pushing through mounting complexity              | Stop; hunt the judo move that deletes it        |
-| Rearranging complexity instead of removing it    | Delete a concept, branch, or layer, not tidy it |
+| Anti-Pattern                                             | Fix                                                           |
+| -------------------------------------------------------- | ------------------------------------------------------------- |
+| 20+ edits without verification                           | Verify every 2-3 edits                                        |
+| Fix without verifying the fix                            | One fix, one verify, repeat                                   |
+| `fix -> fix -> fix` chains without checking              | Always verify between fixes                                   |
+| Accepting a green check you didn't read                  | Nonzero executed count, real duration, the gate's own command |
+| Writing tests from memory                                | Read actual function signatures first                         |
+| Changing shared types without grepping consumers         | `Grep` all usages before modifying shared types               |
+| Mixing move and change in one commit                     | Move first commit, change second commit                       |
+| Debugging spiral past 3 attempts                         | New hypothesis one level deeper, never wider                  |
+| One mega-commit at end of session                        | Commit each logical chunk as it lands                         |
+| Bare or hedged commit messages (`fix: bug`, "might fix") | Specific subject, body explaining why, facts not guesses      |
+| `git add -A` / `git add .`                               | Stage specific files only                                     |
+| Pushing `main`/`master` or tags autonomously             | Explicit go-ahead only; your own PR branch is fine            |
+| Acting on review findings without a file budget          | Triage blockers vs follow-ups; declare the budget first       |
+| Silently picking one interpretation                      | Surface options; ask before committing to one                 |
+| "Improving" code adjacent to your change                 | Stay surgical; touch only what's asked                        |
+| Touching comments you don't understand                   | Leave them; not your scope                                    |
+| Bloated abstraction for single-use code                  | Write the function; abstract when reused                      |
+| Pushing through mounting complexity                      | Stop; hunt the judo move that deletes it                      |
+| Rearranging complexity instead of removing it            | Delete a concept, branch, or layer, not tidy it               |
 
 ---
 

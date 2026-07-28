@@ -49,7 +49,7 @@ For Codex's structured `codex review` command, prompts aren't needed — it has 
 
 The slots that repeatedly produce sharp reviews. Compose per dispatch — not every slot fires every time, but round-2+ briefs always carry the findings ledger (see SKILL.md, The Review Loop).
 
-```
+```text
 [Original ask — verbatim]   The user asked: "<paste the user's exact words>"
 [Scope]                     Review exactly <base>..<SHA> / only these files: <list>. Nothing else.
 [Persona]                   You are a senior <domain> engineer.
@@ -72,7 +72,7 @@ The orientation-suppression slot doubles as an independence lever: a reviewer th
 
 For round 2+ of a review loop, per finding:
 
-```
+```text
 Round <N> re-review. Prior finding, verbatim:
 <finding>
 Claimed fix: commit <SHA>.
@@ -85,7 +85,7 @@ Verdict: FIXED or NOT-FIXED: <one concise sentence>.
 
 For anything human-facing — specs, decks, digests, docs, skills. Give the fact-checker read access to the fact sources (`--add-dir`, repo root); its best catches are invented infrastructure, not prose problems.
 
-```
+```text
 Fact-check the claims below against the repository. For EACH claim, return a verdict line:
 CONFIRMED / STALE / WRONG / NOT-FOUND — with file:line evidence and the corrected fact
 if stale or wrong. Close with a counted scorecard:
@@ -102,7 +102,7 @@ A clean fact-check does not discharge the author's own final pass over the artif
 
 Artifact-mediated design consultation on an undecided question. Set a deadline and a degraded fallback before dispatching so the consult never blocks the decision; convergence between models is the confidence signal to proceed.
 
-```
+```text
 Read <design doc path>. Open question: <the undecided thing>.
 Challenge the framing, name the tensions honestly, and say which option you would
 take and why. This is a consultation, not a gate — no verdict needed.
@@ -114,7 +114,7 @@ The consulted model validates and critiques; it does not author.
 
 Best as the first pass. Broad coverage across all dimensions.
 
-```
+```text
 Review the changes between main and HEAD with extreme thoroughness. Prioritize:
 1. Correctness — logic errors, edge cases, null handling, race conditions
 2. Security — injection, auth gaps, secrets exposure, OWASP Top 10:2025
@@ -133,7 +133,7 @@ Overall verdict: "patch is correct" or "patch is incorrect" with justification.
 
 ## Security Deep-Dive
 
-```
+```text
 You are a senior application security engineer reviewing a code change.
 
 Analyze the diff between the current branch and main for:
@@ -159,7 +159,7 @@ Do NOT flag style or non-security concerns.
 
 ## Architecture Review
 
-```
+```text
 You are a principal software architect reviewing a code change for design quality.
 
 Evaluate the diff between current branch and main:
@@ -183,7 +183,7 @@ Skip: implementation details, performance micro-optimizations, style.
 
 ## Performance Review
 
-```
+```text
 You are a performance engineer reviewing a code change for efficiency.
 
 Analyze the diff between current branch and main:
@@ -207,7 +207,7 @@ Skip: premature optimization, style preferences, sub-millisecond concerns in col
 
 ## Error Handling Review
 
-```
+```text
 You are reviewing a code change specifically for error handling correctness.
 
 Analyze the diff between current branch and main:
@@ -228,7 +228,7 @@ For each finding:
 
 ## Concurrency Review
 
-```
+```text
 You are reviewing a code change for concurrency correctness.
 
 Analyze the diff between current branch and main:
@@ -253,7 +253,7 @@ Skip: single-threaded code paths, non-concurrent modules.
 
 For domain-specific reviews, use this skeleton:
 
-```
+```text
 You are a [specific role] reviewing a code change for [specific domain].
 
 Analyze the diff between current branch and main:

@@ -123,7 +123,7 @@ Granularity answers to reviewer cost, and it gets corrected in both directions. 
 
 A stack needs a nav blockquote at the top of every PR so a reviewer always knows where they are and what's landed:
 
-```
+```markdown
 > **Stack PR 2 of 4 · PROJ-481** — the policy engine.
 > `#101` (data plane, ✅ merged) → **`#102` you are here** → `#103` (admin surface) → `#104` (client adoption).
 > Rebased onto current `main`.

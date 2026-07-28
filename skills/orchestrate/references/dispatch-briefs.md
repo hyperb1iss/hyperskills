@@ -60,14 +60,15 @@ After fixing, run `[TOOL_COMMAND] [PATH]` to verify zero issues remain.
 ## Worker Brief (build/fix)
 
 ```markdown
-**Task: [DESCRIPTIVE TITLE]** (task_[ID])
+**Task: [DESCRIPTIVE TITLE]** (task\_[ID])
 
 Work in /absolute/path/to/[directory]
 
 ## The ask (verbatim)
 
 > [The user's exact words. Do not paraphrase. If your read of this brief
-> conflicts with the ask, say so in your report.]
+>
+> > conflicts with the ask, say so in your report.]
 
 ## Scope fence
 
@@ -208,7 +209,7 @@ Declare all four elements at arm time; a watcher missing any of them is a stuck 
 ```markdown
 Watch: [what — command/file/endpoint and poll interval]
 Exit condition: [named, checkable — "checks settle to SUCCESS or FAILURE",
-  not "looks done"; beware conditions no state can satisfy]
+not "looks done"; beware conditions no state can satisfy]
 On fire: [remediation rung — the ONE action taken, then re-observe]
 Ceiling: [max iterations or wall time, then escalate with evidence]
 Stale-fire: [if the world changed since arming, no-op and report]

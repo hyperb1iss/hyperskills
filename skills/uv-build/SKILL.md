@@ -11,7 +11,7 @@ description: Use this skill when building Python packages, configuring build bac
 
 ## When to Use uv-build
 
-```
+```text
 Is your package pure Python?
 ├─ YES → Needs VCS versioning, build hooks, or dynamic metadata?
 │  ├─ NO  → uv_build (fast, zero-config, excellent defaults)
@@ -214,12 +214,13 @@ build-backend = "uv_build"
 ```
 
 MANIFEST.in equivalents:
-| MANIFEST.in | uv_build |
-|------------|----------|
-| `include CHANGELOG.md` | `source-include = ["CHANGELOG.md"]` |
-| `recursive-include tests` | `source-include = ["tests/**"]` |
-| `global-exclude *.pyc` | Handled by `default-excludes` |
-| `prune docs` | `source-exclude = ["docs/**"]` |
+
+| MANIFEST.in               | uv_build                            |
+| ------------------------- | ----------------------------------- |
+| `include CHANGELOG.md`    | `source-include = ["CHANGELOG.md"]` |
+| `recursive-include tests` | `source-include = ["tests/**"]`     |
+| `global-exclude *.pyc`    | Handled by `default-excludes`       |
+| `prune docs`              | `source-exclude = ["docs/**"]`      |
 
 ### From hatchling
 
