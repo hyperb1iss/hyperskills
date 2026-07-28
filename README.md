@@ -254,6 +254,7 @@ Skills with reference files for the deep-dive material:
 | `dream`              | `conversation-formats.md`, `extraction-guide.md`: session schemas and memory extraction rules |
 | `tilt`               | `api-reference.md`, `patterns.md`: full Tiltfile API and power patterns                       |
 | `tui-design`         | `visual-catalog.md`, `app-patterns.md`: Unicode catalog and app gallery                       |
+| `super-good-pr`      | `canonical-prs.md`: four real PR bodies from one shipped stack, as a calibration set          |
 | `uv`                 | `configuration.md`, `docker-ci.md`, `resolution.md`: uv config, CI patterns, resolver details |
 | `ruff`               | `configuration.md`, `rules.md`: Ruff config and rule catalog snapshot                         |
 | `ty`                 | `migration.md`, `type-system.md`: migration from mypy or Pyright and beta type-system support |

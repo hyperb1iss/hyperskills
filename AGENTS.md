@@ -43,6 +43,10 @@ hyperskills/
 │   │   └── references/
 │   │       ├── api-reference.md
 │   │       └── patterns.md
+│   ├── super-good-pr/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── canonical-prs.md
 │   ├── tui-design/
 │   │   ├── SKILL.md
 │   │   └── references/
@@ -290,6 +294,7 @@ Sizes drift as skills evolve — check with `wc -w skills/*/SKILL.md` instead of
 | `codex-imagegen`     | none       | Process — Codex image generation delegation |
 | `cross-model-review` | 3 files    | Process — bidirectional cross-model review  |
 | `dream`              | 2 files    | Process — conversation memory consolidation |
+| `super-good-pr`      | 1 file     | Process — reviewer-first PR descriptions    |
 | `git`                | none       | Domain — git operations                     |
 | `tilt`               | 2 files    | Domain — Kubernetes dev                     |
 | `tui-design`         | 2 files    | Domain — terminal UI                        |
@@ -304,7 +309,7 @@ When adding a new skill, it should fit one of these categories:
 
 **Process skills** — HOW to approach a class of work:
 
-- `brainstorm`, `plan`, `research`, `orchestrate`, `implement`, `codex-imagegen`, `cross-model-review`, `dream`
+- `brainstorm`, `plan`, `research`, `orchestrate`, `implement`, `codex-imagegen`, `cross-model-review`, `dream`, `super-good-pr`
 - These tend to be workflow-heavy with phases and decision gates
 
 **Domain skills** — specialized knowledge for a specific technology or practice:

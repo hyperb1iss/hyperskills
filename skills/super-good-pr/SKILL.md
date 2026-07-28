@@ -53,15 +53,15 @@ The Validation section is where trust is won or lost. Rules:
 
 ## Diagrams and visual enrichment
 
-When a PR changes topology — services, request paths, data flow, state machines, deployment shape — prose makes the reviewer rebuild the picture in their head. Hand them the picture instead. GitHub renders ```` ```mermaid ```` fenced blocks natively, so a diagram costs nothing to ship and lives in the body itself.
+When a PR changes topology — services, request paths, data flow, state machines, deployment shape — prose makes the reviewer rebuild the picture in their head. Hand them the picture instead. GitHub renders ` ```mermaid ` fenced blocks natively, so a diagram costs nothing to ship and lives in the body itself.
 
-| Change shape                                   | Visual                                          |
-| ---------------------------------------------- | ----------------------------------------------- |
-| Service/network topology, request path changes | Mermaid `flowchart` — before/after pair         |
-| Protocol, handshake, cross-service call order  | Mermaid `sequenceDiagram`                       |
-| State machine or lifecycle changes             | Mermaid `stateDiagram-v2`                       |
-| Schema relationships, new tables/FKs           | Mermaid `erDiagram`                             |
-| Rollout phases and gates                       | Mermaid `flowchart` with the safe-stop points   |
+| Change shape                                   | Visual                                               |
+| ---------------------------------------------- | ---------------------------------------------------- |
+| Service/network topology, request path changes | Mermaid `flowchart` — before/after pair              |
+| Protocol, handshake, cross-service call order  | Mermaid `sequenceDiagram`                            |
+| State machine or lifecycle changes             | Mermaid `stateDiagram-v2`                            |
+| Schema relationships, new tables/FKs           | Mermaid `erDiagram`                                  |
+| Rollout phases and gates                       | Mermaid `flowchart` with the safe-stop points        |
 | UI changes                                     | Screenshot or short clip, drag-dropped as attachment |
 
 Rules that keep diagrams load-bearing:
@@ -130,3 +130,7 @@ A stack needs a nav blockquote at the top of every PR so a reviewer always knows
 ```
 
 Each PR's "What this is" then says what the _previous_ PR established and what this one adds, so the stack reads as one argument across several documents. End each with what's deferred to the next PR in the stack.
+
+## References
+
+`references/canonical-prs.md` is the calibration set: four real PR bodies that shipped one feature as a four-part stack, reproduced verbatim. Read it when the rules above are clear but the execution isn't — when you need to see how long a "How it works" section actually runs, what a real Validation block counts, how an honest `⚠️` line reads next to green checks, or how a stack's nav blockquotes chain across four documents. Match the section you're unsure about rather than reading it end to end.
