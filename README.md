@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Skills-17-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="17 Skills">
+  <img src="https://img.shields.io/badge/Skills-16-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="16 Skills">
   <img src="https://img.shields.io/badge/skills.sh-Compatible-ff6ac1?style=for-the-badge&logo=vercel&logoColor=white" alt="skills.sh">
 </p>
 
@@ -34,7 +34,7 @@ hyperskills is built around an agent workflow. Brainstorming structured by the D
 
 Domain skills round out the toolbox where models have stale or missing knowledge: current Astral Python tooling, Tilt operational decision trees, and terminal UI design that survives across emulators.
 
-Each skill encodes procedural knowledge, decision trees, anti-patterns, and current SOTA. None prescribes a strict workflow. They give you knowledge and framing; you decide when to reach for them. Skills carry procedural knowledge in-context; [Sibyl](https://github.com/hyperb1iss/sibyl) carries decisions, patterns, and learnings across sessions. 17 skills, all installable independently.
+Each skill encodes procedural knowledge, decision trees, anti-patterns, and current SOTA. None prescribes a strict workflow. They give you knowledge and framing; you decide when to reach for them. Skills carry procedural knowledge in-context; [Sibyl](https://github.com/hyperb1iss/sibyl) carries decisions, patterns, and learnings across sessions. 16 skills, all installable independently.
 
 ## ⚡ Installation
 
@@ -249,7 +249,7 @@ Skills with reference files for the deep-dive material:
 | Skill                | Reference Files                                                                               |
 | -------------------- | --------------------------------------------------------------------------------------------- |
 | `implement`          | `benchmarks.md`, `recovery.md`: quantitative data from 21k operations, error-recovery detail  |
-| `cross-model-review` | `prompts.md`, `failure-recovery.md`: review prompts, hang ladders and failure triage          |
+| `cross-model-review` | `prompts.md`, `failure-recovery.md`, `cli-flags.md`: prompts, hang ladders, flag surface      |
 | `orchestrate`        | `dispatch-briefs.md`: copyable worker, reviewer, and research dispatch briefs                 |
 | `dream`              | `conversation-formats.md`, `extraction-guide.md`: session schemas and memory extraction rules |
 | `tilt`               | `api-reference.md`, `patterns.md`: full Tiltfile API and power patterns                       |

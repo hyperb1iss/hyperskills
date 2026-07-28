@@ -29,7 +29,8 @@ hyperskills/
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │       ├── prompts.md
-│   │       └── failure-recovery.md
+│   │       ├── failure-recovery.md
+│   │       └── cli-flags.md
 │   ├── dream/
 │   │   ├── SKILL.md
 │   │   └── references/
@@ -287,7 +288,7 @@ Sizes drift as skills evolve — check with `wc -w skills/*/SKILL.md` instead of
 | `orchestrate`        | 1 file     | Process — multi-agent dispatch                   |
 | `implement`          | 2 files    | Process — implementation                         |
 | `codex-imagegen`     | none       | Process — Codex image generation delegation      |
-| `cross-model-review` | 2 files    | Process — bidirectional cross-model review       |
+| `cross-model-review` | 3 files    | Process — bidirectional cross-model review       |
 | `dream`              | 2 files    | Process — conversation memory consolidation      |
 | `git`                | none       | Domain — git operations                          |
 | `tilt`               | 2 files    | Domain — Kubernetes dev                          |

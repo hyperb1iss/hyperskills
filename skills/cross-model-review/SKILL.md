@@ -317,44 +317,12 @@ Report the disposition ledger ("took 4, declined 3 with reasons, flagged 2") —
 
 ## Sandbox & Permission Flags
 
-Both CLIs scope what the reviewer can read, write, and execute. Default to the most restrictive that does the job.
+Both CLIs scope what the reviewer can read, write, and execute. Default to the most restrictive that does the job:
 
-### Codex sandbox modes
+- **Claude → Codex:** `--sandbox read-only` for pure review; `workspace-write` only when the pass applies fixes.
+- **Codex → Claude:** `--allowedTools "Read,Glob,Grep,Bash(git *)"`, plus `Bash(rg:*)` when the reviewer needs to grep across files.
 
-`codex exec` and `codex review` accept `--sandbox <mode>`:
-
-| Mode                 | Read | Write    | Network | Use for                                 |
-| -------------------- | ---- | -------- | ------- | --------------------------------------- |
-| `read-only`          | ✓    | ✗        | ✗       | Pure review (default for review work)   |
-| `workspace-write`    | ✓    | cwd only | ✗       | Review + apply suggested fixes          |
-| `danger-full-access` | ✓    | ✓        | ✓       | Last resort; explicit user request only |
-
-### Codex flags worth knowing (as of Jul 2026)
-
-| Flag                                         | When                                                                                    |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `--skip-git-repo-check`                      | Running from `/tmp` or any non-repo dir (trips the git trust check)                     |
-| `--add-dir <DIR>`                            | Extend read access to another path                                                      |
-| `-C <DIR>` / `--cd <DIR>`                    | Run in another worktree without `cd`                                                    |
-| `--ephemeral`                                | One-shot session, no persistence                                                        |
-| `--full-auto`                                | Alias for `--ask-for-approval never --sandbox workspace-write`; only when applying fixes |
-| `--dangerously-bypass-approvals-and-sandbox` | Last resort; explicit user request only                                                 |
-| `--json` / `--output-last-message`           | Capture the verdict; read-only sandboxes silently fail to write a requested report file |
-| `-c model_reasoning_effort="xhigh"`          | Spec/RFC review only (see Effort Override Policy)                                       |
-
-Version-pinned CLI flags are the fastest-rotting content a skill can carry — a documented `--sandbox` form was already rejected by a newer codex build in the field. When the installed CLI disagrees with this table, the CLI wins; flag the skill for a patch.
-
-### Claude permission flags (`claude -p`)
-
-| Flag                                          | When                                            |
-| --------------------------------------------- | ----------------------------------------------- |
-| `--allowedTools "Read,Glob,Grep,Bash(git *)"` | Standard read-only review toolset (recommended) |
-| `--add-dir <PATH>`                            | Read access outside cwd                         |
-| `--no-session-persistence`                    | Sanity pings; one-shot calls                    |
-| `--output-format text` / `json`               | Capture for parsing                             |
-| `--dangerously-skip-permissions`              | Last resort; explicit user request only         |
-
-The default toolset for Codex → Claude is `--allowedTools "Read,Glob,Grep,Bash(git *)"`. Add `Bash(rg:*)` if the reviewer needs grep across files. Resist write tools unless the review explicitly applies fixes. One guarded opt-in is field-proven: the brief may allow "do not modify files unless you find a real defect and can fix it surgically; if you do edit, list exact files changed" — real defect, surgical fix, disclosed in the verdict.
+Full flag surface — sandbox modes, the Codex ergonomics flags (`-C`, `--ephemeral`, `--full-auto`, `--skip-git-repo-check`, capture flags), the Claude permission flags, and the one field-proven guarded write opt-in — is in `references/cli-flags.md`. When the installed CLI disagrees with it, the CLI wins.
 
 ---
 
@@ -416,15 +384,14 @@ Ceremony scales with blast radius, not line count: security-sensitive changes (a
 
 These apply to both directions; prompts are model-agnostic and reliably improve review signal:
 
-1. **Assign a persona.** "Senior security engineer" beats "review for security"
-2. **Specify what to skip.** "Skip formatting, naming style, minor docs gaps" prevents bikeshedding
-3. **Require confidence scores** and act only on findings ≥ 0.7
-4. **Demand file:line citations.** Vague findings without location aren't actionable
-5. **Ask for concrete fixes.** "Suggest a specific fix"
-6. **One domain per pass.** Security-only, architecture-only
-7. **Demand a shaped verdict.** PASS carries the evidence list, residual risks, and the evidence tier actually reached (executed / static analysis / traced) — a blocked gate steps down the ladder and says so. FAIL carries blockers with file:line, what's verified-good, the smallest fix, and a repro
-8. **Ask for one executable probe** beyond the existing suite — "Prove the code works, don't just confirm it exists"
-9. **Recall before dispatch.** Prior gotchas for this lane become the review's attack plan; when memory comes back empty, say so and review from live repo evidence
+**Table stakes**, in every brief: a persona ("senior security engineer" beats "review for security"), one domain per pass, an explicit skip list to prevent bikeshedding, confidence scores with a 0.7 floor, file:line citations, and a request for concrete fixes.
+
+**The levers that actually change output quality:**
+
+1. **Demand a shaped verdict.** PASS carries the evidence list, residual risks, and the evidence tier actually reached (executed / static analysis / traced) — a blocked gate steps down the ladder and says so. FAIL carries blockers with file:line, what's verified-good, the smallest fix, and a repro
+2. **Ask for one executable probe** beyond the existing suite — "Prove the code works, don't just confirm it exists"
+3. **Recall before dispatch.** Prior gotchas for this lane become the review's attack plan; when memory comes back empty, say so and review from live repo evidence
+4. **Carry the keystone.** Name the load-bearing claim the whole change rides on and tell the reviewer to attack it first
 
 When a review closes a defect class, fold it into the repo's standing review prompt or CI gate so the next reviewer inherits it. A recurring reviewer hallucination is a corpus bug — scrub the stale docs the reviewer ingests.
 
@@ -439,10 +406,7 @@ Ready-to-use prompt templates — security, architecture, performance, error han
 | Self-review (model reviews its own code)                                | Systematic bias, same blind spots                                                                                                      | Cross-model: author and reviewer are different models                                                                         |
 | Re-litigating a settled finding round after round                       | Oscillation without new confirmed defects                                                                                              | Stop; the budget bounds re-litigation, not converging rounds (see The Review Loop)                                            |
 | Hardcoding `--model` / `-m` / `-c model=`                               | Overrides user config; stale model names                                                                                               | Defer to user config; only `model_reasoning_effort` for spec review                                                           |
-| `claude -p --allowedTools "..." "PROMPT"` (no `--`)                     | Variadic flag eats the prompt                                                                                                          | Always the `--` separator — see Rule 3                                                                                        |
-| `yield_time_ms` under 300000, or reverting to 1000 mid-session          | Empty yields read as failure; orphans pile up                                                                                          | 300000 on every call — see Rule 1                                                                                             |
-| Re-invoking `claude -p` after `Process running with session ID NNNN`    | Spawns a parallel claude; original still working                                                                                       | Reap the session — see Rule 2                                                                                                 |
-| `claude -p` from Codex with `ANTHROPIC_API_KEY` in the env              | Review silently bills per-token to the API                                                                                             | `env -u ANTHROPIC_API_KEY` on the spawning call — see Rule 4                                                                  |
+| Skipping any of the four Codex → Claude rules                           | Missing `--` eats the prompt; a low `yield_time_ms` reads as failure; re-invoking orphans processes; a stray API key bills the wrong account | Use the Gold Path launcher, which bakes in all four                                                                      |
 | Bare `codex review` (no scope flag)                                     | Hangs or produces 100KB+ blob output                                                                                                   | Exactly one scope flag — see the Claude → Codex rule                                                                          |
 | Shell `timeout` wrapped around a review                                 | Reviews legitimately take 30s–5min+; false exit-124 failures                                                                           | No shell timeout by default — see Failure Recovery                                                                              |
 | Treating transcript size as the failure signal                          | A 1MB+ `codex exec` transcript can be a successful deep dive                                                                           | Judge by output growth and convergence to a verdict — see `references/failure-recovery.md`                                      |
@@ -471,5 +435,6 @@ Ready-to-use prompt templates — security, architecture, performance, error han
 
 ## References
 
-- `references/prompts.md` — prompt templates: security, architecture, performance, error handling, concurrency, plus the annotated dispatch brief, fix re-verification, fact-check, and consult templates.
-- `references/failure-recovery.md` — the full symptom → recovery triage table and the reviewer hang ladder.
+- `references/prompts.md` — per-domain review prompts and the annotated dispatch, re-verification, fact-check, and consult briefs.
+- `references/failure-recovery.md` — symptom → recovery triage and the hang ladders for both directions.
+- `references/cli-flags.md` — sandbox modes and the full Codex/Claude flag surface.
