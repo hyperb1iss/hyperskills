@@ -339,32 +339,11 @@ Conventional Commit types: `feat` (capability), `fix` (bug), `refactor` (no beha
 
 **Body** (always include one): wrap at 76 chars, separated from subject by a blank line. Explain _why_, the diff shows _what_. State facts: banish "likely", "probably", "might", "seems", "appears to". If you don't know what a change does, read more before committing. Two sentences usually suffices; mention load-bearing context a future bisect would want.
 
-### HEREDOC + Co-Author
-
-Compose messages via HEREDOC (or `git commit -F <file>`) to preserve formatting — `-m` flags keep each paragraph on one unwrapped line and burn amend cycles. Add a `Co-Authored-By` trailer that names the model, "Claude" alone doesn't disambiguate across multi-agent sessions.
-
-```bash
-git commit -m "$(cat <<'EOF'
-fix(auth): guard against null session in token refresh
-
-Refresh racing with logout was dereferencing a freed session, surfacing
-as a 500 with no log trail. Early return plus a single warn log makes
-the failure mode visible without spamming on every refresh.
-
-Co-Authored-By: Nova (Claude Opus 4.7) <noreply@anthropic.com>
-EOF
-)"
-```
-
-Backstop the wrap after committing (a check, not the mechanism):
-
-```bash
-git log -1 --format=%B | awk 'length($0) > 76 && $0 !~ /^(Co-Authored-By:|https?:\/\/)/ { print "over 76 chars: " $0; bad=1 } END { exit bad }'
-```
+Compose via `git commit -F -` with a single-quoted heredoc, never stacked `-m` flags — they ship each paragraph as one unwrapped line and burn amend cycles. Add a `Co-Authored-By` trailer naming the model and version; "Claude" alone doesn't disambiguate across multi-agent sessions. Quoting mechanics, the wrap backstop, and what to do when a shell-composed body lands mangled are in `/hyperskills:git`.
 
 ### Multi-agent staging
 
-Other agents may be working in parallel:
+Other agents may be working in parallel, so stage deliberately:
 
 ```bash
 git status                # See the full picture first
@@ -372,7 +351,7 @@ git diff --staged         # Review what you're about to commit
 git add <specific-files>  # Only files you personally touched
 ```
 
-Never `git add -A` or `git add .` (catches other agents' WIP and secrets). Never `git restore` files you didn't modify. Never push `main`/`master` or tags — those need an explicit go-ahead. Pushing your own PR/feature branch in a shareable state is normal: re-fetch first, and after a history rewrite use `--force-with-lease` pinned to the just-fetched SHA. When in doubt whether a branch is yours, ask. Skip planning docs, scratch files, and `.local.md` from the repo.
+Never `git add -A` or `git add .` (catches other agents' WIP and secrets), never `git restore` files you didn't modify, never push `main`/`master` or tags without an explicit go-ahead. Pushing your own PR branch in a shareable state is normal. Skip planning docs, scratch files, and `.local.md`. Co-edited files, `index.lock` contention, and lease-pinned force pushes are `/hyperskills:git` territory.
 
 ---
 
@@ -383,17 +362,13 @@ Never `git add -A` or `git add .` (catches other agents' WIP and secrets). Never
 | 20+ edits without verification                   | Verify every 2-3 edits                          |
 | Fix without verifying the fix                    | One fix, one verify, repeat                     |
 | `fix -> fix -> fix` chains without checking      | Always verify between fixes                     |
-| Editing without reading first                    | Read the file immediately before editing        |
+| Accepting a green check you didn't read          | Nonzero executed count, real duration, the gate's own command |
 | Writing tests from memory                        | Read actual function signatures first           |
 | Changing shared types without grepping consumers | `Grep` all usages before modifying shared types |
 | Mixing move and change in one commit             | Move first commit, change second commit         |
 | Debugging spiral past 3 attempts                 | New hypothesis one level deeper, never wider    |
-| Premature optimization                           | Correctness first, optimize after tests pass    |
 | One mega-commit at end of session                | Commit each logical chunk as it lands           |
-| Bare titles like `fix: bug` or `update stuff`    | Specific subject + body explaining why          |
-| Skipping the body to "save time"                 | Always include a body, even two sentences       |
-| Filenames or paths in the subject line           | Describe the behavior, not the file             |
-| Uncertain language ("might fix", "should work")  | State facts; read more code if you don't know   |
+| Bare or hedged commit messages (`fix: bug`, "might fix") | Specific subject, body explaining why, facts not guesses |
 | `git add -A` / `git add .`                       | Stage specific files only                       |
 | Pushing `main`/`master` or tags autonomously     | Explicit go-ahead only; your own PR branch is fine |
 | Acting on review findings without a file budget  | Triage blockers vs follow-ups; declare the budget first |
@@ -403,7 +378,6 @@ Never `git add -A` or `git add .` (catches other agents' WIP and secrets). Never
 | Bloated abstraction for single-use code          | Write the function; abstract when reused        |
 | Pushing through mounting complexity              | Stop; hunt the judo move that deletes it        |
 | Rearranging complexity instead of removing it    | Delete a concept, branch, or layer, not tidy it |
-| Vague "make it work" goal                        | Define a verifiable check first                 |
 
 ---
 

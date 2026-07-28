@@ -189,7 +189,7 @@ As patterns prove reliable, lighten review overhead instead of running full cere
 
 This is earned confidence, not cutting corners. The gradient resets when a task departs from the established pattern; escalate back to full ceremony for anything genuinely new.
 
-The gradient covers correctness ceremony only. Three things never decay: shape checkpoints at wave boundaries (sprawl has shipped past green tests AND two passing cross-model reviews), mutation gates, and standing-correction recall — a vetoed pattern once re-appeared ~315 autonomous items later, so user vetoes re-enter every late-task brief verbatim. Risk escalates regardless of position in the run: security-critical or spec-level work goes back to rounds-until-PASS, iterating until it converges, not until a count is hit.
+The gradient covers correctness ceremony only. Three things never decay: shape checkpoints at wave boundaries (see Supervising the Fleet), mutation gates, and standing-correction recall — a vetoed pattern once re-appeared ~315 autonomous items later, so user vetoes re-enter every late-task brief verbatim. Risk escalates regardless of position in the run: security-critical or spec-level work goes back to rounds-until-PASS, iterating until it converges, not until a count is hit.
 
 ---
 
@@ -448,7 +448,7 @@ Arm every watcher with a named exit condition, a remediation rung, an iteration 
 
 ### Shape checkpoints
 
-Correctness gates don't measure scope: a 397-file sprawl shipped with 549 green tests and two passing cross-model reviews, and the human killed it in seconds from the diffstat. At each wave boundary, run a shape check distinct from the verify gate:
+Correctness gates don't measure scope; sprawl has shipped past green tests and passing cross-model reviews and died in seconds from the diffstat. At each wave boundary, run a shape check distinct from the verify gate:
 
 ```bash
 git diff --name-only origin/${BASE:-main}...HEAD | awk -F/ '{print $1"/"$2}' | sort | uniq -c | sort -nr   # BASE = the PR's actual base ref
