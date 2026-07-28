@@ -11,6 +11,16 @@ YELLOW := \033[38;2;241;250;140m
 RED := \033[38;2;255;99;99m
 RESET := \033[0m
 
+# File lists. Scoped to tracked files so node_modules and the gitignored
+# research corpus never reach a linter; falls back to find outside a checkout.
+# Mode 120000 is filtered because prettier errors on an explicitly-named
+# symlink, and CLAUDE.md is a tracked symlink to AGENTS.md.
+LS := git ls-files -s
+NOLINK := awk '$$1 != "120000" { print $$4 }'
+TRACKED_MD := ($(LS) '*.md' 2>/dev/null | $(NOLINK) || find . -name '*.md' -type f -not -path './node_modules/*')
+TRACKED_JSON := ($(LS) '*.json' 2>/dev/null | $(NOLINK) || find . -name '*.json' -type f -not -path './node_modules/*')
+TRACKED_YAML := ($(LS) '*.yml' '*.yaml' 2>/dev/null | $(NOLINK) || find . -name '*.y*ml' -type f -not -path './node_modules/*')
+
 #─────────────────────────────────────────────
 # Default target
 #─────────────────────────────────────────────
@@ -30,21 +40,25 @@ lint-json:
 
 lint-yaml:
 	@echo "$(CYAN)→ Linting YAML files...$(RESET)"
-	@if command -v yamllint >/dev/null 2>&1; then \
-		find . -name "*.yml" -o -name "*.yaml" | xargs yamllint -d relaxed 2>/dev/null || true; \
+	@if ! command -v yamllint >/dev/null 2>&1; then \
+		echo "$(YELLOW)  ⚠ yamllint not installed — YAML NOT checked$(RESET)"; \
+	elif [ -z "$$($(TRACKED_YAML))" ]; then \
+		echo "$(YELLOW)  ⚠ no YAML files tracked — nothing checked$(RESET)"; \
+	elif $(TRACKED_YAML) | xargs yamllint -d relaxed; then \
+		echo "$(GREEN)  ✓ YAML valid$(RESET)"; \
 	else \
-		echo "$(YELLOW)  ⚠ yamllint not installed, skipping$(RESET)"; \
+		echo "$(RED)✗ YAML lint failed$(RESET)"; exit 1; \
 	fi
-	@echo "$(GREEN)  ✓ YAML checked$(RESET)"
 
 lint-md:
 	@echo "$(CYAN)→ Linting Markdown files...$(RESET)"
-	@if command -v markdownlint >/dev/null 2>&1; then \
-		find . -name "*.md" -type f | xargs markdownlint --config .markdownlint.json 2>/dev/null || true; \
+	@if ! command -v markdownlint >/dev/null 2>&1; then \
+		echo "$(YELLOW)  ⚠ markdownlint not installed — Markdown NOT checked$(RESET)"; \
+	elif $(TRACKED_MD) | xargs markdownlint --config .markdownlint.json; then \
+		echo "$(GREEN)  ✓ Markdown valid$(RESET)"; \
 	else \
-		echo "$(YELLOW)  ⚠ markdownlint not installed, skipping$(RESET)"; \
+		echo "$(RED)✗ Markdown lint failed$(RESET)"; exit 1; \
 	fi
-	@echo "$(GREEN)  ✓ Markdown checked$(RESET)"
 
 #─────────────────────────────────────────────
 # Formatting
@@ -54,17 +68,20 @@ format: format-md format-json
 
 format-md:
 	@echo "$(CYAN)→ Formatting Markdown files...$(RESET)"
-	@npx prettier --write "**/*.md" 2>/dev/null || echo "$(YELLOW)  ⚠ prettier failed$(RESET)"
+	@$(TRACKED_MD) | xargs npx prettier --write \
+		|| (echo "$(RED)✗ prettier failed$(RESET)" && exit 1)
 	@echo "$(GREEN)  ✓ Markdown formatted$(RESET)"
 
 format-json:
 	@echo "$(CYAN)→ Formatting JSON files...$(RESET)"
-	@npx prettier --write "**/*.json" 2>/dev/null || echo "$(YELLOW)  ⚠ prettier failed$(RESET)"
+	@$(TRACKED_JSON) | xargs npx prettier --write \
+		|| (echo "$(RED)✗ prettier failed$(RESET)" && exit 1)
 	@echo "$(GREEN)  ✓ JSON formatted$(RESET)"
 
 format-check:
 	@echo "$(CYAN)→ Checking format...$(RESET)"
-	@npx prettier --check "**/*.md" "**/*.json" 2>/dev/null || (echo "$(RED)✗ Files need formatting$(RESET)" && exit 1)
+	@{ $(TRACKED_MD); $(TRACKED_JSON); } | xargs npx prettier --check \
+		|| (echo "$(RED)✗ Files need formatting$(RESET)" && exit 1)
 	@echo "$(GREEN)  ✓ Format OK$(RESET)"
 
 #─────────────────────────────────────────────
