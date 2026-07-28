@@ -5,7 +5,9 @@ description: Use this skill when working with Python projects, packages, scripts
 
 # uv: Python Package & Project Manager
 
-uv (v0.11.11, May 2026) replaces pip, pip-tools, pipx, pyenv, virtualenv, and poetry. Written in Rust, 10-100x faster than alternatives. It is stable production software; minor versions can contain breaking changes, while patch releases are intended to be non-breaking.
+uv replaces pip, pip-tools, pipx, pyenv, virtualenv, and poetry. Written in Rust, 10-100x faster than alternatives. It is stable production software; minor versions can contain breaking changes, while patch releases are intended to be non-breaking.
+
+**Snapshot: v0.11.11, May 2026.** The installed binary outranks this file. Run `uv --version` first, and `uv <command> --help` whenever a flag here doesn't land — the local install is often behind, and commands documented below (notably `uv audit`, preview-gated since 0.10) may simply not exist yet.
 
 ## Workflow Decision Tree
 

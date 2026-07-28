@@ -9,7 +9,7 @@ Verification-driven task decomposition with Sibyl-native tracking. Mined from 20
 
 **Core insight:** Plans fail when steps can't be verified. Decomposition that lands in concrete checks survives contact with reality; abstract bullets don't. And a plan is a durable artifact consumed by autonomous runs and other agents, not chat exhaust — tracking in Sibyl and the repo lets it outlive the context window that produced it.
 
-**How to read this skill:** the phases below describe the rhythm of a useful planning pass, not a procedure to march through. Skip planning entirely for small clear work, compress phases when the answers are obvious, and treat the first plan as a hypothesis. Replanning is the rule, not the exception.
+**How to read this skill:** the first plan is a hypothesis, and replanning is the rule rather than evidence the plan was bad. The Phase 1 scale table is the real dial — it decides whether you plan at all.
 
 The shape: SCOPE → EXPLORE → DECOMPOSE → VERIFY & APPROVE → TRACK, with a loop back to DECOMPOSE when review finds gaps.
 

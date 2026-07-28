@@ -5,7 +5,9 @@ description: Use this skill when type checking Python code or setting up type ch
 
 # ty: Python Type Checker & Language Server
 
-ty (v0.0.34, May 2026) is Astral's Rust-based Python type checker and language server. **Beta status:** 0.0.x versioning, breaking changes between versions, and no stable API yet. Astral reports 10-100x faster checks than mypy and Pyright on large projects.
+ty is Astral's Rust-based Python type checker and language server. **Beta status:** 0.0.x versioning, breaking changes between versions, and no stable API yet. Astral reports 10-100x faster checks than mypy and Pyright on large projects.
+
+**Snapshot: v0.0.34, May 2026.** The installed binary outranks this file, and it rots faster here than in the other Astral skills: 0.0.x means flags, rule names, and config keys move between releases. Check `ty --version` and `ty check --help` before trusting a flag, and `ty explain rule` for current rule names.
 
 **Formerly "Red-Knot"**, renamed May 2025, extracted from the ruff repo to `astral-sh/ty`.
 

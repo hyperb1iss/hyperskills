@@ -9,7 +9,7 @@ Wave-based knowledge gathering with deferred synthesis. Mined from 300+ real res
 
 **Core insight:** Research breadth-first, synthesize after. Conclusions drawn from the first three results miss nuance the fourth wave would have surfaced. Deploying agents in waves and accumulating findings before synthesizing produces sharper recommendations.
 
-**How to read this skill:** the wave structure below is a shape, not a procedure. Quick mode skips most of it. Standard research uses one wave plus targeted follow-ups. Deep dives genuinely need the full pattern. Calibrate to the question, not the framework.
+**How to read this skill:** calibrate to the question, not the framework. Most research is Quick Mode or one wave plus targeted follow-ups; only deep dives need the full pattern. The Phase 1 budget table sizes it.
 
 ## The Shape
 

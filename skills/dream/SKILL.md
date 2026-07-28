@@ -9,7 +9,7 @@ Bio-inspired two-phase sleep cycle that reviews Claude Code and Codex conversati
 
 **Core insight:** inline capture gets the gotchas — as of Jul 2026 the Remember beat fires at volume, per-slice, mid-session. Dreams hunt what no single session can see: gotchas that repeat across sessions, instruction phrases that persist in the prompt stream, cross-project connections, and the blind spots of otherwise good capture (harness friction, the user's unblock one-liners). Dreams are the backstop and the telescope, not the primary channel.
 
-**How to read this skill:** the phases below describe the rhythm of a useful dream cycle, not a procedure to march through. Quick naps compress most of it, deep sleeps stretch it out. The non-negotiable bits are extraction quality (Sibyl entries that meet the bar in `references/extraction-guide.md`) and dedup discipline (every write checked against existing entries). Process shape adapts; quality bar doesn't.
+**How to read this skill:** the depth mode below sets how much of the cycle runs. Two things never scale down with it: extraction quality (the bar lives in `references/extraction-guide.md`) and dedup discipline (every write checked against existing entries first). Process shape adapts; quality bar doesn't.
 
 ## The Shape
 

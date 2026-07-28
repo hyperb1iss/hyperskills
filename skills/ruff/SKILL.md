@@ -5,7 +5,9 @@ description: Use this skill when linting, formatting, or fixing Python code with
 
 # ruff: Python Linter & Formatter
 
-ruff (v0.15.12, Apr 2026) is three tools in one Rust binary: linter (`ruff check`), formatter (`ruff format`), and dependency analyzer (`ruff analyze graph`). It replaces Flake8, Black, isort, pyupgrade, and dozens more.
+ruff is three tools in one Rust binary: linter (`ruff check`), formatter (`ruff format`), and dependency analyzer (`ruff analyze graph`). It replaces Flake8, Black, isort, pyupgrade, and dozens more.
+
+**Snapshot: v0.15.12, Apr 2026.** The installed binary outranks this file. Check `ruff --version` and `ruff check --help` when a flag or rule code here doesn't land.
 
 **The built-in language server** (`ruff server`) replaces the deprecated `ruff-lsp` package (archived Dec 2025).
 

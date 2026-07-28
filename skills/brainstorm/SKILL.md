@@ -9,7 +9,7 @@ Structured ideation using the Double Diamond model, grounded in persistent memor
 
 **Core insight:** AI excels at divergent phases (volume, cross-domain connections). Humans excel at convergent phases (judgment, selection). Separating the two, and using Sibyl to avoid re-exploring solved problems, is the shape that consistently produces useful brainstorms.
 
-**How to read this skill:** the phases below describe the natural rhythm of a good brainstorm, not a procedure to march through. Skip phases that don't apply. Revisit earlier phases when new info changes the frame. Use judgment about when to compress, when to skip to action, and when divergent exploration is actually warranted.
+**How to read this skill:** the diamond is a rhythm, not a gate — phases revisit when new information changes the frame, and most real brainstorms are Quick Mode. The table below picks the mode before any phase starts.
 
 ## Reading the Brief
 
