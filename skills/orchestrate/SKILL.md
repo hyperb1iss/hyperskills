@@ -296,26 +296,7 @@ A PASS is not a permanent state; it covers a SHA.
 
 ## Strategy 6: Full Lifecycle
 
-For greenfield projects, combine all strategies in sequence:
-
-```
-Session 1: RESEARCH (Research Swarm)
-    -> Background agents build the knowledge corpus; planning agents synthesize
-
-Session 2: BUILD (Epic Parallel Build)
-    -> Scout, then waves of builders; monitor, integrate, track completions
-
-Session 3: ITERATE (Build-Review-Fix Pipeline)
-    -> Review agents assess, fix agents address findings, audits per subsystem
-
-Session 4: HARDEN (Sequential Pipeline)
-    -> Integration boundaries, security, races — foreground, sequential
-
-Session 5: CONSOLIDATE (Dream)
-    -> Capture durable patterns and decisions into the knowledge graph
-```
-
-Each session shifts orchestration strategy to match the work's nature. Parallel when possible, sequential when required.
+Greenfield projects run the other five in sequence, one per session, each shifting strategy to match the work's nature: research swarm → epic parallel build → build-review-fix pipeline → sequential hardening (integration boundaries, security, races) → `dream` to consolidate. Parallel when possible, sequential when required.
 
 ---
 

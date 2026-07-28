@@ -230,19 +230,24 @@ Watch for silent same-family collapse: on a Codex host, "cross-model review" can
 
 ## Review Modes Matrix
 
-Match the row to what you're actually reviewing.
-
 The Codex → Claude cells below show scope shape only — for actual execution, wrap the chosen scope in the gold-path launcher above so all four rules stay intact.
 
-| Mode                        | Scope                                                | Claude → Codex                                                                 | Codex → Claude                                                          |
+**Reviewing a diff** is one mode with several scopes. Pick the scope, then plug it into the direction: Claude → Codex passes the flag to `codex review`, Codex → Claude pipes the git expression into `claude -p "PROMPT"`.
+
+| Diff scope                            | git expression                     | `codex review` flag    |
+| ------------------------------------- | ---------------------------------- | ---------------------- |
+| Pre-PR full (all commits on branch)   | `git diff main...HEAD`             | `--base main`          |
+| Single commit                         | `git show <SHA>`                   | `--commit <SHA>`       |
+| Commit range (slice, not all of main) | `git diff <base>..HEAD`            | `--base <base>`        |
+| Branch-vs-branch (stacked PRs)        | `git diff feat-a...HEAD`           | `--base feat-a`        |
+| Staged only (about-to-commit)         | `git diff --staged`                | pipe into `codex exec` |
+| Unstaged WIP (working tree)           | `git diff`                         | `--uncommitted`        |
+| Mixed staged + unstaged + untracked   | `git diff HEAD` after `git status` | pipe into `codex exec` |
+
+**Everything that isn't a plain diff** is a distinct mode with its own prompt shape:
+
+| Mode                        | Reviewing                                            | Claude → Codex                                                                 | Codex → Claude                                                          |
 | --------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
-| **Pre-PR full**             | `main...HEAD` (all commits on branch)                | `codex review --base main`                                                     | `git diff main...HEAD \| claude -p "PROMPT"`                            |
-| **Single commit**           | One SHA                                              | `codex review --commit <SHA>`                                                  | `git show <SHA> \| claude -p "PROMPT"`                                  |
-| **Commit range**            | `<base>..HEAD` (multi-commit slice, not all of main) | `codex review --base <base>`                                                   | `git diff <base>..HEAD \| claude -p "PROMPT"`                           |
-| **Branch-vs-branch**        | feat-a vs feat-b (stacked PRs)                       | `codex review --base feat-a`                                                   | `git diff feat-a...HEAD \| claude -p "PROMPT"`                          |
-| **Staged only**             | About-to-commit                                      | `git diff --staged \| codex exec "PROMPT"`                                     | `git diff --staged \| claude -p "PROMPT"`                               |
-| **Unstaged WIP**            | Working tree                                         | `codex review --uncommitted`                                                   | `git diff \| claude -p "PROMPT"`                                        |
-| **Mixed state**             | Staged + unstaged + untracked                        | `git status; codex exec "Review all current uncommitted work"`                 | `git status; git diff HEAD \| claude -p "PROMPT"`                       |
 | **Single file / path**      | One file or directory                                | `codex exec --sandbox read-only "Review only <path> for ..."`                  | `git diff <path> \| claude -p "PROMPT"` (or tool-access for cross-file) |
 | **Spec / RFC / design doc** | Markdown prose                                       | `codex exec -c model_reasoning_effort="xhigh" "Review docs/design/RFC.md ..."` | `cat docs/design/RFC.md \| claude -p "PROMPT"` (max effort, see policy) |
 | **Focused investigation**   | Custom (security, perf)                              | `codex exec "You are a senior <DOMAIN> engineer. Analyze <CONCERN> ..."`       | `claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT"`     |
