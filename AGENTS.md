@@ -280,23 +280,23 @@ Before committing, verify:
 
 Sizes drift as skills evolve — check with `wc -w skills/*/SKILL.md` instead of trusting a table.
 
-| Skill                | References | Domain                                           |
-| -------------------- | ---------- | ------------------------------------------------ |
-| `brainstorm`         | none       | Process — ideation                               |
-| `plan`               | none       | Process — decomposition                          |
-| `research`           | none       | Process — knowledge gathering                    |
-| `orchestrate`        | 1 file     | Process — multi-agent dispatch                   |
-| `implement`          | 2 files    | Process — implementation                         |
-| `codex-imagegen`     | none       | Process — Codex image generation delegation      |
-| `cross-model-review` | 3 files    | Process — bidirectional cross-model review       |
-| `dream`              | 2 files    | Process — conversation memory consolidation      |
-| `git`                | none       | Domain — git operations                          |
-| `tilt`               | 2 files    | Domain — Kubernetes dev                          |
-| `tui-design`         | 2 files    | Domain — terminal UI                             |
-| `uv`                 | 3 files    | Domain — Python package management               |
-| `ruff`               | 2 files    | Domain — Python linting & formatting             |
-| `ty`                 | 2 files    | Domain — Python type checking                    |
-| `uv-build`           | none       | Domain — Python build backend                    |
+| Skill                | References | Domain                                      |
+| -------------------- | ---------- | ------------------------------------------- |
+| `brainstorm`         | none       | Process — ideation                          |
+| `plan`               | none       | Process — decomposition                     |
+| `research`           | none       | Process — knowledge gathering               |
+| `orchestrate`        | 1 file     | Process — multi-agent dispatch              |
+| `implement`          | 2 files    | Process — implementation                    |
+| `codex-imagegen`     | none       | Process — Codex image generation delegation |
+| `cross-model-review` | 3 files    | Process — bidirectional cross-model review  |
+| `dream`              | 2 files    | Process — conversation memory consolidation |
+| `git`                | none       | Domain — git operations                     |
+| `tilt`               | 2 files    | Domain — Kubernetes dev                     |
+| `tui-design`         | 2 files    | Domain — terminal UI                        |
+| `uv`                 | 3 files    | Domain — Python package management          |
+| `ruff`               | 2 files    | Domain — Python linting & formatting        |
+| `ty`                 | 2 files    | Domain — Python type checking               |
+| `uv-build`           | none       | Domain — Python build backend               |
 
 ## Skill Categories
 
