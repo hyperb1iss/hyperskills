@@ -44,9 +44,7 @@ hyperskills/
 │   │       ├── api-reference.md
 │   │       └── patterns.md
 │   ├── super-good-pr/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   │       └── canonical-prs.md
+│   │   └── SKILL.md
 │   ├── tui-design/
 │   │   ├── SKILL.md
 │   │   └── references/
@@ -294,7 +292,7 @@ Sizes drift as skills evolve — check with `wc -w skills/*/SKILL.md` instead of
 | `codex-imagegen`     | none       | Process — Codex image generation delegation |
 | `cross-model-review` | 3 files    | Process — bidirectional cross-model review  |
 | `dream`              | 2 files    | Process — conversation memory consolidation |
-| `super-good-pr`      | 1 file     | Process — reviewer-first PR descriptions    |
+| `super-good-pr`      | none       | Process — reviewer-first PR descriptions    |
 | `git`                | none       | Domain — git operations                     |
 | `tilt`               | 2 files    | Domain — Kubernetes dev                     |
 | `tui-design`         | 2 files    | Domain — terminal UI                        |

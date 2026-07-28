@@ -130,7 +130,3 @@ A stack needs a nav blockquote at the top of every PR so a reviewer always knows
 ```
 
 Each PR's "What this is" then says what the _previous_ PR established and what this one adds, so the stack reads as one argument across several documents. End each with what's deferred to the next PR in the stack.
-
-## References
-
-`references/canonical-prs.md` is the calibration set: four real PR bodies that shipped one feature as a four-part stack, reproduced verbatim. Read it when the rules above are clear but the execution isn't — when you need to see how long a "How it works" section actually runs, what a real Validation block counts, how an honest `⚠️` line reads next to green checks, or how a stack's nav blockquotes chain across four documents. Match the section you're unsure about rather than reading it end to end.
