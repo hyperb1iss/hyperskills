@@ -105,6 +105,9 @@ The house palette is fair game when a header wants personality — one emoji per
 
 ## Voice and anti-slop
 
+This section is the anti-slop authority for a PR body, and it wins outright on structure. A general-purpose humanizer pass strips emoji, boldface, and bold-led bullets on sight, which would gut the palette above and the reviewer-focus and follow-up sections. Semantic emoji headers are required here, so no cleanup pass gets to remove them. Take the prose patterns from a humanizer (em dashes, rule-of-three, inflated significance, chatbot closers, "-ing" pseudo-analysis, copula avoidance, filler and hedging) and leave the artifact's shape alone.
+
+- Sentences resolve left to right. Never open one on a bare identifier, path, or SHA: lead with the English noun and demote the symbol into apposition, so "the backfill commit (`23581131`)" rather than the bare hash. Never let That, It, or This be the subject of a sentence crossing a heading. Detail that a reader can skip belongs in parentheses; detail they must parse to follow the argument belongs in its own sentence.
 - **"Banger" is the quality bar, not vocabulary.** Never write "this is a banger / gorgeous / sick / cinematic" into a PR body. Those are words for talking _about_ the work, not in it. The bar means: leads with why, proves claims, honest about blast radius. Real PR voice is plain, root-cause-first, full sentences.
 - Full sentences that build linearly. No fragment-style compression, no em-dash overuse, no corporate slop ("in order to", "it should be noted"), no hedging ("just", "simply", "basically").
 - **The slop lexicon evolves with model generations** (as of Jul 2026): the "it's not an X, it's a Y" cadence, and "load-bearing" — a word this skill uses freely that must never land in a PR body. House jargon is fine between agents; sweep it from anything a human reads.
