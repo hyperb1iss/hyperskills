@@ -222,7 +222,7 @@ When the preferred reviewer is unreachable, each rung down trades away a named g
 | Different-family, diff-only                   | Model diversity, no surrounding context                        |
 | Same-model, fresh context                     | Context independence only — the floor; still catches real bugs |
 | Alternate CLI, smoke-tested first             | A gate exists at all                                           |
-| Honest failure recorded                       | Nothing — but the record is true                               |
+| Failure recorded as failure                   | Nothing — but the record is true                               |
 
 Watch for silent same-family collapse: on a Codex host, "cross-model review" can quietly become GPT reviewing GPT. Verify the reviewer's family.
 

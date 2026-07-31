@@ -104,7 +104,7 @@ Artifact-mediated design consultation on an undecided question. Set a deadline a
 
 ```text
 Read <design doc path>. Open question: <the undecided thing>.
-Challenge the framing, name the tensions honestly, and say which option you would
+Challenge the framing, name the tensions plainly, and say which option you would
 take and why. This is a consultation, not a gate — no verdict needed.
 ```
 

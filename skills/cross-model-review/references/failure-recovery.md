@@ -32,7 +32,7 @@ Silence is not failure. Output-file growth plus process state is the discriminat
 
 Wedges observed in the field (as of Jul 2026): a stray MCP helper in the reviewer's startup path, a broken MCP transport, and permission prompts waiting on a stdin nobody was reading. Each was found by isolating one variable, not by rerunning the same command harder.
 
-If every rung fails, step down the Degradation Ladder in SKILL.md — an honest "review unavailable" beats a fake green check.
+If every rung fails, step down the Degradation Ladder in SKILL.md — a recorded "review unavailable" beats a fake green check.
 
 ## Claude → Codex Hangs
 
@@ -43,6 +43,6 @@ Even correctly-scoped `codex review` calls hang; it's the top operational failur
 | Output file growing            | Keep waiting; it's working                                                                                                                                 |
 | Empty file, process tree alive | Wait one more window, then isolate variables (as of Jul 2026, wedged MCP servers and startup hooks are the usual culprits)                                 |
 | Empty file, process wedged     | Kill only that process tree; retry once with fewer degrees of freedom — exact diff on stdin, narrower file list, lower effort. Same question, less payload |
-| Retry also sticks              | Pre-declare the give-up, record the failed review honestly                                                                                                 |
+| Retry also sticks              | Pre-declare the give-up, record the failed review as failed                                                                                                 |
 
 Never spawn a duplicate alongside a live reviewer. And size alone is not the failure signal: a 1MB+ `codex exec` transcript can be a successful deep exploration with the verdict at the tail — grep for verdict and severity markers instead of dumping the trace. The real failure shape is no output growth, or growth with no convergence toward a verdict.

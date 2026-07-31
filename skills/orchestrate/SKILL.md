@@ -306,7 +306,7 @@ Wave design applies to any fan-out, research or build:
 
 - **Collision analysis first.** Partition the wave by file overlap before writing briefs ("the next good wave has to avoid one giant ledger dogpile"). Lanes come from the dependency map, not task-list order.
 - **Calibrate before committing the fleet.** A small first wave validates method quality; worker-discovered corrections get baked into wave-2 briefs.
-- **The agent pool is managed state.** At the thread ceiling, harvest and close stale agents (final reports recover at close); close non-producers with an honest note.
+- **The agent pool is managed state.** At the thread ceiling, harvest and close stale agents (final reports recover at close); close non-producers with a note saying what they did not produce.
 - **Failed worker output is idea-ore, not a merge candidate.** A budget-blown worker with an oversized diff gets salvaged for its concept and reimplemented smaller — never merge the blob.
 
 ---
@@ -413,7 +413,7 @@ The worker doesn't share your reality, and its output can poison yours.
 
 ## Supervising the Fleet
 
-Launching is the easy half. The craft is distinguishing slow from stuck, keeping watchers honest, and checking shape — not just correctness.
+Launching is the easy half. The craft is distinguishing slow from stuck, holding watchers to receipts, and checking shape — not just correctness.
 
 ### Slow vs stuck
 

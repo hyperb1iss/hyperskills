@@ -103,7 +103,7 @@ Mounting complexity is the cue, not the cost of doing business. When a change st
 | A wrapper that just forwards to another function          | Delete it; call through directly                                       |
 | The same conditional copy-pasted across call sites        | Extract the decision into one home: a helper, a type, a model          |
 | Feature logic living in a shared/util module              | Move it to the module that owns the concept, its canonical home        |
-| `any`/`unknown`/casts smoothing over a shape you distrust | Make the type honest; let the contract carry the invariant             |
+| `any`/`unknown`/casts smoothing over a shape you distrust | Make the type match reality; let the contract carry the invariant             |
 | Generic "magic" hiding a simple data-shape assumption     | Boring, explicit, direct code beats clever indirection                 |
 | Independent async steps run in sequence                   | Run them in parallel; let related state land atomically                |
 
@@ -149,7 +149,7 @@ Strong success criteria let you loop independently. Weak criteria require consta
 
 ### Scope doubt
 
-"Are we overengineering?" — from the user or your own gut — gets adjudication, not reassurance: an honest verdict, the carrying cost of the extra structure quantified, and over-built work parked unpushed with revival criteria rather than silently deleted.
+"Are we overengineering?" — from the user or your own gut — gets adjudication, not reassurance: a verdict either way, the carrying cost of the extra structure quantified, and over-built work parked unpushed with revival criteria rather than silently deleted.
 
 Entering a review-fix round, triage blockers from follow-ups and declare a file budget before touching code — review loops ratchet scope monotonically (one observed loop: 8 rounds, 63 files; re-anchored to 6). "Documented why not" is a legitimate response to an absence finding.
 
