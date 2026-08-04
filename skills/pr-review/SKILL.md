@@ -45,11 +45,11 @@ git ls-files --others --exclude-standard
 
 Ceremony scales with blast radius, not line count. Pick a level and say which one you picked.
 
-| Level             | When                                                              | What runs                                                                                 |
-| ----------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| 1 · Glance        | Docs, config renames, one-file obvious fixes                      | Correctness lens, single pass                                                             |
-| 2 · Standard      | Typical feature or fix PR                                         | Correctness + contracts + intent drift, sequential                                        |
-| 3 · Deep          | Broad surface; auth, payments, migrations, infra; risky pre-merge | Full lens fleet in parallel, falsifier gate on every candidate, negative-space report     |
+| Level             | When                                                              | What runs                                                                               |
+| ----------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| 1 · Glance        | Docs, config renames, one-file obvious fixes                      | Correctness lens, single pass                                                           |
+| 2 · Standard      | Typical feature or fix PR                                         | Correctness + contracts + intent drift, sequential                                      |
+| 3 · Deep          | Broad surface; auth, payments, migrations, infra; risky pre-merge | Full lens fleet in parallel, falsifier gate on every candidate, negative-space report   |
 | 4 · Thermonuclear | On request ("thermonuclear"), or architecture-shaping PRs         | Everything in level 3 plus the structural ambition pass (`references/thermonuclear.md`) |
 
 Security-sensitive changes take the security lens at every level. The user can waive levels down for trivial diffs and demand more for big ones; "look this over" is not a request for a fleet.
@@ -60,14 +60,14 @@ Three stages stand between a suspicion and the report. Most candidates should di
 
 ### Stage 1: dead on arrival (rules, not judgment)
 
-| Kill rule                                                       | Where it goes instead                                                        |
-| --------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Pre-existing issue the change doesn't worsen or newly rely on   | Sidequest log, or 💡 Follow-up when worth surfacing                           |
-| Linter-, typechecker-, or formatter-catchable                   | Run the tool; report only if the gate is missing from CI                      |
-| Anchored to unmodified lines with no causal link to the diff    | Dropped                                                                       |
-| Style or taste with no concrete failure                         | Dropped                                                                       |
-| Speculative edge case with no constructible trigger             | Dropped                                                                       |
-| Missing tests, generically                                      | Finding only when a specific changed behavior is unverified and regression-prone |
+| Kill rule                                                     | Where it goes instead                                                            |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Pre-existing issue the change doesn't worsen or newly rely on | Sidequest log, or 💡 Follow-up when worth surfacing                              |
+| Linter-, typechecker-, or formatter-catchable                 | Run the tool; report only if the gate is missing from CI                         |
+| Anchored to unmodified lines with no causal link to the diff  | Dropped                                                                          |
+| Style or taste with no concrete failure                       | Dropped                                                                          |
+| Speculative edge case with no constructible trigger           | Dropped                                                                          |
+| Missing tests, generically                                    | Finding only when a specific changed behavior is unverified and regression-prone |
 
 ### Stage 2: the falsifier gate
 
@@ -83,9 +83,9 @@ A finding is a diagnosis, and a diagnosis needs a receipt. Before reporting a ca
 
 ### Stage 3: the label
 
-| Label     | Means                                                              | Carries                                                        |
-| --------- | ------------------------------------------------------------------ | --------------------------------------------------------------- |
-| CONFIRMED | The falsifier ran and failed to kill it                            | The receipt: failing command, base-vs-head output, traced path |
+| Label     | Means                                                             | Carries                                                        |
+| --------- | ----------------------------------------------------------------- | -------------------------------------------------------------- |
+| CONFIRMED | The falsifier ran and failed to kill it                           | The receipt: failing command, base-vs-head output, traced path |
 | PLAUSIBLE | Disproof wasn't cheap (live data, environment, or human judgment) | Exactly why, and what would settle it                          |
 
 Name the evidence tier reached: executed > traced > read. A PLAUSIBLE never wears CONFIRMED's tone; certainty language is earned per finding.
@@ -94,16 +94,16 @@ Name the evidence tier reached: executed > traced > read. A PLAUSIBLE never wear
 
 Each lens is one concern domain with its own checklist in `references/lenses.md`. A single reviewer on a risky diff is demonstrably incomplete: independently-briefed lenses produce complementary, non-overlapping findings. Two lenses converging on the same candidate moves it to the front of the adjudication queue; convergence never substitutes for the falsifier, because correlated reviewers repeat the same hallucination.
 
-| Lens                   | Hunts                                                                                                    |
+| Lens                   | Hunts                                                                                                     |
 | ---------------------- | --------------------------------------------------------------------------------------------------------- |
-| Correctness & keystone | The load-bearing invariant, derived from code and attacked first; invariant inventory; guards both ways  |
-| Contracts & callers    | Tightened validation vs real caller values; symmetry (the un-mirrored fix); class sweeps                 |
+| Correctness & keystone | The load-bearing invariant, derived from code and attacked first; invariant inventory; guards both ways   |
+| Contracts & callers    | Tightened validation vs real caller values; symmetry (the un-mirrored fix); class sweeps                  |
 | Security               | Secrets, capability values, and attacker-controlled content traced end to end; siblings of changed guards |
-| Fragility              | Compensating machinery around a bug instead of a fix at the owning boundary; concrete maintenance traps  |
-| Nerf detector          | Rate limits, serialization, caps, and retries that hide a defect instead of fixing the bottleneck        |
-| Simplicity & sprawl    | Diffstat vs stated scope; machinery count; structural claims measured mechanically                       |
-| Beyond the diff        | What tests can't see: rollout windows, config inheritance, rollback paths, what the fix removed          |
-| Intent drift           | Description vs diff, deleted tests, weakened CI, undisclosed changes (runs last, un-quarantines)         |
+| Fragility              | Compensating machinery around a bug instead of a fix at the owning boundary; concrete maintenance traps   |
+| Nerf detector          | Rate limits, serialization, caps, and retries that hide a defect instead of fixing the bottleneck         |
+| Simplicity & sprawl    | Diffstat vs stated scope; machinery count; structural claims measured mechanically                        |
+| Beyond the diff        | What tests can't see: rollout windows, config inheritance, rollback paths, what the fix removed           |
+| Intent drift           | Description vs diff, deleted tests, weakened CI, undisclosed changes (runs last, un-quarantines)          |
 
 At level 3+, run lenses as parallel read-only agents on a frozen artifact. Lens agents propose candidates plus a suggested falsifier for each; the falsifier gate runs centrally or as a second verification fleet. Generation and adjudication stay separate roles. `orchestrate` carries the dispatch brief anatomy; pin the exact SHA and file list in every brief.
 
@@ -119,14 +119,20 @@ Even below level 4, ask the shape question once per review: does the diff footpr
 
 Verdict first, one line, from this matrix:
 
-| Verdict                                | When                                                                          |
-| -------------------------------------- | ------------------------------------------------------------------------------ |
-| `APPROVE`                              | No 🚫 or ⚠️ findings (💡 follow-ups allowed)                                   |
-| `APPROVE WITH FINDINGS`                | At least one ⚠️, no 🚫                                                         |
-| `NEEDS_CHANGES: <one sentence>`        | Any 🚫 CONFIRMED finding                                                       |
-| `INCONCLUSIVE: <what would settle it>` | A 🚫 candidate stuck at PLAUSIBLE, or a required check that could not run     |
+| Verdict                                | When                                                                      |
+| -------------------------------------- | ------------------------------------------------------------------------- |
+| `APPROVE`                              | No 🚫 or ⚠️ findings (💡 follow-ups allowed)                              |
+| `APPROVE WITH FINDINGS`                | At least one ⚠️, no 🚫                                                    |
+| `NEEDS_CHANGES: <one sentence>`        | Any 🚫 CONFIRMED finding                                                  |
+| `INCONCLUSIVE: <what would settle it>` | A 🚫 candidate stuck at PLAUSIBLE, or a required check that could not run |
 
-An INCONCLUSIVE is never rounded up to an APPROVE; blocked verification is a verdict, not a footnote. Then findings, numbered, severity-ordered:
+An INCONCLUSIVE is never rounded up to an APPROVE; blocked verification is a verdict, not a footnote.
+
+**The report is written for a human who has to act on it.** The pipeline is machinery; the output is prose from a seasoned principal engineer. Findings arrive in complete sentences a tired author can follow: what breaks, why it matters, what to do next, with no fragment chains and no jargon the author has to decode. When a finding is an instance of a class, teach the class in one sentence so the author fixes it everywhere, not just here. And name what's solid: one or two lines on what was verified good tells the author what not to touch and makes the criticism land as judgment rather than reflex.
+
+**Orient before you itemize.** When the change adds, removes, or rewires components, open with two to five sentences naming the components touched and how their relationships change, plus a mermaid diagram when the picture beats the paragraph: `flowchart LR` for structure and dependencies, `sequenceDiagram` for a changed runtime flow. Draw the delta, not the system: changed elements plus their immediate neighbors, real names from the code, new and modified nodes visibly marked (`classDef` styling or `NEW:` / `MOD:` prefixes), under ~20 nodes. GitHub's renderer is strict: alphanumeric node ids, quoted labels for punctuation, no raw braces in labels. A diagram restating a trivial diff costs reader time; draw only what prose can't carry in one read.
+
+Then findings, numbered, severity-ordered:
 
 - 🚫 **Blocking**: required behavior is incorrect or unsafe. A rollout gate limits exposure but does not un-block a known defect.
 - ⚠️ **Non-blocking**: real and material, but survivable.
@@ -147,6 +153,7 @@ Rules:
 - **Verify anchors by content.** Grep for the quoted line before citing it; line numbers drift, and a wrong anchor burns trust faster than a missed bug (trust measurably erodes after 3-5 hallucinated comments).
 - **Few and high-conviction beats many.** Finding volume is inversely correlated with action. No nit flooding, especially when structural issues exist.
 - **Fixes target the root cause** and arrive committable when cheap; suggestions get acted on, prose gets ignored.
+- **Emoji for impact, not decoration.** The severity markers (🚫 ⚠️ 💡) are load-bearing. Beyond them, one well-chosen emoji can make a section land; stacked emoji and the AI-slop set never appear (`super-good-pr` carries the palette and the banned list).
 - **PR-body inaccuracy is a finding on the code scale**: claimed-but-unimplemented changes, stale receipts, undisclosed changes. Grade against `super-good-pr`'s standard.
 - **Negative space is mandatory at level 3+**: what was checked and found clean (same precision as findings), what was not reviewed and why, which checks did not run. This section is what makes a quiet report trustworthy rather than merely quiet.
 - **Close with a transparency footer**: scope reviewed, lenses run, agents spawned and why, skipped areas with reasons.
@@ -156,42 +163,42 @@ Rules:
 
 Read-only by default. Do not post comments, approve, request changes, or push fixes unless explicitly asked. Before any requested GitHub action, re-check the live head and every anchor.
 
-| Rule                                                                       | Why                                                        |
-| --------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| Pull all three comment surfaces: issue comments, inline comments, review bodies | Nits and perf asks hide outside review records             |
-| Use thread-aware queries for resolution state                              | Flat comment lists hide what's already settled             |
-| On someone else's PR, findings route to the author                          | Never push fixes to their branch unasked; credit-first     |
-| Resolve only threads you opened, and only when the receipt satisfies them   | Resolution belongs to the thread's opener                  |
+| Rule                                                                            | Why                                                    |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Pull all three comment surfaces: issue comments, inline comments, review bodies | Nits and perf asks hide outside review records         |
+| Use thread-aware queries for resolution state                                   | Flat comment lists hide what's already settled         |
+| On someone else's PR, findings route to the author                              | Never push fixes to their branch unasked; credit-first |
+| Resolve only threads you opened, and only when the receipt satisfies them       | Resolution belongs to the thread's opener              |
 
 Roles never blur: the reviewer doesn't fix, the fixer doesn't post verdicts, and the human picks which findings get acted on. The receiving side (triaging inbound findings, fix passes with file budgets, bot-loop stop conditions, disposition ledgers) is owned by `cross-model-review`'s Consuming Findings and `super-good-pr`'s Answering reviews; don't re-derive it here.
 
 ## Composition
 
-| Need                                                                | Reach for                       |
-| -------------------------------------------------------------------- | -------------------------------- |
-| A different model's independent review (dispatch + consuming)       | `cross-model-review`            |
-| The PR body standard, drift baseline, disposition ledgers           | `super-good-pr`                 |
-| Fleet dispatch briefs and verifier anatomy at level 3+              | `orchestrate`                   |
-| The fix pass after findings land                                     | `implement`                     |
-| Prior gotchas in, defect classes out                                 | Sibyl                           |
-| Pre-existing debt spotted mid-review                                 | Sidequest log; keep moving      |
+| Need                                                          | Reach for                  |
+| ------------------------------------------------------------- | -------------------------- |
+| A different model's independent review (dispatch + consuming) | `cross-model-review`       |
+| The PR body standard, drift baseline, disposition ledgers     | `super-good-pr`            |
+| Fleet dispatch briefs and verifier anatomy at level 3+        | `orchestrate`              |
+| The fix pass after findings land                              | `implement`                |
+| Prior gotchas in, defect classes out                          | Sibyl                      |
+| Pre-existing debt spotted mid-review                          | Sidequest log; keep moving |
 
 When a review closes a defect class, fold it into the repo's standing review prompt or a CI gate so the next reviewer inherits it. A recurring reviewer false positive is a corpus bug: find and scrub the stale doc feeding it.
 
 ## Anti-Patterns
 
-| Anti-Pattern                                   | Fix                                                                        |
-| ----------------------------------------------- | ---------------------------------------------------------------------------- |
-| Narrating the diff and calling it review        | Findings or negative space; a walkthrough is not a review                    |
-| Reporting every candidate                       | Stage 2 exists to kill most of them; run it                                  |
-| Reading the description first, then confirming it | Quarantine the narrative; hunt from code                                    |
-| "Assume there's a bug" prompting                | Measured overcorrection: models invent errors in correct code; falsify instead |
-| Trusting model line numbers for anchors         | Grep the quoted content                                                      |
-| Nit flooding                                    | Nits die in stage 1; cap the report at high-conviction findings              |
-| Scope creep into a repo-wide audit              | The diff plus what it newly relies on; sidequest the rest                    |
-| Blaming the PR for base-revision behavior       | Reproduce on base before calling it introduced                               |
-| Fixing while reviewing                          | Roles never blur                                                             |
-| A PASS outliving a push                         | Verdicts key to a SHA; re-review the delta                                   |
+| Anti-Pattern                                      | Fix                                                                            |
+| ------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Narrating the diff and calling it review          | Findings or negative space; a walkthrough is not a review                      |
+| Reporting every candidate                         | Stage 2 exists to kill most of them; run it                                    |
+| Reading the description first, then confirming it | Quarantine the narrative; hunt from code                                       |
+| "Assume there's a bug" prompting                  | Measured overcorrection: models invent errors in correct code; falsify instead |
+| Trusting model line numbers for anchors           | Grep the quoted content                                                        |
+| Nit flooding                                      | Nits die in stage 1; cap the report at high-conviction findings                |
+| Scope creep into a repo-wide audit                | The diff plus what it newly relies on; sidequest the rest                      |
+| Blaming the PR for base-revision behavior         | Reproduce on base before calling it introduced                                 |
+| Fixing while reviewing                            | Roles never blur                                                               |
+| A PASS outliving a push                           | Verdicts key to a SHA; re-review the delta                                     |
 
 ## What This Skill is NOT
 
