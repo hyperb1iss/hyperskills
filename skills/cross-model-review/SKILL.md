@@ -170,6 +170,8 @@ A bare `codex review` (no scope) is the #1 cause of Claude → Codex failures: i
 
 Scoped `codex review` also takes custom instructions as a trailing `[PROMPT]` argument (as of Jul 2026: `codex review --base main "focus on error handling"`), so a focused pass keeps structured review behavior. Reach for `codex exec "PROMPT"` when the artifact isn't a diff at all: spec docs, single files outside version control, freeform investigations. Never bare `codex review`.
 
+From a backgrounded or non-interactive shell, also close stdin: `codex exec ... </dev/null`. With a pipe on stdin, `codex exec` prints `Reading additional input from stdin...` and waits forever, even when the prompt was passed as an argument (field-verified Aug 2026; the Pi `/xreview` wrapper already runs stdin-closed for the same reason).
+
 If `codex review` output exceeds ~100KB, the diff is too large for one pass. Split: `codex review --commit <SHA1>`, `codex review --commit <SHA2>`, or use `codex exec` with a narrowed prompt ("Review error handling only"). Large `codex exec` transcripts are a different animal: size alone is not a failure signal, see `references/failure-recovery.md`.
 
 ---
