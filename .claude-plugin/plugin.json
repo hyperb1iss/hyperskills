@@ -52,6 +52,7 @@
     "findings-ledger",
     "adversarial-verification",
     "pr-review",
+    "hyper-pr-review",
     "pull-request-review",
     "falsifier-gate",
     "false-positive-control",

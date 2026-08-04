@@ -1,9 +1,9 @@
 ---
-name: pr-review
+name: hyper-pr-review
 description: Use this skill when conducting a code review as the reviewer, from a quick pre-merge pass on a diff to a full thermonuclear quality audit of a pull request. Covers scope establishment, false-positive control via falsifier gates, review lenses, structural quality, and GitHub review etiquette. Activates on mentions of review this PR, PR review, pull request review, review my branch, review the diff, review these changes, pre-merge review, deep review, thermonuclear review, code quality audit, maintainability review, review before merge, or harsh review.
 ---
 
-# PR Review
+# Hyper PR Review
 
 A finding is a hypothesis, not a deliverable. As of Aug 2026, frontier reviewers catch only 15-31% of what human reviewers flag, so recall is a lost cause and precision is the entire game. Precision comes from verification machinery, not from better prompting (prompting-only noise control has published evidence of outright failure). This skill's edge over hosted review bots is that it runs where the code executes: every candidate finding faces its cheapest disproof before it is reported, and execution adjudicates whenever the code can run.
 
@@ -117,18 +117,20 @@ Even below level 4, ask the shape question once per review: does the diff footpr
 
 ## Output Contract
 
-Verdict first, one line, from this matrix:
+Verdict first, one line. Evaluate the matrix top to bottom; the first matching row wins, so a confirmed blocker outranks an unresolved one, and nothing approves while a required check is unrun:
 
-| Verdict                                | When                                                                      |
-| -------------------------------------- | ------------------------------------------------------------------------- |
-| `APPROVE`                              | No 🚫 or ⚠️ findings (💡 follow-ups allowed)                              |
-| `APPROVE WITH FINDINGS`                | At least one ⚠️, no 🚫                                                    |
-| `NEEDS_CHANGES: <one sentence>`        | Any 🚫 CONFIRMED finding                                                  |
-| `INCONCLUSIVE: <what would settle it>` | A 🚫 candidate stuck at PLAUSIBLE, or a required check that could not run |
+| Verdict                                | When                                                                                       |
+| -------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `NEEDS_CHANGES: <one sentence>`        | At least one 🚫 CONFIRMED finding                                                          |
+| `INCONCLUSIVE: <what would settle it>` | No 🚫 CONFIRMED, but a 🚫 candidate is stuck at PLAUSIBLE or a required check couldn't run |
+| `APPROVE WITH FINDINGS`                | All required checks ran; at least one ⚠️, no 🚫                                            |
+| `APPROVE`                              | All required checks ran; no 🚫 or ⚠️ findings (💡 follow-ups allowed)                      |
 
 An INCONCLUSIVE is never rounded up to an APPROVE; blocked verification is a verdict, not a footnote.
 
 **The report is written for a human who has to act on it.** The pipeline is machinery; the output is prose from a seasoned principal engineer. Findings arrive in complete sentences a tired author can follow: what breaks, why it matters, what to do next, with no fragment chains and no jargon the author has to decode. When a finding is an instance of a class, teach the class in one sentence so the author fixes it everywhere, not just here. And name what's solid: one or two lines on what was verified good tells the author what not to touch and makes the criticism land as judgment rather than reflex.
+
+The prose itself gets the anti-slop pass. A review that reads like LLM output gets discounted before its findings are weighed, so sweep the tells before posting: no em dashes, no rule-of-three cadences, no "this isn't just X, it's Y", no inflated significance, no hedging filler, no chatbot closers. `super-good-pr` carries the full pattern set for PR-posted artifacts; it applies to review reports exactly as it applies to bodies, and it strips the prose tells without touching the severity markers or structure.
 
 **Orient before you itemize.** When the change adds, removes, or rewires components, open with two to five sentences naming the components touched and how their relationships change, plus a mermaid diagram when the picture beats the paragraph: `flowchart LR` for structure and dependencies, `sequenceDiagram` for a changed runtime flow. Draw the delta, not the system: changed elements plus their immediate neighbors, real names from the code, new and modified nodes visibly marked (`classDef` styling or `NEW:` / `MOD:` prefixes), under ~20 nodes. GitHub's renderer is strict: alphanumeric node ids, quoted labels for punctuation, no raw braces in labels. A diagram restating a trivial diff costs reader time; draw only what prose can't carry in one read.
 
