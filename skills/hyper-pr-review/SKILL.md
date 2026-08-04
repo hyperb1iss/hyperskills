@@ -165,6 +165,8 @@ Rules:
 
 Read-only by default. Do not post comments, approve, request changes, or push fixes unless explicitly asked. Before any requested GitHub action, re-check the live head and every anchor.
 
+**Delivery shape, when posting is requested: inline first, summary as needed.** Each finding lands as an inline review comment on the exact changed lines, self-contained (severity marker, the finding, the fix, a committable `suggestion` block where cheap), submitted together as one review rather than a scatter of issue comments. The top-level review body carries only what has no line to live on: the verdict, the orientation and any mermaid, the negative space, and the transparency footer, sized to need. A two-finding pass gets a sentence or two up top; a deep pass earns the full summary. Inline comments do the work; the summary orients.
+
 | Rule                                                                            | Why                                                    |
 | ------------------------------------------------------------------------------- | ------------------------------------------------------ |
 | Pull all three comment surfaces: issue comments, inline comments, review bodies | Nits and perf asks hide outside review records         |
