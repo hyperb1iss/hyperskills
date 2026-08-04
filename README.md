@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Skills-16-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="16 Skills">
+  <img src="https://img.shields.io/badge/Skills-17-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="17 Skills">
   <img src="https://img.shields.io/badge/skills.sh-Compatible-ff6ac1?style=for-the-badge&logo=vercel&logoColor=white" alt="skills.sh">
 </p>
 
@@ -34,7 +34,7 @@ hyperskills is built around an agent workflow. Brainstorming structured by the D
 
 Domain skills round out the toolbox where models have stale or missing knowledge: current Astral Python tooling, Tilt operational decision trees, and terminal UI design that survives across emulators.
 
-Each skill encodes procedural knowledge, decision trees, anti-patterns, and current SOTA. None prescribes a strict workflow. They give you knowledge and framing; you decide when to reach for them. Skills carry procedural knowledge in-context; [Sibyl](https://github.com/hyperb1iss/sibyl) carries decisions, patterns, and learnings across sessions. 16 skills, all installable independently.
+Each skill encodes procedural knowledge, decision trees, anti-patterns, and current SOTA. None prescribes a strict workflow. They give you knowledge and framing; you decide when to reach for them. Skills carry procedural knowledge in-context; [Sibyl](https://github.com/hyperb1iss/sibyl) carries decisions, patterns, and learnings across sessions. 17 skills, all installable independently.
 
 ## ⚡ Installation
 
@@ -80,6 +80,7 @@ A few combinations come up often, more as observation than prescription:
 | Bug fix                 | implement (the skill scales itself for trivial fixes) |
 | Raster asset delegation | codex-imagegen from any shell-capable agent harness   |
 | Opening a PR            | super-good-pr, then announce it in your own voice     |
+| Reviewing a PR          | pr-review, with cross-model-review as a second lane   |
 | Python project work     | uv, ruff, ty, uv-build                                |
 | Knowledge consolidation | dream pulls insights from past sessions into Sibyl    |
 
@@ -143,6 +144,14 @@ The author model writes, a different model reviews — and the independence clai
 
 ```bash
 /hyperskills:cross-model-review
+```
+
+#### `pr-review`: Falsifier-Gated PR Review
+
+Conducting the review yourself, with precision as the explicit target: frontier reviewers catch a fraction of what humans flag, so every reported finding has to be worth the reader's trust. Candidate findings pass a three-stage pipeline (hard exclusion rules, then the cheapest disproof actually run, then CONFIRMED/PLAUSIBLE labels with named evidence tiers), the PR narrative stays quarantined until the intent-drift pass checks it against the diff, and eight lenses cover what single-pass review misses: contract tightening vs real callers, fragility, nerf detection, sprawl, rollout reality, and description drift. Thermonuclear mode layers on the structural ambition pass: code judo, spaghetti growth, and an approval bar where "it works" isn't enough. Negative-space reporting (what was checked and clean, what wasn't reviewed) ships with every deep pass.
+
+```bash
+/hyperskills:pr-review
 ```
 
 #### `codex-imagegen`: Codex Image Generation Delegation
@@ -250,6 +259,7 @@ Skills with reference files for the deep-dive material:
 | -------------------- | --------------------------------------------------------------------------------------------- |
 | `implement`          | `benchmarks.md`, `recovery.md`: quantitative data from 21k operations, error-recovery detail  |
 | `cross-model-review` | `prompts.md`, `failure-recovery.md`, `cli-flags.md`: prompts, hang ladders, flag surface      |
+| `pr-review`          | `lenses.md`, `thermonuclear.md`: per-lens checklists and the structural ambition pass         |
 | `orchestrate`        | `dispatch-briefs.md`: copyable worker, reviewer, and research dispatch briefs                 |
 | `dream`              | `conversation-formats.md`, `extraction-guide.md`: session schemas and memory extraction rules |
 | `tilt`               | `api-reference.md`, `patterns.md`: full Tiltfile API and power patterns                       |
