@@ -107,7 +107,13 @@ Each lens is one concern domain with its own checklist in `references/lenses.md`
 
 At level 3+, run lenses as parallel read-only agents on a frozen artifact. Lens agents propose candidates plus a suggested falsifier for each; the falsifier gate runs centrally or as a second verification fleet. Generation and adjudication stay separate roles. `orchestrate` carries the dispatch brief anatomy; pin the exact SHA and file list in every brief.
 
-Recall before reviewing: prior gotchas for this repo are the attack plan (`sibyl context`). When recall comes back empty, say so and review from live evidence.
+## Memory Is the Differentiator
+
+Hosted reviewers learn per-team suppression lists; this skill reviews with a knowledge graph. Memory feeds every phase, and every review feeds it back.
+
+- **Before: recall the attack plan.** Run `sibyl context` on the repo and subsystem before reading the first file. Prior defect classes in this area become named attack vectors; distribute them into lens briefs as leads. Known false-positive ghosts die in stage 1 without burning a falsifier. Intentional-keeps settled in past rounds don't get re-litigated: a trade-off argued down with receipts last month is not a fresh finding today. Empty recall is stated, never padded.
+- **During: memory arms the adjudicator, not the generators.** A candidate matching a remembered error pattern inherits its known falsifier, so adjudication gets cheaper. Lens agents themselves stay memory-blind for independence; the orchestrator injects specific recalled gotchas into briefs as named leads rather than letting each lens free-run its own recall.
+- **After: the review makes the graph smarter.** Capture new defect classes, gotchas, false-positive ghosts, and intentional-keep rationales (`sibyl remember`), so the next session inherits settled state instead of re-deriving it. A defect class closed twice belongs in the repo's standing review prompt or a CI gate. A recurring reviewer false positive is a corpus bug: find and scrub the stale doc feeding it.
 
 ## Thermonuclear Mode
 
@@ -186,8 +192,6 @@ Roles never blur: the reviewer doesn't fix, the fixer doesn't post verdicts, and
 | The fix pass after findings land                              | `implement`                |
 | Prior gotchas in, defect classes out                          | Sibyl                      |
 | Pre-existing debt spotted mid-review                          | Sidequest log; keep moving |
-
-When a review closes a defect class, fold it into the repo's standing review prompt or a CI gate so the next reviewer inherits it. A recurring reviewer false positive is a corpus bug: find and scrub the stale doc feeding it.
 
 ## Anti-Patterns
 
