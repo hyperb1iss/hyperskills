@@ -25,6 +25,7 @@ Above all, be ambitious about structure. Do not stop at local cleanup opportunit
 For every meaningful change, ask:
 
 - Is there a code-judo move that would make this dramatically simpler?
+- Does the platform or ecosystem now ship a primitive that deletes this machinery outright? Ground the answer in a dated primary source, not training-data memory (see Grounding at the Edge in SKILL.md).
 - Can the change be reframed so fewer concepts, branches, or helper layers are needed?
 - Does this improve or worsen the local architecture?
 - Did the diff add branching complexity where a better abstraction should exist?

@@ -115,6 +115,18 @@ Hosted reviewers learn per-team suppression lists; this skill reviews with a kno
 - **During: memory arms the adjudicator, not the generators.** A candidate matching a remembered error pattern inherits its known falsifier, so adjudication gets cheaper. Lens agents themselves stay memory-blind for independence; the orchestrator injects specific recalled gotchas into briefs as named leads rather than letting each lens free-run its own recall.
 - **After: the review makes the graph smarter.** Capture new defect classes, gotchas, false-positive ghosts, and intentional-keep rationales (`sibyl remember`), so the next session inherits settled state instead of re-deriving it. A defect class closed twice belongs in the repo's standing review prompt or a CI gate. A recurring reviewer false positive is a corpus bug: find and scrub the stale doc feeding it.
 
+## Grounding at the Edge
+
+When a PR pushes past settled practice (deep infra, new runtime primitives, novel distributed-systems machinery, fast-moving frameworks), the reviewer's training data is part of the attack surface: author and reviewer often share a knowledge cutoff, so a design can look bespoke when it's now-standard, or look fine when the ecosystem moved on. For these PRs, run light SOTA research before judging the architecture.
+
+- **Bounded and primary-sourced.** A few targeted searches against release notes, official docs, and upstream issues, date-anchored. This is grounding, not a research project; reach for `research` when the question outgrows a handful of queries.
+- **The questions:** does the platform or ecosystem now ship a primitive that deletes this machinery? Is the chosen approach current, deprecated, or superseded? Are the diff's version and capability claims true against the live source?
+- **Research findings pass the same pipeline.** "The platform ships native X since version Y" carries a dated primary-source link as its receipt, or it stays PLAUSIBLE.
+- **The inverse matters as much.** An unfamiliar pattern that postdates training data is not a defect. Before flagging a modern idiom as wrong, check whether the world moved; a reviewer false positive born of staleness is a corpus bug in your own head.
+- **Current-and-verified goes in the negative space.** "Checked against the operator docs as of Aug 2026: no upstream primitive covers this, bespoke is justified" is exactly the sentence that makes an APPROVE on frontier work trustworthy.
+
+This feeds the simplicity and thermonuclear lenses directly: the highest-value judo move on edge-pushing PRs is often "delete this, the platform ships it now."
+
 ## Thermonuclear Mode
 
 The structural ambition layer, invoked by name or earned by an architecture-shaping diff. The bar moves from "is it correct" to "does the codebase get better": hunt the code-judo move that deletes complexity instead of rearranging it, treat spaghetti growth and boundary leaks as design problems rather than nits, and quantify impact (line counts, moving pieces, concept count) instead of vibing. Thresholds are smells, not compliance lines: a file at 996 lines does not pass a 1,000-line rule. A structural finding without a sketched simpler alternative is a complaint, not a finding. Full standards, review questions, remedies, and the approval bar live in `references/thermonuclear.md`.
@@ -191,6 +203,7 @@ Roles never blur: the reviewer doesn't fix, the fixer doesn't post verdicts, and
 | Fleet dispatch briefs and verifier anatomy at level 3+        | `orchestrate`              |
 | The fix pass after findings land                              | `implement`                |
 | Prior gotchas in, defect classes out                          | Sibyl                      |
+| Landscape questions that outgrow a few grounding queries      | `research`                 |
 | Pre-existing debt spotted mid-review                          | Sidequest log; keep moving |
 
 ## Anti-Patterns
