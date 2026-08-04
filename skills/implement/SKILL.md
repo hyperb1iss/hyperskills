@@ -103,7 +103,7 @@ Mounting complexity is the cue, not the cost of doing business. When a change st
 | A wrapper that just forwards to another function          | Delete it; call through directly                                       |
 | The same conditional copy-pasted across call sites        | Extract the decision into one home: a helper, a type, a model          |
 | Feature logic living in a shared/util module              | Move it to the module that owns the concept, its canonical home        |
-| `any`/`unknown`/casts smoothing over a shape you distrust | Make the type match reality; let the contract carry the invariant             |
+| `any`/`unknown`/casts smoothing over a shape you distrust | Make the type match reality; let the contract carry the invariant      |
 | Generic "magic" hiding a simple data-shape assumption     | Boring, explicit, direct code beats clever indirection                 |
 | Independent async steps run in sequence                   | Run them in parallel; let related state land atomically                |
 

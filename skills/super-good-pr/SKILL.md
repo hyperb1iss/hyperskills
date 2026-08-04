@@ -59,7 +59,7 @@ When a PR changes topology (services, request paths, data flow, state machines, 
 
 | Change shape                                   | Visual                                               |
 | ---------------------------------------------- | ---------------------------------------------------- |
-| Service/network topology, request path changes | Mermaid `flowchart`, before/after pair              |
+| Service/network topology, request path changes | Mermaid `flowchart`, before/after pair               |
 | Protocol, handshake, cross-service call order  | Mermaid `sequenceDiagram`                            |
 | State machine or lifecycle changes             | Mermaid `stateDiagram-v2`                            |
 | Schema relationships, new tables/FKs           | Mermaid `erDiagram`                                  |
