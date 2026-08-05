@@ -4,7 +4,7 @@ Eight concern domains, each with its own checklist. Run them inline at levels 1-
 
 ## Running a Lens as an Agent
 
-Lens agents generate; they do not adjudicate, fix, or post. The dispatch brief pins:
+Lens agents generate; they do not adjudicate, fix, or post. This contract is deliberately schematic because it is agent-to-agent interchange; none of its rigidity belongs in the report a human reads (SKILL.md's Output Contract governs that voice). The dispatch brief pins:
 
 - **Scope**: exact SHA, base ref, file list. Read-only, no checkout mutation (`git show <sha>:<path>` to read without switching).
 - **The one lens**: its checklist below, plus an explicit skip list ("not style, not other lenses' domains").

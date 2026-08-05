@@ -43,7 +43,7 @@ git ls-files --others --exclude-standard
 
 ## The Intensity Dial
 
-Ceremony scales with blast radius, not line count. Pick a level and say which one you picked.
+Ceremony scales with blast radius, not line count. Pick a level; the levels are calibration vocabulary for you, not for the reader. The report mentions its depth in plain words ("quick look" or "deep pass, lenses in parallel"), never as a level number.
 
 | Level             | When                                                              | What runs                                                                               |
 | ----------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
@@ -135,16 +135,9 @@ Even below level 4, ask the shape question once per review: does the diff footpr
 
 ## Output Contract
 
-Verdict first, one line. Evaluate the matrix top to bottom; the first matching row wins, so a confirmed blocker outranks an unresolved one, and nothing approves while a required check is unrun:
+The contract binds content, never formatting. Rigid structure belongs to agent-to-agent interchange (the lens-agent contract in `references/lenses.md` is deliberately schematic); the report itself reads the way a sharp colleague writes. A labeled-field skeleton gets skimmed where two flowing sentences get acted on, so reach for a table or numbered scaffolding only when it genuinely scans better than prose, which is rarer than it feels.
 
-| Verdict                                | When                                                                                       |
-| -------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `NEEDS_CHANGES: <one sentence>`        | At least one 🚫 CONFIRMED finding                                                          |
-| `INCONCLUSIVE: <what would settle it>` | No 🚫 CONFIRMED, but a 🚫 candidate is stuck at PLAUSIBLE or a required check couldn't run |
-| `APPROVE WITH FINDINGS`                | All required checks ran; at least one ⚠️, no 🚫                                            |
-| `APPROVE`                              | All required checks ran; no 🚫 or ⚠️ findings (💡 follow-ups allowed)                      |
-
-An INCONCLUSIVE is never rounded up to an APPROVE; blocked verification is a verdict, not a footnote.
+**Verdict first, as one plain sentence.** Four verdicts, checked in order, first match wins: `NEEDS_CHANGES` (any 🚫 CONFIRMED), `INCONCLUSIVE` (no confirmed blocker, but a 🚫 candidate is stuck at PLAUSIBLE or a required check couldn't run), `APPROVE WITH FINDINGS` (at least one ⚠️, no 🚫, all required checks ran), `APPROVE` (clean; 💡 follow-ups allowed). The precedence is the point: a confirmed blocker outranks an unresolved one, nothing approves while a required check is unrun, and an INCONCLUSIVE never rounds up to an APPROVE. It still lands as a sentence ("needs changes: the retry path double-charges on a 502"), not a rendered matrix.
 
 **The report is written for a human who has to act on it.** The pipeline is machinery; the output is prose from a seasoned principal engineer. Findings arrive in complete sentences a tired author can follow: what breaks, why it matters, what to do next, with no fragment chains and no jargon the author has to decode. When a finding is an instance of a class, teach the class in one sentence so the author fixes it everywhere, not just here. And name what's solid: one or two lines on what was verified good tells the author what not to touch and makes the criticism land as judgment rather than reflex.
 
@@ -152,20 +145,14 @@ The prose itself gets the anti-slop pass. A review that reads like LLM output ge
 
 **Orient before you itemize.** When the change adds, removes, or rewires components, open with two to five sentences naming the components touched and how their relationships change, plus a mermaid diagram when the picture beats the paragraph: `flowchart LR` for structure and dependencies, `sequenceDiagram` for a changed runtime flow. Draw the delta, not the system: changed elements plus their immediate neighbors, real names from the code, new and modified nodes visibly marked (`classDef` styling or `NEW:` / `MOD:` prefixes), under ~20 nodes. GitHub's renderer is strict: alphanumeric node ids, quoted labels for punctuation, no raw braces in labels. A diagram restating a trivial diff costs reader time; draw only what prose can't carry in one read.
 
-Then findings, numbered, severity-ordered:
-
-- 🚫 **Blocking**: required behavior is incorrect or unsafe. A rollout gate limits exposure but does not un-block a known defect.
-- ⚠️ **Non-blocking**: real and material, but survivable.
-- 💡 **Follow-up**: real issues outside this PR's causal scope, including pre-existing debt it doesn't worsen.
-
-Each finding carries anchor + label + trigger → impact + mechanism + fix:
+**Findings severity-ordered, each one complete.** The severity markers stay because they scan: 🚫 blocking (required behavior is incorrect or unsafe; a rollout gate limits exposure but doesn't un-block a known defect), ⚠️ non-blocking (real and material, survivable), 💡 follow-up (real, outside this PR's causal scope). Completeness is a checklist, not a template. A reader can locate it (content-verified anchor), believe it (CONFIRMED with its receipt, or PLAUSIBLE with why not and what would settle it), see it break (trigger and impact), and fix it (root-cause fix, committable when cheap). Write it the way you'd say it across a desk:
 
 ```text
-2. 🚫 [CONFIRMED · executed] apps/api/limits.ts:84
-   Trigger: any request with an X-Forwarded-For chain longer than 3 hops.
-   Impact: rate-limit key collapses to "unknown"; one shared bucket for all traffic.
-   Receipt: node repro.mjs → "unknown" for a 4-hop chain (base: per-IP key).
-   Fix: take the first untrusted hop, not the last; limits.ts:79 already has the parsed chain.
+🚫 apps/api/limits.ts:84, confirmed by repro. Any request with more than
+three X-Forwarded-For hops collapses the rate-limit key to "unknown", so all
+of that traffic shares one bucket. Base keys per-IP; head doesn't (node
+repro.mjs shows the collapse). Take the first untrusted hop instead of the
+last; the parsed chain is already sitting at limits.ts:79.
 ```
 
 Rules:
@@ -175,15 +162,15 @@ Rules:
 - **Fixes target the root cause** and arrive committable when cheap; suggestions get acted on, prose gets ignored.
 - **Emoji for impact, not decoration.** The severity markers (🚫 ⚠️ 💡) are load-bearing. Beyond them, one well-chosen emoji can make a section land; stacked emoji and the AI-slop set never appear (`super-good-pr` carries the palette and the banned list).
 - **PR-body inaccuracy is a finding on the code scale**: claimed-but-unimplemented changes, stale receipts, undisclosed changes. Grade against `super-good-pr`'s standard.
-- **Negative space is mandatory at level 3+**: what was checked and found clean (same precision as findings), what was not reviewed and why, which checks did not run. This section is what makes a quiet report trustworthy rather than merely quiet.
-- **Close with a transparency footer**: scope reviewed, lenses run, agents spawned and why, skipped areas with reasons.
+- **Negative space is content, not a form.** At level 3+, the report says in a few plain sentences what was checked and found clean, what was not reviewed and why, and which checks could not run. This is what makes a quiet report trustworthy rather than merely quiet.
+- **End with a line of process transparency**: what was reviewed, how deep the pass went, what was skipped and why. A sentence or two, not a labeled footer.
 - **No findings? Say `No findings.`** then the negative space. A `No findings` verdict requires resolving the invariant inventory, not sampling the diff. Never manufacture.
 
 ## Acting on the PR
 
 Read-only by default. Do not post comments, approve, request changes, or push fixes unless explicitly asked. Before any requested GitHub action, re-check the live head and every anchor.
 
-**Delivery shape, when posting is requested: inline first, summary as needed.** Each finding lands as an inline review comment on the exact changed lines, self-contained (severity marker, the finding, the fix, a committable `suggestion` block where cheap), submitted together as one review rather than a scatter of issue comments. The top-level review body carries only what has no line to live on: the verdict, the orientation and any mermaid, the negative space, and the transparency footer, sized to need. A two-finding pass gets a sentence or two up top; a deep pass earns the full summary. Inline comments do the work; the summary orients.
+**Delivery shape, when posting is requested: inline first, summary as needed.** Each finding lands as an inline review comment on the exact changed lines, self-contained (severity marker, the finding, the fix, a committable `suggestion` block where cheap), submitted together as one review rather than a scatter of issue comments. The top-level review body carries only what has no line to live on: the verdict, the orientation and any mermaid, the negative space, and the process-transparency close, sized to need. A two-finding pass gets a sentence or two up top; a deep pass earns the full summary. Inline comments do the work; the summary orients.
 
 | Rule                                                                            | Why                                                    |
 | ------------------------------------------------------------------------------- | ------------------------------------------------------ |
