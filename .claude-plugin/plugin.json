@@ -1,6 +1,6 @@
 {
   "name": "hyperskills",
-  "version": "3.11.0",
+  "version": "3.11.1",
   "description": "Focused skills for capable coding agents: design exploration, research, planning, implementation, multi-agent coordination, independent review, prose editing, memory, Git, Tilt, terminal UI, and delegated image generation.",
   "author": {
     "name": "Stefanie Jane",
@@ -103,6 +103,9 @@
     "over-correction",
     "surface-profiles",
     "skill-evaluation",
-    "context-engineering"
+    "context-engineering",
+    "observable-review",
+    "review-progress",
+    "stream-json"
   ]
 }

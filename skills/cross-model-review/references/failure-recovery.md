@@ -13,9 +13,11 @@ Preserve the original prompt, output path, process handle, and error. Classify t
 | Auth, quota, or provider error | Report the actual access problem; do not change credentials or billing routes silently                  |
 | Tool denied                    | Decide whether the check can be performed with existing access; otherwise disclose the missing evidence |
 
+For the [observable runner](observable-reviews.md), inspect `status.json` and `stderr.log` before reading the raw stream. Wrapper exit 90 marks a changed or lost Git snapshot; exit 91 means no usable successful result. A saved `complete` state confirms process/result handling, not the substantive review verdict.
+
 ## Slow Versus Stuck
 
-Read output growth and process state together. A quiet process can be computing, waiting on stdin, or blocked by a helper. Neither quiet output nor a long runtime proves failure. Growing output can also be an unproductive loop.
+Read output growth and process state together. The runner's event count and last activity describe observed events, not guaranteed liveness; verify the original process when status stops changing. A quiet process can be computing, waiting on stdin, or blocked by a helper. Neither quiet output nor a long runtime proves failure. Growing output can also be an unproductive loop.
 
 When progress is uncertain, identify the contended resource or pending operation. Inspect the specific child process, available stderr, and host session state. Do not print its environment or unrelated process command lines (they may contain credentials).
 

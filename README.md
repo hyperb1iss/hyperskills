@@ -106,7 +106,7 @@ Partition independent work, define ownership beyond file paths, and integrate re
 
 ### `cross-model-review`
 
-Launch and consume an independent review of code, a specification, a diagnosis, or factual claims. Covers current CLI discovery, process handles, output capture, permissions, billing intent, and evidence-based finding disposition. A second model adds a perspective; agreement still needs proof.
+Launch and consume an independent review of code, a specification, a diagnosis, or factual claims. Covers current CLI discovery, process handles, output capture, permissions, billing intent, and evidence-based finding disposition. An optional Claude runner exposes recent activity, retains private logs, and checks the declared Git scope for changes. A second model adds a perspective; agreement still needs proof.
 
 ```text
 /hyperskills:cross-model-review
@@ -192,7 +192,7 @@ The checks use `uv` (Python and isolated PyYAML), Bash, and Perl. Markdown linti
 
 ```bash
 make check      # Parse manifests, YAML frontmatter, and bundled references
-make test       # Exercise malformed inputs and scanner regressions
+make test       # Run validator, scanner, and review-runner regressions
 make all        # Run both checks and tests
 make lint       # Optional JSON, YAML, and Markdown lint tools
 make format     # Format tracked Markdown and JSON

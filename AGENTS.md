@@ -29,7 +29,9 @@ hyperskills/
 │   │   └── references/{benchmarks,recovery}.md
 │   ├── cross-model-review/
 │   │   ├── SKILL.md
-│   │   └── references/{prompts,failure-recovery,cli-flags}.md
+│   │   ├── references/{prompts,failure-recovery,cli-flags,observable-reviews}.md
+│   │   ├── scripts/{run_claude_review,review_status}.py
+│   │   └── tests/test_observable_review.py
 │   ├── hyper-pr-review/
 │   │   ├── SKILL.md
 │   │   └── references/{lenses,thermonuclear}.md
@@ -71,7 +73,7 @@ The brace notation groups filenames; it is not a literal path.
 | `research`           | none            | Gather and adjudicate evidence               |
 | `orchestrate`        | 1               | Coordinate independent work and integration  |
 | `implement`          | 2               | Implement and verify behavior                |
-| `cross-model-review` | 3               | Dispatch and consume independent reviews     |
+| `cross-model-review` | 4               | Dispatch and consume independent reviews     |
 | `hyper-pr-review`    | 2               | Conduct evidence-based review                |
 | `codex-imagegen`     | none            | Delegate raster asset generation             |
 | `super-good-pr`      | none            | Author and maintain PR descriptions          |
@@ -108,7 +110,7 @@ Scripts belong in `scripts/` when deterministic execution improves reliability. 
 
 ## Validation and Evaluation
 
-Run `make check` for manifests, parsed YAML, required metadata, size limits, and concrete bundled references. The validator inspects all skill directories, including new untracked skills. Run `make test` for validator and scanner regressions. The checks use uv to run isolated Python with PyYAML, plus Bash and Perl.
+Run `make check` for manifests, parsed YAML, required metadata, size limits, and concrete bundled references. The validator inspects all skill directories, including new untracked skills. Run `make test` for validator, scanner, and observable review runner regressions. The checks use uv to run isolated Python with PyYAML, plus Bash and Perl.
 
 For a workflow change, select realistic cases from [evals/README.md](evals/README.md) or add a case for a newly discovered failure. Evaluate the produced artifact and actions, not whether the response repeats a heading or phrase. Include a negative routing case when changing discovery metadata. A task requiring additional live access or publishing uses an isolated fixture or stops at a reviewable artifact.
 
