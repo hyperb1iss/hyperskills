@@ -10,7 +10,7 @@ Run the passes in order: mechanical, structural, rhetorical, sentential, lexical
 
 Deterministic. Detect with the commands in `SKILL.md`, not by eye.
 
-**M1. Em and en dashes.** The single most reliable tell. Replace with a period first, a comma for a tight aside, a colon when introducing an explanation, or restructure. Catch spaced (` — `) and double-hyphen (` -- `) forms too. One exception: a user-provided writing sample that uses them.
+**M1. Em and en dashes.** A house rule and a density check rather than proof of authorship: published human essays out-dash frontier models (see `evidence.md`). On our surfaces the ban is absolute because the project contract bans it. On someone else's prose, treat density as a candidate and look for converging signals. Replace with a period first, a comma for a tight aside, a colon when introducing an explanation, or restructure. Catch spaced (` — `), unspaced, and double-hyphen (`a--b`) forms. One exception: a user-provided writing sample that uses them.
 - Before: `The migration runs online—no downtime—but the backfill is slow.`
 - After: `The migration runs online with no downtime. The backfill is slow.`
 
@@ -54,6 +54,20 @@ The document's shape, judged with the text out of focus. Structural slop survive
 - After: `## Caching` / `The resolver caches by content hash, so...`
 
 **S9. Parallel-structure lock-in.** Every list item opening with the same part of speech, every section opening with the same construction. A little parallelism is craft. Total parallelism reads generated.
+
+**S10. Rule of three.** Ideas forced into groups of three to sound comprehensive, at every scale: three adjectives, three list items, three sections, three clauses in a closing sentence. Count the real items and use that number, even when the real number is one. Watch for the escalating variant where each of the three gets longer than the last, which reads as a rehearsed crescendo.
+- Before: `The resolver is fast, reliable, and easy to extend.`
+- After: `The resolver caches by content hash, so a warm build skips it entirely.`
+- Before: `We built it for speed, for safety, and for the kind of clarity that lets a new engineer read the whole pipeline in an afternoon.`
+- After: `We built it for speed and for safety. A new engineer can read the whole pipeline in an afternoon.`
+
+**S11. Fractal summaries.** Every subsection gets a summary, every section gets a summary, and the document gets one too. Keep at most the outermost, and only when the document is long enough that a reader might not finish it.
+
+**S12. Excessive enumeration.** A listicle wearing prose clothes, usually because someone banned bullets: "The first wall is... The second wall is... The third wall is..." Either use a real list or write the argument as connected reasoning.
+
+**S13. Wh-word headers.** "What we do differently", "Where the market is stuck", "Why this matters", "How it works" repeated as a full heading scheme. One is fine. A document whose every heading opens on a wh-word is running a template.
+
+**S14. Paragraph over-fragmentation.** A long run of one-sentence paragraphs, each landing like a beat. A single one-line paragraph is emphasis; eighteen of them is a texture, and it is the texture readers now recognize.
 
 ## 3. Rhetorical (R)
 
@@ -105,6 +119,18 @@ The argument's shape. These are the tells readers name when they say something "
 - Before: `Our goal is to provide a great developer experience with sensible defaults and clear errors.`
 - After: `Every error names the config key that caused it and the file it was read from.`
 
+**R15. Reasoning leak.** Chain-of-thought residue surfacing in the finished text: "I want to be precise about my own role here", "let me reconsider that". The model's deliberation is not the document.
+
+**R16. Premise stacking.** The evidence paragraph placed before the point it supports, so the point arrives already argued twice. Lead with the claim, then support it.
+
+**R17. Announced counts.** "Two constraints shape the design", "for three reasons", "there are four things to know". Naming the count before the items is a planning artifact. Either the list is visible and the count is redundant, or the count is wrong by the time you finish editing.
+
+**R18. The tie-back close.** Ending by looping to the question: "So, to answer your question: yes." The reader knows what they asked.
+
+**R19. Invented concept labels.** An abstract problem-noun bolted onto a domain word to coin a term the field does not use: "the supervision paradox", "the acceleration trap", "workload creep". One might be a real idea. Several in one document is a generator.
+
+**R20. Forced figurative language.** A word lifted from the prompt or the subject and repurposed as a metaphor for something unrelated. Frontier models do this readily. If the metaphor does not survive being stated literally, cut it.
+
 ## 4. Sentential (N)
 
 Sentence-level shape.
@@ -129,10 +155,10 @@ Sentence-level shape.
 - Before: `The gateway serves as the entry point and features rate limiting.`
 - After: `The gateway is the entry point. It rate-limits per tenant.`
 
-**N6. Actor-hiding passive.** Catch `is/are/was/were + past participle` and name the actor when the actor matters.
+**N6. Actor-hiding passive.** Narrow, and pointed the opposite way from the usual advice: models use agentless passive at roughly half the human rate (`evidence.md`), so a blanket passive purge moves prose toward the machine register. Fix only passive that hides an actor the reader needs in order to act.
 - Before: `Requests are validated before the handler is invoked.`
 - After: `The middleware validates each request before calling the handler.`
-- Keep the passive when the actor is unknown, obvious, or genuinely irrelevant.
+- Leave it alone when the actor is unknown, obvious, or genuinely irrelevant, which is most of the time.
 
 **N7. Clause stacks.** If the reader has to backtrack to parse it, split it. One idea per sentence. Detail a reader can skip belongs in parentheses; detail they must parse to follow the argument belongs in its own sentence.
 
@@ -148,21 +174,33 @@ Sentence-level shape.
 
 **N12. Sentence-opening monotony.** Six sentences in a row opening with the subject, or four opening with a subordinate clause. Vary the entry point.
 
+**N13. False agency.** An inanimate subject taking a human verb, which is how a sentence avoids naming who acted. "A complaint becomes a fix" (the complaint did nothing; someone fixed it). Also "the decision emerges", "the market rewards", "the data tells us". Name the actor, or state the mechanism.
+- Before: `The migration surfaced a schema conflict that demanded attention.`
+- After: `The migration failed on a duplicate index name, and we renamed the new index.`
+
+**N14. Distributive appositive.** A trailing fragment that distributes a metaphor across a set: "each one a thread in the tapestry", "every request a small negotiation". Delete the fragment; the sentence rarely needs it.
+
+**N15. Phrasal coordination imbalance.** Models over-use "X, Y, and Z" lists and under-use "and then X happened" clause sequences (`evidence.md`). When a paragraph is a chain of comma-lists, rebuild one of them as a sequence of clauses with real verbs. This fixes the tricolon feel more reliably than deleting the third item.
+
+**N16. Self-echo.** Reusing a phrase from earlier in the same document as if it were an established term or a callback, when the first use was ordinary. Either make it a defined term or vary the wording.
+
 ## 5. Lexical (L)
 
 Last pass, least valuable. Word swaps on unfixed structure produce clean-sounding slop.
 
-**L1. AI vocabulary.** Highest-frequency offenders: additionally, crucial, delve, robust, seamless, leverage, utilize, enhance, foster, garner, interplay, intricate, pivotal, showcase, tapestry, testament, underscore, vibrant, holistic, nuanced, multifaceted, comprehensive, streamline, empower, unlock, elevate, myriad, plethora, realm, landscape (abstract). Replace with the plain word, or cut the adjective. These co-occur, so a cluster is stronger evidence than any single hit.
+**L1. AI vocabulary.** Frequent offenders: additionally, delve, seamless, enhance, foster, garner, interplay, intricate, pivotal, showcase, tapestry, testament, underscore, vibrant, holistic, nuanced, multifaceted, comprehensive, streamline, empower, unlock, elevate, myriad, plethora, realm, landscape (abstract). Replace with the plain word, or cut the adjective. These co-occur, so a cluster is stronger evidence than any single hit, and pre-LLM baseline usage of the famous ones sits around 2 to 3%, which is the false-positive floor.
+
+**False-positive trap:** `robust`, `leverage`, and `crucial` are widely banned and skew **human** in corpus log-odds (`evidence.md`). They are not on the list above. Neither are *just*, *really*, *actually*, *my*, or *thing*, which are human-overused and should survive the pass. Prefer the empirically derived list at [berenslab/llm-excess-vocab](https://github.com/berenslab/llm-excess-vocab) to any hand-written one, and note that close to 30% of its style markers are `-ing` forms, which makes N3 a verb-inflection fingerprint rather than a phrasing habit.
 
 **L2. Plain-word swaps.** utilize to use, leverage to use, facilitate to help, in the event that to if, prior to to before, subsequent to to after, numerous to many, commence to start, terminate to stop, ascertain to find out, endeavor to try. The fancier synonym is rarely clearer.
 
-**L3. Filler phrases.** in order to (to), due to the fact that (because), at this point in time (now), it is important to note that (delete), has the ability to (can), for the purpose of (to), in terms of (usually delete), it should be noted (delete).
+**L3. Filler phrases.** in order to (to), due to the fact that (because), at this point in time (now), it is important to note that (delete), has the ability to (can), for the purpose of (to), in terms of (usually delete), it should be noted (delete). Cut clusters, not instances: isolated wordy constructions are a human signal in the Wikipedia corpus, and a document scrubbed of every one of these reads more generated, not less.
 
-**L4. Stacked hedges.** `could potentially possibly` becomes `may`. One hedge carries the uncertainty; three signal a writer with no basis. Single honest hedges in scientific, legal, medical, and forecasting prose stay.
+**L4. Stacked hedges.** Only the stacks. `could potentially possibly` becomes `may`, because one hedge carries the uncertainty and three signal a writer with no basis. Single hedges stay everywhere, and in scientific, legal, medical, and forecasting prose they are the honest register. Models hedge at 50 to 67% of the human rate (`evidence.md`), so stripping hedges is one of the most common ways a deslop pass makes prose worse.
 
 **L5. Adverb props.** `runs quickly` becomes `is fast` or the measured number. `significantly improves` becomes the delta. An adverb holding up a weak verb means the verb is wrong. Worst offenders: significantly, effectively, essentially, basically, simply, just, actually, really, quite, very, incredibly, seamlessly, robustly.
 
-**L6. Abstract metaphor nouns.** substrate (base), wedge (add), vector (method), locus, vantage, nexus, primitive (as a noun), harness (as a metaphor), surface (as in API surface), bedrock, scaffolding (as a metaphor), modality, paradigm, gold-plating (more than the job needs), ratchet, flywheel, north star, endgame. These read technical and usually have a plainer concrete word.
+**L6. Abstract metaphor nouns.** substrate (base), wedge (add), vector (method), locus, vantage, nexus, primitive (as a noun), harness (as a metaphor), surface (as in API surface), bedrock, scaffolding (as a metaphor), modality, paradigm, gold-plating (more than the job needs), ratchet (the mechanism's real name, or a limit that only tightens), evacuate (move out), flywheel, north star, endgame (the last phase). These read technical and usually have a plainer concrete word.
 
 **L7. House jargon leaking outward.** Terms that are efficient between agents and opaque to a human reader: load-bearing, blast radius, nerf, falsifier gate, consumption boundary, receipts. Fine in skill files and briefs. Sweep them from anything a human reads, unless the reader shares the vocabulary.
 
@@ -173,6 +211,10 @@ Last pass, least valuable. Word swaps on unfixed structure produce clean-soundin
 - After: `The tradeoff is memory for latency.`
 
 **L10. Superlative inflation.** `the most`, `the best`, `the only`, `never`, `always`, `every single` where the writer has not checked. Either verify the claim or scale it down to what is known.
+
+**L11. Era-overuse, current generation.** As of Aug 2026 the Claude-generation set is: load-bearing, in service of, earns its keep, priors, backstop, pivot point, sharp insight, key insight. These are house-fluent between agents and instantly recognizable to a human reader. The `→` arrow and an unrequested collaborative "we" belong here too. Expect this list to rot within months, which is the point of dating it.
+
+**L12. Borrowed rigor.** Economics and optimization vocabulary used as decoration: first-order concerns, the binding constraint, asymmetric upside, forcing function, the delta between, necessary but not sufficient, the operative word. Each has a precise technical meaning. Used loosely, they signal rigor without adding any.
 
 ## 6. Epistemic (E)
 
@@ -195,6 +237,20 @@ Truth-level tells. These are the ones that make text untrustworthy rather than m
 **E7. Unfalsifiable claims.** `Designed for scale`, `built with security in mind`, `production-ready`, `enterprise-grade`, `battle-tested`. Nothing in these can be checked. Replace with the property and its evidence, or cut them.
 
 **E8. Confident restatement of the prompt.** Text that answers by paraphrasing the question with more words. Common in generated docs sections that mirror their own heading. If a paragraph adds no information the heading did not, cut the paragraph.
+
+**E9. Process theatre.** Claims about the work rather than the result: "double-checked", "after extensive analysis", "thoroughly reviewed", "I carefully considered". A receipt is a command and its output. Everything else is a claim about diligence, and it reads as padding at best.
+
+**E10. Agent-loop vocabulary.** Text addressed to the orchestrator rather than the reader: "this turn", "as requested", "in this session", "point me at", "let me know if you want me to". Common when an agent's status report gets pasted into a document.
+
+**E11. Provider and harness residue.** Mechanical, always wrong, never legitimate: `turn12search4` style citation stubs, `[cite: 7]`, `[span_4]`, lenticular brackets around a source name, dagger-digit footnote markers, and `utm_source=chatgpt` on a pasted link. The scanner treats these as hard failures.
+
+**E12. Orphan statistics.** A suspiciously precise figure with no source: "cut deploy time by 47%", "improves accuracy by 12.4%". Precision manufactures authority. Either the number has a receipt or it does not belong.
+
+**E13. Calibration theatre.** Confidence bands that nothing depends on: "epistemic status: moderate", "I'm about 80% confident", "I hold this loosely". Real calibration changes what the reader should do. Decorative calibration just performs rigor.
+
+**E14. Performed candor.** Announcing honesty rather than being honest: "let me be blunt", "the strongest version of their argument is", "worth naming that", "the uncomfortable truth". Also the withheld payoff, where a sentence promises a revelation and delivers an ordinary point: "where the real work happens", "the part nobody tells you".
+
+**E15. Clean slop, the second-order tell.** Prose that passes every check above and is still recognizable, because the aphoristic one-liner closing each paragraph and the clipped fragment pairs have themselves become a uniform. Any individual instance is fine. As a texture across a document, it is the current signature of text that has been through a deslop pass. The only fix is variation the writer actually chose.
 
 ## What not to flag
 

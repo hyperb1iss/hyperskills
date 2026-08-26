@@ -38,9 +38,13 @@ hyperskills/
 │   │       └── thermonuclear.md
 │   ├── deslop/
 │   │   ├── SKILL.md
+│   │   ├── scripts/
+│   │   │   └── slopscan.pl       # protection-aware mechanical scan
 │   │   └── references/
 │   │       ├── pattern-catalog.md
-│   │       └── surface-profiles.md
+│   │       ├── surface-profiles.md
+│   │       ├── evidence.md
+│   │       └── fixtures/         # slop / protected / clean, for scanner regression
 │   ├── dream/
 │   │   ├── SKILL.md
 │   │   └── references/
@@ -251,25 +255,17 @@ Bump the version. Skills are opt-in, so strict semver "breaking" rarely applies 
 
 `CLAUDE.md` is a symlink to `AGENTS.md`. Edit `AGENTS.md`; Claude sees the same file.
 
-Add an install command:
+Update two places here: the project-structure tree and the skill-inventory table. Add the new skill to the matching list under Skill Categories as well.
 
-```bash
-npx skills add hyperbliss/hyperskills --skill <skill-name>
-```
+#### `README.md`
 
-Add a skill description section:
-
-```markdown
-### Skill Title (`hyperskills:<skill-name>`)
-
-One-sentence description of what it provides.
-```
-
-Add to the usage section:
+The per-skill prose lives here, not in `AGENTS.md`. Add a `####` entry under Process Skills or Domain Skills carrying what the skill provides and why it exists, followed by its invocation:
 
 ```bash
 /hyperskills:<skill-name>
 ```
+
+Add a row to the Composing Skills table when the skill pairs with others in a common situation.
 
 ### Step 5: Validate
 
@@ -285,7 +281,8 @@ Before committing, verify:
 - [ ] Anti-patterns section included
 - [ ] "What This Skill is NOT" section included
 - [ ] `plugin.json` keywords updated
-- [ ] `AGENTS.md` updated with install command, description, and usage
+- [ ] `AGENTS.md` updated: structure tree, inventory table, category list
+- [ ] `README.md` updated: skill entry with invocation, plus a composing-table row if it applies
 - [ ] Version bumped in `plugin.json`
 
 ## Existing Skill Inventory
@@ -302,7 +299,7 @@ Sizes drift as skills evolve — check with `wc -w skills/*/SKILL.md` instead of
 | `codex-imagegen`     | none       | Process — Codex image generation delegation |
 | `cross-model-review` | 3 files    | Process — bidirectional cross-model review  |
 | `hyper-pr-review`    | 2 files    | Process — falsifier-gated PR review         |
-| `deslop`             | 2 files    | Process — AI tell removal from prose        |
+| `deslop`             | 3 files    | Process — AI tell removal from prose        |
 | `dream`              | 2 files    | Process — conversation memory consolidation |
 | `super-good-pr`      | none       | Process — reviewer-first PR descriptions    |
 | `git`                | none       | Domain — git operations                     |

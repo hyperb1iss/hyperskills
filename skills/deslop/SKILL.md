@@ -1,240 +1,232 @@
 ---
 name: deslop
-description: Use this skill before any prose leaves the terminal for a human reader, and whenever text needs AI tells removed. Covers docs, READMEs, release notes, blog posts, Slack messages, PR bodies, commit bodies, and specs. Activates on mentions of deslop, unslop, humanize, remove AI tells, AI slop, sounds like AI, reads like ChatGPT, em dashes, clean up this prose, make this sound human, polish this writing, slop check, AI writing patterns, editing pass, or before posting.
+description: Use this skill before any prose leaves the terminal for a human reader, and whenever text needs AI tells removed. Covers docs, READMEs, release notes, blog posts, Slack messages, PR bodies, commit bodies, and specs. Activates on mentions of deslop, unslop, humanize, remove AI tells, AI slop, sounds like AI, reads like ChatGPT, em dashes, clean up this prose, make this sound human, slop check, or AI writing patterns.
 ---
 
 # Deslop
 
-Slop is a shape, not a wordlist. Text with every banned word swapped out still reads as machine-written when the paragraph shape, the flat rhythm, and the decoration-where-evidence-belongs all survive. That is why lexical scrubbing feels productive and changes so little: it is the cheapest pass and the least effective one.
+AI tells sit at three levels: characters, words, and shape. The first two are cheap to fix and carry the least signal. Corpus work points the same way: across 61,608 stories, narrative-structure features alone separated model text from human text at 93.2% macro-F1 ([StoryScope](https://arxiv.org/abs/2604.03136)). Swap the vocabulary and the thing that identifies the text is still there.
 
-Two consequences drive everything below. Fix the shape before the words. And decide what surface you are writing for before you fix anything, because the rules that clean up a blog post will vandalize a PR body, a scientific abstract, or an agent brief.
+So the passes below start with character checks because a script does those for free, then work down through document shape, argument shape, and sentence shape, and reach vocabulary last. The order is the contribution. Neither source catalog prescribes one, and a flat list of patterns invites a reader to fix twenty cheap word hits and call it done.
 
-Note on this file: skill files are an agent-facing surface, so the tables and bold lead-ins here are correct for the reader they have. The doc profile below would flag both in a README. That is the surface model working, not a contradiction.
+The second thing that decides every rule is the surface. A pass tuned for a blog post will strip the semantic emoji a PR body requires, flatten the calibrated uncertainty that makes a postmortem honest, and spend tokens polishing a brief no human will read. Read the surface row before editing anything.
+
+This file gets its own rhetorical, sentential, and epistemic passes. Its tables, dense phrasing, and house jargon are correct for an agent reader and would be wrong in a README, which is what the agent-facing row below means.
 
 ## Surface first
 
-Read the target surface off the task, then apply that row. When a surface has its own authority skill, that skill wins on structure and this one contributes prose patterns only.
+One canonical matrix. When a surface names an authority skill, that skill decides structure and this one supplies prose patterns.
 
-| Surface                                          | Register target                            | Structure                                                       | Overrides and exemptions                                                                |
-| ------------------------------------------------ | ------------------------------------------ | --------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| PR body, PR comment reply                        | Reviewer-first, full sentences, receipts   | Semantic emoji headers and bold section leads are **required**   | `super-good-pr` owns structure. Take prose patterns only, leave the shape alone          |
-| PR review report                                 | Principal-engineer prose                   | Severity markers (🚫 ⚠️ 💡) are load-bearing                     | `hyper-pr-review` owns structure                                                        |
-| Commit body                                      | Plain text, imperative subject             | No markdown, no fences, wrap at 76                              | Attribution trailers and URLs exempt from wrap and from tell-scanning                   |
-| README, docs, guides                             | Plain, concrete, second person             | Headings and code blocks are load-bearing                       | Never touch code blocks, CLI output, frontmatter, link targets, or config samples        |
-| Changelog, release notes, migration guide         | Version-scoped                             | Lists are correct here                                          | Diff-anchored writing is **correct**, not a tell. These documents exist to narrate change |
-| Slack, email, chat with a human                  | Warm, complete sentences, peer energy      | Minimal formatting                                              | House signature footer required where the contract says so                              |
-| Blog, essay, opinion, personal writing            | The author's voice                          | Free                                                            | Voice and stance belong here. This is the only surface where you add opinion             |
-| Encyclopedic, reference, neutral documentation    | Neutral and plain                          | Free                                                            | No first person, no injected stance. Neutral **is** the human register here              |
-| Scientific, legal, medical, forecasting, postmortem | Calibrated uncertainty                     | Free                                                            | Hedges are honest. Strip only hedges that qualify nothing                                |
-| Fiction, creative                                | The piece's voice                           | Free                                                            | Invented detail is the job. The no-fabrication rule does not apply                       |
-| Code comments, docstrings                        | Describe the thing as it is                | Free                                                            | Diff-anchored comments ("this replaces the old loop") are a tell here, unlike changelogs |
-| Agent briefs, skill files, Sibyl memories, prompts | Dense, jargon welcome                      | Tables and bold serve scanning                                  | **Skip this skill.** Prose polish for a machine reader burns tokens for nothing          |
+| Surface                                   | Register target                       | Structure authority          | What changes here                                                                   |
+| ----------------------------------------- | ------------------------------------- | ---------------------------- | ----------------------------------------------------------------------------------- |
+| PR body, PR comment reply                 | Reviewer-first, receipts              | `super-good-pr`              | Semantic emoji headers and bold section leads stay. Prose patterns apply             |
+| PR review report                          | Principal-engineer prose              | `hyper-pr-review`            | Severity markers stay. Prose patterns apply                                          |
+| Commit body                               | Plain text, factual                   | `implement`, `git`           | No markdown at all, wrap at 76. Trailers and URLs exempt                            |
+| Spec, plan, design doc                    | Precise, decision-carrying            | `plan`                       | Full pass. Slop here propagates into everything built from it                        |
+| Research report                           | Findings with provenance              | `research`                   | Full pass. Stitched agent summaries arrive pre-slopped                               |
+| README, docs, guides                      | Plain, concrete, second person        | this skill                   | Full pass. Code, CLI output, config samples untouched                                |
+| Changelog, release notes, migration guide | Version-scoped                        | this skill                   | Full pass, but narrating the change is correct here rather than a tell                |
+| Slack, email                              | Warm, complete sentences              | this skill                   | Full pass. Required signature footers stay                                           |
+| Interactive chat with the user             | The house register                    | the project contract         | Skip. They watched the work happen and can ask a follow-up                          |
+| Blog, essay, opinion, personal            | The author's voice                    | the author                   | Full pass, and stance belongs here. Flat neutrality is its own tell                  |
+| Encyclopedic, reference, neutral docs     | Neutral and plain                     | the publication              | Full pass, no injected stance. Neutral is the correct human register                  |
+| Scientific, legal, medical, forecasting    | Calibrated uncertainty                | the discipline               | Hedges are honest. Cut only hedges that qualify nothing                              |
+| Marketing copy the user asked for          | Persuasive                            | the brief                    | Puffery is the genre. Name it once, then respect the brief                            |
+| Fiction, creative                         | The piece's voice                     | the author                   | Invented detail is the work. The no-fabrication rule does not apply                   |
+| Code comments, docstrings                 | Describe the thing as it is           | the codebase                 | Narrating a past change is a tell here, unlike a changelog                            |
+| Agent brief, skill file, prompt, memory    | Dense, jargon welcome                 | this skill                   | Structure exempt (tables, density, jargon). Rhetorical, sentential, and epistemic passes still apply |
 
-The last row is a real boundary, not a caveat. House jargon between agents is efficient. Sweep it only from text a human reads.
+Per-surface detail and worked artifact-level rewrites are in `references/surface-profiles.md`.
+
+## Two roles, and why they are separate
+
+Detection and rewriting are different jobs, and one agent doing both grades its own work. Self-gating raises acceptance while correctness falls, so when the stakes justify it, split the roles: the detector reports findings and is not permitted to rewrite, and the rewriter consumes those findings without re-deriving them. On a subagent host, enforce it with tool permissions rather than instructions, denying the detector `Write` and `Edit`.
+
+For a short artifact one agent can hold both roles, provided the detection report is written down before any edit starts. Writing the findings first is what stops the pass from becoming a vibe.
+
+## Where the folklore is wrong
+
+Several rules that circulate as deslop advice point in the wrong direction. Instruction-tuned models **under**-use these relative to humans, so removing them moves prose toward the machine register. Full citations and numbers in `references/evidence.md`.
+
+| Common rule                       | What the corpus shows                                                        | Do this instead                                              |
+| --------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| "Cut passive voice"               | Models use agentless passive at roughly half the human rate                    | Fix only passive that hides an actor the reader needs         |
+| "Strip hedges"                    | Models hedge at 50 to 67% of the human rate                                   | Cut hedges that qualify nothing, keep calibrated ones         |
+| "Avoid contractions, first person" | Both run well below human rates                                              | Add them back wherever the register allows                     |
+| "Ban robust, leverage, crucial"   | All three skew **human** in HC3 log-odds                                     | Drop them from the banned list and judge in context           |
+| "Em dashes prove AI"              | Published human essays out-dash frontier models                              | Treat the ban as a house rule plus a density check            |
+| "Cut every 'in order to'"         | Isolated wordy constructions are a human signal in the Wikipedia corpus       | Cut clusters, not instances                                    |
+
+The same research supplies a tell nobody lists: models over-use phrasal coordination ("X, Y, and Z") at up to twice the human rate while under-using clausal coordination ("and then the build broke"). That imbalance is what makes a tricolon feel machine-made, and rebuilding one list into a sequence of clauses fixes more than deleting a third item.
+
+Lexical markers also rot. Words get called out publicly, writers avoid them, and models keep moving. Treat any wordlist here as dated (Aug 2026) and weight structure higher, because structural tells have survived every generation so far.
 
 ## The five passes
-
-Run them in this order. The order matters because starting with vocabulary tempts you to stop there, and word swaps on unfixed structure produce text that is still obviously generated.
 
 ```dot
 digraph deslop {
   rankdir=LR;
   node [shape=box, style=rounded];
-  mech [label="1. Mechanical\n(deterministic)"];
-  struct [label="2. Structural\n(document shape)"];
-  rhet [label="3. Rhetorical\n(argument shape)"];
-  sent [label="4. Sentential\n(sentence shape)"];
-  lex [label="5. Lexical\n(words)"];
-  gate [label="Exit gate\n(rescan + fabrication audit)", shape=diamond];
-  mech -> struct -> rhet -> sent -> lex -> gate;
-  gate -> struct [label="one more pass, max", style=dashed];
+  m [label="1. Mechanical\n(script)"];
+  s [label="2. Structural\n(document shape)"];
+  r [label="3. Rhetorical\n(argument shape)"];
+  n [label="4. Sentential\n(sentence shape)"];
+  l [label="5. Lexical\n(words)"];
+  g [label="Exit gate\n(rescan + epistemic audit)", shape=diamond];
+  m -> s -> r -> n -> l -> g;
+  g -> s [label="one revision, then ship", style=dashed];
 }
 ```
 
-### 1. Mechanical
-
-Deterministic hits, no judgment needed. Run the commands, do not eyeball for these.
+**1. Mechanical.** Run the scanner. It masks every protected region (frontmatter, fenced code in all forms, indented code, inline code spans, blockquotes, link targets) before any check, so it never reports a hit inside code or inside a quoted example.
 
 ```bash
-F=path/to/file.md
-
-# hard fail: em and en dashes, curly quotes and apostrophes,
-# double-hyphen dash, non-breaking space, ellipsis character
-rg -n '[\x{2014}\x{2013}]' "$F"
-rg -n '[\x{201c}\x{201d}\x{2018}\x{2019}]' "$F"
-rg -n ' -- ' "$F"
-rg -n '\x{00a0}' "$F"
-rg -n '\x{2026}' "$F"
-
-# candidate list, needs judgment: bold-lead bullets, title-case headings
-rg -n '^\s*[-*+] \*\*[^*]+:\*\*' "$F"
-rg -n '^#{1,6} .*[a-z] [A-Z][a-z]' "$F"
-
-# AI vocabulary frequency, code fences stripped
-awk '/^```/{f=!f; next} !f' "$F" | rg -oiw \
-  -e delve -e crucial -e pivotal -e landscape -e tapestry -e testament \
-  -e vibrant -e intricate -e showcase -e underscore -e additionally \
-  -e enhance -e foster -e garner -e interplay -e leverage -e utilize \
-  -e robust -e seamless -e holistic -e nuanced -e multifaceted \
-  | sort | uniq -c | sort -rn
-
-# negative parallelism and -ing pseudo-analysis
-rg -ni "not (just|only|merely|simply)\b.{0,60}\b(it'?s|it is|but)" "$F"
-rg -ni ', (highlighting|underscoring|emphasizing|ensuring|reflecting|symbolizing|showcasing|fostering|contributing|cultivating|encompassing|demonstrating|solidifying|cementing|paving) ' "$F"
-
-# rhythm proxy: sentence-length histogram
-awk '/^```/{f=!f; next} !f' "$F" \
-  | awk 'BEGIN{RS="[.!?]"} {n=split($0,w,/[[:space:]]+/); c=0; for(i=1;i<=n;i++) if(w[i]!="") c++; if(c>1) print c}' \
-  | sort -n | uniq -c
+perl skills/deslop/scripts/slopscan.pl --surface house FILE...
+# --surface house (default, our repos) | published | agent | sample
+# exit 0 clean · 10 candidates only · 20 hard failures
 ```
 
-Hard-fail hits get fixed with no discussion. Candidate hits get judged, since the heading pattern flags legitimate proper nouns ("Using GitHub Actions") and a bold lead that ends in a period and adds new detail is fine. On the histogram, a healthy piece has real spread with genuinely short and genuinely long sentences. When most sentences cluster in a 12-to-25-word band with nothing under 8 and nothing over 35, the rhythm is machine-flat even if every word is clean.
+Hard failures get fixed. Candidates get judged, because the heading check flags legitimate proper nouns and a bold lead that ends in a period and then adds new information is fine. The rhythm lines are diagnostics and never a gate: short technical prose legitimately scores low, and the thresholds circulating for these metrics are unvalidated. Vocabulary is inventory at this stage, applied in pass five.
 
-### 2. Structural
+**2. Structural.** Judge the document with the text out of focus, looking only at its shape: header inflation, bullets where the ideas connect, uniform section and paragraph sizes, reasoning packed into table cells, a summary that restates what was just read.
 
-Look at the document with the text unfocused, judging only its shape.
+**3. Rhetorical.** Read for the argument. Inflated significance, puffery, vague attribution, signposting, generic closes, and the reasoning-era tells (premise stacking, announced counts, the tie-back close, fractal summaries, invented concept labels).
 
-| Shape tell                                                  | Fix                                                                                  |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| A heading over every two paragraphs                         | Cut headings until each one covers a real section. Prose can carry a transition       |
-| Bullets where the ideas connect                             | Connected reasoning is prose. Lists are for genuinely parallel, unordered items       |
-| Every list item the same length, every section the same size | Let the important part be longer. Symmetry is the machine's signature                 |
-| Reasoning packed into table cells                           | Tables hold enumerable facts. Arguments go in sentences                               |
-| Bold-lead bullets that restate the label                    | Convert to prose, or make the lead name a thing the following sentence then advances   |
-| A summary section that restates the document                | Cut it. The reader just read the document                                             |
-| Boldface on every proper noun or key term                   | Bold at most what a skimmer must not miss                                             |
+**4. Sentential.** Sentence shape: negative parallelism, tailing negation fragments, participial tails, false ranges, clause stacks that force a reread, manufactured punchlines, staccato runs, and the phrasal-coordination imbalance above.
 
-### 3. Rhetorical
+**5. Lexical.** Plain words, filler clusters, copula avoidance, adverbs propping up weak verbs, abstract metaphor nouns, house jargon leaking outward. Colons introduce lists and explanations; as a dramatic mid-sentence hinge a colon does the same work as the em dash it replaced.
 
-Now read for the argument. These are the tells that survive a clean vocabulary and still give the game away.
+**Epistemic axis, checked at the gate.** Truth-level tells cut across all five: cutoff disclaimers, speculative gap-filling, sycophancy, chatbot residue, process theatre, unfalsifiable claims, and fabricated specificity.
 
-Inflated significance ("marks a pivotal moment", "a testament to", "setting the stage for") gets cut down to what happened. Promotional puffery ("nestled", "vibrant", "breathtaking") becomes a neutral description. Vague attribution ("experts believe", "industry reports suggest") gets a named source or gets deleted, never a decorated guess. Signposting ("let's dive in", "here's what you need to know") gets replaced by the thing itself. A generic upbeat close ("the future looks bright") gets cut so the piece ends on its last concrete fact. Full catalog with before-and-after pairs in `references/pattern-catalog.md`.
+Every entry, with before-and-after pairs, is in `references/pattern-catalog.md`. Do not restate the catalog here.
 
-Two tests worth running on every paragraph. First, the mechanism test: if a sentence names a feeling rather than a mechanism, a number, or an instruction, rewrite it to say what happens ("the database stays close at hand" becomes "queries run in-process, with no network hop"). Second, the generic-docs test: if a paragraph could appear verbatim in an unrelated project's documentation, it says nothing about this one, so cut it.
+## How many signals convict
 
-### 4. Sentential
+A single marker proves nothing, and acting on one is how a deslop pass starts damaging good writing.
 
-Sentence-level shape: negative parallelism ("it's not just X, it's Y"), tailing negation fragments ("no guessing", "no wasted motion"), participle phrases bolted on to fake depth, false ranges ("from X to Y" where the endpoints share no scale), actor-hiding passive, clause stacks that force a reread, manufactured punchlines, and staccato runs of fragments engineering drama. One idea per sentence, and name the actor when the actor matters.
+| Independent signals                   | Report                                                            |
+| ------------------------------------- | ----------------------------------------------------------------- |
+| One                                   | Nothing. No finding, no hedged mention                            |
+| Two                                   | The structural finding on its own evidence, without citing markers |
+| Three or more, plus structural evidence | A finding that states how many signals it rests on                 |
 
-### 5. Lexical
+Markers that are all manifestations of one sentence count as one signal.
 
-Last, and least valuable. Swap the AI vocabulary for plain words, cut filler ("in order to", "it is important to note that"), collapse stacked hedges, replace elaborate copula avoidance ("serves as", "boasts") with "is" and "has", cut adverbs propping up weak verbs, and pick the concrete word over the abstract metaphor noun ("substrate" becomes "base", "vector" becomes "method"). Colons belong before a list or an explanation. As a dramatic mid-sentence hinge, a colon is an em dash wearing a hat.
+## Evidence per finding
 
-### The epistemic axis
+Each finding carries an artifact or it does not get reported.
 
-Truth-level tells cut across all five passes and get checked at the exit gate, because they damage trust rather than just readability: cutoff disclaimers, speculative gap-filling, sycophancy, chatbot residue, unfalsifiable claims ("production-ready", "built with security in mind"), and fabricated specificity. The catalog's section 6 carries them with fixes.
+| Test         | Question                                                        | Artifact required                            |
+| ------------ | --------------------------------------------------------------- | -------------------------------------------- |
+| Deletion     | Cut the span. What was lost?                                    | The cut span and the named loss. "Nothing" convicts |
+| Inversion    | Negate the claim and write the negation out                      | If nobody would assert it, the original said nothing |
+| Stranger     | Could someone who never read the source have written this?       | The specific fact only a reader would know    |
+| Attribution  | Does "studies show" resolve to a source supporting this claim?   | The resolved citation, or the finding         |
+| Load bearing | Delete the wrapper. What broke?                                 | The failing command, or nothing              |
+
+Report a "not flagged, and why" note whenever softer markers were present and deliberately passed over. It is the one restraint control that shows its work.
 
 ## Swap traps
 
-Removing a tell usually relocates it. Each row is a pass that looks clean and reads worse.
+Removing a tell tends to relocate it.
 
-| You removed          | The trap                                                | Do this instead                                                                   |
-| -------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| An em dash           | Parenthesis spray, colon as mid-sentence connector      | End the sentence. Use a comma for a tight aside                                   |
-| Rule of three        | Rule of four, or three items with new rhythm            | Count the real items and use that number, even when it is one                     |
-| Bold-lead bullets    | The same list with a heading per item                   | Prose, or a bold lead that ends in a period and is followed by new information     |
-| An AI vocabulary word | A same-register synonym ("crucial" to "vital")           | The plain word, or cut the adjective entirely                                     |
-| Passive voice        | A fake actor ("the system", "the framework")            | The real actor, or keep the passive when the actor genuinely does not matter       |
-| Hedging              | A flat overclaim                                        | The calibrated claim plus its actual basis                                        |
-| A generic conclusion | A different generic conclusion ("In short", "Ultimately") | Stop at the last concrete fact                                                     |
-| Sycophancy           | Clipped coldness                                        | A neutral, direct answer                                                          |
-| Staccato drama       | One long clause-stacked sentence                        | Mixed rhythm across the paragraph                                                 |
-| Decorative emoji     | Caps or bold as replacement decoration                  | Nothing. The sentence carries itself                                              |
-| "Delve into"         | "Dive into", "explore"                                  | The verb that says what you did: read, measured, tested, benchmarked              |
+| You removed           | The trap                                                  | Do this instead                                                          |
+| --------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------ |
+| An em dash            | Parenthesis spray, colon as connector, or a `--` substitute | End the sentence. Use a comma for a tight aside                           |
+| Rule of three         | Rule of four, or three items with new rhythm              | Count the real items, then rebuild the list as clauses                    |
+| Bold-lead bullets     | A heading per former bullet                               | Prose, or a bold lead ending in a period followed by new information      |
+| An AI vocabulary word | A same-register synonym ("crucial" to "vital")            | The plain word, or cut the adjective                                      |
+| Passive voice         | A fake actor ("the system", "the framework")              | The real actor, or leave the passive alone                                |
+| Hedging               | A flat overclaim                                          | The calibrated claim plus its basis                                       |
+| A generic conclusion  | A different generic conclusion ("In short", "Ultimately")  | Stop at the last concrete fact                                            |
+| Sycophancy            | Clipped coldness                                          | A neutral, direct answer                                                  |
+| Staccato drama        | One long clause-stacked sentence                          | Mixed rhythm across the paragraph                                        |
+| Decorative emoji      | Caps or bold as replacement decoration                    | Nothing. The sentence carries itself                                      |
+| "Delve into"          | "Dive into", "explore"                                    | The verb for what happened: read, measured, tested, benchmarked           |
 
 ## Voice: match, never invent
 
-Voice comes from a source, never from your own taste. In priority order: a writing sample the user provides, the author's existing prose in the same repo or thread, the register the project contract specifies, then the surface default.
+Voice comes from a source. In priority order: a writing sample the user provides, the author's existing prose in the same repo or thread, the register the project contract specifies, then the surface default.
 
-A user-provided sample outranks every style rule here, including the em dash ban. If the sample uses em dashes, keep them at the sample's frequency. Matching the author beats scrubbing the tell.
+A user-provided sample outranks every rule here, including the dash ban. If the sample uses em dashes, keep them at the sample's frequency.
 
-Where the surface allows stance (blog, essay, opinion, personal writing), sterile neutrality is its own tell, so let the writing have opinions, mixed feelings, uneven rhythm, and asides. Stance is voice and it is yours to add. Facts are not: no name, number, date, quote, or citation may appear in the rewrite unless the source or the user supplied it. Trading a vague claim for an invented specific is the worst failure this skill has, because it reads better and it is false.
+Where the surface allows stance, let the writing carry opinions, mixed feelings, uneven rhythm, asides, and first person when it fits. Stance is voice and it is yours to add. Facts are not: no name, number, date, quote, or citation enters the rewrite unless the source or the user supplied it. Trading a vague claim for an invented specific is the failure that matters most here, because the result reads better and is false.
 
 ## Preservation contract
 
-Never edit: text inside code fences, inline code, CLI output, frontmatter, link targets, quoted material, titles, proper names, or any watched phrase being discussed rather than used.
+Never edit: fenced or inline code, CLI output, frontmatter, link targets, quoted material, titles, proper names, required boilerplate, or a watched phrase that is being discussed rather than used. When a human hands you their own text for editing, edit it surgically and keep what they clearly chose.
 
-Not tells on their own, and not grounds for rewriting:
+Not tells on their own: clean grammar, formal vocabulary, a single transition word, curly quotes from an auto-curling editor, one em dash, one short emphatic sentence, mixed casual and formal register, unsourced claims, and precise technical vocabulary.
 
-- Clean grammar and consistent style. Polish is not evidence.
-- Formal or unusual vocabulary. AI overuses a specific set of fancy words, not all of them.
-- One transition word. A single "however" is not a confession.
-- Curly quotes alone. macOS, Word, and most editors auto-curl by default.
-- One em dash in otherwise human prose. Editors and journalists use them constantly.
-- One short emphatic sentence. Humans land points that way.
-- Mixed casual and formal register, which often signals a real person in a technical field.
-- Unsourced claims. Most writing is unsourced.
-- Precise technical vocabulary. "Idempotent", "quantile", and "eventual consistency" are the right words.
+Signs of a human author, which mean edit less: hard-to-fabricate specifics, unresolved mixed feelings, era-bound references, real sentence-length variance, self-interrupting asides, first-person editorial choices the writer can defend, plain copulas, honest superlatives, and text predating late 2022.
 
-Look for clusters. A single tell means nothing; em dashes plus rule-of-three plus "vibrant tapestry" plus a "Conclusion" section is a confession.
+## Two axes that cannot be traded
 
-Signs of a human author, which mean edit less: hard-to-fabricate specifics, unresolved mixed feelings, era-bound references, real sentence-length variance, and genuine self-interrupting asides.
+Score the pass on both, because optimizing one alone is how prose gets ruined.
+
+**Slop** counts the confirmed tells that survived. **Lifelessness** measures the opposite failure: prose that reads as anti-AI cosplay, with legitimate longer sentences, precise technical vocabulary, and the author's own habits sanded off. A pass that improves one and wrecks the other has not worked.
+
+The scanner trips a deterministic over-correction warning when mean sentence length drops below 10 words with a standard deviation under 4, or when more than 60% of sentences fall under 6 words. Either means the last pass went too far.
 
 ## The stop rule
 
-One rewrite plus one audit pass. Then stop.
+One rewrite, one audit, one revision. Then ship, and say which checks still fail and why they were left.
 
-If the text still reads as generated after two passes, the problem is not the prose. It is that the text has nothing to say, and no amount of editing adds information. Say so and ask for the missing facts.
-
-Over-correction is a real failure with its own signature:
-
-- Uniform short sentences are as machine-flat as uniform mid-length ones.
-- Stripped technical vocabulary makes precise writing vague.
-- Deleted honest hedges turn calibrated claims into overclaims.
-- A sanded-down human author is worse off than before you started.
-- Deletion is not always the fix. A vague attribution wants a real source, and a feeling-word wants a mechanism. Both are expansions.
+When text still reads as generated after that, ask which of these it is before rewriting again: the wrong surface profile, source material with no information in it, a rewrite that relocated tells instead of removing them, or missing voice calibration. Each has a different fix, and only the second is unfixable by editing.
 
 ## Exit gate
 
-The pass is done when all of these hold:
-
-1. The mechanical scan returns zero hard-fail hits for this surface, rerun after the rewrite rather than before it.
-2. Every name, number, date, and citation traces back to the source.
-3. No claim is unfalsifiable, and no conversation residue survived into the document.
-4. The sentence-length histogram shows real spread.
-5. The opening line does not announce, and the closing line does not send off.
-6. No paragraph passes the generic-docs test.
-7. It sounds like the author, or like a person, and not like nobody.
-8. Nothing inside the preservation contract was touched.
+1. The scanner reports zero hard failures for this surface, rerun after the rewrite.
+2. Every name, number, date, and citation traces to the source.
+3. No claim is unfalsifiable and no conversation residue survived.
+4. Nothing inside the preservation contract was touched.
+5. The opening does not announce and the close does not send off.
+6. Any paragraph that would transplant unchanged into an unrelated project's docs is either specific now, or is boilerplate the reader needs.
+7. It reads like the author, or like a person.
+8. The over-correction warning is silent.
 
 ## Invocation modes
 
-| Mode         | Trigger                                    | Deliver                                                             |
-| ------------ | ------------------------------------------ | ------------------------------------------------------------------- |
-| **Embedded** | Another skill or task calls this mid-job   | The final text only. No draft, no audit bullets, no ceremony        |
-| **File**     | The user points at a file                  | Rewrite in place, prose only, then report what changed in a few lines |
-| **Pasted**   | The user pastes text in                    | The rewrite, plus the short list of tells you found                 |
-| **Gate**     | Pre-ship check on an artifact              | Pass or fail per the exit gate, with the specific fixes             |
-| **Audit**    | "Does this read as AI?"                    | The tells with locations and no rewrite                             |
+| Mode         | Trigger                                  | Deliver                                                        |
+| ------------ | ---------------------------------------- | -------------------------------------------------------------- |
+| **Embedded** | Another skill or task calls this mid-job | The final text only, no ceremony                               |
+| **File**     | The user points at a file                | Rewrite prose in place, then report what changed in a few lines |
+| **Pasted**   | The user pastes text in                  | The rewrite plus the tells found                               |
+| **Gate**     | Pre-ship check on an artifact            | Pass or fail against the exit gate, with the fixes             |
+| **Audit**    | "Does this read as AI?"                  | Findings with locations and no rewrite                         |
 
-Default to embedded when another skill invoked this one. Callers want prose, not process.
+Default to embedded when another skill invoked this one.
 
 ## Anti-patterns
 
-| Anti-pattern                                            | Fix                                                                            |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Running the vocabulary pass and calling it done          | Fix structure and argument shape first. Words are pass five of five            |
-| Applying one profile to every surface                    | Read the surface row first. A PR body and a Wikipedia article share no rules   |
-| Deslopping agent-facing text                             | Skip it. Prose polish for a machine reader is wasted tokens                    |
-| Replacing a vague claim with an invented specific        | Ask for the fact, or write the plain version without it                        |
-| Trusting your own scan for em dashes and curly quotes    | Run the commands. Eyeballing misses them consistently                          |
-| Rewriting until it feels clean                           | Two passes, then diagnose the content instead                                  |
-| Stripping hedges from writing where uncertainty is honest | Scientific, legal, medical, and forecasting prose keeps its calibration        |
-| Injecting typos or filler to sound human                 | That is detector cosplay. Write well instead                                   |
-| Editing quoted text, code, or proper names               | Honor the preservation contract                                                |
-| Flattening a human author's voice                        | Match the sample. It outranks every rule here                                  |
+| Anti-pattern                                        | Fix                                                                     |
+| --------------------------------------------------- | ----------------------------------------------------------------------- |
+| Running the vocabulary pass and calling it done      | Structure and argument first. Words are pass five                       |
+| One profile for every surface                        | Read the surface row. A PR body and an abstract share almost no rules   |
+| Acting on a single marker                            | Convict on converging signals, per the table above                      |
+| Reporting a finding with no artifact                 | Run one of the five evidence tests, or drop it                          |
+| Deslopping a brief, prompt, or memory's structure    | Structure is exempt there. Prose passes still apply                      |
+| Replacing a vague claim with an invented specific    | Ask for the fact, or write the plain version without it                 |
+| Trusting your own scan for dashes and curly quotes   | Run the script. Reading for them misses them                            |
+| Rewriting until it feels clean                       | One revision, then diagnose which of the four causes it is              |
+| Stripping hedges where uncertainty is honest         | Scientific, legal, medical, and forecasting prose keeps its calibration |
+| Injecting typos or filler to sound human             | That is detector cosplay. Write better instead                          |
+| Flattening a human author's voice                    | Match the sample. It outranks every rule here                            |
 
 ## What this skill is NOT
 
-- **Not a detector-evasion tool.** No injected typos, no artificial filler, no deliberate errors to move a score. If the context requires disclosure that text was AI-assisted, cleaning the prose does not change that obligation.
-- **Not a translator into one house voice.** It removes tells and matches the author, and a human author's voice outranks its defaults.
-- **Not a structure authority for artifacts that own their shape.** `super-good-pr` governs PR bodies, `hyper-pr-review` governs review reports. This skill contributes prose patterns to both and never restructures them.
-- **Not for agent-facing text.** Briefs, skill files, prompts, and memories are exempt.
+- **Not a detector-evasion tool.** No injected typos, no artificial filler, no errors added to move a score. Never emit an authorship verdict, and never repeat a detector score as though it settled anything. Detectors misclassify human writing at high rates, with the damage falling hardest on second-language and neurodivergent writers.
+- **Not a translator into one house voice.** It removes tells and matches the author, whose voice outranks its defaults.
+- **Not a structure authority** for artifacts that own their shape. `super-good-pr` governs PR bodies and `hyper-pr-review` governs review reports.
 - **Not a fact-checker.** It audits fabrications it introduced, not claims already in the source.
-- **Not a substitute for having something to say.** Slop is often a symptom of an empty draft, and editing cannot add information.
+- **Not a substitute for having something to say.** Editing cannot add information to an empty draft.
 
 ## References
 
-The full tell catalog with before-and-after pairs lives in `references/pattern-catalog.md`, organized by the same five axes as the passes. Per-surface detail, including who overrides whom, lives in `references/surface-profiles.md`.
+- `references/pattern-catalog.md` carries every tell, grouped by pass, with before-and-after pairs.
+- `references/surface-profiles.md` carries per-surface rules with worked artifact-level rewrites.
+- `references/evidence.md` records what the corpus research supports, with citations and verification tiers, plus the false-positive traps.
+- `scripts/slopscan.pl` is the protection-aware mechanical scanner.
+- `references/fixtures/` holds slop, protected, and clean fixtures for checking the scanner after an edit.
 
-The pattern set synthesizes [Wikipedia's Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) (maintained by WikiProject AI Cleanup), the [blader/humanizer](https://github.com/blader/humanizer) skill, and Cursor's [pstack `unslop`](https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md) skill, plus editing craft and the house conventions this repo already encoded in `super-good-pr` and `hyper-pr-review`.
+The pattern set synthesizes [Wikipedia's Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) (WikiProject AI Cleanup), the [blader/humanizer](https://github.com/blader/humanizer) skill, Cursor's [pstack `unslop`](https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md) skill, peer-reviewed corpus work cited in `references/evidence.md`, and house conventions from `super-good-pr` and `hyper-pr-review`.

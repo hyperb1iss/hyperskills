@@ -2,7 +2,7 @@
 
 One profile per surface, each with a worked artifact-level example. Sentence-level fixes live in `pattern-catalog.md`; this file is about what a whole artifact should look like when it is clean, and which rules do not apply where.
 
-Read the profile before editing. The most expensive deslop failure is not a missed tell, it is a correct rule applied to a surface that needed the opposite.
+Read the profile before editing. The expensive deslop failure is a correct rule applied to a surface that needed the opposite.
 
 ## Authority map
 
@@ -16,7 +16,7 @@ When a surface has its own skill, that skill owns the artifact's structure and t
 | Spec, plan document              | `plan`               | Prose patterns, full pass              |
 | Research report                  | `research`           | Prose patterns, full pass              |
 | README, docs, blog, Slack, email | This skill           | Everything                             |
-| Agent brief, skill file, memory  | None                 | Nothing. Exempt                        |
+| Agent brief, skill file, memory  | This skill           | Prose patterns only. Structure exempt  |
 
 ## README and project intro
 
@@ -44,7 +44,7 @@ Register: mechanism first. Every paragraph should tell the reader something they
 
 Never touch: code blocks, CLI output, config samples, frontmatter, API signatures, error strings.
 
-Common failure: feeling instead of mechanism (R13), signposting (R5), and header inflation (S1) chopping a two-paragraph explanation into four labeled stubs.
+Common failure: feeling instead of mechanism (R13) and signposting (R5), with header inflation (S1) chopping a two-paragraph explanation into four labeled stubs.
 
 **Before:**
 
@@ -62,7 +62,7 @@ Common failure: feeling instead of mechanism (R13), signposting (R5), and header
 >
 > A task that does not declare an input will not invalidate when that input changes. This is the most common cause of a stale build.
 
-Note what the fix adds: the actual mechanism, and the failure mode a reader needs. Deslopping is not only deletion.
+Note what the fix adds: the actual mechanism, and the failure mode a reader needs. Some tells want expansion rather than deletion.
 
 ## Release notes and changelogs
 
@@ -92,7 +92,7 @@ Register: plain text, factual, written for someone reading it years later during
 
 Hard rules: no markdown, no fences, no headers, no emoji in the subject, wrap at 76 columns. Attribution trailers and URLs are exempt from the wrap and from tell scanning.
 
-Common failure: house jargon (L7), hedging (L4), and narrating the session instead of the change.
+Common failure: house jargon (L7) and narrating the session instead of the change.
 
 **Before:**
 
@@ -117,7 +117,7 @@ changed in the same commit as its sources.
 The key now includes a hash of the resolved task definition.
 ```
 
-The rewrite names the mechanism, states the observed symptom as fact rather than guess, and drops the jargon a stranger would not decode.
+Note what the rewrite adds: the actual key change, and the symptom stated as an observation rather than a guess.
 
 ## Slack and email
 
@@ -125,7 +125,7 @@ Register: warm, complete sentences, peer energy. Explain at whatever length unde
 
 Never touch: a required signature footer, thread links, code snippets.
 
-Common failure: chatbot artifacts (E4), sycophancy (E5), and compression into fragments that read as curt.
+Common failure: chatbot artifacts (E4) and sycophancy (E5), plus compression into fragments that read as curt.
 
 **Before:**
 
@@ -139,7 +139,7 @@ Common failure: chatbot artifacts (E4), sycophancy (E5), and compression into fr
 
 The instructive case. A PR body has required structure that a general cleanup pass destroys.
 
-Preserve: semantic emoji headers, bold section leads, tables of enumerable facts, severity markers, the receipts and their counts, any body a human wrote.
+Preserve: semantic emoji headers, bold section leads, tables of enumerable facts, severity markers, and the receipts with their counts. A body a human wrote is edited surgically or not at all: when they hand it over for editing, keep the choices they clearly made and change only what the findings name.
 
 Fix: em dashes, inflated significance, hedging, chatbot closers, house jargon, participle pseudo-analysis.
 
@@ -155,7 +155,7 @@ Fix: em dashes, inflated significance, hedging, chatbot closers, house jargon, p
 >
 > Per-tenant rate limiting, enforced at the gateway. A shared global limit let one noisy tenant consume the whole budget, so each tenant now gets its own token bucket keyed on the tenant id from the request's signed context.
 
-The emoji header survives because it is load-bearing. Everything after it was decoration.
+The emoji header stays because the artifact requires it. The rest of the original made three claims about significance and none about the mechanism.
 
 ## Code comments and docstrings
 
@@ -182,7 +182,7 @@ Never touch: doctest bodies, type annotations, parameter names, example output.
 
 ## Profiles without worked examples
 
-These need a rule, not a demonstration.
+These need a rule more than a demonstration.
 
 | Surface                                             | The rule that matters most                                                                                                                   |
 | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |

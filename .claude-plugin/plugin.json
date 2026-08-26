@@ -110,8 +110,12 @@
     "anti-slop",
     "prose-editing",
     "writing-quality",
-    "surface-profiles",
     "em-dash",
-    "editing-pass"
+    "editing-pass",
+    "surface-aware-editing",
+    "slop-scanner",
+    "corpus-evidence",
+    "over-correction",
+    "surface-profiles"
   ]
 }

@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Skills-17-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="17 Skills">
+  <img src="https://img.shields.io/badge/Skills-18-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="18 Skills">
   <img src="https://img.shields.io/badge/skills.sh-Compatible-ff6ac1?style=for-the-badge&logo=vercel&logoColor=white" alt="skills.sh">
 </p>
 
@@ -34,7 +34,7 @@ hyperskills is built around an agent workflow. Brainstorming structured by the D
 
 Domain skills round out the toolbox where models have stale or missing knowledge: current Astral Python tooling, Tilt operational decision trees, and terminal UI design that survives across emulators.
 
-Each skill encodes procedural knowledge, decision trees, anti-patterns, and current SOTA. None prescribes a strict workflow. They give you knowledge and framing; you decide when to reach for them. Skills carry procedural knowledge in-context; [Sibyl](https://github.com/hyperb1iss/sibyl) carries decisions, patterns, and learnings across sessions. 17 skills, all installable independently.
+Each skill encodes procedural knowledge, decision trees, anti-patterns, and current SOTA. None prescribes a strict workflow. They give you knowledge and framing; you decide when to reach for them. Skills carry procedural knowledge in-context; [Sibyl](https://github.com/hyperb1iss/sibyl) carries decisions, patterns, and learnings across sessions. 18 skills, all installable independently.
 
 ## ⚡ Installation
 
@@ -178,7 +178,9 @@ What a PR description is actually for: handing a human the mental model fast, pr
 
 #### `deslop`: AI Tell Removal
 
-The pass that runs on anything a human reads outside the terminal. Its premise is that slop is a shape, not a wordlist: text with every banned word swapped still reads as generated when the flat rhythm, the header inflation, and the decoration-where-evidence-belongs all survive. So the passes run structure first and vocabulary last, gated by a surface profile, because the rules that clean up a blog post will vandalize a PR body, a scientific abstract, or an agent brief. Carries a deterministic mechanical scan (runnable `rg` and `awk` checks for dashes, curly quotes, bold-lead bullets, vocabulary frequency, and a sentence-length histogram as a rhythm proxy), a swap-trap table for the tells that relocate instead of dying, a preservation contract so a real author's voice survives, and a two-pass stop rule with the diagnosis for what fails it: text that still reads generated after two passes has nothing to say, and editing cannot add information.
+The pass that runs on anything a human reads outside the terminal. AI tells sit at three levels (characters, words, shape) and the cheap two carry the least signal, which is why a vocabulary scrub leaves text still recognizable. So the five passes reach vocabulary last, and every rule is gated by a surface profile, because a pass tuned for a blog post will strip the semantic emoji a PR body requires and flatten the calibrated uncertainty that makes a postmortem honest.
+
+What makes it more than another wordlist: a real scanner (`scripts/slopscan.pl`) that masks frontmatter, code fences in every form, inline code, blockquotes, and link targets before any check, so it never reports a hit inside code or inside a quoted example, with slop/protected/clean fixtures to prove it still works. A `references/evidence.md` that separates what corpus research supports from what practitioners assert, and corrects the folklore: models *under*-use passive voice, hedges, contractions, and first person relative to humans, so the usual advice to strip them moves prose toward the machine register. Plus a convergence rule so one marker never convicts, five evidence tests so no finding ships as a vibe, a swap-trap table for tells that relocate instead of dying, and a second scoring axis for the opposite failure, where prose gets cut into anti-AI cosplay.
 
 ```bash
 /hyperskills:deslop
