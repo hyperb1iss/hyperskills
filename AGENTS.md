@@ -40,7 +40,7 @@ hyperskills/
 │   │   ├── SKILL.md
 │   │   ├── scripts/
 │   │   │   ├── slopscan.pl       # protection-aware mechanical scan
-│   │   │   └── selftest.sh       # 49-case regression gate for the scanner
+│   │   │   └── selftest.sh       # 57-case regression gate for the scanner
 │   │   └── references/
 │   │       ├── pattern-catalog.md
 │   │       ├── surface-profiles.md

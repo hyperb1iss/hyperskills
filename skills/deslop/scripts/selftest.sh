@@ -40,6 +40,17 @@ grep_check() {
   fi
 }
 
+# suppressed_check NAME FILE -- the advisory must fire, so an over-mask is visible
+suppressed_check() {
+  local name="$1" file="$2"
+  if perl "$SCAN" "$file" 2>&1 | grep -q "masking suppressed"; then
+    pass=$((pass + 1))
+  else
+    fail=$((fail + 1))
+    printf '  FAIL  %-46s expected a masking-suppressed advisory\n' "$name"
+  fi
+}
+
 printf 'slopscan regression\n'
 
 # ---- the shipped fixtures ------------------------------------------------
@@ -152,6 +163,33 @@ check "tab-indented code block"              0 "$TMP/tabindent.md"
 
 printf 'text\r\n\r\n```\r\ncode \xe2\x80\x94 dash\r\n```\r\n\r\nclean\r\n' > "$TMP/crlffence.md"
 check "CRLF inside a fence"                  0 "$TMP/crlffence.md"
+
+# ---- false-clean classes found in round 4 -------------------------------
+# Each of these masked visible prose and exited 0 before the fix. A false clean
+# is the severe direction, because the scanner lies instead of over-reporting.
+printf -- '> quoted\n```\ncode\n```\nvisible prose with a dash \xe2\x80\x94 here\n' > "$TMP/quotefencepr.md"
+check "fence ends a quote, prose after stays visible" 20 "$TMP/quotefencepr.md"
+
+printf 'escaped \\`tick\\` then a dash \xe2\x80\x94 in prose\n' > "$TMP/escapedopener.md"
+check "escaped backtick does not open a span"  20 "$TMP/escapedopener.md"
+
+printf 'a ``two-tick opener and a ```three-tick run, then a dash \xe2\x80\x94 in prose\n' > "$TMP/runlength.md"
+check "closing backtick run must match length" 20 "$TMP/runlength.md"
+
+printf 'a \\](not-a-link) and a dash \xe2\x80\x94 in prose\n' > "$TMP/pseudolink.md"
+check "pseudo-link needs a real label"        20 "$TMP/pseudolink.md"
+
+printf 'text[^n]\n\n[^n]: dash \xe2\x80\x94 in the footnote body\n' > "$TMP/footnotebody.md"
+check "footnote body is prose"                20 "$TMP/footnotebody.md"
+
+printf 'see ](<https://x.test/a\nb>) and a dash \xe2\x80\x94 in prose\n' > "$TMP/anglenewline.md"
+check "angle destination cannot span a newline" 20 "$TMP/anglenewline.md"
+
+# The known remaining gap: a fence closed deeper than its list indent still
+# over-masks. It must announce the suppression rather than report clean.
+printf -- 'ok\n\n- item\n\n  ```\n  code\n    ```\n\nvisible prose with a dash \xe2\x80\x94 here\n' > "$TMP/listdeep.md"
+suppressed_check "known gap announces itself"  "$TMP/listdeep.md"
+suppressed_check "protected fixture reports its suppressions" "$FIX/protected.md"
 
 # ---- degenerate inputs --------------------------------------------------
 : > "$TMP/empty.md"

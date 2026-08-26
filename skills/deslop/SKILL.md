@@ -84,13 +84,16 @@ digraph deslop {
 }
 ```
 
-**1. Mechanical.** Run the scanner. It masks every protected region (frontmatter, fenced code in all forms, indented code, inline code spans, blockquotes, link targets) before any check, so it never reports a hit inside code or inside a quoted example.
+**1. Mechanical.** Run the scanner. It masks every protected region (frontmatter, fenced code in all forms, indented code, inline code spans, blockquotes, HTML comments, link and autolink targets) before any check, so it does not report a hit inside code or inside a quoted example.
 
 ```bash
 perl skills/deslop/scripts/slopscan.pl --surface house FILE...
 # --surface house (default, our repos) | published | agent | sample
-# exit 0 clean · 10 candidates only · 20 hard failures
+# --show-masked   list the hits masking suppressed
+# exit 0 clean · 10 candidates only · 20 hard failures · 30 unreadable input
 ```
+
+The masker is a heuristic rather than a CommonMark parser, and the dangerous failure would be over-masking, where visible prose gets blanked and a real tell exits 0. So the scanner runs every check twice, once masked and once raw, and reports what masking suppressed. A file with dashes in its code blocks says so and still passes; a masking bug shows up on that line instead of vanishing. One known gap sits behind it: a fence closed deeper than its list indent still over-masks. Rerun `scripts/selftest.sh` after any change to the masker, since all 57 of its cases are failures it actually had.
 
 Hard failures get fixed. Candidates get judged, because the heading check flags legitimate proper nouns and a bold lead that ends in a period and then adds new information is fine. The rhythm lines are diagnostics and never a gate: short technical prose legitimately scores low, and the thresholds circulating for these metrics are unvalidated. Vocabulary is inventory at this stage, applied in pass five.
 
@@ -217,7 +220,7 @@ Default to embedded when another skill invoked this one.
 | Running the vocabulary pass and calling it done      | Structure and argument first. Words are pass five                       |
 | One profile for every surface                        | Read the surface row. A PR body and an abstract share almost no rules   |
 | Acting on a single marker                            | Convict on converging signals, per the table above                      |
-| Reporting a finding with no artifact                 | Run one of the the evidence tests, or drop it                          |
+| Reporting a finding with no artifact                 | Run one of the evidence tests, or drop it                          |
 | Deslopping a brief, prompt, or memory's structure    | Structure is exempt there. Prose passes still apply                      |
 | Replacing a vague claim with an invented specific    | Ask for the fact, or write the plain version without it                 |
 | Trusting your own scan for dashes and curly quotes   | Run the script. Reading for them misses them                            |
@@ -240,7 +243,7 @@ Default to embedded when another skill invoked this one.
 - `references/craft-moves.md` carries the diagnostics that repair them, from the editing tradition, plus the guards that stop a craft pass from overshooting.
 - `references/surface-profiles.md` carries per-surface rules with worked artifact-level rewrites.
 - `references/evidence.md` records what the corpus research supports, with citations and verification tiers, plus the false-positive traps.
-- `scripts/slopscan.pl` is the protection-aware mechanical scanner, and `scripts/selftest.sh` is its 49-case regression gate. Run the gate after any edit to the masker.
+- `scripts/slopscan.pl` is the protection-aware mechanical scanner, and `scripts/selftest.sh` is its 57-case regression gate. Run the gate after any edit to the masker.
 - `references/fixtures/` holds slop, protected, and clean fixtures for checking the scanner after an edit.
 
 The pattern set synthesizes [Wikipedia's Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) (WikiProject AI Cleanup), the [blader/humanizer](https://github.com/blader/humanizer) skill, Cursor's [pstack `unslop`](https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md) skill, peer-reviewed corpus work cited in `references/evidence.md`, and house conventions from `super-good-pr` and `hyper-pr-review`.
