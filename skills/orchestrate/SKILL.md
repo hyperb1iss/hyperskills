@@ -15,16 +15,16 @@ The strategies are host-agnostic; the fan-out verb differs:
 
 | Host                      | Fan-out surface                                                   | Notes                                                      |
 | ------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------- |
-| Claude Code               | `Agent` tool — parallel calls in one block, background for swarms | Worktree isolation via the agent's isolation option        |
+| Claude Code               | `Agent` tool: parallel calls in one block, background for swarms | Worktree isolation via the agent's isolation option         |
 | Codex                     | `spawn_agent` with a role-appropriate `agent_type`                | Delegation gate precedence below                           |
 | Pi (pi-nova pack)         | `dispatch` tool with `"mode": "parallel"`                         | Children inherit the safety gate via `PI_CODING_AGENT_DIR` |
-| Any host, no fan-out verb | Task queue as bus — Sibyl tasks + worktree isolation              | A real dispatch mode, not a degraded one                   |
+| Any host, no fan-out verb | Task queue as bus: Sibyl tasks + worktree isolation              | A real dispatch mode, not a degraded one                    |
 
-**Codex delegation gate precedence:** contract-mandated verification counts as warranted subagent work — or route it through external CLI review processes, which don't count as subagents. Exploratory swarms still need the user's ask. Standing user grants ("spawn subagents any time you want") persist across sessions; record them in memory.
+**Codex delegation gate precedence:** contract-mandated verification counts as warranted subagent work, or route it through external CLI review processes, which don't count as subagents. Exploratory swarms still need the user's ask. Standing user grants ("spawn subagents any time you want") persist across sessions; record them in memory.
 
 **Task queue as bus:** when the host lacks a fan-out verb, orchestrate through the task graph plus worktree isolation. Write self-contained cold-pickup task descriptions (repo, refs, tags, done-means) at the same quality bar as a dispatch brief.
 
-On Pi, builder children should use worktree isolation and return branch/patch info for review — never auto-merge child output. Use the reservation budget cap for large waves so scheduling stops before runaway spend. Copyable Pi dispatch shape in `references/dispatch-briefs.md`.
+On Pi, builder children should use worktree isolation and return branch/patch info for review. Never auto-merge child output. Use the reservation budget cap for large waves so scheduling stops before runaway spend. Copyable Pi dispatch shape in `references/dispatch-briefs.md`.
 
 ## Strategy Selection
 
@@ -38,7 +38,7 @@ On Pi, builder children should use worktree isolation and return branch/patch in
 | **Fleet/Stack Maintenance** | Many PRs/branches, shared review context | 1         | No (0%)    | Inventory first, serial fixer, evidence-based closures |
 | **Full Lifecycle**          | New project from scratch                 | All above | Mixed      | Research -> Plan -> Build -> Review -> Harden          |
 
-Serial is a dispatch mode, not a fallback: thirteen open PRs sharing review context got one inventory-first serial fixer, not a fan-out. Before any long unattended loop, ask whether progress accumulates between iterations — without auto-merge, an overnight loop makes parallel worktrees, not cumulative progress; one long worker beats many orphaned ones. Design loops for mid-run patching; they will need upgrades while running.
+Serial is a dispatch mode, not a fallback: thirteen open PRs sharing review context got one inventory-first serial fixer, not a fan-out. Before any long unattended loop, ask whether progress accumulates between iterations. Without auto-merge, an overnight loop makes parallel worktrees, not cumulative progress; one long worker beats many orphaned ones. Design loops for mid-run patching; they will need upgrades while running.
 
 ---
 
@@ -125,7 +125,7 @@ Phase 4: Review and harden (FOREGROUND)
 - Each agent gets its own directory scope; overlapping file ownership produces merge conflicts and lost work
 - Existing patterns to follow ("Follow pattern from X"), which saves the agent from inventing one
 - Infrastructure context ("Redis available at X"), which prevents the agent from re-discovering what already exists
-- Explicit git hygiene; with 30+ parallel agents this is load-bearing, not optional
+- Explicit git hygiene; with 30+ parallel agents this is not optional
 - Task IDs for traceability across the swarm
 
 ### Git coordination for parallel agents
@@ -144,7 +144,7 @@ Directory partitioning is the default. When several agents must share ONE workin
 
 - Each brief lists owned paths, forbidden paths, AND the interfaces sibling agents are producing that this one may rely on ("another agent is adding `GET /api/ready?probe=k8s`")
 - Uniquely contended files get a single named owner
-- Repo-wide pre-commit hooks create commit-_ordering_ constraints — hold workstream commits until the last agent lands, then commit each atomically
+- Repo-wide pre-commit hooks create commit-_ordering_ constraints. Hold workstream commits until the last agent lands, then commit each atomically
 - Shared-environment health (disk, memory) preempts the pipeline; one worker's full disk can ENOSPC the others mid-build
 
 ---
@@ -189,7 +189,7 @@ As patterns prove reliable, lighten review overhead instead of running full cere
 
 This is earned confidence, not cutting corners. The gradient resets when a task departs from the established pattern; escalate back to full ceremony for anything genuinely new.
 
-The gradient covers correctness ceremony only. Three things never decay: shape checkpoints at wave boundaries (see Supervising the Fleet), mutation gates, and standing-correction recall — a vetoed pattern once re-appeared ~315 autonomous items later, so user vetoes re-enter every late-task brief verbatim. Risk escalates regardless of position in the run: security-critical or spec-level work goes back to rounds-until-PASS, iterating until it converges, not until a count is hit.
+The gradient covers correctness ceremony only. Three things never decay: shape checkpoints at wave boundaries (see Supervising the Fleet), mutation gates, and standing-correction recall. A vetoed pattern once re-appeared ~315 autonomous items later, so user vetoes re-enter every late-task brief verbatim. Risk escalates regardless of position in the run: security-critical or spec-level work goes back to rounds-until-PASS, iterating until it converges, not until a count is hit.
 
 ---
 
@@ -265,7 +265,7 @@ Each reviewer gets named files, dimension-specific questions, and a fixed report
 
 ### Lens-locked panels
 
-Run the fact-checker first, then parallel judgment reviewers — each locked to ONE lens with explicit non-goals ("do NOT fact-check technical claims — another reviewer owns that") and a fixed return schema (3 strongest / top 5 problems / the one change). Independent same-brief reviewers on one diff produce complementary, non-overlapping true findings; N=1 coverage on a risky diff is demonstrably incomplete.
+Run the fact-checker first, then parallel judgment reviewers, each locked to ONE lens with explicit non-goals ("do NOT fact-check technical claims. Another reviewer owns that") and a fixed return schema (3 strongest / top 5 problems / the one change). Independent same-brief reviewers on one diff produce complementary, non-overlapping true findings; N=1 coverage on a risky diff is demonstrably incomplete.
 
 Give reviewers the lenses tests structurally can't reach: mixed-version rollout windows, config inheritance scope, guards one level below their threat model, rollback paths, what the fix _removed_.
 
@@ -278,9 +278,9 @@ A reviewer that can edit, checkout, or mutate state is a liability in a fan-out.
 - **Prior findings to verify:** hand it the open findings so it confirms or refutes rather than re-deriving from scratch.
 - **Prioritized risk lenses:** name the attack/failure categories that matter most (header smuggling, RLS bypass, apply-time CRD pruning, etc.) so coverage is deliberate, not generic.
 
-**Synthesis -- adjudicate, don't vote-count.** When reviewers disagree, gather primary evidence (live read-only state, a render, the spec) and let it decide. Independent convergence -- two agents finding the same issue without coordination -- is a severity signal, not noise.
+**Synthesis: adjudicate, don't vote-count.** When reviewers disagree, gather primary evidence (live read-only state, a render, the spec) and let it decide. Independent convergence (two agents finding the same issue without coordination) is a severity signal, not noise.
 
-**Commit ownership for review/fix waves:** the orchestrator commits, agents report. Re-run the agent's tightest test and spot-check its load-bearing claims before trusting a self-reported PASS -- the implementer never self-assigns PASS.
+**Commit ownership for review/fix waves:** the orchestrator commits, agents report. Re-run the agent's tightest test and spot-check its central claims before trusting a self-reported PASS. The implementer never self-assigns PASS.
 
 ### Verification lifecycle
 
@@ -288,7 +288,7 @@ A PASS is not a permanent state; it covers a SHA.
 
 - **Any commit after the verifier's pass voids it.** Changed runtime code after a PASS? Get a fresh independent read before summarizing.
 - **Freeze the tree while a verifier reads it.** Fill the wait only with work that is safe regardless of the verdict: reads, memory capture, other lanes.
-- **Re-verify warm or fresh.** Warm re-verify (resume the same verifier with a delta brief: prior finding verbatim, fix SHA, enumerated proof cases) converges FAIL→fix rounds and catches regressions the fix itself introduced. A fresh verifier ("a prior PASS is never inherited") suits final certification. Both are practiced; as of Jul 2026 the evidence doesn't settle a single rule — pick per round purpose.
+- **Re-verify warm or fresh.** Warm re-verify (resume the same verifier with a delta brief: prior finding verbatim, fix SHA, enumerated proof cases) converges FAIL→fix rounds and catches regressions the fix itself introduced. A fresh verifier ("a prior PASS is never inherited") suits final certification. Both are practiced; as of Jul 2026 the evidence doesn't settle a single rule. Pick per round purpose.
 - **Interrupt contract.** A verifier can be interrupted mid-flight: status, stop at the current safe point, PASS/FAIL on what it has seen, no file edits. Amend scope by injecting a message rather than kill-and-respawn.
 - **Reproduce a FAIL on the base** before accepting it as introduced by the change under review.
 
@@ -307,7 +307,7 @@ Wave design applies to any fan-out, research or build:
 - **Collision analysis first.** Partition the wave by file overlap before writing briefs ("the next good wave has to avoid one giant ledger dogpile"). Lanes come from the dependency map, not task-list order.
 - **Calibrate before committing the fleet.** A small first wave validates method quality; worker-discovered corrections get baked into wave-2 briefs.
 - **The agent pool is managed state.** At the thread ceiling, harvest and close stale agents (final reports recover at close); close non-producers with a note saying what they did not produce.
-- **Failed worker output is idea-ore, not a merge candidate.** A budget-blown worker with an oversized diff gets salvaged for its concept and reimplemented smaller — never merge the blob.
+- **Failed worker output is idea-ore, not a merge candidate.** A budget-blown worker with an oversized diff gets salvaged for its concept and reimplemented smaller. Never merge the blob.
 
 ---
 
@@ -350,8 +350,8 @@ digraph bg_fg {
 **Patterns observed across 597+ dispatches:**
 
 - Research agents with no immediate dependency → background (essentially always)
-- Code agents can run backgrounded when worktree isolation and an integration path (orchestrator review, cherry-pick, combined final gate) exist — that's what makes a build army work
-- Code agents must not run backgrounded when the next task consumes their files, or when nothing merges their output — an unattended loop without auto-merge makes parallel worktrees, not cumulative progress
+- Code agents can run backgrounded when worktree isolation and an integration path (orchestrator review, cherry-pick, combined final gate) exist. That's what makes a build army work
+- Code agents must not run backgrounded when the next task consumes their files, or when nothing merges their output. An unattended loop without auto-merge makes parallel worktrees, not cumulative progress
 - Review/validation gates → foreground, since they block pipeline progress
 
 ---
@@ -370,12 +370,12 @@ The brief is where the orchestrator's context advantage transfers to the worker.
 | Settled decisions    | What not to re-litigate                                                                      |
 | Receipts already run | Exact commands and counts, so worker effort goes to residual risk                            |
 | Epistemic rules      | Evidence format, confidence floor, `[unverified]` labels, finding caps, skip nits            |
-| Capability grants    | Concrete verbs ("you can restart X", "read the db pod directly") — never "use your judgment" |
-| Standing corrections | Every user veto from this session, verbatim — conversation context decays over long spans    |
+| Capability grants    | Concrete verbs ("you can restart X", "read the db pod directly"), never "use your judgment"  |
+| Standing corrections | Every user veto from this session, verbatim. Conversation context decays over long spans     |
 
 Not every brief needs every slot: a research brief leans on CURRENT TRUTH and epistemic rules, a build brief on the scope fence and done-means block. Full copyable templates live in `references/dispatch-briefs.md`.
 
-**Deviations from brief.** Worker reports carry a required "Deviations from brief" section with per-item justification. At harvest, read deviations first — briefs are hypotheses, and a justified deviation is a finding about your brief.
+**Deviations from brief.** Worker reports carry a required "Deviations from brief" section with per-item justification. At harvest, read deviations first. Briefs are hypotheses, and a justified deviation is a finding about your brief.
 
 ---
 
@@ -404,7 +404,7 @@ Parallel agents only work in parallel when the orchestrator front-loads context.
 
 The worker doesn't share your reality, and its output can poison yours.
 
-- **Volatile context goes in the brief itself.** Worktree generation copies only tracked files — an untracked vision doc silently starves the worker. Distill live decisions and untracked docs into the prompt.
+- **Volatile context goes in the brief itself.** Worktree generation copies only tracked files. An untracked vision doc silently starves the worker. Distill live decisions and untracked docs into the prompt.
 - **Grep returned artifacts' citations.** Before handing a delegated document onward, check that its cited symbols actually exist.
 - **Quarantine confabulation.** A worker that returns output referencing decisions you never made gets discarded wholesale: verify it mutated nothing, keep only facts you can independently re-verify, redo the work directly.
 - **Route agent-to-agent findings through the orchestrator.** Workers can't always reach each other; tell them to surface undeliverable messages instead of dropping them.
@@ -413,19 +413,19 @@ The worker doesn't share your reality, and its output can poison yours.
 
 ## Supervising the Fleet
 
-Launching is the easy half. The craft is distinguishing slow from stuck, holding watchers to receipts, and checking shape — not just correctness.
+Launching is the easy half. The craft is distinguishing slow from stuck, holding watchers to receipts, and checking shape, not just correctness.
 
 ### Slow vs stuck
 
 | Signal              | Move                                                                                                                                                                         |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Long job goes quiet | Escalate poll windows geometrically, then switch to independent progress signals (pgrep, artifact growth, diff-stat trajectory) — never just more waiting on its own chatter |
-| Suspected dead      | Killing needs evidence too — check for a write midstream before terminating                                                                                                  |
+| Long job goes quiet | Escalate poll windows geometrically, then switch to independent progress signals (pgrep, artifact growth, diff-stat trajectory), never just more waiting on its own chatter  |
+| Suspected dead      | Killing needs evidence too. Check for a write midstream before terminating                                                                                                   |
 | Slow but alive      | Patience is a value ("guesses don't deploy apps"); queue latency is not a failure signal                                                                                     |
 
 ### Watcher contract
 
-Arm every watcher with a named exit condition, a remediation rung, an iteration ceiling, and stale-fire no-op — declared at arm time. Smoke-test the watcher before trusting hours of its output; a broken awk regex once made every poll read "not ready" indefinitely. Kill only your own PIDs. Tear down watchers as the first act of any pivot, narrate on state change only, and surface user input between polls — a watch-buried session once went ~50 minutes deaf to the user.
+Arm every watcher with a named exit condition, a remediation rung, an iteration ceiling, and stale-fire no-op, declared at arm time. Smoke-test the watcher before trusting hours of its output; a broken awk regex once made every poll read "not ready" indefinitely. Kill only your own PIDs. Tear down watchers as the first act of any pivot, narrate on state change only, and surface user input between polls. A watch-buried session once went ~50 minutes deaf to the user.
 
 ### Shape checkpoints
 
@@ -441,7 +441,7 @@ Classify the diff by top-level path against the mission and ask which pieces pro
 
 ## Terminal States
 
-An orchestrated run ends in one of two named states — never fake-done, never silent stop:
+An orchestrated run ends in one of two named states (never fake-done, never silent stop):
 
 - **Done, with receipts:** gates actually run, output shown.
 - **Blocked cleanly:** proof of current state (exact command → its output), a live-gate runbook (commands, evidence paths, pass criteria), and exactly one named human action ("type `! aws sso login` and I'll immediately run the plan, verify, and apply"). Pre-stage held irreversible actions so a one-word "go" executes instantly; optionally arm a watcher on the unblock artifact itself.
@@ -459,7 +459,7 @@ An orchestrated run ends in one of two named states — never fake-done, never s
 | Keep full review ceremony for every late task   | Apply the trust gradient after patterns prove stable                    |
 | Let agents run `git add .` or `git push`        | Explicit git hygiene in every build prompt                              |
 | Background an agent whose output nothing merges | Backgrounding code needs worktree isolation plus an integration path    |
-| Treat `index.lock` as fatal — or clean it blind | Lock-owner forensics: live owner → hand off; none → stale, clean and go |
+| Treat `index.lock` as fatal, or clean it blind | Lock-owner forensics: live owner → hand off; none → stale, clean and go  |
 | Ship the full fleet without a calibration wave  | Small first wave validates the method; corrections bake into wave 2     |
 | Let correctness gates stand in for shape checks | Shape checkpoint at every wave boundary; diffstat against the mission   |
 | Merge a failed worker's oversized blob          | Salvage the idea, reimplement smaller                                   |
@@ -468,7 +468,7 @@ An orchestrated run ends in one of two named states — never fake-done, never s
 
 ## References
 
-Full copyable templates — research brief, sweep brief, worker brief, read-only verifier brief, warm re-verify delta brief, verifier interrupt, watcher spec — live in `references/dispatch-briefs.md`.
+Full copyable templates (research brief, sweep brief, worker brief, read-only verifier brief, warm re-verify delta brief, verifier interrupt, watcher spec) live in `references/dispatch-briefs.md`.
 
 ## Hyperskills Integration
 

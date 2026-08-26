@@ -188,7 +188,7 @@ Do not edit files. Also check whether the fix introduced second-order
 regressions in [adjacent surface].
 ```
 
-Use a fresh verifier instead for final certification — a prior PASS is never inherited across commits.
+Use a fresh verifier instead for final certification. A prior PASS is never inherited across commits.
 
 ## Verifier Interrupt
 
@@ -200,7 +200,7 @@ current safe point and return PASS/FAIL based on the review so far.
 Do not edit files. List any side effects you have already caused.
 ```
 
-Mid-flight scope amendments go the same way — inject the new scope as a message rather than kill-and-respawn, so accumulated context survives.
+Mid-flight scope amendments go the same way. Inject the new scope as a message rather than kill-and-respawn, so accumulated context survives.
 
 ## Watcher Spec
 
