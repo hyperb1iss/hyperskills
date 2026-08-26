@@ -2,9 +2,9 @@
 
 Pattern matching finds tells. This file fixes them, using diagnostics from the editing tradition that predates AI by decades.
 
-The reason it works is not sentiment. The three features with the largest measured gap between model and human prose (present participial clauses at 5.3 times the human rate, "that" clauses as subject at 2.6, nominalizations at 2.1, all in `evidence.md`) are precisely what Joseph Williams' character-and-action principle and Gopen and Swan's "articulate the action in the verb" were written to repair. The tradition aimed at clarity and happened to aim at the machine signature.
+The reason it works is not sentiment. The three features with the largest measured gap between GPT-4o and human prose (present participial clauses at 5.3 times the human rate, "that" clauses as subject at 2.6, nominalizations at 2.1, all in `evidence.md`) map directly onto Joseph Williams' character-and-action principle and Gopen and Swan's instruction to articulate the action in the verb. Those techniques were written for clarity rather than for detection, and they happen to target the same constructions.
 
-Two properties make these better than a wordlist. They are voice-neutral, so they fix the defect without imposing a register. And they cannot rot, because nobody is going to publicize participial-clause density until models stop producing it.
+Two properties make these better than a wordlist. They are voice-neutral, so they fix the defect without imposing a register. And they should decay more slowly than vocabulary markers, since a syntactic habit is harder to prompt away than a word and nobody is publicizing participial-clause density.
 
 ## The three tests to run on any paragraph
 
@@ -14,7 +14,7 @@ Each takes under a minute and each catches a different failure.
 
 **The topic-string test** (Williams). Underline the first seven or eight words of every sentence, stopping at the verb. Read the underlined strings together. Do they name a small set of related ideas, or does every sentence open on a new abstraction? A scattered topic string is why a paragraph feels like it is about nothing, and it is invisible sentence by sentence.
 
-**The stress-position test** (Strunk, formalized by Gopen and Swan). Read aloud and tap hard on the last three or four words of each sentence. Do they deserve that emphasis? Sentences that end on metadiscourse or a hedge have buried the payload. Move peripheral ideas left and new information right.
+**The stress-position test** (Gopen and Swan). The stress position is whatever sits at the sentence's point of syntactic closure, which can be a single word or a long final clause, so find the closure first rather than counting back a fixed number of words. Read aloud and lean on that span. Does it deserve the emphasis? Sentences closing on metadiscourse or a hedge have buried the payload. Move peripheral ideas left and new information right.
 
 ## Character and action
 
@@ -57,7 +57,7 @@ Strunk's 1918 rule 10 carries a test that later editions dropped: "a common faul
 
 ## Hedging: the discriminator that actually works
 
-Pinker's formulation is the cleanest test anyone has written. **Does the qualifier name the conditions under which the claim fails, or is it an escape hatch?** A qualification is a choice; a hedge is a tic. Keep and even add qualifications; cut hedges.
+Pinker's formulation is the most useful test here. **Does the qualifier name the conditions under which the claim fails, or is it an escape hatch?** A qualification is a choice; a hedge is a tic. Keep and even add qualifications; cut hedges.
 
 A wordlist cannot make this call, and there is a paper proving it: the CoNLL-2010 shared task annotated legitimate scientific hedges and illegitimate encyclopedic weasels using overlapping word lists, where *probable, likely, possible, may, might, suggest, appear* appear in both taxonomies. The same task documents complex keywords, phrases that are speculative only as a whole, where neither word carries the speculation alone.
 
@@ -70,7 +70,7 @@ Six questions, and any single no means cut:
 5. Is it a regulated or pre-approved string?
 6. Does the hedge cover the recommendation, not only the finding?
 
-That last one is where published writing fails most often. Roughly 44% of articles in one epidemiology survey hedged the finding and then overclaimed in the recommendation. And removing honest hedges demonstrably misleads expert readers: in a randomized trial of 300 clinicians, abstracts with spin were rated as showing more treatment benefit than the same abstracts de-spun.
+That last one catches a documented failure: in one epidemiology survey, roughly 44% of articles hedged the finding and then overclaimed in the recommendation. And removing honest hedges demonstrably misleads expert readers: in a randomized trial of 300 clinicians, abstracts with spin were rated as showing more treatment benefit than the same abstracts de-spun.
 
 The operational procedure from CoNLL-2010: mark the minimal cue, then extend the scope to the largest syntactic unit, such that disregarding the marked span leaves a sentence you can still extract facts from.
 

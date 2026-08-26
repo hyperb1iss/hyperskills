@@ -136,7 +136,7 @@ The argument's shape. These are the tells readers name when they say something "
 
 Sentence-level shape.
 
-**N1. Negative parallelism, in excess or empty.** Narrower than the folklore, because the construction itself is endorsed craft: Williams lists "not only X but Y" among his six devices for emphasis, and Strunk's 1918 rule 19 says "the antithesis of negative and positive is strong: *not charity, but simple justice*". No corpus measurement of AI over-use exists. Two tests catch the real defect. Does the negated half name a position someone actually holds, or is it a strawman pivot? And does the antithesis recur more than once every few hundred words? A yes to the second or a no to the first means cut it.
+**N1. Negative parallelism, in excess or empty.** Narrower than the folklore, because the construction itself is endorsed craft: Williams lists "not only X but Y" among his six devices for emphasis, and Strunk's 1918 rule 11 says "the antithesis of negative and positive is strong: *not charity, but simple justice*". No corpus measurement of AI over-use exists. Two tests catch the real defect. Does the negated half name a position someone actually holds, or is it a strawman pivot? And does the antithesis recur more than once every few hundred words? A yes to the second or a no to the first means cut it.
 - Before: `This isn't just a cache, it's a correctness guarantee.` (nobody claimed it was only a cache)
 - After: `The cache also serializes writes, so two concurrent updates cannot interleave.`
 - Mechanically safe subset, closed-class: `not careful` to `careless`, `not many` to `few`, `did not remember` to `forgot`.
@@ -159,7 +159,7 @@ The shape itself is legitimate. Williams treats the trailing participial clause 
 - Before: `The gateway serves as the entry point and features rate limiting.`
 - After: `The gateway is the entry point. It rate-limits per tenant.`
 
-**N6. Actor-hiding passive.** Narrow, and pointed the opposite way from the usual advice: models use agentless passive at roughly half the human rate (`evidence.md`), so a blanket passive purge moves prose toward the machine register. Fix only passive that hides an actor the reader needs in order to act.
+**N6. Actor-hiding passive.** Narrow, and not the usual advice. GPT-4o uses agentless passive at roughly half the human rate while Llama 3 variants sit much closer to it (`evidence.md`), so the direction is model-specific and a blanket passive purge is unsupported. Fix only passive that hides an actor the reader needs in order to act.
 - Before: `Requests are validated before the handler is invoked.`
 - After: `The middleware validates each request before calling the handler.`
 - Leave it alone when the actor is unknown, obvious, or genuinely irrelevant, which is most of the time.
@@ -208,7 +208,7 @@ Last pass, least valuable. Word swaps on unfixed structure produce clean-soundin
 
 **L3. Filler phrases.** in order to (to), due to the fact that (because), at this point in time (now), it is important to note that (delete), has the ability to (can), for the purpose of (to), in terms of (usually delete), it should be noted (delete). Cut clusters, not instances: isolated wordy constructions are a human signal in the Wikipedia corpus, and a document scrubbed of every one of these reads more generated, not less.
 
-**L4. Stacked hedges.** Only the stacks. `could potentially possibly` becomes `may`, because one hedge carries the uncertainty and three signal a writer with no basis. Single hedges stay everywhere, and in scientific, legal, medical, and forecasting prose they are the honest register. Models hedge at 50 to 67% of the human rate (`evidence.md`), so stripping hedges is one of the most common ways a deslop pass makes prose worse.
+**L4. Stacked hedges.** Only the stacks. `could potentially possibly` becomes `may`, because one hedge carries the uncertainty and three signal a writer with no basis. Single hedges stay everywhere, and in scientific, legal, medical, and forecasting prose they are the honest register. Hedge direction is model-specific: GPT-4o over-uses downtoners while every Llama 3 variant avoids them (`evidence.md`), so "strip the hedges" is unsupported as a general rule. Use the six-question test in `craft-moves.md` instead of a word count.
 
 **L5. Adverb props.** `runs quickly` becomes `is fast` or the measured number. `significantly improves` becomes the delta. An adverb holding up a weak verb means the verb is wrong. Worst offenders: significantly, effectively, essentially, basically, simply, just, actually, really, quite, very, incredibly, seamlessly, robustly.
 

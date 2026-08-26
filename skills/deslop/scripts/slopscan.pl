@@ -168,7 +168,7 @@ sub mask {
     my @lines = split /\n/, $t, -1;
 
     my $in_front = (@lines && $lines[0] eq '---') ? 1 : 0;
-    my ($fence_char, $fence_len, $in_quote, $prev_blank) = ('', 0, 0, 1);
+    my ($fence_char, $fence_len, $in_quote, $in_code, $prev_blank) = ('', 0, 0, 0, 1);
 
     for my $i (0 .. $#lines) {
         my $line = $lines[$i];
@@ -203,18 +203,32 @@ sub mask {
             next;
         }
 
-        # blockquote, including lazy continuation until a blank line
+        # blockquote, including lazy continuation. A lazy continuation ends at a
+        # blank line or at any line that starts a new block, because an ATX
+        # heading, fence, list, or thematic break interrupts a paragraph.
         if ($line =~ /^ {0,3}>/) { $in_quote = 1 }
-        elsif ($blank)           { $in_quote = 0 }
+        elsif ($blank || $line =~ /^ {0,3}(?:\#{1,6}\s|[-*+]\s|\d+[.)]\s|(?:-\s*){3,}$|(?:_\s*){3,}$|(?:\*\s*){3,}$)/) {
+            $in_quote = 0;
+        }
         if ($in_quote) {
             $lines[$i] = blank($line);
             $prev_blank = $blank;
             next;
         }
 
-        # indented code block: four or more spaces (or a tab) after a blank line
+        # indented code block: opens on four or more spaces (or a tab) after a
+        # blank line, and continues across further indented and blank lines.
+        if ($in_code) {
+            if ($blank || $line =~ /^(?: {4,}|\t)/) {
+                $lines[$i] = blank($line);
+                $prev_blank = $blank;
+                next;
+            }
+            $in_code = 0;
+        }
         if (!$blank && $prev_blank && $line =~ /^(?: {4,}|\t)\S/) {
-            $lines[$i] = blank($line);
+            $in_code    = 1;
+            $lines[$i]  = blank($line);
             $prev_blank = 0;
             next;
         }
@@ -226,10 +240,15 @@ sub mask {
 
     # inline code spans, including spans that wrap across lines
     $out =~ s/(`+)(?:(?!\1).)*?\1/blank($&)/gse;
-    # link and image destinations: angle-bracket, bare, reference definition, autolink
-    $out =~ s/\]\(<[^>]*>/blank($&)/ge;
-    $out =~ s/\]\([^)\s]+/blank($&)/ge;
-    $out =~ s/^ {0,3}\[[^\]]+\]:\s*\S+/blank($&)/gme;
+    # Link and image markup: angle-bracket destination, bare destination with
+    # balanced parentheses, optional title in any of the three quote forms,
+    # reference definitions, and autolinks. The whole destination-and-title run
+    # is markup rather than prose, so it is masked as one unit.
+    my $title = qr/(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?/;
+    my $bare  = qr/(?:[^()\s]|\((?:[^()]|\([^()]*\))*\))+/;
+    $out =~ s/\]\(\s*<[^>]*>$title\s*\)/blank($&)/ge;
+    $out =~ s/\]\(\s*$bare$title\s*\)/blank($&)/ge;
+    $out =~ s/^ {0,3}\[[^\]]+\]:\s*(?:<[^>]*>|\S+)$title/blank($&)/gme;
     $out =~ s/<(?:https?|ftp|mailto):[^>\s]*>/blank($&)/ge;
 
     return $out;

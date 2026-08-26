@@ -94,6 +94,21 @@ check "lazy blockquote continuation"   0 "$TMP/lazyquote.md"
 printf '\n        eight-space indented code \xe2\x80\x94 dash\n' > "$TMP/indent8.md"
 check "eight-space indented code"      0 "$TMP/indent8.md"
 
+# ---- CommonMark forms a round-3 review broke ----------------------------
+printf '\n    first indented code line\n    second line with an em dash \xe2\x80\x94 here\n    third line\n' > "$TMP/indentmulti.md"
+check "multiline indented code block"  0 "$TMP/indentmulti.md"
+
+printf 'see [docs](https://x.test/a_(b)_c?utm_source=chatgpt.com) here\n' > "$TMP/balanced.md"
+check "balanced-parenthesis destination"  0 "$TMP/balanced.md"
+
+printf 'see [docs](https://x.test/a "a title \xe2\x80\x94 with a dash") here\n' > "$TMP/linktitle.md"
+check "link title is markup, not prose"   0 "$TMP/linktitle.md"
+
+# a heading terminates a lazy blockquote, so the heading must stay visible
+printf '> quoted line with a dash \xe2\x80\x94 here\n# Visible heading with a dash \xe2\x80\x94 here\n' > "$TMP/quoteheading.md"
+check "heading after blockquote stays visible" 20 "$TMP/quoteheading.md"
+grep_check "heading text is not masked" "Visible heading" "$TMP/quoteheading.md"
+
 # ---- degenerate inputs --------------------------------------------------
 : > "$TMP/empty.md"
 check "empty file"                     0 "$TMP/empty.md"
