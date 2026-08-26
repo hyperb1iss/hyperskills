@@ -246,6 +246,14 @@ check "bold-lead bullet is a house candidate" 10 "$TMP/boldlead.md"
 check "agent surface skips bold-lead check"    0 "$TMP/boldlead.md" agent
 check "agent surface skips heading case"       0 "$TMP/mixedcase.md" agent
 
+# ---- apostrophe variant glyphs ---------------------------------------------
+# LLMs emit eight apostrophe glyphs; only two are curly quotes. A variant
+# between letters is a hard failure, a prime after a digit is legitimate.
+printf 'this don\xc2\xb4t and this don\xe2\x80\xb2t read as apostrophes\n' > "$TMP/aposvariant.md"
+check "apostrophe variant between letters fires"  20 "$TMP/aposvariant.md"
+printf 'the 5\xe2\x80\xb2 UTR and a bare accent \xc2\xb4 alone stay clean\n' > "$TMP/primeok.md"
+check "prime after a digit stays clean"            0 "$TMP/primeok.md"
+
 # ---- transactional effort framing ------------------------------------------
 printf 'the check is cheap and buys you headroom\n' > "$TMP/transact.md"
 check "transactional effort framing is a candidate" 10 "$TMP/transact.md"

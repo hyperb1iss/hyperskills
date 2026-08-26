@@ -148,6 +148,13 @@ sub checks {
     # author's choice rather than a defect.
     push @{ $surf eq 'sample' ? \@cand : \@hard },
         hits($prose, qr/[\x{201C}\x{201D}\x{2018}\x{2019}]/, 'curly quote');
+    # LLMs emit eight apostrophe glyphs (Rudnicka & Juzek); the curly pair
+    # above catches two. These four are flanked-by-letters only, so a prime
+    # in "the 5' UTR" or a bare accent stays clean. Grave accent (U+0060) is
+    # excluded: it is the inline-code delimiter and the masker owns it.
+    push @{ $surf eq 'sample' ? \@cand : \@hard },
+        hits($prose, qr/(?<=[[:alpha:]])[\x{02BC}\x{00B4}\x{2032}\x{201B}](?=[[:alpha:]])/,
+             'apostrophe variant glyph');
     push @hard, hits($prose, qr/[\x{00A0}\x{2007}\x{202F}]/,         'non-breaking space');
     push @hard, hits($prose, qr/\x{2026}/,                            'ellipsis character');
 
