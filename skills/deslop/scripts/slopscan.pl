@@ -60,8 +60,11 @@ for my $file (@files) {
     # masking. Legitimate suppressions are dashes inside code and quotes; a
     # masking bug shows up here instead of vanishing, which is the whole point.
     my ($raw_hard, undef) = checks($raw, $surface);
-    my %seen = map { $_ => 1 } @$hard;
-    my @suppressed = grep { !$seen{$_} } @$raw_hard;
+    # Compare on label and line only. Masking changes the snippet text, so a
+    # line carrying a tell in both prose and code would otherwise be reported
+    # as suppressed even though the prose hit was already caught.
+    my %seen = map { /^([^:]+:\d+)/ ? ($1 => 1) : () } @$hard;
+    my @suppressed = grep { /^([^:]+:\d+)/ && !$seen{$1} } @$raw_hard;
 
     my @hard = @$hard;
     my @cand = @$cand;
