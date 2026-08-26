@@ -30,11 +30,12 @@ while (@ARGV) {
 die "usage: slopscan.pl [--surface house|published|agent|sample] [--json] FILE...\n"
     unless @files;
 
-# Dashes and curly quotes are a house rule, not a universal AI tell (see
+# Dashes are a house rule rather than a universal AI tell (see
 # references/evidence.md: published human essays out-dash frontier models).
-# On the house surface they are hard failures because the contract bans them.
-# Elsewhere they are density candidates.
-my $dash_is_hard = ($surface eq 'house');
+# They are hard failures on our own files, house and agent alike, because the
+# project contract bans them in anything we write. On someone else's prose
+# (published, sample) they are density candidates needing converging signals.
+my $dash_is_hard = ($surface eq 'house' || $surface eq 'agent');
 
 my ($hard_total, $cand_total) = (0, 0);
 my @report;
