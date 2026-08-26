@@ -1,6 +1,6 @@
 # Cross-Model Review Prompt Templates
 
-Ready-to-use prompts for each review pass. These are model-agnostic — they work with any reviewer CLI.
+Ready-to-use prompts for each review pass. These are model-agnostic. They work with any reviewer CLI.
 
 ## Usage
 
@@ -35,11 +35,11 @@ out=$(mktemp -t claude-review-output.XXXXXX.txt)
 git diff main...HEAD | env -u ANTHROPIC_API_KEY claude -p "PROMPT_TEXT_HERE" > "$out" 2>&1
 ```
 
-For Codex's structured `codex review` command, prompts aren't needed — it has its own review format.
+For Codex's structured `codex review` command, prompts aren't needed. It has its own review format.
 
 **Claude CLI gotcha:** Variadic flags (`--allowedTools`, `--allowed-tools`, `--disallowedTools`, `--tools`, `--add-dir`, `--betas`, `--file`, `--mcp-config`, `--plugin-dir`) greedily consume every following argument until the next flag. Always either put the prompt before the flag, separate it with `--`, or feed it via stdin.
 
-**Codex sandbox gotcha:** When Codex is the host, run `claude -p` with `yield_time_ms: 300000`. The default 1000ms yield returns empty output and `Process running with session ID NNNN` while claude is still working — do not retry, reap `session_id: NNNN` until it exits. See SKILL.md for details.
+**Codex sandbox gotcha:** When Codex is the host, run `claude -p` with `yield_time_ms: 300000`. The default 1000ms yield returns empty output and `Process running with session ID NNNN` while claude is still working. Do not retry, reap `session_id: NNNN` until it exits. See SKILL.md for details.
 
 **Billing gotcha:** Codex exports `ANTHROPIC_API_KEY`, which outranks subscription OAuth in Claude Code's auth precedence. In `-p` mode the key is used silently, so the review bills per-token to the API instead of your Pro/Max plan. Prefix every spawning `claude -p` call with `env -u ANTHROPIC_API_KEY`. See SKILL.md Rule 4.
 
@@ -47,13 +47,13 @@ For Codex's structured `codex review` command, prompts aren't needed — it has 
 
 ## Dispatch Brief Anatomy
 
-The slots that repeatedly produce sharp reviews. Compose per dispatch — not every slot fires every time, but round-2+ briefs always carry the findings ledger (see SKILL.md, The Review Loop).
+The slots that repeatedly produce sharp reviews. Compose per dispatch. Not every slot fires every time, but round-2+ briefs always carry the findings ledger (see SKILL.md, The Review Loop).
 
 ```text
 [Original ask — verbatim]   The user asked: "<paste the user's exact words>"
 [Scope]                     Review exactly <base>..<SHA> / only these files: <list>. Nothing else.
 [Persona]                   You are a senior <domain> engineer.
-[Keystone]                  The load-bearing claim is: <claim>. Attack it first; the whole
+[Keystone]                  The keystone claim is: <claim>. Attack it first; the whole
                             change rides on it.
 [Receipts already run]      Assume these passed locally: <exact commands + counts>. Do not re-run them.
 [Ambient failures]          <known pre-existing failure> fails on this branch for unrelated reasons — not this diff.
@@ -66,7 +66,7 @@ The slots that repeatedly produce sharp reviews. Compose per dispatch — not ev
 [Orientation suppression]   Do not run Sibyl, do not load skills — review from the repo only.
 ```
 
-The orientation-suppression slot doubles as an independence lever: a reviewer that loads the author's memory inherits the author's assumptions. Carrying the user's ask verbatim (not your paraphrase) guards against brief-inherited intent bias — invite the reviewer to challenge your interpretation of it.
+The orientation-suppression slot doubles as an independence lever: a reviewer that loads the author's memory inherits the author's assumptions. Carrying the user's ask verbatim (not your paraphrase) guards against brief-inherited intent bias. Invite the reviewer to challenge your interpretation of it.
 
 ## Fix Re-Verification (binary)
 
@@ -83,7 +83,7 @@ Verdict: FIXED or NOT-FIXED: <one concise sentence>.
 
 ## Fact-Check (per-claim verdicts)
 
-For anything human-facing — specs, decks, digests, docs, skills. Give the fact-checker read access to the fact sources (`--add-dir`, repo root); its best catches are invented infrastructure, not prose problems.
+For anything human-facing (specs, decks, digests, docs, skills). Give the fact-checker read access to the fact sources (`--add-dir`, repo root); its best catches are invented infrastructure, not prose problems.
 
 ```text
 Fact-check the claims below against the repository. For EACH claim, return a verdict line:

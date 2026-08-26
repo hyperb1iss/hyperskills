@@ -1,6 +1,6 @@
 # Failure Recovery: Triage Tables and the Hang Ladder
 
-Lookup material for when a cross-model review errors, stalls, or goes silent. SKILL.md carries the headline rules; this file carries the full symptom map. Drawn from a Jun 2026 audit of 4k+ Claude/Codex JSONL conversations plus a Jul 2026 pass over ~600 sessions — most failures are wrapper mechanics, not model quality.
+Lookup material for when a cross-model review errors, stalls, or goes silent. SKILL.md carries the headline rules; this file carries the full symptom map. Drawn from a Jun 2026 audit of 4k+ Claude/Codex JSONL conversations plus a Jul 2026 pass over ~600 sessions. Most failures are wrapper mechanics, not model quality.
 
 ## Codex → Claude Failure Triage
 
@@ -21,18 +21,18 @@ Classify the failure before changing tactics.
 
 ## When the Reviewer Hangs
 
-Silence is not failure. Output-file growth plus process state is the discriminator — never elapsed time. Growing output across reaps means still working, and slow can be a quality signal: a fast rubber stamp on a large surface would be suspicious. Work the ladder top-down:
+Silence is not failure. Output-file growth plus process state is the discriminator, never elapsed time. Growing output across reaps means still working, and slow can be a quality signal: a fast rubber stamp on a large surface would be suspicious. Work the ladder top-down:
 
 | Rung         | Move                                                                                                                                                                                                                                |
 | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Diagnose** | Check output-file size and the process tree before declaring it stuck                                                                                                                                                               |
 | **Isolate**  | One variable at a time. Startup hooks / MCP helpers: `claude --bare` (drops subscription auth) or `--safe-mode` (keeps auth, drops hooks). Permission waits: `--permission-mode dontAsk`. Stdin hangs: pass the diff as an argument |
-| **Degrade**  | No-tools piped diff, narrower file scope — same question, less payload                                                                                                                                                              |
+| **Degrade**  | No-tools piped diff, narrower file scope. Same question, less payload                                                                                                                                                               |
 | **Kill**     | Only the stuck process tree, never respawn blind. Pre-declare the give-up condition ("if this attempt sticks, I record the review as unavailable") and disclose the failed review in the wrap                                       |
 
 Wedges observed in the field (as of Jul 2026): a stray MCP helper in the reviewer's startup path, a broken MCP transport, and permission prompts waiting on a stdin nobody was reading. Each was found by isolating one variable, not by rerunning the same command harder.
 
-If every rung fails, step down the Degradation Ladder in SKILL.md — a recorded "review unavailable" beats a fake green check.
+If every rung fails, step down the Degradation Ladder in SKILL.md. A recorded "review unavailable" beats a fake green check.
 
 ## Claude → Codex Hangs
 
@@ -42,7 +42,7 @@ Even correctly-scoped `codex review` calls hang; it's the top operational failur
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Output file growing            | Keep waiting; it's working                                                                                                                                 |
 | Empty file, process tree alive | Wait one more window, then isolate variables (as of Jul 2026, wedged MCP servers and startup hooks are the usual culprits)                                 |
-| Empty file, process wedged     | Kill only that process tree; retry once with fewer degrees of freedom — exact diff on stdin, narrower file list, lower effort. Same question, less payload |
+| Empty file, process wedged     | Kill only that process tree; retry once with fewer degrees of freedom: exact diff on stdin, narrower file list, lower effort. Same question, less payload  |
 | Retry also sticks              | Pre-declare the give-up, record the failed review as failed                                                                                                |
 
-Never spawn a duplicate alongside a live reviewer. And size alone is not the failure signal: a 1MB+ `codex exec` transcript can be a successful deep exploration with the verdict at the tail — grep for verdict and severity markers instead of dumping the trace. The real failure shape is no output growth, or growth with no convergence toward a verdict.
+Never spawn a duplicate alongside a live reviewer. And size alone is not the failure signal: a 1MB+ `codex exec` transcript can be a successful deep exploration with the verdict at the tail. Grep for verdict and severity markers instead of dumping the trace. The real failure shape is no output growth, or growth with no convergence toward a verdict.

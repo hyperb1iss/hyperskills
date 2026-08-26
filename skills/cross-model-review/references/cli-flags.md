@@ -41,4 +41,4 @@ Scope flags for `codex review` itself (`--base`, `--commit`, `--uncommitted`) ar
 
 Add `Bash(rg:*)` when the reviewer needs grep across files. Resist write tools unless the review explicitly applies fixes.
 
-**One guarded write opt-in is field-proven.** The brief may allow "do not modify files unless you find a real defect and can fix it surgically; if you do edit, list exact files changed" — real defect, surgical fix, disclosed in the verdict. Anything looser turns a reviewer into an unsupervised second author.
+**One guarded write opt-in is field-proven.** The brief may allow "do not modify files unless you find a real defect and can fix it surgically; if you do edit, list exact files changed": real defect, surgical fix, disclosed in the verdict. Anything looser turns a reviewer into an unsupervised second author.
