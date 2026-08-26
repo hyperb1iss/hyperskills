@@ -7,7 +7,7 @@ description: Use this skill to review recent conversations and consolidate learn
 
 Bio-inspired two-phase sleep cycle that reviews Claude Code and Codex conversations, extracts structured knowledge, and consolidates it into Sibyl. Like biological dreaming: NREM consolidates, REM discovers.
 
-**Core insight:** inline capture gets the gotchas — as of Jul 2026 the Remember beat fires at volume, per-slice, mid-session. Dreams hunt what no single session can see: gotchas that repeat across sessions, instruction phrases that persist in the prompt stream, cross-project connections, and the blind spots of otherwise good capture (harness friction, the user's unblock one-liners). Dreams are the backstop and the telescope, not the primary channel.
+**Core insight:** inline capture gets the gotchas. As of Jul 2026 the Remember beat fires at volume, per-slice, mid-session. Dreams hunt what no single session can see: gotchas that repeat across sessions, instruction phrases that persist in the prompt stream, cross-project connections, and the blind spots of otherwise good capture (harness friction, the user's unblock one-liners). Dreams are the backstop and the telescope, not the primary channel.
 
 **How to read this skill:** the depth mode below sets how much of the cycle runs. Two things never scale down with it: extraction quality (the bar lives in `references/extraction-guide.md`) and dedup discipline (every write checked against existing entries first). Process shape adapts; quality bar doesn't.
 
@@ -81,14 +81,14 @@ Read conversations and identify extractable knowledge. The trick is reading targ
 | **Debugging chains**           | Sequences of failed → fixed attempts                   | Error patterns, root causes                                               |
 | **Evidence-trust calibration** | Green signals that lied (tests passed, behavior broke) | Which check missed what, and the compensating verification                |
 | **Tool limits hit**            | Tool hangs or failures at a size/shape boundary        | The exact boundary as a condition, not a ban                              |
-| **Retired risks**              | Investigations that cleared a suspected problem        | Dated evidence closing the risk — no lingering fake TODOs                 |
+| **Retired risks**              | Investigations that cleared a suspected problem        | Dated evidence closing the risk (no lingering fake TODOs)                 |
 | **Tool invocations**           | `tool_use` blocks (Bash, Edit, etc.)                   | Commands that worked, error patterns                                      |
 | **Architecture discussion**    | Longer text blocks with design reasoning               | Patterns, system relationships                                            |
 | **Thinking blocks**            | `type: "thinking"` content                             | Reasoning chains, hidden insights                                         |
 
 ### Extraction mechanics
 
-Grep scores, python extracts. Claude Code JSONL nests content arrays inside message objects, so line-level grep like `'"role":"user"'` matches assistant messages that quote user content — use grep only for signal counts, python parsing for the actual pull. High-signal fields: `ai-title` (session topic at a glance), `message.model` (which model authored the session), Codex `session_meta` (cwd, branch, model). Schemas, discovery commands, and working extraction snippets for both formats live in `references/conversation-formats.md`.
+Grep scores, python extracts. Claude Code JSONL nests content arrays inside message objects, so line-level grep like `'"role":"user"'` matches assistant messages that quote user content. Use grep only for signal counts, python parsing for the actual pull. High-signal fields: `ai-title` (session topic at a glance), `message.model` (which model authored the session), Codex `session_meta` (cwd, branch, model). Schemas, discovery commands, and working extraction snippets for both formats live in `references/conversation-formats.md`.
 
 For promising sessions (high correction count, long duration, many tool calls), read key segments more deeply using `Read` with offset/limit on the JSONL.
 
@@ -96,18 +96,18 @@ For promising sessions (high correction count, long duration, many tool calls), 
 
 Prioritize sessions for deep reading:
 
-| Signal                                 | Score | How to Detect                                                                          |
-| -------------------------------------- | ----- | -------------------------------------------------------------------------------------- |
-| User corrections present               | +3    | grep for negation words in user messages                                               |
-| Gotcha also seen in a previous session | +3    | the repeat is the capture trigger — write it as a gate, test, or invariant, not a note |
-| Multiple error-fix cycles              | +2    | tool_use errors followed by successful retries                                         |
-| Cross-project references               | +2    | mentions of other project paths                                                        |
-| Architecture/design discussion         | +2    | grep for design keywords                                                               |
-| New library/tool adoption              | +2    | grep for "install", "add", package names                                               |
-| Long session (>50 messages)            | +1    | line count of JSONL                                                                    |
-| Simple Q&A session                     | -1    | short session with no tool calls                                                       |
+| Signal                                 | Score | How to Detect                                                                         |
+| -------------------------------------- | ----- | ------------------------------------------------------------------------------------- |
+| User corrections present               | +3    | grep for negation words in user messages                                              |
+| Gotcha also seen in a previous session | +3    | the repeat is the capture trigger. Write it as a gate, test, or invariant, not a note |
+| Multiple error-fix cycles              | +2    | tool_use errors followed by successful retries                                        |
+| Cross-project references               | +2    | mentions of other project paths                                                       |
+| Architecture/design discussion         | +2    | grep for design keywords                                                              |
+| New library/tool adoption              | +2    | grep for "install", "add", package names                                              |
+| Long session (>50 messages)            | +1    | line count of JSONL                                                                   |
+| Simple Q&A session                     | -1    | short session with no tool calls                                                      |
 
-Process top-scored sessions first; quick nap mode usually caps at the top 3. Low-signal sessions can be skipped entirely — extracting from a Q&A session about syntax produces noise, not knowledge. Mind the skew: capture discipline favors domain learnings, but the repeats that burn sessions are usually harness and tooling friction (cwd drift, path bases, quoting, flag shapes). That friction clears the bar.
+Process top-scored sessions first; quick nap mode usually caps at the top 3. Low-signal sessions can be skipped entirely. Extracting from a Q&A session about syntax produces noise, not knowledge. Mind the skew: capture discipline favors domain learnings, but the repeats that burn sessions are usually harness and tooling friction (cwd drift, path bases, quoting, flag shapes). That friction clears the bar.
 
 ---
 
@@ -117,8 +117,8 @@ Transform raw conversation signal into structured Sibyl entities. This is where 
 
 ### Write-time discipline
 
-- **Date-stamp volatile claims.** Versions, SOTA, and live state carry an as-of date so future recall can age them — a 25-day-old "latest version" memory nearly caused a wrong downgrade. Recalled memory is a lead, not gospel; write entries that age visibly.
-- **Supersede, don't append.** When a finding contradicts an existing entry, correct the old entry in place — including why the obvious fix is a dead end — and title corrections as corrections ("Correction: retain local Supabase PVCs in Tilt").
+- **Date-stamp volatile claims.** Versions, SOTA, and live state carry an as-of date so future recall can age them. A 25-day-old "latest version" memory nearly caused a wrong downgrade. Recalled memory is a lead, not gospel; write entries that age visibly.
+- **Supersede, don't append.** When a finding contradicts an existing entry, correct the old entry in place (including why the obvious fix is a dead end) and title corrections as corrections ("Correction: retain local Supabase PVCs in Tilt").
 - **The quality test:** could a future session turn this into a gate, a constraint, or an executable recipe? If not, it's trivia. Full bar and worked examples in `references/extraction-guide.md`.
 
 ### Extraction categories
@@ -127,15 +127,15 @@ Transform raw conversation signal into structured Sibyl entities. This is where 
 | ------------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Decisions**                   | `episode`, category `decision` | Technical choices with trade-offs: library selection, architecture, API design. Record rationale, alternatives, and provenance (who decided, when) |
 | **Patterns**                    | `pattern`                      | Reusable approaches that worked. The bar: would this be useful in a different project?                                                             |
-| **Corrections / anti-patterns** | `error_pattern`                | Mistakes that got corrected — the user said "that's wrong," or something broke and was debugged to root cause                                      |
+| **Corrections / anti-patterns** | `error_pattern`                | Mistakes that got corrected (the user said "that's wrong," or something broke and was debugged to root cause)                                      |
 | **Rules**                       | `rule`                         | Hard constraints discovered through experience. "Always X when Y." "Never Z because W."                                                            |
 | **Open questions / tensions**   | `episode`, category `tension`  | Raised but unanswered; contradictions between approaches; deferred decisions                                                                       |
 
-Verb and flag shapes live in the `sibyl` skill and the live `--help` — CLI surfaces drift under skills, and installs differ. When a kind or flag is rejected, adapt the capture to what the install accepts rather than dropping it.
+Verb and flag shapes live in the `sibyl` skill and the live `--help`. CLI surfaces drift under skills, and installs differ. When a kind or flag is rejected, adapt the capture to what the install accepts rather than dropping it.
 
 ### Deduplication
 
-Before writing, check for existing entries — the value of the graph collapses when duplicates accumulate. Dedup the extraction set against itself first (multiple sessions repeat the same insight), then check each survivor against Sibyl:
+Before writing, check for existing entries. The value of the graph collapses when duplicates accumulate. Dedup the extraction set against itself first (multiple sessions repeat the same insight), then check each survivor against Sibyl:
 
 ```bash
 sibyl search "[entity title keywords]" --limit 5
@@ -162,10 +162,10 @@ Only in `deep` mode and mining runs. Find unexpected connections across projects
 
 ### Connection Discovery
 
-Pull the graph wide (`sibyl search` sweeps per kind — patterns, error patterns, unresolved tensions; walk `sibyl explore related` from the anchors it surfaces), then look for:
+Pull the graph wide (`sibyl search` sweeps per kind: patterns, error patterns, unresolved tensions; walk `sibyl explore related` from the anchors it surfaces), then look for:
 
 1. **Pattern reuse:** a pattern from project A that would solve a problem in project B
-2. **Contradictory approaches:** project A does X one way, project B does it differently — which is right?
+2. **Contradictory approaches:** project A does X one way, project B does it differently. Which is right?
 3. **Shared infrastructure gaps:** multiple projects hitting the same limitation
 4. **Knowledge transfer:** something learned in one domain that applies to another
 
@@ -180,11 +180,11 @@ The user's own prompts are encoding telemetry. Diff recurring instruction phrase
 | Phrase vanished month-over-month | The encoding landed ("commit as you go" went 11 → 2 → 0 → 0 as the contract absorbed it) |
 | Phrase persists across months    | Codify-next candidate                                                                    |
 
-Candidates still pass the net-new-delta gate — a repeat proves demand, not absence. The gap is often execution consistency, not missing rules.
+Candidates still pass the net-new-delta gate. A repeat proves demand, not absence. The gap is often execution consistency, not missing rules.
 
 ### Staleness Detection
 
-Scan the graph for aging entities (kind-scoped `sibyl search` sweeps; exact verb shapes live in the `sibyl` skill). For anything older than ~90 days: is the project still active, has the technology moved, does the pattern still hold? Resolve with the same write-time maintenance moves applied graph-wide — supersede in place, retire the risk with dated evidence, or tag `stale,needs-review` for a human.
+Scan the graph for aging entities (kind-scoped `sibyl search` sweeps; exact verb shapes live in the `sibyl` skill). For anything older than ~90 days: is the project still active, has the technology moved, does the pattern still hold? Resolve with the same write-time maintenance moves applied graph-wide: supersede in place, retire the risk with dated evidence, or tag `stale,needs-review` for a human.
 
 ---
 
@@ -192,16 +192,16 @@ Scan the graph for aging entities (kind-scoped `sibyl search` sweeps; exact verb
 
 The report serves two audiences: the user (what landed) and future dreams (which check this entry to avoid re-processing). Four fields are required; everything else is optional:
 
-- **Coverage:** sessions reviewed, projects, time span — what the next cycle's orient checks
-- **Dedup receipts:** entities created / updated / duplicates skipped — the counts that prove dedup ran
+- **Coverage:** sessions reviewed, projects, time span (what the next cycle's orient checks)
+- **Dedup receipts:** entities created / updated / duplicates skipped (the counts that prove dedup ran)
 - **Highlights:** the 2-3 findings worth a human's attention
 - **Parked writes:** learnings that failed to write, verbatim, flagged NOT captured, with the flush command
 
-Record the report itself in Sibyl as an episode (category `dream-report`, tagged `dream`) — it is the anchor the next cycle's orient searches for.
+Record the report itself in Sibyl as an episode (category `dream-report`, tagged `dream`). It is the anchor the next cycle's orient searches for.
 
 ### Beyond the Graph
 
-When a pattern is process-shaped and cross-project, its durable home may be a skill or the contract rather than the graph. Gate every proposed skill edit on net-new delta: re-read the target skill first — most of what a run rediscovers is already written down.
+When a pattern is process-shaped and cross-project, its durable home may be a skill or the contract rather than the graph. Gate every proposed skill edit on net-new delta: re-read the target skill first. Most of what a run rediscovers is already written down.
 
 ---
 
@@ -215,7 +215,7 @@ For fast end-of-day processing:
 4. Write to Sibyl
 5. One-paragraph dream report
 
-**Skip:** the whole REM phase — cross-project analysis, prompt-stream telemetry, staleness detection.
+**Skip:** the whole REM phase (cross-project analysis, prompt-stream telemetry, staleness detection).
 
 ---
 

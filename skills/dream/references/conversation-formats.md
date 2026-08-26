@@ -148,7 +148,7 @@ Each line has a `timestamp`, `type`, and type-specific payload:
 
 ### Event Types
 
-**`session_meta`** — One per file, session header:
+**`session_meta`** (one per file, session header):
 
 - `payload.id`: Session UUID
 - `payload.cwd`: Working directory
@@ -157,9 +157,9 @@ Each line has a `timestamp`, `type`, and type-specific payload:
 - `payload.model_provider`: Provider name (e.g., `openai`)
 - `payload.base_instructions`: System prompt text (NOT `system_prompt`)
 - `payload.source`: Source identifier
-- `payload.git`: `{branch, origin_url, ...}` — git context for the session
+- `payload.git`: `{branch, origin_url, ...}` (git context for the session)
 
-**`response_item`** — Conversation turns:
+**`response_item`** (conversation turns):
 
 - `payload.type`: `message` | `function_call` | `function_call_output` | `reasoning`
 - For messages: `payload.role` = `developer` | `user` | `assistant`, `payload.content[].type` = `input_text` | `output_text`
@@ -167,11 +167,11 @@ Each line has a `timestamp`, `type`, and type-specific payload:
 - For function outputs: `payload.call_id`, `payload.output`
 - For reasoning: `payload.encrypted_content` (opaque, not readable)
 
-**`event_msg`** — Lifecycle events:
+**`event_msg`** (lifecycle events):
 
 - `task_started`, `task_complete`, `token_count`, `user_message`, `agent_message`
 
-**`turn_context`** — Per-turn metadata:
+**`turn_context`** (per-turn metadata):
 
 - `cwd`, `date`, `timezone`, `approval_policy`, `sandbox_policy`
 - `model_name`, `personality`, `reasoning_effort`, `user_instructions`
@@ -203,7 +203,7 @@ find ~/.codex/sessions -name "rollout-*.jsonl" -mtime -7 -exec ls -lhS {} + | he
 
 ### Codex SQLite (Supplementary)
 
-**`~/.codex/state_5.sqlite`** — Thread index with columns:
+**`~/.codex/state_5.sqlite`** (thread index with columns):
 
 - `id`, `title`, `model`, `cwd`, `git_branch`, `git_origin_url`
 - `first_user_message`, `tokens_used`, `created_at`, `updated_at`
@@ -215,7 +215,7 @@ sqlite3 ~/.codex/state_5.sqlite "SELECT id, title, model, cwd, datetime(created_
 
 ### Codex History (Supplementary)
 
-**`~/.codex/history.jsonl`** — Flat prompt log:
+**`~/.codex/history.jsonl`** (flat prompt log):
 
 ```json
 { "session_id": "uuid", "ts": 1712300000, "text": "user prompt text" }

@@ -6,26 +6,26 @@
 
 | Signal                             | Sibyl Type                     | Example                                                                                       |
 | ---------------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------- |
-| User corrects assistant's approach | `error_pattern`                | "Don't use `uv pip` — use `uv add` for project dependencies"                                  |
+| User corrects assistant's approach | `error_pattern`                | "Don't use `uv pip`. Use `uv add` for project dependencies"                                   |
 | Technical decision with trade-offs | `episode` (category: decision) | "Chose Temporal over BullMQ because workflow visibility matters more than simplicity"         |
-| Non-obvious debugging insight      | `pattern`                      | "FalkorDB WRONGTYPE errors mean the key schema changed — run FLUSHALL on dev"                 |
+| Non-obvious debugging insight      | `pattern`                      | "FalkorDB WRONGTYPE errors mean the key schema changed. Run FLUSHALL on dev"                  |
 | Reusable code pattern              | `pattern`                      | "Use `select!` with heartbeat future for long-running Temporal activities"                    |
-| Hard constraint discovered         | `rule`                         | "Never commit .env files — gradial uses SOPS for secrets"                                     |
+| Hard constraint discovered         | `rule`                         | "Never commit .env files. Gradial uses SOPS for secrets"                                      |
 | Unresolved question deferred       | `episode` (category: tension)  | "Should Sibyl use Graphiti's built-in community detection or custom?"                         |
-| New tool/library adoption          | `episode` (category: decision) | "Adopted better-auth for v2 — replacing next-auth due to multi-tenant needs"                  |
-| Performance finding                | `pattern`                      | "Batch Sibyl writes via REST API, not individual CLI calls — 10x faster"                      |
+| New tool/library adoption          | `episode` (category: decision) | "Adopted better-auth for v2, replacing next-auth due to multi-tenant needs"                   |
+| Performance finding                | `pattern`                      | "Batch Sibyl writes via REST API, not individual CLI calls (10x faster)"                      |
 | Configuration quirk                | `error_pattern`                | "moon workspace requires `.moon/toolchains.yml` even if empty"                                |
-| User unblock one-liner             | `pattern` or `rule`            | "need to run `./gx setup env --legacy`" — the incantation is the learning                     |
+| User unblock one-liner             | `pattern` or `rule`            | "need to run `./gx setup env --legacy`" (the incantation is the learning)                     |
 | Taste directive / standing rule    | `rule`                         | "Preserve the pretty PR body; prove rebases with range-diff"                                  |
 | Evidence-trust calibration         | `error_pattern`                | "Green render + unit suites missed four live-behavior failures in this lane"                  |
-| Tool limit hit                     | `rule` (conditional)           | "git-iris PR generation hangs above ~174 files / 24k lines — condition, not ban"              |
-| Retired risk                       | `episode` (category: decision) | "Postgres-off risk disproven, evidence attached — closed so it doesn't linger as a fake TODO" |
+| Tool limit hit                     | `rule` (conditional)           | "git-iris PR generation hangs above ~174 files / 24k lines (condition, not ban)"              |
+| Retired risk                       | `episode` (category: decision) | "Postgres-off risk disproven, evidence attached (closed so it doesn't linger as a fake TODO)" |
 
 ### Skip These (Low/No Value)
 
 | Signal                                           | Why Skip                                                      |
 | ------------------------------------------------ | ------------------------------------------------------------- |
-| Simple Q&A ("what does X do?")                   | No transfer value — answer is in the docs                     |
+| Simple Q&A ("what does X do?")                   | No transfer value (answer is in the docs)                     |
 | File reads / directory listings                  | Ephemeral navigation, not knowledge                           |
 | Routine git operations                           | Git history captures this                                     |
 | Typo corrections                                 | Not a pattern or learning                                     |
@@ -159,20 +159,20 @@ digraph entity_selection {
 
 3. **Decision matrix:**
 
-   | Search Result                  | Action                                                                                                                                |
-   | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-   | No matches                     | Create new entity                                                                                                                     |
-   | Same topic, older info         | Update existing entity (note: Sibyl tracks temporal validity)                                                                         |
-   | Same topic, same info          | Skip — already captured                                                                                                               |
-   | Same topic, contradictory info | New evidence supersedes: correct the old entry in place, titled "Correction: ..." — genuinely unresolved: tension entity linking both |
-   | Related but distinct           | Create new entity with RELATED_TO relationship                                                                                        |
+   | Search Result                  | Action                                                                                                                               |
+   | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+   | No matches                     | Create new entity                                                                                                                    |
+   | Same topic, older info         | Update existing entity (note: Sibyl tracks temporal validity)                                                                        |
+   | Same topic, same info          | Skip (already captured)                                                                                                              |
+   | Same topic, contradictory info | New evidence supersedes: correct the old entry in place, titled "Correction: ...". Genuinely unresolved: tension entity linking both |
+   | Related but distinct           | Create new entity with RELATED_TO relationship                                                                                       |
 
 ### Within a Single Dream Cycle
 
 Multiple sessions may contain the same insight (e.g., same bug hit twice). Deduplicate within the extraction batch before writing to Sibyl:
 
 1. Group extractions by topic/keyword
-2. Merge duplicates — keep the richest description
+2. Merge duplicates. Keep the richest description
 3. Note multiple source sessions in the entity metadata
 
 ---
@@ -183,22 +183,22 @@ Consistent tags make future search and REM exploration effective.
 
 ### Required Tags
 
-- `project:<name>` — Which project this relates to (e.g., `project:sibyl`, `project:v2`)
-- Source conversation type — `source:claude` or `source:codex`
+- `project:<name>`: Which project this relates to (e.g., `project:sibyl`, `project:v2`)
+- Source conversation type: `source:claude` or `source:codex`
 
 ### Recommended Tags
 
-- `domain:<area>` — Technical domain (e.g., `domain:auth`, `domain:graph`, `domain:deployment`)
-- `stack:<tech>` — Technology involved (e.g., `stack:temporal`, `stack:react`, `stack:kubernetes`)
-- `confidence:<level>` — How sure are we? `high`, `medium`, `low`
+- `domain:<area>`: Technical domain (e.g., `domain:auth`, `domain:graph`, `domain:deployment`)
+- `stack:<tech>`: Technology involved (e.g., `stack:temporal`, `stack:react`, `stack:kubernetes`)
+- `confidence:<level>`: How sure are we? `high`, `medium`, `low`
 
 ### Dream-Specific Tags
 
-- `dream` — All entities created during dream cycles
-- `dream-date:YYYY-MM-DD` — When the dream cycle ran
-- `stale` — Flagged for review during REM phase
-- `needs-review` — Low-confidence extraction requiring human validation
-- `cross-project` — REM-discovered cross-project connections
+- `dream`: All entities created during dream cycles
+- `dream-date:YYYY-MM-DD`: When the dream cycle ran
+- `stale`: Flagged for review during REM phase
+- `needs-review`: Low-confidence extraction requiring human validation
+- `cross-project`: REM-discovered cross-project connections
 
 ---
 
