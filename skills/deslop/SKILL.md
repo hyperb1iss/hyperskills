@@ -240,7 +240,7 @@ Default to embedded when another skill invoked this one.
 - `references/craft-moves.md` carries the diagnostics that repair them, from the editing tradition, plus the guards that stop a craft pass from overshooting.
 - `references/surface-profiles.md` carries per-surface rules with worked artifact-level rewrites.
 - `references/evidence.md` records what the corpus research supports, with citations and verification tiers, plus the false-positive traps.
-- `scripts/slopscan.pl` is the protection-aware mechanical scanner, and `scripts/selftest.sh` is its 35-case regression gate. Run the gate after any edit to the masker.
+- `scripts/slopscan.pl` is the protection-aware mechanical scanner, and `scripts/selftest.sh` is its 49-case regression gate. Run the gate after any edit to the masker.
 - `references/fixtures/` holds slop, protected, and clean fixtures for checking the scanner after an edit.
 
 The pattern set synthesizes [Wikipedia's Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) (WikiProject AI Cleanup), the [blader/humanizer](https://github.com/blader/humanizer) skill, Cursor's [pstack `unslop`](https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md) skill, peer-reviewed corpus work cited in `references/evidence.md`, and house conventions from `super-good-pr` and `hyper-pr-review`.

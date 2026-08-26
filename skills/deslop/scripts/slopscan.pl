@@ -49,6 +49,7 @@ for my $file (@files) {
     my $raw = do { local $/; <$fh> };
     close $fh;
 
+    $raw =~ s/\A\x{FEFF}//;  # a byte-order mark otherwise hides the frontmatter
     $raw =~ s/\r\n?/\n/g;   # normalize CRLF and CR before anything else
     my $prose = mask($raw);
 
@@ -250,6 +251,9 @@ sub mask {
     $out =~ s/\]\(\s*$bare$title\s*\)/blank($&)/ge;
     $out =~ s/^ {0,3}\[[^\]]+\]:\s*(?:<[^>]*>|\S+)$title/blank($&)/gme;
     $out =~ s/<(?:https?|ftp|mailto):[^>\s]*>/blank($&)/ge;
+    # HTML comments never reach a reader, and a bare URL is not prose
+    $out =~ s/<!--.*?-->/blank($&)/gse;
+    $out =~ s{(?<![\w/])(?:https?|ftp)://[^\s<>()\[\]"']+}{blank($&)}ge;
 
     return $out;
 }

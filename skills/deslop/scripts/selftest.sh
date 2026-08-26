@@ -109,6 +109,50 @@ printf '> quoted line with a dash \xe2\x80\x94 here\n# Visible heading with a da
 check "heading after blockquote stays visible" 20 "$TMP/quoteheading.md"
 grep_check "heading text is not masked" "Visible heading" "$TMP/quoteheading.md"
 
+# ---- forms found by self-probing after round 3 --------------------------
+printf '\xef\xbb\xbf---\ntitle: dash \xe2\x80\x94 here\n---\n\nclean prose here.\n' > "$TMP/bom.md"
+check "byte-order mark before frontmatter"  0 "$TMP/bom.md"
+
+printf '<!-- comment dash \xe2\x80\x94 here -->\n\nclean prose here.\n' > "$TMP/htmlcomment.md"
+check "HTML comment never reaches a reader"  0 "$TMP/htmlcomment.md"
+
+printf 'visit https://x.test/a\xe2\x80\x94b directly today\n' > "$TMP/bareurl.md"
+check "bare URL is not prose"                0 "$TMP/bareurl.md"
+
+printf '![alt text](https://x.test/a\xe2\x80\x94b?utm_source=chatgpt.com)\n\nclean prose.\n' > "$TMP/image.md"
+check "image destination"                    0 "$TMP/image.md"
+
+# a setext heading is visible prose, so its text must still be scanned
+printf 'Heading with a dash \xe2\x80\x94 here\n=====\n\nclean prose.\n' > "$TMP/setext.md"
+check "setext heading text is scanned"      20 "$TMP/setext.md"
+
+printf '> > deeply quoted dash \xe2\x80\x94 here\n> > more\n\nclean.\n' > "$TMP/nestedquote.md"
+check "nested blockquote"                    0 "$TMP/nestedquote.md"
+
+printf '>     indented code inside a quote \xe2\x80\x94 dash\n\nclean.\n' > "$TMP/quoteindent.md"
+check "indented code inside a blockquote"    0 "$TMP/quoteindent.md"
+
+printf -- '- item\n\n  ```\n  code \xe2\x80\x94 dash\n  ```\n\n- next item\n' > "$TMP/listfence.md"
+check "fenced code inside a list item"       0 "$TMP/listfence.md"
+
+printf '| a | b |\n| - | - |\n| `x \xe2\x80\x94 y` | z |\n' > "$TMP/tablecode.md"
+check "inline code inside a table cell"      0 "$TMP/tablecode.md"
+
+printf 'a span with a tick: ``inner ` tick \xe2\x80\x94 dash`` done\n' > "$TMP/spaninspan.md"
+check "backtick run inside a code span"      0 "$TMP/spaninspan.md"
+
+printf 'see [text [with] brackets](https://x.test/a?utm_source=chatgpt.com) ok\n' > "$TMP/linkbrackets.md"
+check "link text containing brackets"        0 "$TMP/linkbrackets.md"
+
+printf 'text[^1]\n\n[^1]: https://x.test/a?utm_source=chatgpt.com\n' > "$TMP/footnote.md"
+check "footnote definition target"           0 "$TMP/footnote.md"
+
+printf '\n\ttab indented code \xe2\x80\x94 dash\n\tsecond line\n' > "$TMP/tabindent.md"
+check "tab-indented code block"              0 "$TMP/tabindent.md"
+
+printf 'text\r\n\r\n```\r\ncode \xe2\x80\x94 dash\r\n```\r\n\r\nclean\r\n' > "$TMP/crlffence.md"
+check "CRLF inside a fence"                  0 "$TMP/crlffence.md"
+
 # ---- degenerate inputs --------------------------------------------------
 : > "$TMP/empty.md"
 check "empty file"                     0 "$TMP/empty.md"
