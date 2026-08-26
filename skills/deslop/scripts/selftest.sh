@@ -246,6 +246,17 @@ check "bold-lead bullet is a house candidate" 10 "$TMP/boldlead.md"
 check "agent surface skips bold-lead check"    0 "$TMP/boldlead.md" agent
 check "agent surface skips heading case"       0 "$TMP/mixedcase.md" agent
 
+# ---- stacked rhetorical frames (N19) ---------------------------------------
+# Three distinct frame families in one paragraph fire; repetition of a single
+# family and frames split across list items stay clean.
+printf 'We queue the work rather than dropping it, so the retry loop stays empty, which means the backlog is the whole story.\n' > "$TMP/stacked.md"
+check "three frame families in one paragraph fire"  10 "$TMP/stacked.md"
+grep_check "stacked frames are named" 'stacked frames' "$TMP/stacked.md"
+printf 'The job runs, so the queue drains, so the worker idles, so the pool shrinks.\n' > "$TMP/oneframe.md"
+check "single-family repetition stays clean"         0 "$TMP/oneframe.md"
+printf -- '- kept rather than dropped\n- retries, so the queue drains\n- the delay, not the size\n' > "$TMP/listframes.md"
+check "frames across separate list items stay clean" 0 "$TMP/listframes.md"
+
 # ---- apostrophe variant glyphs ---------------------------------------------
 # LLMs emit eight apostrophe glyphs; only two are curly quotes. A variant
 # between letters is a hard failure, a prime after a digit is legitimate.

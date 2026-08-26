@@ -184,6 +184,7 @@ sub checks {
                      'house jargon or borrowed rigor');
     push @cand, hits($prose, qr/\bcheap(?:est|ly)?\b|\bpay(?:s|ing)? rent\b|\bbuys you\b|\bcosts you nothing\b/i,
                      'transactional effort framing');
+    push @cand, stacked_frames($prose);
     push @cand, hits($prose, qr/(?:^|[.!?]\s+|^\s*[-*+]\s+)(?:let me be (?:blunt|clear)|here'?s the thing|the thing is|real talk|to be honest)\b|\bworth naming that\b/i,
                      'performed candor');
     push @cand, hits($prose, qr/\b(?:epistemic status|~?\d{1,3}% confident|I hold this loosely)\b/i,
@@ -367,6 +368,42 @@ sub heading_case {
       :                     (\@sent,  'sentence-case heading in a title-case file');
     return map { sprintf('%s:%d  %s', $label, $_->[0], substr($_->[1], 0, 90)) }
                @$minor;
+}
+
+# Stacked rhetorical frames, the Opus 5 signature (catalog N19). Any single
+# frame is voice; three or more DISTINCT families in one paragraph is the
+# airless texture. Diversity rather than repetition, so a paragraph that
+# legitimately needs several `so` clauses never fires. List items count as
+# their own paragraphs so separate bullets cannot pool into a false hit.
+sub stacked_frames {
+    my ($text) = @_;
+    my @fams = (
+        [ contrast    => qr/\brather than\b|\binstead of\b/i ],
+        [ reframe     => qr/,\s+which\s+(?:is|means|makes)\b/i ],
+        [ consequence => qr/,\s+so\s+[a-z]/ ],
+        [ closer      => qr/\b(?:is|was)\s+the\s+(?:whole|entire|real|actual|only)\b/i ],
+        [ negation    => qr/,\s+not\s+(?:a|an|the)?\s*[a-z]/ ],
+    );
+    my @out;
+    my @lines = split /\n/, $text, -1;
+    my ($start, $para) = (0, '');
+    my $flush = sub {
+        return if $para eq '';
+        my @hit = grep { $para =~ $_->[1] } @fams;
+        push @out, sprintf('stacked frames (%s):%d',
+                           join('+', map { $_->[0] } @hit), $start + 1)
+            if @hit >= 3;
+        $para = '';
+    };
+    for my $i (0 .. $#lines) {
+        my $line = $lines[$i];
+        if ($line =~ /^\s*$/ || $line =~ /^\s*[|#]/) { $flush->(); next }
+        $flush->() if $line =~ /^\s*(?:[-*+]|\d+[.)])\s/;
+        $start = $i if $para eq '';
+        $para .= ($para eq '' ? '' : "\n") . $line;
+    }
+    $flush->();
+    return @out;
 }
 
 sub hits {

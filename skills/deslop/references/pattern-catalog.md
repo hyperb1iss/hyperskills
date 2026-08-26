@@ -196,6 +196,10 @@ Four nominalizations to keep, or a pass strips the cohesion devices: a short sub
 
 **N16. Self-echo.** Reusing a phrase from earlier in the same document as if it were an established term or a callback, when the first use was ordinary. Either make it a defined term or vary the wording.
 
+**N19. Stacked rhetorical frames.** The Claude Opus 5 signature, measured on a local corpus (`evidence.md`): contrastive frames (`rather than`, `instead of`), reframing tails (`, which means`), consequence spines (`, so`), appositive negation (`, not Y`), and definitional closers ("The render was the whole gap") welded together until every sentence carries a claim and the paragraph has no resting beat. Any single frame is voice and endorsed craft; the antithesis is Strunk's rule 11, and the corpus's best refusal prose depends on it. The tell is diversity, not presence: three or more distinct frame families in one paragraph is the airless texture readers report as "sounds like Claude". The scanner flags exactly that stack and never the single instance, because single-instance style edits are the one edit class humans judge as making prose worse. The fix is to let one frame keep the argument and demote the others to plain statements, or split the paragraph so the claims get room to land separately.
+- Before: `We queue the work rather than dropping it, so the retry loop stays empty, which means the backlog is the whole story.`
+- After: `We queue the work instead of dropping it, and the retry loop stays empty. The backlog tells you everything about load.`
+
 ## 5. Lexical (L)
 
 Last pass, least valuable. Word swaps on unfixed structure produce clean-sounding slop.
@@ -290,7 +294,7 @@ Convergence counts by family, not by id, because several ids describe one underl
 
 | Family                  | Ids                          |
 | ----------------------- | ---------------------------- |
-| Texture                 | S14, N8, N9, E15             |
+| Texture                 | S14, N8, N9, N19, E15        |
 | Coordination and cadence | S3, S10, N11, N15            |
 | Inflation               | R1, R2, R9, E7               |
 | Evasion                 | R3, N6, N13, E3              |
