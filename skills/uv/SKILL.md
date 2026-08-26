@@ -7,7 +7,7 @@ description: Use this skill when working with Python projects, packages, scripts
 
 uv replaces pip, pip-tools, pipx, pyenv, virtualenv, and poetry. Written in Rust, 10-100x faster than alternatives. It is stable production software; minor versions can contain breaking changes, while patch releases are intended to be non-breaking.
 
-**Snapshot: v0.11.11, May 2026.** The installed binary outranks this file. Run `uv --version` first, and `uv <command> --help` whenever a flag here doesn't land — the local install is often behind, and commands documented below (notably `uv audit`, preview-gated since 0.10) may simply not exist yet.
+**Snapshot: v0.11.11, May 2026.** The installed binary outranks this file. Run `uv --version` first, and `uv <command> --help` whenever a flag here doesn't land. The local install is often behind, and commands documented below (notably `uv audit`, preview-gated since 0.10) may simply not exist yet.
 
 ## Workflow Decision Tree
 
@@ -245,13 +245,13 @@ In a workspace, config search starts at workspace root. `uv.toml` takes preceden
 
 | Setting            | Default             | Purpose                                  |
 | ------------------ | ------------------- | ---------------------------------------- |
-| `required-version` | —                   | Enforce uv version (PEP 440)             |
+| `required-version` | -                   | Enforce uv version (PEP 440)             |
 | `add-bounds`       | `"lower"`           | Default bounds for `uv add`              |
 | `compile-bytecode` | `false`             | Compile .pyc on install                  |
 | `fork-strategy`    | `"requires-python"` | Resolution fork behavior                 |
-| `exclude-newer`    | —                   | Date/duration cutoff for reproducibility |
+| `exclude-newer`    | -                   | Date/duration cutoff for reproducibility |
 | `environments`     | `[]`                | Limit lockfile platforms                 |
-| `torch-backend`    | —                   | PyTorch backend (cpu/cu126/auto)         |
+| `torch-backend`    | -                   | PyTorch backend (cpu/cu126/auto)         |
 | `default-groups`   | `["dev"]`           | Groups installed by default              |
 
 **.env file support:** `uv run` automatically loads `.env` files. Control with `--env-file` or `UV_NO_ENV_FILE=1`.

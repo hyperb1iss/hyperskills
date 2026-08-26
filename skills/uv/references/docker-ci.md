@@ -1,6 +1,6 @@
 # Docker & CI/CD Patterns for uv
 
-## Docker — Optimized Multi-Stage Build
+## Docker: Optimized Multi-Stage Build
 
 ```dockerfile
 FROM python:3.13-slim AS builder
@@ -41,9 +41,9 @@ CMD ["my_app"]
 
 ### Docker Tips
 
-- Add `.venv` to `.dockerignore` — prevents local environments from being copied
-- Use `--no-editable` in production images — avoids `.pth` file overhead
-- The `--mount=type=bind` pattern avoids COPY for lock/pyproject — better cache hits
+- Add `.venv` to `.dockerignore`. Prevents local environments from being copied
+- Use `--no-editable` in production images. Avoids `.pth` file overhead
+- The `--mount=type=bind` pattern avoids COPY for lock/pyproject. Better cache hits
 - For workspace builds, bind the entire workspace root
 
 ### Hardened Images (0.10.8+)

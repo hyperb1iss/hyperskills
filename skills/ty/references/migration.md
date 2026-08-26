@@ -113,4 +113,4 @@ Replace mypy with ty in CI as the blocking check. Remove mypy config.
 - Heavy Pydantic plugin usage (first-class support coming)
 - Django/SQLAlchemy plugin dependencies
 - Need for `TypeVarTuple` (NumPy/tensor typing)
-- Production environments requiring battle-tested stability
+- Production environments that want a type checker with a long track record

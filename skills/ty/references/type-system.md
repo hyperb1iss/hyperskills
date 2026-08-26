@@ -50,7 +50,7 @@ All decorator params, `field()`, `InitVar`, `ClassVar`, `KW_ONLY`, `replace()`, 
 
 | Feature                         | Description                                                         |
 | ------------------------------- | ------------------------------------------------------------------- |
-| **Intersection types**          | First-class `A & B` — not available in mypy or pyright              |
+| **Intersection types**          | First-class `A & B`, not available in mypy or pyright               |
 | **Unknown vs Any**              | Explicit gradual typing: `Any` is deliberate, `Unknown` is inferred |
 | **Fixpoint iteration**          | Handles cyclic type dependencies                                    |
 | **Reachability analysis**       | Detects unreachable code across version-specific branches           |
@@ -61,7 +61,7 @@ All decorator params, `field()`, `InitVar`, `ClassVar`, `KW_ONLY`, `replace()`, 
 | Feature                                         | Impact                      | Tracking |
 | ----------------------------------------------- | --------------------------- | -------- |
 | `TypeVarTuple` / `Unpack`                       | NumPy/tensor typing         | #156     |
-| `Concatenate`                                   | Supported in current beta   | —        |
+| `Concatenate`                                   | Supported in current beta   | -        |
 | `type[SomeProtocol]`                            | Protocol metaclass          | #903     |
 | `@classmethod`/`@staticmethod` protocol members | Protocol completeness       | #1381    |
 | `ClassVar` protocol members                     | Protocol completeness       | #1380    |
@@ -71,7 +71,7 @@ All decorator params, `field()`, `InitVar`, `ClassVar`, `KW_ONLY`, `replace()`, 
 | Tuple length narrowing                          | Tuple refinement            | #560     |
 | Enum functional syntax + `Flag`                 | Enum completeness           | #876     |
 | Overlapping overload diagnostics                | Overload correctness        | #103     |
-| `dataclass_transform`                           | Partial                     | —        |
+| `dataclass_transform`                           | Partial                     | -        |
 | Tagged union narrowing for TypedDict            | Discriminated unions        | #1479    |
 
 ## Key Rules

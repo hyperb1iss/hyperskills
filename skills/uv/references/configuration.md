@@ -17,7 +17,7 @@
 
 | Setting            | Type | Default   | Description                                                   |
 | ------------------ | ---- | --------- | ------------------------------------------------------------- |
-| `required-version` | str  | —         | Enforce uv version (PEP 440 specifier)                        |
+| `required-version` | str  | -         | Enforce uv version (PEP 440 specifier)                        |
 | `package`          | bool | `true`    | Treat as Python package vs virtual project                    |
 | `managed`          | bool | `true`    | Whether uv manages this project                               |
 | `default-groups`   | list | `["dev"]` | Groups installed by default                                   |
@@ -30,7 +30,7 @@
 | `resolution`               | str  | `"highest"`                  | `highest`/`lowest`/`lowest-direct` |
 | `fork-strategy`            | str  | `"requires-python"`          | `requires-python`/`fewest`         |
 | `prerelease`               | str  | `"if-necessary-or-explicit"` | Pre-release strategy               |
-| `exclude-newer`            | str  | —                            | Date, duration, or ISO 8601 cutoff |
+| `exclude-newer`            | str  | -                            | Date, duration, or ISO 8601 cutoff |
 | `environments`             | list | `[]`                         | Limit lockfile to these platforms  |
 | `required-environments`    | list | `[]`                         | Require wheels for these platforms |
 | `conflicts`                | list | `[]`                         | Mutually exclusive extras/groups   |
@@ -55,7 +55,7 @@
 | ------------------- | ---- | ------------- | ----------------------------------------------- |
 | `python-preference` | str  | `"managed"`   | `managed`/`only-managed`/`system`/`only-system` |
 | `python-downloads`  | str  | `"automatic"` | `automatic`/`manual`/`never`                    |
-| `torch-backend`     | str  | —             | PyTorch backend (`cpu`/`cu126`/`cu128`/`auto`)  |
+| `torch-backend`     | str  | -             | PyTorch backend (`cpu`/`cu126`/`cu128`/`auto`)  |
 
 ### Index Settings
 

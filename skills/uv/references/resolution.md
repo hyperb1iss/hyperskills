@@ -4,7 +4,7 @@
 
 | Strategy            | Flag                         | Behavior                                   |
 | ------------------- | ---------------------------- | ------------------------------------------ |
-| `highest` (default) | —                            | Latest compatible versions                 |
+| `highest` (default) | -                            | Latest compatible versions                 |
 | `lowest`            | `--resolution lowest`        | Minimum versions for all deps              |
 | `lowest-direct`     | `--resolution lowest-direct` | Minimum for direct, highest for transitive |
 
@@ -59,7 +59,7 @@ version = "0.70"
 requires-dist = ["numpy>=1.8.1", "scipy>=0.13.0"]
 ```
 
-Provides static metadata without building source distributions — useful for packages with exotic build requirements (CUDA, Fortran, etc.).
+Provides static metadata without building source distributions, useful for packages with exotic build requirements (CUDA, Fortran, etc.).
 
 ## Conflict Declaration
 
@@ -73,7 +73,7 @@ conflicts = [
 ]
 ```
 
-Tells the resolver these extras are mutually exclusive — prevents impossible resolution.
+Tells the resolver these extras are mutually exclusive. Prevents impossible resolution.
 
 ## Reproducibility
 
@@ -153,4 +153,4 @@ explicit = true         # Only used when explicitly referenced in sources
 
 - TOML format, schema-versioned by minor uv releases
 - `revision` field tracks backwards-compatible changes
-- uv rejects lockfiles with newer schema versions — pin `required-version` to avoid surprises
+- uv rejects lockfiles with newer schema versions. Pin `required-version` to avoid surprises

@@ -152,8 +152,8 @@ Built on Salsa (same framework as rust-analyzer). Changing one function re-parse
 | Project               | ty        | pyright | mypy   |
 | --------------------- | --------- | ------- | ------ |
 | home-assistant (cold) | 2.19s     | 19.62s  | 45.66s |
-| PyTorch (cold)        | 4.04s     | 262.74s | —      |
-| PyTorch (incremental) | **4.7ms** | 386ms   | —      |
+| PyTorch (cold)        | 4.04s     | 262.74s | -      |
+| PyTorch (incremental) | **4.7ms** | 386ms   | -      |
 
 ## Editor/LSP Setup
 
