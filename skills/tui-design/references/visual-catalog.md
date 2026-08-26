@@ -109,7 +109,7 @@ Minimal:    ■■■■■■□□□□□□ 57%
 
 ---
 
-## Braille Patterns (U+2800–U+28FF)
+## Braille Patterns (U+2800-U+28FF)
 
 Each braille character is a 2-column × 4-row dot grid, encoding 8 bits:
 
