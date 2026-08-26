@@ -277,10 +277,14 @@ sub mask {
 
     my $out = join "\n", @lines;
 
-    # Inline code spans, including spans that wrap across lines. The opening run
-    # must not be escaped, and the closing run must be exactly the same length,
-    # so a two-tick opener is not closed by a three-tick run.
-    $out =~ s/(?<!\\)(?<!`)(`+)(?!`)((?:(?!(?<!`)\1(?!`)).)*?)(?<!`)\1(?!`)/blank($&)/gse;
+    # Inline code spans, including spans that wrap across a soft line break. The
+    # opening run must not be escaped, the closing run must be exactly the same
+    # length (a two-tick opener is not closed by a three-tick run), and the span
+    # may never cross a blank line, because the paragraph ends there. Without
+    # that stop, one unpaired backtick run in prose pairs with another far away
+    # and blanks every line between them, which is how the contributor guide's
+    # own inventory table went invisible on the first dogfood scan.
+    $out =~ s/(?<!\\)(?<!`)(`+)(?!`)((?:(?!(?<!`)\1(?!`))(?!\n[ \t]*\n).)*?)(?<!`)\1(?!`)/blank($&)/gse;
     # Link and image markup: angle-bracket destination, bare destination with
     # balanced parentheses, optional title in any of the three quote forms,
     # reference definitions, and autolinks. The whole destination-and-title run

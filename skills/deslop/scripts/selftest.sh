@@ -238,5 +238,14 @@ check "bold-lead bullet is a house candidate" 10 "$TMP/boldlead.md"
 check "agent surface skips bold-lead check"    0 "$TMP/boldlead.md" agent
 check "agent surface skips heading case"       0 "$TMP/mixedcase.md" agent
 
+# ---- inline spans stop at blank lines --------------------------------------
+# two unpaired backtick runs in different paragraphs must not pair up and
+# blank the prose between them; this hid 24 prose dashes in AGENTS.md
+printf 'See (```dot) syntax.\n\nA dash \342\200\224 in prose.\n\nUse ```dot again.\n' > "$TMP/tickpair.md"
+check "unpaired tick runs do not span paragraphs" 20 "$TMP/tickpair.md"
+grep_check "the dash between them is reported"  'em or en dash:3' "$TMP/tickpair.md"
+printf 'prose `code \342\200\224\nstill code` after\n' > "$TMP/softwrap.md"
+check "span across a soft break still masks"     0 "$TMP/softwrap.md"
+
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]
