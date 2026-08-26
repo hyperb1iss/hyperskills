@@ -93,9 +93,9 @@ perl skills/deslop/scripts/slopscan.pl --surface house FILE...
 # exit 0 clean · 10 candidates only · 20 hard failures · 30 unreadable input
 ```
 
-The masker is a heuristic rather than a CommonMark parser, and the dangerous failure would be over-masking, where visible prose gets blanked and a real tell exits 0. So the scanner runs every check twice, once masked and once raw, and reports what masking suppressed. A file with dashes in its code blocks says so and still passes; a masking bug shows up on that line instead of vanishing. One known gap sits behind it: a fence closed deeper than its list indent still over-masks. Rerun `scripts/selftest.sh` after any change to the masker, since all 57 of its cases are failures it actually had.
+The masker is a heuristic rather than a CommonMark parser, and the dangerous failure would be over-masking, where visible prose gets blanked and a real tell exits 0. So the scanner runs every check twice, once masked and once raw, and reports what masking suppressed. A file with dashes in its code blocks says so and still passes; a masking bug shows up on that line instead of vanishing. One known gap sits behind it: a fence closed deeper than its list indent still over-masks. Rerun `scripts/selftest.sh` after any change to the masker, since every one of its cases is a failure it actually had.
 
-Hard failures get fixed. Candidates get judged, because the heading check flags legitimate proper nouns and a bold lead that ends in a period and then adds new information is fine. The rhythm lines are diagnostics and never a gate: short technical prose legitimately scores low, and the thresholds circulating for these metrics are unvalidated. Vocabulary is inventory at this stage, applied in pass five.
+Hard failures get fixed. Candidates get judged: the heading check fires only on a file that mixes cases and flags the minority style, a proper noun can still put a heading on the wrong side of it, and a bold lead that ends in a period and then adds new information is fine. On the agent surface the scanner skips structural candidates outright, because that surface exempts structure. The rhythm lines are diagnostics and never a gate: short technical prose legitimately scores low, and the thresholds circulating for these metrics are unvalidated. Vocabulary is inventory at this stage, applied in pass five.
 
 **2. Structural.** Judge the document with the text out of focus, looking only at its shape: header inflation, bullets where the ideas connect, uniform section and paragraph sizes, reasoning packed into table cells, a summary that restates what was just read.
 
@@ -243,7 +243,7 @@ Default to embedded when another skill invoked this one.
 - `references/craft-moves.md` carries the diagnostics that repair them, from the editing tradition, plus the guards that stop a craft pass from overshooting.
 - `references/surface-profiles.md` carries per-surface rules with worked artifact-level rewrites.
 - `references/evidence.md` records what the corpus research supports, with citations and verification tiers, plus the false-positive traps.
-- `scripts/slopscan.pl` is the protection-aware mechanical scanner, and `scripts/selftest.sh` is its 57-case regression gate. Run the gate after any edit to the masker.
+- `scripts/slopscan.pl` is the protection-aware mechanical scanner, and `scripts/selftest.sh` is its regression gate. Run the gate after any edit to the masker.
 - `references/fixtures/` holds slop, protected, and clean fixtures for checking the scanner after an edit.
 
 The pattern set synthesizes [Wikipedia's Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) (WikiProject AI Cleanup), the [blader/humanizer](https://github.com/blader/humanizer) skill, Cursor's [pstack `unslop`](https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md) skill, peer-reviewed corpus work cited in `references/evidence.md`, and house conventions from `super-good-pr` and `hyper-pr-review`.

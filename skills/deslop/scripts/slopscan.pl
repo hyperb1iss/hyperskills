@@ -158,8 +158,12 @@ sub checks {
     push @hard, hits($prose, qr/\x{3010}[^\x{3011}]{0,40}\x{3011}/,       'lenticular bracket');
 
     # ---- candidates: need judgment ----------------------------------------
-    push @cand, hits($prose, qr/^\s*[-*+]\s+\*\*[^*]+:\*\*/m,      'bold-lead bullet');
-    push @cand, hits($prose, qr/^#{1,6} .*[a-z] [A-Z][a-z]/m,      'possible title-case heading');
+    # Structural candidates are skipped on the agent surface, where the
+    # surface matrix exempts structure (tables, density, bold leads) outright.
+    if ($surf ne 'agent') {
+        push @cand, hits($prose, qr/^\s*[-*+]\s+\*\*[^*]+:\*\*/m, 'bold-lead bullet');
+        push @cand, heading_case($prose);
+    }
     push @cand, hits($prose, qr/\bnot (?:just|only|merely|simply)\b[^.!?]{0,60}\b(?:it'?s|it is|but)\b/i,
                      'negative parallelism');
     push @cand, hits($prose, qr/,\s+(?:highlighting|underscoring|emphasizing|ensuring|reflecting|symbolizing|showcasing|fostering|contributing|cultivating|encompassing|demonstrating|solidifying|cementing|signaling|positioning|paving)\s/i,
@@ -305,6 +309,36 @@ sub blank_tail {
     my $i = rindex($s, '](');
     return blank($s) if $i < 0;
     return substr($s, 0, $i) . blank(substr($s, $i));
+}
+
+# Title case is a style choice rather than a tell; the tell is a file that
+# mixes heading cases, which is how an inserted section betrays a second
+# author. Flag the minority style only, and stay silent on a consistent
+# file. A proper noun can still put a heading on the wrong side of the
+# classifier, which is why the result is a candidate.
+sub heading_case {
+    my ($text) = @_;
+    my (@title, @sent);
+    my @lines = split /\n/, $text, -1;
+    for my $i (0 .. $#lines) {
+        next unless $lines[$i] =~ /^ {0,3}#{1,6}\s+(\S.*?)\s*$/;
+        my $body = $1;
+        $body =~ s/\s+#+$//;
+        my @words = grep { /[[:alpha:]]/ } split ' ', $body;
+        next if @words < 2;
+        my $caps = grep { /^[^[:alpha:]]*[[:upper:]]/ } @words;
+        if ($caps == @words || $body =~ /[a-z] [A-Z][a-z]/) {
+            push @title, [$i + 1, $body];
+        } else {
+            push @sent, [$i + 1, $body];
+        }
+    }
+    return () unless @title && @sent;
+    my ($minor, $label) = (@title <= @sent)
+        ? (\@title, 'title-case heading in a sentence-case file')
+        : (\@sent,  'sentence-case heading in a title-case file');
+    return map { sprintf('%s:%d  %s', $label, $_->[0], substr($_->[1], 0, 90)) }
+               @$minor;
 }
 
 sub hits {

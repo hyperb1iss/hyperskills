@@ -20,7 +20,7 @@ Deterministic. Detect with the commands in `SKILL.md`, not by eye.
 
 **M4. Decorative emoji.** Remove from headings and bullets where they carry no meaning. Semantic palettes on artifacts that require them (PR bodies, review severity markers) are exempt and must survive the pass.
 
-**M5. Title case headings.** Sentence case, always. Proper nouns keep their capitals, so the mechanical hit is a candidate, not a verdict.
+**M5. Mixed heading case.** Title case and sentence case are both legitimate conventions; the tell is one document mixing them, which is how an inserted section betrays a second author. Unify to the file's majority style. The scanner flags only the minority headings in a mixed file, and a proper noun can still land a heading on the wrong side, so the hit is a candidate, not a verdict.
 - Before: `## Configuring The Build Cache`
 - After: `## Configuring the build cache`
 

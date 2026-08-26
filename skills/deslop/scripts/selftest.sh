@@ -223,5 +223,20 @@ check "dash hard on house"             20 "$TMP/dash.md"
 check "dash hard on our agent files"   20 "$TMP/dash.md" agent
 check "dash soft on published prose"   10 "$TMP/dash.md" published
 
+# ---- heading case: consistency is the signal, not the case ----------------
+# uniform title case is a style choice; flagging every heading flooded the
+# report with 499 candidates on the first repo-wide dogfood scan
+printf '# My Great Tool\n\n## Getting Started Guide\n\nBody text here.\n\n## Advanced Usage Notes\n\nMore body.\n' > "$TMP/titlecase.md"
+check "uniform title-case file is clean"     0 "$TMP/titlecase.md"
+printf '# My tool\n\n## Getting started\n\nBody text here.\n\n## Advanced Usage Notes\n\nMore body.\n\n## Known limitations\n\nEnd.\n' > "$TMP/mixedcase.md"
+check "mixed heading case fires"            10 "$TMP/mixedcase.md"
+grep_check "minority heading is the one named" 'title-case heading in a sentence-case file:7' "$TMP/mixedcase.md"
+
+# ---- agent surface exempts structure, per the surface matrix ---------------
+printf -- '- **Speed:** fast\n' > "$TMP/boldlead.md"
+check "bold-lead bullet is a house candidate" 10 "$TMP/boldlead.md"
+check "agent surface skips bold-lead check"    0 "$TMP/boldlead.md" agent
+check "agent surface skips heading case"       0 "$TMP/mixedcase.md" agent
+
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]
