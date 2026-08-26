@@ -96,7 +96,7 @@ Each lens is one concern domain with its own checklist in `references/lenses.md`
 
 | Lens                   | Hunts                                                                                                     |
 | ---------------------- | --------------------------------------------------------------------------------------------------------- |
-| Correctness & keystone | The load-bearing invariant, derived from code and attacked first; invariant inventory; guards both ways   |
+| Correctness & keystone | The central invariant, derived from code and attacked first; invariant inventory; guards both ways        |
 | Contracts & callers    | Tightened validation vs real caller values; symmetry (the un-mirrored fix); class sweeps                  |
 | Security               | Secrets, capability values, and attacker-controlled content traced end to end; siblings of changed guards |
 | Fragility              | Compensating machinery around a bug instead of a fix at the owning boundary; concrete maintenance traps   |
@@ -141,7 +141,7 @@ The contract binds content, never formatting. Rigid structure belongs to agent-t
 
 **The report is written for a human who has to act on it.** The pipeline is machinery; the output is prose from a seasoned principal engineer. Findings arrive in complete sentences a tired author can follow: what breaks, why it matters, what to do next, with no fragment chains and no jargon the author has to decode. When a finding is an instance of a class, teach the class in one sentence so the author fixes it everywhere, not just here. And name what's solid: one or two lines on what was verified good tells the author what not to touch and makes the criticism land as judgment rather than reflex.
 
-The prose itself gets the anti-slop pass. A review that reads like LLM output gets discounted before its findings are weighed, so sweep the tells before posting: no em dashes, no rule-of-three cadences, no "this isn't just X, it's Y", no inflated significance, no hedging filler, no chatbot closers. `deslop` carries the full pattern set, and its review-report surface profile treats the severity markers (🚫 ⚠️ 💡) as load-bearing, so the prose gets cleaned without the structure getting flattened. `super-good-pr` remains the structural authority for anything posted to a PR.
+The prose itself gets the anti-slop pass. A review that reads like LLM output gets discounted before its findings are weighed, so sweep the tells before posting: no em dashes, no rule-of-three cadences, no "this isn't just X, it's Y", no inflated significance, no hedging filler, no chatbot closers. `deslop` carries the full pattern set, and its review-report surface profile treats the severity markers (🚫 ⚠️ 💡) as protected, so the prose gets cleaned without the structure getting flattened. `super-good-pr` remains the structural authority for anything posted to a PR.
 
 **Orient before you itemize.** When the change adds, removes, or rewires components, open with two to five sentences naming the components touched and how their relationships change, plus a mermaid diagram when the picture beats the paragraph: `flowchart LR` for structure and dependencies, `sequenceDiagram` for a changed runtime flow. Draw the delta, not the system: changed elements plus their immediate neighbors, real names from the code, new and modified nodes visibly marked (`classDef` styling or `NEW:` / `MOD:` prefixes), under ~20 nodes. GitHub's renderer is strict: alphanumeric node ids, quoted labels for punctuation, no raw braces in labels. A diagram restating a trivial diff costs reader time; draw only what prose can't carry in one read.
 
@@ -160,7 +160,7 @@ Rules:
 - **Verify anchors by content.** Grep for the quoted line before citing it; line numbers drift, and a wrong anchor burns trust faster than a missed bug (trust measurably erodes after 3-5 hallucinated comments).
 - **Few and high-conviction beats many.** Finding volume is inversely correlated with action. No nit flooding, especially when structural issues exist.
 - **Fixes target the root cause** and arrive committable when cheap; suggestions get acted on, prose gets ignored.
-- **Emoji for impact, not decoration.** The severity markers (🚫 ⚠️ 💡) are load-bearing. Beyond them, one well-chosen emoji can make a section land; stacked emoji and the AI-slop set never appear (`super-good-pr` carries the palette and the banned list).
+- **Emoji for impact, not decoration.** The severity markers (🚫 ⚠️ 💡) are semantic. Beyond them, one well-chosen emoji can make a section land; stacked emoji and the AI-slop set never appear (`super-good-pr` carries the palette and the banned list).
 - **PR-body inaccuracy is a finding on the code scale**: claimed-but-unimplemented changes, stale receipts, undisclosed changes. Grade against `super-good-pr`'s standard.
 - **Negative space is content, not a form.** At level 3+, the report says in a few plain sentences what was checked and found clean, what was not reviewed and why, and which checks could not run. This is what makes a quiet report trustworthy rather than merely quiet.
 - **End with a line of process transparency**: what was reviewed, how deep the pass went, what was skipped and why. A sentence or two, not a labeled footer.

@@ -172,7 +172,7 @@ edges. Add no text or watermark.
 ```
 
 For a refinement, change one dimension at a time. "Keep everything else
-unchanged" is load-bearing, not decorative.
+unchanged" is the part that does the work, not decoration.
 
 ## Verify the Handoff
 
