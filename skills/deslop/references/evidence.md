@@ -104,6 +104,18 @@ Consequence: the scanner reports rhythm and never gates on it, and the only dete
 
 **Reported.** `proselint` produced zero diagnostics against a fixture stuffed with AI tells, and its typography module wants curly quotes and ellipsis characters, which is the opposite of what this skill wants. Do not gate on it.
 
+## The Claude column: a local corpus measurement
+
+No published stylometry includes any Opus model, so this section is our own measurement and the first Claude column this file has carried. **Verified by our own testing** (Aug 2026): 43 Claude Code transcript files from personal projects, 102,962 words of claude-opus-5 prose, contrast lanes of claude-fable-5 and claude-opus-4.8 from the same pool, and a 2,312-word human control. Scripts and per-marker tables are re-runnable from `research/opus5-register/` in this repo (gitignored). Rates are per 1,000 prose words with code, tables, and quotes stripped.
+
+**The Opus 5 signature is grammatical, not lexical.** Keyness against fable-5 shows opus-5 over-using function words (`rather`, `than`, `so`, `because`, `which`, `not`) while fable over-uses content words, so the fingerprint survives topic changes and no wordlist can see it. The load-carrying markers: `rather than` at 3.29 (fable 0.70, human 0.00, stable across seven projects), `, so` clauses at 6.11 (fable 3.07), `because` at 1.73 (0.64), `, which is/means` reframing tails at 1.80 (0.85), and the definitional closer (`was the whole gap`) at 0.52 (0.28, human 0.00). Three or more of these families in one paragraph is the N19 texture; single instances are correct English at high base rates and must not be flagged.
+
+**Density runs the other way.** Opus-5 writes shorter sentences than fable-5 (18.9-word mean against 27.1), lower lexical density (61.8% content words against 68.0%), fewer semicolons, and a seventh of the 50-word sentences. The felt density of opus-5 prose is claim-rate under causal welding, not syntactic compression.
+
+**Anti-markers, which invert folklore.** Bold-lead bullets run at 0.13 on opus-5 long-form against fable's 2.33, so the canonical Claude tell essentially never fires on opus-5 prose. `isn't X; it's Y` is the one antithesis variant opus-5 uses least of the three models measured. A check tuned to those catches opus-4.8 and fable, not opus 5.
+
+**Two caveats that gate reuse.** The corpus em-dash rate is contract-suppressed mid-window (15.10 in July 2026, 2.81 in August, straddling this repo's deslop sweeps), so any re-mining must date-slice at 2026-07-31, and under a standing dash ban a dash points away from Claude (compliance measured at 98% elsewhere). And the corpus is house-register technical prose; these figures do not travel to fiction or marketing registers.
+
 ## Where this file is thin
 
 The per-feature percentages in the folklore section are reported rather than verified, and they carry the most weight of anything here. Anyone extending this skill should open Reinhart et al. and read the feature tables directly. The community-sourced tell families in `pattern-catalog.md` (reasoning leak, premise stacking, calibration theatre, performed candor) are unsourced pattern observations, useful and unmeasured.
