@@ -9,7 +9,7 @@ Structured ideation using the Double Diamond model, grounded in persistent memor
 
 **Core insight:** AI excels at divergent phases (volume, cross-domain connections). Humans excel at convergent phases (judgment, selection). Separating the two, and using Sibyl to avoid re-exploring solved problems, is the shape that consistently produces useful brainstorms.
 
-**How to read this skill:** the diamond is a rhythm, not a gate — phases revisit when new information changes the frame, and most real brainstorms are Quick Mode. The table below picks the mode before any phase starts.
+**How to read this skill:** the diamond is a rhythm, not a gate. Phases revisit when new information changes the frame, and most real brainstorms are Quick Mode. The table below picks the mode before any phase starts.
 
 ## Reading the Brief
 
@@ -17,10 +17,10 @@ The brief tells you how wide to go. Read its signals before choosing a mode.
 
 | Signal in the brief                                                                          | Mode it selects                                                     |
 | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Stakes + uncertainty + an open question ("i'm terrified to announce...", "let's get weird!") | Go wide — exploration is the deliverable, not a plan                |
+| Stakes + uncertainty + an open question ("i'm terrified to announce...", "let's get weird!") | Go wide: exploration is the deliverable, not a plan                 |
 | Crisp problem, known options                                                                 | Quick mode; ceremony scales inversely with brief clarity            |
 | Risk or hardening framing ("get evil", "get gnarly")                                         | Adversarial depth; generic-but-safe findings read as under-delivery |
-| "Build it" / momentum words                                                                  | Not a brainstorm — exit to implementation                           |
+| "Build it" / momentum words                                                                  | Not a brainstorm: exit to implementation                            |
 
 ---
 
@@ -45,10 +45,10 @@ If Sibyl already has a directly applicable answer, surface it first. The brainst
 
 ### Common moves
 
-- **Lean toward one load-bearing question at a time.** Stacking five questions buries the signal; building understanding incrementally surfaces what actually matters. The exception is when the user fires multiple parallel asks; then answer them in parallel rather than artificially serializing.
+- **Lean toward one decisive question at a time.** Stacking five questions buries the signal; building understanding incrementally surfaces what actually matters. The exception is when the user fires multiple parallel asks; then answer them in parallel rather than artificially serializing.
 - **Reframe the problem** from multiple angles: user view ("as a [user], I need..."), system view ("the system currently..."), constraint view ("we're bounded by...").
 - **Spawn parallel Explore agents** when the problem space is genuinely large: research how similar projects solve this, map the existing codebase surface, search for SOTA approaches.
-- **Run the kill-check.** Identify the one load-bearing assumption that decides whether the requested approach can work at all, and verify it with a decisive check before building options on it. The user's framing is a hypothesis too — confirm, refute, or split it with receipts, then keep solving the underlying problem either way.
+- **Run the kill-check.** Identify the one assumption that decides whether the requested approach can work at all, and verify it with a decisive check before building options on it. The user's framing is a hypothesis too. Confirm, refute, or split it with receipts, then keep solving the underlying problem either way.
 - **Translate felt-experience asks into named criteria.** "Buttery smooth", "gorgeous", "tip top" are valid problem statements; convert them into checkable acceptance criteria (what's observable, in whose environment, verified how) before exploring solutions, and draft beloved existing artifacts as fixtures.
 
 The discipline here is staying in problem space when the pull toward solutions is strong. If the problem is already crisp, skip ahead. This phase exists to prevent solving the wrong thing, not to perform exploration.
@@ -57,7 +57,7 @@ The discipline here is staying in problem space when the pull toward solutions i
 
 - Jumping to solutions before the problem frame is clear
 - Stacking questions when the answers depend on each other
-- Dismissing vague input ("make it faster" is a valid starting point — translate it into named criteria instead of rejecting it)
+- Dismissing vague input ("make it faster" is a valid starting point: translate it into named criteria instead of rejecting it)
 
 ---
 
@@ -92,7 +92,7 @@ If the problem was already crisp coming in, this phase is a 30-second confirmati
 
 - **Include one unconventional option** when the obvious paths look similar. Fixation on the first decent idea is the failure mode this phase is designed to prevent.
 - **Carry one subtractive option.** The judo move at the approach altitude: alongside the options that build something, include the one that builds less or nothing. Reuse an existing system, solve it with config, or delete the need entirely. The cheapest complexity is what you never write, and it rarely makes the list unless you force it on.
-- **Run the wheels gate.** Name the prior art you'd borrow versus the genuinely novel part you'd build — steal patterns ruthlessly — and give the build side a maintenance ceiling with a named kill condition ("if we can't prove value in a few focused files plus tests, we stop").
+- **Run the wheels gate.** Name the prior art you'd borrow versus the genuinely novel part you'd build (steal patterns ruthlessly) and give the build side a maintenance ceiling with a named kill condition ("if we can't prove value in a few focused files plus tests, we stop").
 - **Ground in existing patterns:** "this follows what we did in [project X]" or "this diverges from our convention because [reason]".
 - **Name the verification method** for each approach so the choice connects to a concrete check (test, benchmark, visual confirmation).
 
@@ -106,11 +106,11 @@ Don't fixate on the first decent idea:
 
 ### Two dials, corrected independently
 
-Ambition of the destination and complexity of the mechanism are separate dials. Push the destination ("is this ambitious enough to matter?") while keeping the mechanism boring. The bar is usefulness, not smallness — a minimal option that only proves plumbing is as wrong as a gold-plated one. Ask the lifespan question: something deleted in two weeks earns deliberately boring architecture; something that will live earns the timeless treatment.
+Ambition of the destination and complexity of the mechanism are separate dials. Push the destination ("is this ambitious enough to matter?") while keeping the mechanism boring. The bar is usefulness, not smallness. A minimal option that only proves plumbing is as wrong as a gold-plated one. Ask the lifespan question: something deleted in two weeks earns deliberately boring architecture; something that will live earns the timeless treatment.
 
 ### When the design gets attacked
 
-Concede without defending sunk work, then diagnose the pressure that produced the bad shape ("polling showed up because the gateway needed X — but convenience is not architecture"). Match the user's simplification energy, and fence the one load-bearing invariant that must survive it. A constraint absorbed this way usually makes the design better; say so when it does. On an overcorrection, offer the third option that satisfies both constraints.
+Concede without defending sunk work, then diagnose the pressure that produced the bad shape ("polling showed up because the gateway needed X, but convenience is not architecture"). Match the user's simplification energy, and fence the one invariant that must survive it. A constraint absorbed this way usually makes the design better; say so when it does. On an overcorrection, offer the third option that satisfies both constraints.
 
 ### Anti-patterns
 
@@ -126,13 +126,13 @@ Concede without defending sunk work, then diagnose the pressure that produced th
 
 **Goal:** Lock in the approach, record the decision, exit to action.
 
-Present your recommendation with conviction. Route to the user only the forks they actually own — product policy, risk appetite, taste — and decide the rest with your own judgment, saying so. End in one precise consent question, not a menu of everything; that preserves genuine choice without mush. When the user's answer is a cleaner model than your question, adopt it out loud. Then record the decision in Sibyl so future sessions don't re-litigate it:
+Present your recommendation with conviction. Route to the user only the forks they actually own (product policy, risk appetite, taste) and decide the rest with your own judgment, saying so. End in one precise consent question, not a menu of everything; that preserves genuine choice without mush. When the user's answer is a cleaner model than your question, adopt it out loud. Then record the decision in Sibyl so future sessions don't re-litigate it:
 
 ```bash
 sibyl add "Brainstorm: [topic]" "Chose [approach] because [reason]. Rejected [other approaches] due to [tradeoffs]. Key constraint: [X]."
 ```
 
-Record deliberately-open decisions as pinned invariants too ("the result is not necessarily one PR — agent's choice"); open-endedness is exactly what future sessions' priors will erase. And keep requirement separate from preference: a casual "use X" is a preference until the user makes it a constraint.
+Record deliberately-open decisions as pinned invariants too ("the result is not necessarily one PR, agent's choice"); open-endedness is exactly what future sessions' priors will erase. And keep requirement separate from preference: a casual "use X" is a preference until the user makes it a constraint.
 
 Hand off to whatever's next:
 
@@ -142,7 +142,7 @@ Hand off to whatever's next:
 | `/hyperskills:research`    | Need deeper investigation first                                                                                     |
 | `/hyperskills:orchestrate` | Ready to dispatch agents                                                                                            |
 | Direct implementation      | Simple enough to just build                                                                                         |
-| Write a spec               | Needs formal documentation — `deslop` the draft, then cross-model review, iterating to convergence ("until we love it"), not to a count |
+| Write a spec               | Needs formal documentation: `deslop` the draft, then cross-model review, iterating to convergence ("until we love it"), not to a count |
 
 ### Output
 
@@ -164,7 +164,7 @@ For small decisions that don't need the full diamond: search Sibyl, present two 
 Two shapes proven in the wild (as of Jul 2026):
 
 - **Consult mode.** Write the design to a file and confer with the other model on the undecided question. Advisory, not a verdict: no iteration cap, but give the consult a deadline and a degraded fallback so it never blocks the decision.
-- **Convergence as signal.** When independent starts — parallel research agents, another model from a blank page, prior art — agree on the spiky parts, that agreement is the confidence signal to proceed. Where they diverge is where the real decision lives.
+- **Convergence as signal.** When independent starts (parallel research agents, another model from a blank page, prior art) agree on the spiky parts, that agreement is the confidence signal to proceed. Where they diverge is where the real decision lives.
 
 A different model breaks self-review bias only; it shares your training staleness. Version, SOTA, and ecosystem claims need live primary sources (registry, release page, official docs) no matter how many models agree.
 
@@ -177,7 +177,7 @@ Adversarial advocate/critic splits are available when options have entrenched ca
 | Anti-Pattern                              | Fix                                              |
 | ----------------------------------------- | ------------------------------------------------ |
 | Jumping to solutions before defining pain | Spend one pass on the problem frame first        |
-| Asking a stack of questions at once       | Ask one load-bearing question, then adapt        |
+| Asking a stack of questions at once       | Ask the one decisive question, then adapt        |
 | Presenting seven "maybe" options          | Offer 2-3 real choices with tradeoffs            |
 | Ignoring prior decisions in Sibyl         | Search memory first and surface relevant context |
 | Brainstorming when the user said build it | Switch to implementation and keep momentum       |
