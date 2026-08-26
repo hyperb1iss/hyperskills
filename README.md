@@ -80,6 +80,7 @@ A few combinations come up often, more as observation than prescription:
 | Bug fix                 | implement (the skill scales itself for trivial fixes) |
 | Raster asset delegation | codex-imagegen from any shell-capable agent harness   |
 | Opening a PR            | super-good-pr, then announce it in your own voice     |
+| Anything humans read    | deslop before it ships, whatever produced the draft   |
 | Reviewing a PR          | hyper-pr-review, with cross-model-review as a lane    |
 | Python project work     | uv, ruff, ty, uv-build                                |
 | Knowledge consolidation | dream pulls insights from past sessions into Sibyl    |
@@ -173,6 +174,14 @@ What a PR description is actually for: handing a human the mental model fast, pr
 
 ```bash
 /hyperskills:super-good-pr
+```
+
+#### `deslop`: AI Tell Removal
+
+The pass that runs on anything a human reads outside the terminal. Its premise is that slop is a shape, not a wordlist: text with every banned word swapped still reads as generated when the flat rhythm, the header inflation, and the decoration-where-evidence-belongs all survive. So the passes run structure first and vocabulary last, gated by a surface profile, because the rules that clean up a blog post will vandalize a PR body, a scientific abstract, or an agent brief. Carries a deterministic mechanical scan (runnable `rg` and `awk` checks for dashes, curly quotes, bold-lead bullets, vocabulary frequency, and a sentence-length histogram as a rhythm proxy), a swap-trap table for the tells that relocate instead of dying, a preservation contract so a real author's voice survives, and a two-pass stop rule with the diagnosis for what fails it: text that still reads generated after two passes has nothing to say, and editing cannot add information.
+
+```bash
+/hyperskills:deslop
 ```
 
 #### `dream`: Conversation Memory Consolidation

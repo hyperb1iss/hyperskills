@@ -36,6 +36,11 @@ hyperskills/
 │   │   └── references/
 │   │       ├── lenses.md
 │   │       └── thermonuclear.md
+│   ├── deslop/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── pattern-catalog.md
+│   │       └── surface-profiles.md
 │   ├── dream/
 │   │   ├── SKILL.md
 │   │   └── references/
@@ -297,6 +302,7 @@ Sizes drift as skills evolve — check with `wc -w skills/*/SKILL.md` instead of
 | `codex-imagegen`     | none       | Process — Codex image generation delegation |
 | `cross-model-review` | 3 files    | Process — bidirectional cross-model review  |
 | `hyper-pr-review`    | 2 files    | Process — falsifier-gated PR review         |
+| `deslop`             | 2 files    | Process — AI tell removal from prose        |
 | `dream`              | 2 files    | Process — conversation memory consolidation |
 | `super-good-pr`      | none       | Process — reviewer-first PR descriptions    |
 | `git`                | none       | Domain — git operations                     |
@@ -313,7 +319,7 @@ When adding a new skill, it should fit one of these categories:
 
 **Process skills** — HOW to approach a class of work:
 
-- `brainstorm`, `plan`, `research`, `orchestrate`, `implement`, `codex-imagegen`, `cross-model-review`, `hyper-pr-review`, `dream`, `super-good-pr`
+- `brainstorm`, `plan`, `research`, `orchestrate`, `implement`, `codex-imagegen`, `cross-model-review`, `hyper-pr-review`, `deslop`, `dream`, `super-good-pr`
 - These tend to be workflow-heavy with phases and decision gates
 
 **Domain skills** — specialized knowledge for a specific technology or practice:

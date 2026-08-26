@@ -337,7 +337,7 @@ Conventional Commit types: `feat` (capability), `fix` (bug), `refactor` (no beha
 
 **Subject:** imperative mood, ≤76 chars, no trailing period, no filenames. "Fix null deref in token refresh" beats "Fix bug." For Conventional Commits, no emoji in the subject, it breaks parsers.
 
-**Body** (always include one): wrap at 76 chars, separated from subject by a blank line. Explain _why_, the diff shows _what_. State facts: banish "likely", "probably", "might", "seems", "appears to". If you don't know what a change does, read more before committing. Two sentences usually suffices; mention load-bearing context a future bisect would want.
+**Body** (always include one): wrap at 76 chars, separated from subject by a blank line. Explain _why_, the diff shows _what_. State facts: banish "likely", "probably", "might", "seems", "appears to". If you don't know what a change does, read more before committing. Two sentences usually suffices; mention load-bearing context a future bisect would want. A commit body is plain prose a human reads years later, so the `deslop` commit-body profile applies: no em dashes, no markdown, no inflated significance, no house jargon.
 
 Compose via `git commit -F -` with a single-quoted heredoc, never stacked `-m` flags — they ship each paragraph as one unwrapped line and burn amend cycles. Add a `Co-Authored-By` trailer naming the model and version; "Claude" alone doesn't disambiguate across multi-agent sessions. Quoting mechanics, the wrap backstop, and what to do when a shell-composed body lands mangled are in `/hyperskills:git`.
 

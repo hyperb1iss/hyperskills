@@ -138,6 +138,8 @@ Iterate the plan to convergence. Spec defects are the most expensive class, so r
 
 ### Present for Approval
 
+A plan that lands as a spec file gets the `deslop` pass before review, since a spec is a document humans read and argue over, and slop in a spec propagates into every artifact built from it. A plan presented inline stays on the chat surface and skips the pass.
+
 Show the plan as a structured list with waves:
 
 ```markdown

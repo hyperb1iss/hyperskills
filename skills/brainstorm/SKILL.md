@@ -142,7 +142,7 @@ Hand off to whatever's next:
 | `/hyperskills:research`    | Need deeper investigation first                                                                                     |
 | `/hyperskills:orchestrate` | Ready to dispatch agents                                                                                            |
 | Direct implementation      | Simple enough to just build                                                                                         |
-| Write a spec               | Needs formal documentation — then cross-model review, iterating to convergence ("until we love it"), not to a count |
+| Write a spec               | Needs formal documentation — `deslop` the draft, then cross-model review, iterating to convergence ("until we love it"), not to a count |
 
 ### Output
 

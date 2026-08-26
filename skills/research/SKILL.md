@@ -259,6 +259,8 @@ Three waves is a sound default budget, not a hard stop. Waves that keep surfacin
 
 Research output is not a build contract. Before it feeds `plan`, force the product cuts: the first workflow, the minimal boundaries, one vertical slice. When the decision is "build," prefer exiting into the riskiest narrow slice — a canary wedge that proves or breaks the approach before anything gets polished — over a fleet-wide plan. Triage findings as adopt / borrow the ideas / ignore with confidence.
 
+A report that lands as a file is a document humans read, so run `deslop` on it before handing it over. Synthesized findings are where AI tells breed: agent summaries arrive pre-slopped, and stitching them together compounds the inflated significance, the hedging, and the rule-of-three cadences. Findings written straight into chat stay on the chat surface and skip the pass.
+
 ---
 
 ## Quick Research Mode
