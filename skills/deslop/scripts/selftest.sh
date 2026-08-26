@@ -232,6 +232,14 @@ printf '# My tool\n\n## Getting started\n\nBody text here.\n\n## Advanced Usage 
 check "mixed heading case fires"            10 "$TMP/mixedcase.md"
 grep_check "minority heading is the one named" 'title-case heading in a sentence-case file:7' "$TMP/mixedcase.md"
 
+# setext headings count toward the case-consistency check too
+printf 'My Great Tool\n=============\n\nBody text here.\n\nAnother heading here\n----\n\nMore body.\n' > "$TMP/setextcase.md"
+check "mixed-case setext headings fire"       10 "$TMP/setextcase.md"
+# an equal split has no majority, and the label must not invent one
+printf '# Getting Started Guide\n\nBody text here.\n\n# Known limitations\n\nEnd.\n' > "$TMP/tiecase.md"
+check "heading-case tie still fires"          10 "$TMP/tiecase.md"
+grep_check "tie label claims no majority"     'mixed heading case, no majority' "$TMP/tiecase.md"
+
 # ---- agent surface exempts structure, per the surface matrix ---------------
 printf -- '- **Speed:** fast\n' > "$TMP/boldlead.md"
 check "bold-lead bullet is a house candidate" 10 "$TMP/boldlead.md"

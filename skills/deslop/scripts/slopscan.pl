@@ -325,9 +325,20 @@ sub heading_case {
     my (@title, @sent);
     my @lines = split /\n/, $text, -1;
     for my $i (0 .. $#lines) {
-        next unless $lines[$i] =~ /^ {0,3}#{1,6}\s+(\S.*?)\s*$/;
-        my $body = $1;
-        $body =~ s/\s+#+$//;
+        my $body;
+        if ($lines[$i] =~ /^ {0,3}#{1,6}\s+(\S.*?)\s*$/) {
+            $body = $1;
+            $body =~ s/\s+#+$//;
+        }
+        # setext: a text line underlined by = or -, which CommonMark reads as
+        # a heading even when the author meant a thematic break
+        elsif ($i < $#lines
+               && $lines[$i]     =~ /^ {0,3}\S/
+               && $lines[$i]     !~ /^ {0,3}(?:#|>|\||[-*+]\s|\d+[.)]\s|(?:=+|-+)\s*$)/
+               && $lines[$i + 1] =~ /^ {0,3}(?:=+|-+)\s*$/) {
+            ($body = $lines[$i]) =~ s/^\s+|\s+$//g;
+        }
+        next unless defined $body;
         my @words = grep { /[[:alpha:]]/ } split ' ', $body;
         next if @words < 2;
         my $caps = grep { /^[^[:alpha:]]*[[:upper:]]/ } @words;
@@ -338,9 +349,13 @@ sub heading_case {
         }
     }
     return () unless @title && @sent;
-    my ($minor, $label) = (@title <= @sent)
-        ? (\@title, 'title-case heading in a sentence-case file')
-        : (\@sent,  'sentence-case heading in a title-case file');
+    # On an equal split there is no majority to deviate from, so say so
+    # instead of inventing one; the title-case half is still the likelier
+    # insertion, so those are the lines reported.
+    my ($minor, $label) =
+        (@title == @sent) ? (\@title, 'mixed heading case, no majority')
+      : (@title <  @sent) ? (\@title, 'title-case heading in a sentence-case file')
+      :                     (\@sent,  'sentence-case heading in a title-case file');
     return map { sprintf('%s:%d  %s', $label, $_->[0], substr($_->[1], 0, 90)) }
                @$minor;
 }
