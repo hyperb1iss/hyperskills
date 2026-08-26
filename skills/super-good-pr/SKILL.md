@@ -1,6 +1,6 @@
 ---
 name: super-good-pr
-description: Use this skill when writing, polishing, or maintaining a pull request description, including drafting a PR body, opening a PR, rewriting a weak one, updating or refreshing a description after new commits or a rebase, keeping a PR body accurate, or when asked to make a PR "good" or "a banger". Produces reviewer-first descriptions that lead with why, prove every claim with evidence, name the load-bearing files and invariants, and state the real blast radius. Activates on mentions of write a PR, PR description, draft a PR, open a pull request, polish this PR, make this PR good, banger PR, PR body, update the PR description, refresh the PR body, keep the PR description accurate, describe these changes, or PR writeup.
+description: Use this skill when writing, polishing, or maintaining a pull request description, including drafting a PR body, opening a PR, rewriting a weak one, updating or refreshing a description after new commits or a rebase, keeping a PR body accurate, or when asked to make a PR "good" or "a banger". Produces reviewer-first descriptions that lead with why, prove every claim with evidence, name the decisive files and invariants, and state the real blast radius. Activates on mentions of write a PR, PR description, draft a PR, open a pull request, polish this PR, make this PR good, banger PR, PR body, update the PR description, refresh the PR body, keep the PR description accurate, describe these changes, or PR writeup.
 ---
 
 # Super Good PR Descriptions
@@ -9,7 +9,7 @@ A PR description is read by a human who has to rebuild your mental model from ze
 
 **Core insight:** lead with _why_, prove with _evidence_, state the real _blast radius_. A changelog tells the reviewer what moved. A super-good PR tells them what to believe, where to look, and what could still bite. The difference is entirely in altitude and receipts, not length.
 
-**How to read this skill:** the spine below is a map, not a script. Real PRs drop sections that don't apply and add domain-specific ones that do. A one-file fix doesn't need a rollout-sequencing section; a migration does. Match the shape to the change. The non-negotiables are the part that's actually load-bearing, and the section order is just a reliable way to deliver them.
+**How to read this skill:** the spine below is a map, not a script. Real PRs drop sections that don't apply and add domain-specific ones that do. A one-file fix doesn't need a rollout-sequencing section; a migration does. Match the shape to the change. The non-negotiables carry the weight; the section order is just a reliable way to deliver them.
 
 ## The non-negotiables
 
@@ -17,7 +17,7 @@ These are what make a description land. If a section doesn't serve one of these,
 
 - **Open with the mental model, not the diff.** First paragraph says what this _is_ and, when there's a naive version a reader would assume, why that version is wrong. "IP/CIDR allowlists are the wrong primitive here: behind a shared cloud edge, allowing an IP means allowing every tenant on it." Now the reviewer knows why the code looks the way it does before they read a line of it.
 - **Describe the system, not the session.** The body explains what the code does now and why, never the journey. No "then we refactored", no review round-by-round, no tooling provenance. Development history is sludge to a reviewer; the making-of belongs in the chat synthesis, not the artifact. This binds hardest when you edit an existing body: an approach you abandoned mid-PR is not news, so "an earlier version of this change kept X" and "originally this did Y" turn the description into a revision log about you. When a rejected alternative genuinely helps a reviewer, argue it in the present tense as a property of the system, so "accepting `gradial` buys nothing, because the namespace is empty on every cluster" rather than "we used to accept `gradial`". The `🔁 What changed since the last review round` section is the only place a delta belongs, it is scoped to what reviewers asked for, and it does not exist on a first-round PR.
-- **Name the load-bearing invariant and tell reviewers to anchor on it.** Most PRs have one property that, if broken, breaks everything: an ordering, a fail-closed default, an idempotency key. Say it out loud. "Anchor on one property: no upstream socket is opened until every check passes." That sentence directs the entire review.
+- **Name the invariant everything rides on and tell reviewers to anchor on it.** Most PRs have one property that, if broken, breaks everything: an ordering, a fail-closed default, an idempotency key. Say it out loud. "Anchor on one property: no upstream socket is opened until every check passes." That sentence directs the entire review.
 - **Name actual files, functions, and patterns.** `proxy.rs`, `resolvePolicy()`, `ON CONFLICT (id) DO UPDATE`, "the write → audit → revoke ordering." A reviewer should be able to navigate the diff cold from your prose. Vague nouns ("the handler", "some validation") make them hunt.
 - **Prove every claim with a receipt.** Not "tests pass" but `cargo test -p proxy → 98 passed, 0 failed`. Not "it's safe" but the test that pins it. Assertions are free; evidence is the whole point of the section.
 - **State the real blast radius.** What's untouched ("default deployments get none of this"), what's deliberately _not_ built (the dangerous-but-obvious alternative you rejected, and why), and what's a known gap shipping as a follow-up. Hiding the gaps reads as not knowing them.
@@ -32,7 +32,7 @@ Use the headers that carry weight for this change. Each is a `##` with a semanti
 2. **Context blockquote (`>`)**: one to three lines orienting the reader. For a standalone PR, where it sits and what it assumes. For a stack, the nav line (see Stacked PRs and granularity below).
 3. **`## 💡 What this is`**: the core, two to four sentences. Lead with the mental model; kill the naive primitive here if there is one.
 4. **`## 🤔 Why we need it & what it replaces`**: the old world and why it falls short; what's deliberately _not_ built and why the obvious version was dangerous; the blast-radius framing ("dark by default", "non-X deployments untouched").
-5. **`## 🎯 The invariant / anchor`** _(when there's one load-bearing property)_: the single thing to anchor the review on. Optional but powerful; skip it if the change has no single crux.
+5. **`## 🎯 The invariant / anchor`** _(when one property carries the change)_: the single thing to anchor the review on. Optional but powerful; skip it if the change has no single crux.
 6. **`## 🛠️ How it works`**: a numbered, sub-headed walkthrough a reviewer follows cold. Name files. Name patterns by name. This is where most of the body lives. Topology, flow, and ordering changes get a diagram here (see Diagrams and visual enrichment below).
 7. **Domain deep-dives** _(as needed)_: `## 🗄️ The database`, `## 🔗 Identity, end to end`. Add one when a subsystem deserves its own focused pass.
 8. **`## 🚦 Rollout sequencing (and why it's safe)`** _(for anything deployed)_: the order of operations, what's safe to stop at, what the old path keeps doing, and the expected day-one surprises: the alert that fires legitimately, the manual step that remains.
@@ -46,7 +46,7 @@ Use the headers that carry weight for this change. Each is a `##` with a semanti
 The Validation section is where trust is won or lost. Rules:
 
 - Show the command and its result, not a summary of the result. `pnpm turbo typecheck` across the changed package and its dependents → 112 tasks clean.
-- Count things. "25 passed", "98 passed, 0 failed", "12 passed (dark-by-default, label-gate dependencies, patch ordering…)". The parenthetical says _what_ the count proves.
+- Count things. "25 passed", "98 passed, 0 failed", "12 passed (dark-by-default, label-gate dependencies, patch ordering...)". The parenthetical says _what_ the count proves.
 - One `⚠️` line about a real gap beats ten green checks. "Local integration tests stay blocked by a local socket conflict; the CI job is the backstop, and a dedicated CI job for them is an open follow-up." That single line builds more trust than the whole rest of the section.
 - If you didn't verify something, say so. Never imply a check ran that didn't.
 - Receipts are keyed to a SHA. Any rebase, squash, or amend expires them, so re-run the gates against the new head and re-stamp the body. Stale green is a lie with a timestamp.
@@ -66,7 +66,7 @@ When a PR changes topology (services, request paths, data flow, state machines, 
 | Rollout phases and gates                       | Mermaid `flowchart` with the safe-stop points        |
 | UI changes                                     | Screenshot or short clip, drag-dropped as attachment |
 
-Rules that keep diagrams load-bearing:
+Rules that keep diagrams doing real work:
 
 - **Mermaid first.** It renders natively, survives branch deletion, edits like text on later refreshes, and never 404s. Reach for an image only when mermaid can't express it.
 - **Before/after beats single-state.** For a topology change, two small diagrams (old path, new path), or one diagram with the removed edge visibly styled out, show the delta the way a diff shows code.
@@ -97,7 +97,7 @@ Replies are part of the PR's prose surface, with the same voice and the same rec
 
 ## Emoji palette
 
-Load-bearing, never decorative, never stacked. Section-semantic set that works:
+Semantic, never decorative, never stacked. Section-semantic set that works:
 
 `💡` what · `🤔` why · `🎯` anchor/invariant · `🛠️` how · `🗄️` database · `🔗` identity · `🎫` issuance · `📡` serve/API · `🧹` cleanup/retention · `🚦` rollout · `🔁` what-changed · `🧪` validation · `🔍` reviewer-focus · `📌` follow-ups · `🛡️` security fix · `🚨` critical fix · `🏷️` labels · `🔄` reconnect/refresh.
 
@@ -113,7 +113,7 @@ This section is the anti-slop authority for a PR body, and it wins outright on s
 - **"Banger" is the quality bar, not vocabulary.** Never write "this is a banger / gorgeous / sick / cinematic" into a PR body. Those are words for talking _about_ the work, not in it. The bar means: leads with why, proves claims, states the real blast radius. Real PR voice is plain, root-cause-first, full sentences.
 - Full sentences that build linearly. No fragment-style compression, no corporate slop ("in order to", "it should be noted"), no hedging ("just", "simply", "basically").
 - No em dashes or en dashes, ever. They are the most reliable AI tell, so this is a boundary rather than a "use sparingly" preference. Replace each one with a period, a comma, a colon, or parentheses, whichever the sentence actually wants. Scan the body for `—` and `–` before posting; a hit means it is not ready.
-- **The slop lexicon evolves with model generations** (as of Jul 2026): the "it's not an X, it's a Y" cadence, and "load-bearing", a word this skill uses freely that must never land in a PR body. House jargon is fine between agents; sweep it from anything a human reads.
+- **The slop lexicon evolves with model generations** (as of Jul 2026): the "it's not an X, it's a Y" cadence, and "load-bearing", a word that must never land in a PR body. House jargon is fine between agents; sweep it from anything a human reads.
 - **Never instruct yourself or a generator to be "concise" for a PR body**, because compression produces reviewer-hostile paste. Size to understanding; chat length anchors don't govern artifacts humans read later. On a host whose defaults favor terseness, suspend that default explicitly for anything leaving the terminal.
 - A generator drafting the body gets the real receipts enumerated and a no-invented-validation constraint; fact-check its output against the diff before posting, since generators drift on paths and claims.
 - Tables only for enumerable facts: a profile→mode mapping, a port list, a pass/fail grid. Never pack reasoning into table cells; reasoning goes in prose.
