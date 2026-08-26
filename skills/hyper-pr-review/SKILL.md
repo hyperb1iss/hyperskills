@@ -5,7 +5,7 @@ description: Use this skill when conducting a code review as the reviewer, from 
 
 # Hyper PR Review
 
-A finding is a hypothesis, not a deliverable. As of Aug 2026, frontier reviewers catch only 15-31% of what human reviewers flag, so recall is a lost cause and precision is the entire game. Precision comes from verification machinery, not from better prompting (prompting-only noise control has published evidence of outright failure). This skill's edge over hosted review bots is that it runs where the code executes: every candidate finding faces its cheapest disproof before it is reported, and execution adjudicates whenever the code can run.
+A finding is a hypothesis, not a deliverable. As of Aug 2026, frontier reviewers catch only 15-31% of what human reviewers flag, so recall is a lost cause and precision is the entire game. Precision comes from verification machinery, not from better prompting (prompting-only noise control has published evidence of outright failure). This skill's edge over hosted review bots is that it runs where the code executes: every candidate finding faces its quickest disproof before it is reported, and execution adjudicates whenever the code can run.
 
 **Position in the toolbox:** this skill is you conducting the review. `cross-model-review` is dispatch and consumption mechanics for a different model's review; run it as an additional lane, not instead of this. `super-good-pr` owns the PR body standard this skill audits against.
 
@@ -71,7 +71,7 @@ Three stages stand between a suspicion and the report. Most candidates should di
 
 ### Stage 2: the falsifier gate
 
-A finding is a diagnosis, and a diagnosis needs a receipt. Before reporting a candidate, name the cheapest check that would disprove it, then run that check.
+A finding is a diagnosis, and a diagnosis needs a receipt. Before reporting a candidate, name the quickest check that would disprove it, then run that check.
 
 **The execution trust gate comes first.** Running the PR's tests or a repro executes the author's code. For a trusted author in your own repos, run in the working tree. For an external or unknown-provenance PR, execute only in a disposable, credential-free environment (no secrets, restricted network, no workspace writes that outlive the check). When no such isolation is available, stay static: trace instead of run, and label the finding PLAUSIBLE rather than fabricating an executed tier.
 
@@ -86,7 +86,7 @@ A finding is a diagnosis, and a diagnosis needs a receipt. Before reporting a ca
 | Label     | Means                                                             | Carries                                                        |
 | --------- | ----------------------------------------------------------------- | -------------------------------------------------------------- |
 | CONFIRMED | The falsifier ran and failed to kill it                           | The receipt: failing command, base-vs-head output, traced path |
-| PLAUSIBLE | Disproof wasn't cheap (live data, environment, or human judgment) | Exactly why, and what would settle it                          |
+| PLAUSIBLE | Disproof was out of reach (live data, environment, or human judgment) | Exactly why, and what would settle it                          |
 
 Name the evidence tier reached: executed > traced > read. A PLAUSIBLE never wears CONFIRMED's tone; certainty language is earned per finding.
 
@@ -112,7 +112,7 @@ At level 3+, run lenses as parallel read-only agents on a frozen artifact. Lens 
 Hosted reviewers learn per-team suppression lists; this skill reviews with a knowledge graph. Memory feeds every phase, and every review feeds it back.
 
 - **Before: recall the attack plan.** Run `sibyl context` on the repo and subsystem before reading the first file. Prior defect classes in this area become named attack vectors; distribute them into lens briefs as leads. Known false-positive ghosts die in stage 1 without burning a falsifier. Intentional-keeps settled in past rounds don't get re-litigated: a trade-off argued down with receipts last month is not a fresh finding today. Empty recall is stated, never padded.
-- **During: memory arms the adjudicator, not the generators.** A candidate matching a remembered error pattern inherits its known falsifier, so adjudication gets cheaper. Lens agents themselves stay memory-blind for independence; the orchestrator injects specific recalled gotchas into briefs as named leads rather than letting each lens free-run its own recall.
+- **During: memory arms the adjudicator, not the generators.** A candidate matching a remembered error pattern inherits its known falsifier, so adjudication gets faster. Lens agents themselves stay memory-blind for independence; the orchestrator injects specific recalled gotchas into briefs as named leads rather than letting each lens free-run its own recall.
 - **After: the review makes the graph smarter.** Capture new defect classes, gotchas, false-positive ghosts, and intentional-keep rationales (`sibyl remember`), so the next session inherits settled state instead of re-deriving it. A defect class closed twice belongs in the repo's standing review prompt or a CI gate. A recurring reviewer false positive is a corpus bug: find and scrub the stale doc feeding it.
 
 ## Grounding at the Edge
@@ -145,7 +145,7 @@ The prose itself gets the anti-slop pass. A review that reads like LLM output ge
 
 **Orient before you itemize.** When the change adds, removes, or rewires components, open with two to five sentences naming the components touched and how their relationships change, plus a mermaid diagram when the picture beats the paragraph: `flowchart LR` for structure and dependencies, `sequenceDiagram` for a changed runtime flow. Draw the delta, not the system: changed elements plus their immediate neighbors, real names from the code, new and modified nodes visibly marked (`classDef` styling or `NEW:` / `MOD:` prefixes), under ~20 nodes. GitHub's renderer is strict: alphanumeric node ids, quoted labels for punctuation, no raw braces in labels. A diagram restating a trivial diff costs reader time; draw only what prose can't carry in one read.
 
-**Findings severity-ordered, each one complete.** The severity markers stay because they scan: 🚫 blocking (required behavior is incorrect or unsafe; a rollout gate limits exposure but doesn't un-block a known defect), ⚠️ non-blocking (real and material, survivable), 💡 follow-up (real, outside this PR's causal scope). Completeness is a checklist, not a template. A reader can locate it (content-verified anchor), believe it (CONFIRMED with its receipt, or PLAUSIBLE with why not and what would settle it), see it break (trigger and impact), and fix it (root-cause fix, committable when cheap). Write it the way you'd say it across a desk:
+**Findings severity-ordered, each one complete.** The severity markers stay because they scan: 🚫 blocking (required behavior is incorrect or unsafe; a rollout gate limits exposure but doesn't un-block a known defect), ⚠️ non-blocking (real and material, survivable), 💡 follow-up (real, outside this PR's causal scope). Completeness is a checklist, not a template. A reader can locate it (content-verified anchor), believe it (CONFIRMED with its receipt, or PLAUSIBLE with why not and what would settle it), see it break (trigger and impact), and fix it (root-cause fix, committable when small). Write it the way you'd say it across a desk:
 
 ```text
 🚫 apps/api/limits.ts:84, confirmed by repro. Any request with more than
@@ -159,7 +159,7 @@ Rules:
 
 - **Verify anchors by content.** Grep for the quoted line before citing it; line numbers drift, and a wrong anchor burns trust faster than a missed bug (trust measurably erodes after 3-5 hallucinated comments).
 - **Few and high-conviction beats many.** Finding volume is inversely correlated with action. No nit flooding, especially when structural issues exist.
-- **Fixes target the root cause** and arrive committable when cheap; suggestions get acted on, prose gets ignored.
+- **Fixes target the root cause** and arrive committable when the fix is small; suggestions get acted on, prose gets ignored.
 - **Emoji for impact, not decoration.** The severity markers (🚫 ⚠️ 💡) are semantic. Beyond them, one well-chosen emoji can make a section land; stacked emoji and the AI-slop set never appear (`super-good-pr` carries the palette and the banned list).
 - **PR-body inaccuracy is a finding on the code scale**: claimed-but-unimplemented changes, stale receipts, undisclosed changes. Grade against `super-good-pr`'s standard.
 - **Negative space is content, not a form.** At level 3+, the report says in a few plain sentences what was checked and found clean, what was not reviewed and why, and which checks could not run. This is what makes a quiet report trustworthy rather than merely quiet.
@@ -170,7 +170,7 @@ Rules:
 
 Read-only by default. Do not post comments, approve, request changes, or push fixes unless explicitly asked. Before any requested GitHub action, re-check the live head and every anchor.
 
-**Delivery shape, when posting is requested: inline first, summary as needed.** Each finding lands as an inline review comment on the exact changed lines, self-contained (severity marker, the finding, the fix, a committable `suggestion` block where cheap), submitted together as one review rather than a scatter of issue comments. The top-level review body carries only what has no line to live on: the verdict, the orientation and any mermaid, the negative space, and the process-transparency close, sized to need. A two-finding pass gets a sentence or two up top; a deep pass earns the full summary. Inline comments do the work; the summary orients.
+**Delivery shape, when posting is requested: inline first, summary as needed.** Each finding lands as an inline review comment on the exact changed lines, self-contained (severity marker, the finding, the fix, a committable `suggestion` block where the fix is small), submitted together as one review rather than a scatter of issue comments. The top-level review body carries only what has no line to live on: the verdict, the orientation and any mermaid, the negative space, and the process-transparency close, sized to need. A two-finding pass gets a sentence or two up top; a deep pass earns the full summary. Inline comments do the work; the summary orients.
 
 | Rule                                                                            | Why                                                    |
 | ------------------------------------------------------------------------------- | ------------------------------------------------------ |

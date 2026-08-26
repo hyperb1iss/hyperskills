@@ -5,9 +5,9 @@ description: Use this skill before any prose leaves the terminal for a human rea
 
 # Deslop
 
-AI tells sit at three levels: characters, words, and shape. The first two are cheap to fix and carry less signal. In fiction that gap is measured, with narrative-structure features alone separating model from human text at 93.2% macro-F1 across 61,608 stories ([StoryScope](https://arxiv.org/abs/2604.03136)). Nobody has run that measurement on a README, so structure-first is a well-supported bet rather than a law, and the syntactic features with the largest verified gaps (participial clauses at 5.3 times the human rate, nominalizations at 2.1) appear in every register.
+AI tells sit at three levels: characters, words, and shape. The first two are quick to fix and carry less signal. In fiction that gap is measured, with narrative-structure features alone separating model from human text at 93.2% macro-F1 across 61,608 stories ([StoryScope](https://arxiv.org/abs/2604.03136)). Nobody has run that measurement on a README, so structure-first is a well-supported bet rather than a law, and the syntactic features with the largest verified gaps (participial clauses at 5.3 times the human rate, nominalizations at 2.1) appear in every register.
 
-So the passes below open with character checks, because a script does those for free, then work down through document shape, argument shape, and sentence shape, reaching vocabulary last. The order is the contribution: neither source catalog prescribes one, and a flat list invites a reader to fix twenty cheap word hits and stop.
+So the passes below open with character checks, because a script does those for free, then work down through document shape, argument shape, and sentence shape, reaching vocabulary last. The order is the contribution: neither source catalog prescribes one, and a flat list invites a reader to fix twenty easy word hits and stop.
 
 The second thing that decides every rule is the surface. A pass tuned for a blog post will strip the semantic emoji a PR body requires, flatten the calibrated uncertainty that makes a postmortem honest, and spend tokens polishing a brief no human will read. Read the surface row before editing anything.
 
@@ -144,7 +144,7 @@ Report a "not flagged, and why" note whenever softer markers were present and de
 
 ## Swap traps
 
-Removing a tell tends to relocate it. Treat this as a cheap guard rather than a documented mechanism: displacement has not been measured for prompt-level bans, and the one study that looked found no compensation.
+Removing a tell tends to relocate it. Treat this as a light guard rather than a documented mechanism: displacement has not been measured for prompt-level bans, and the one study that looked found no compensation.
 
 The four that fire most often, with the full table in `references/pattern-catalog.md`:
 

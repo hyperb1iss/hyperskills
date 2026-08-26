@@ -2,7 +2,7 @@
 
 One profile per surface, each with a worked artifact-level example. Sentence-level fixes live in `pattern-catalog.md`; this file is about what a whole artifact should look like when it is clean, and which rules do not apply where.
 
-Read the profile before editing. The expensive deslop failure is a correct rule applied to a surface that needed the opposite.
+Read the profile before editing. The worst deslop failure is a correct rule applied to a surface that needed the opposite.
 
 ## Authority map
 

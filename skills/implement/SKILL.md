@@ -41,7 +41,7 @@ digraph implement {
 
 - **Implemented.** Work happens in batches of roughly 2-3 edits, then verifies. Build in dependency order (types → logic → surfaces), held loosely: migrations get written AFTER the code that needs them, and frontend drives backend changes as often as the reverse. Edit existing files 9:1 over creating new ones; that's the observed ratio in successful sessions. Fix errors as they surface; accumulating them creates cascade-debugging.
 
-- **Verified.** Typecheck is the primary inner-loop gate, fast and cheap; run it between batches. Tests fit naturally after feature-complete. Full suite before commit, and the proof ladder continues past green gates to the consumption boundary (see Verification Cadence).
+- **Verified.** Typecheck is the primary inner-loop gate, fast enough to run between batches. Tests fit naturally after feature-complete. Full suite before commit, and the proof ladder continues past green gates to the consumption boundary (see Verification Cadence).
 
 - **Committed.** Atomic chunks, committed as you go. Stage specific files, commit, loop back to the next chunk. Many small commits per session is the pattern that consistently outperforms one mega-commit at the end. See **Commit Cadence** below for message anatomy.
 

@@ -98,7 +98,7 @@ Consequence, and it is a hard rule in `SKILL.md`: never emit an authorship verdi
 - Markdown table delimiter rows read as double-hyphen dashes unless prose-free lines are skipped.
 - `rg -c` counts matching lines rather than matches, so any budget check ("at most one per document") needs `rg -o | wc -l`.
 
-**Reported.** Coefficient of variation on paragraph length is scale-free and cheap, which makes it the better single rhythm metric. Type-token ratio is length-dependent and should be replaced by a moving-average variant over a 25 to 50 word window. Circulating thresholds for sentence-length standard deviation false-fire on short crisp technical prose, and a measurement of this repo's own contract prose landed above one published "human floor," which means that floor is wrong for terse instructional writing.
+**Reported.** Coefficient of variation on paragraph length is scale-free and trivial to compute, which makes it the better single rhythm metric. Type-token ratio is length-dependent and should be replaced by a moving-average variant over a 25 to 50 word window. Circulating thresholds for sentence-length standard deviation false-fire on short crisp technical prose, and a measurement of this repo's own contract prose landed above one published "human floor," which means that floor is wrong for terse instructional writing.
 
 Consequence: the scanner reports rhythm and never gates on it, and the only deterministic rhythm rule is the over-correction trip, which fires on prose that has been cut too short rather than on prose that is too uniform.
 

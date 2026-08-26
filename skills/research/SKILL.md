@@ -173,7 +173,7 @@ Fill specific gaps identified in the analysis. Wave 2 agents differ from Wave 1 
 
 Stop deploying waves when the research question can be answered with confidence, when key claims have 2+ independent sources, or when the user signals "enough, let's decide." The real stopper is yield: a wave that changes no conclusion is the last wave.
 
-Kill low-yield lanes out loud mid-wave ("this search isn't paying rent") and re-anchor to a higher-signal source rather than re-running variants of the same walk.
+Kill low-yield lanes out loud mid-wave ("this lane is a dead end") and re-anchor to a higher-signal source rather than re-running variants of the same walk.
 
 Three waves is a sound default budget, not a hard stop. Waves that keep moving the conclusions can continue past it; waves that oscillate instead of narrowing mean the question itself needs reframing.
 

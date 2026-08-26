@@ -21,7 +21,7 @@ Bound the work before decomposing it. The goal is calibrating planning depth to 
 
 ### Common moves
 
-- **Search Sibyl** for related tasks, decisions, and prior plans: `sibyl search "<feature keywords>"`, `sibyl task list -s todo`. Cheap and often surfaces an already-decomposed predecessor.
+- **Search Sibyl** for related tasks, decisions, and prior plans: `sibyl search "<feature keywords>"`, `sibyl task list -s todo`. Quick, and it often surfaces an already-decomposed predecessor.
 - **Define success criteria** in measurable terms ("tests pass", "endpoint returns X", "p95 latency < 200ms") instead of vague goals like "improve performance".
 - **Write completion criteria an autonomous run can consume**: complete AND validated (what proves each wave, plus review gates at wave checkpoints when stakes warrant). A run that can't close every gate ends blocked with receipts and a runbook for the remaining gates; blocked-cleanly is a legitimate terminal state, fake-done is not.
 - **Identify constraints**: files that shouldn't change, dependencies to respect, timeline or budget pressure.
@@ -59,11 +59,11 @@ Break the work into steps you can actually verify. The discipline that separates
 
 ### Measure twice: look for the reframe first
 
-The most expensive plan is one that faithfully decomposes the wrong shape: tidy tasks, clean DAG, all building something that didn't need to exist. Before breaking work down, spend one pass hunting the judo move that shrinks it.
+The most wasteful plan is one that faithfully decomposes the wrong shape: tidy tasks, clean DAG, all building something that didn't need to exist. Before breaking work down, spend one pass hunting the judo move that shrinks it.
 
 - **Can a reframe collapse the task list?** A different shape might turn ten tasks into three. Reframe before you decompose, not after you've built.
 - **Does the codebase already own this?** Reusing an existing pattern, module, or canonical helper beats decomposing a bespoke build of the same thing.
-- **What can we not build?** The cheapest task is the one you strike from the plan. Delete a mode, a layer, a config surface rather than scheduling work to construct it.
+- **What can we not build?** The easiest task is the one you strike from the plan. Delete a mode, a layer, a config surface rather than scheduling work to construct it.
 
 Ambition of the destination and complexity of the mechanism are separate dials. Pressure-test both. Plans get bounced for timidity as often as implementations get bounced for sprawl; the bar is usefulness, not smallness. Two questions calibrate the mechanism: **how long does this live?** (a two-week component earns no release pipeline) and **what's the riskiest narrow path?** (slice canary-first, one concrete end-to-end proof before generalizing).
 

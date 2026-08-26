@@ -93,7 +93,7 @@ Replies are part of the PR's prose surface, with the same voice and the same rec
 - Every piece of feedback, every round, gets an itemized disposition visible on the PR: fixed (with the SHA), no action (with the reason, addressed to the reviewer), follow-up, or stale.
 - A reply pairs what changed with the receipt that pins it: the fix commit or the regression test.
 - Resolution belongs to the reviewer: answer the thread, don't self-resolve it.
-- Cheap nits get taken, not argued. A reviewer calling the description inaccurate gets code-defect priority.
+- Trivial nits get taken, not argued. A reviewer calling the description inaccurate gets code-defect priority.
 
 ## Emoji palette
 

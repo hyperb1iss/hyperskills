@@ -313,7 +313,7 @@ Characteristic reviewer misses to check first, whichever model reviewed:
 
 Report the disposition ledger ("took 4, declined 3 with reasons, flagged 2"), on the PR when humans are watching. Scorecard the reviewer ("4 right, 3 wrong, 2 nits") to calibrate trust. Two independently-briefed reviewers converging on the same bug upgrades it to confirmed.
 
-**Scope membrane for fix passes:** review-fix loops are a monotonic scope ratchet. Pointed at a PR and told to iterate until clean, a reviewer will eventually touch 100 files. Pre-declare a file budget before the fix pass. Blockers need changed-line causality; suggestions may cover nearby risk; everything else is a follow-up. Cheap nits on a PASS still get adopted. Give push-triggered reviewers a named stop condition: green with only non-blocking suggestions = done.
+**Scope membrane for fix passes:** review-fix loops are a monotonic scope ratchet. Pointed at a PR and told to iterate until clean, a reviewer will eventually touch 100 files. Pre-declare a file budget before the fix pass. Blockers need changed-line causality; suggestions may cover nearby risk; everything else is a follow-up. Trivial nits on a PASS still get adopted. Give push-triggered reviewers a named stop condition: green with only non-blocking suggestions = done.
 
 ---
 
@@ -349,7 +349,7 @@ For Codex-hosted sessions, choose based on depth:
 
 | Approach        | Command shape                                                       | When                                                                                                         |
 | --------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Piped diff**  | `git diff ... \| claude -p "PROMPT"`                                | Quick review; reviewer sees only the diff. Faster, cheaper.                                                  |
+| **Piped diff**  | `git diff ... \| claude -p "PROMPT"`                                | Quick review; reviewer sees only the diff. Faster, uses fewer tokens.                                                  |
 | **Tool access** | `claude -p --allowedTools "Read,Glob,Grep,Bash(git *)" -- "PROMPT"` | Architecture/security/cross-file deep-dive. Reviewer can trace data flow across files the diff doesn't show. |
 
 Tool access costs more tokens but catches bugs that need surrounding context (signatures defined elsewhere, downstream consumers, similar patterns). Both shapes take the `env -u ANTHROPIC_API_KEY` prefix (Rule 4).

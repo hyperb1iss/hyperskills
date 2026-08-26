@@ -91,7 +91,7 @@ If the problem was already crisp coming in, this phase is a 30-second confirmati
   | C: [name] | ...  | ...  | Low/Med/High | ...  |
 
 - **Include one unconventional option** when the obvious paths look similar. Fixation on the first decent idea is the failure mode this phase is designed to prevent.
-- **Carry one subtractive option.** The judo move at the approach altitude: alongside the options that build something, include the one that builds less or nothing. Reuse an existing system, solve it with config, or delete the need entirely. The cheapest complexity is what you never write, and it rarely makes the list unless you force it on.
+- **Carry one subtractive option.** The judo move at the approach altitude: alongside the options that build something, include the one that builds less or nothing. Reuse an existing system, solve it with config, or delete the need entirely. The complexity you never write is complexity you never maintain, and that option rarely makes the list unless you force it on.
 - **Run the wheels gate.** Name the prior art you'd borrow versus the genuinely novel part you'd build (steal patterns ruthlessly) and give the build side a maintenance ceiling with a named kill condition ("if we can't prove value in a few focused files plus tests, we stop").
 - **Ground in existing patterns:** "this follows what we did in [project X]" or "this diverges from our convention because [reason]".
 - **Name the verification method** for each approach so the choice connects to a concrete check (test, benchmark, visual confirmation).

@@ -9,7 +9,7 @@ Lens agents generate; they do not adjudicate, fix, or post. This contract is del
 - **Scope**: exact SHA, base ref, file list. Read-only, no checkout mutation (`git show <sha>:<path>` to read without switching).
 - **The one lens**: its checklist below, plus an explicit skip list ("not style, not other lenses' domains").
 - **Quarantine**: no PR body, title, or comment text in the brief, except for the intent-drift lens, whose job is to check that text.
-- **Output contract**, per candidate: anchor with the quoted line (not just a number), the claim in one sentence, trigger and impact, and a **proposed falsifier**: the cheapest check that would disprove it. No fixes, no verdicts.
+- **Output contract**, per candidate: anchor with the quoted line (not just a number), the claim in one sentence, trigger and impact, and a **proposed falsifier**: the quickest check that would disprove it. No fixes, no verdicts.
 
 The orchestrating reviewer (or a second verification fleet) runs the falsifiers and assigns CONFIRMED / PLAUSIBLE labels. Convergence between independently-briefed lenses moves a candidate to the front of the adjudication queue and raises its priority; it never skips the falsifier. Correlated lenses share blind spots, and unanimous agreement has endorsed defects that one executed check disproved.
 
