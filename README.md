@@ -30,7 +30,7 @@
 
 Models already know how to write React components, Kubernetes manifests, and PyTorch code. They don't need 300 lines of examples for that.
 
-hyperskills is built around an agent workflow. Brainstorming structured by the Double Diamond. Wave-based research with deferred synthesis. Verification-driven planning and implementation. Cross-model peer review that catches what self-review misses. Seven orchestration strategies for multi-agent work. Conversation consolidation that pulls signal out of past sessions into persistent memory. The process skills are the heart of it, mined from thousands of real dispatches and tens of thousands of tracked operations — most recently re-hardened against a 100-day corpus of 600 real Claude and Codex sessions (Jul 2026).
+hyperskills is built around an agent workflow. Brainstorming structured by the Double Diamond. Wave-based research with deferred synthesis. Verification-driven planning and implementation. Cross-model peer review that catches what self-review misses. Seven orchestration strategies for multi-agent work. Conversation consolidation that pulls signal out of past sessions into persistent memory. The process skills are the heart of it, mined from thousands of real dispatches and tens of thousands of tracked operations, most recently re-hardened against a 100-day corpus of 600 real Claude and Codex sessions (Jul 2026).
 
 Domain skills round out the toolbox where models have stale or missing knowledge: current Astral Python tooling, Tilt operational decision trees, and terminal UI design that survives across emulators.
 
@@ -103,7 +103,7 @@ Double Diamond model for creative work. Diverge on the problem, converge on a de
 
 #### `research`: Multi-Agent Knowledge Gathering
 
-Wave-based research with deferred synthesis. Deploy agents in waves across a research surface, run gap analysis between waves, then synthesize with the full picture. Covers technology evaluation, codebase archaeology, SOTA analysis, and competitive landscape patterns. The wave budget is a churn guard, not a wall: keep going while waves yield, reframe when they oscillate. Epistemics are load-bearing: premise-check before any fan-out, date-anchored briefs, and consensus-is-not-verification — version claims settle against a live registry, never vote count.
+Wave-based research with deferred synthesis. Deploy agents in waves across a research surface, run gap analysis between waves, then synthesize with the full picture. Covers technology evaluation, codebase archaeology, SOTA analysis, and competitive landscape patterns. The wave budget is a churn guard, not a wall: keep going while waves yield, reframe when they oscillate. Epistemics come first: premise-check before any fan-out, date-anchored briefs, and consensus-is-not-verification, where version claims settle against a live registry, never vote count.
 
 ```bash
 /hyperskills:research
@@ -122,7 +122,7 @@ Verification-driven planning centered on a durable spec artifact: pinned invaria
 Distilled from 21,321 tracked operations across 64+ projects. Patterns that consistently ship working code:
 
 - 2-3 edits then verify, the cadence that prevents debugging spirals
-- Proof lives at the consumption boundary — and a green check only counts if it demonstrably did the work
+- Proof lives at the consumption boundary, and a green check only counts if it demonstrably did the work
 - Scale selection from trivial (1-5 edits) to epic (1000+ edits), with the right strategy for each
 - The judo move, the shape checkpoint at commit, and fix-the-class-bound-the-fix
 - Error recovery: name the failure class first, spiral prevention, incident mode (depth up, breadth flat)
@@ -141,7 +141,7 @@ Seven orchestration strategies mined from 597+ real agent dispatches: Research S
 
 #### `cross-model-review`: Bidirectional Cross-Model Code Review
 
-The author model writes, a different model reviews — and the independence claim is scoped honestly: it breaks self-review bias, not shared-training staleness. Works in either direction: Claude Code calls Codex via `codex review` (structured diff, custom prompt supported) or `codex exec` (freeform deep-dive), and Codex calls Claude via `claude -p`, whose gnarly gotchas (the `yield_time_ms: 300000` rule, the `--` separator for variadic flags, the `ANTHROPIC_API_KEY` billing trap, output capture to a file rather than `tail`) are all documented. Covers the receiving half too: findings are claims to verify, findings-ledger re-review loops that converge instead of churning, verdict freshness (a PASS covers a SHA), the hang playbook for both directions, and a labeled degradation ladder. Beyond code review: claim-level fact-checks, diagnosis checks before fix mode, and artifact-mediated design consults.
+The author model writes, a different model reviews, and the independence claim is scoped honestly: it breaks self-review bias, not shared-training staleness. Works in either direction: Claude Code calls Codex via `codex review` (structured diff, custom prompt supported) or `codex exec` (freeform deep-dive), and Codex calls Claude via `claude -p`, whose gnarly gotchas (the `yield_time_ms: 300000` rule, the `--` separator for variadic flags, the `ANTHROPIC_API_KEY` billing trap, output capture to a file rather than `tail`) are all documented. Covers the receiving half too: findings are claims to verify, findings-ledger re-review loops that converge instead of churning, verdict freshness (a PASS covers a SHA), the hang playbook for both directions, and a labeled degradation ladder. Beyond code review: claim-level fact-checks, diagnosis checks before fix mode, and artifact-mediated design consults.
 
 ```bash
 /hyperskills:cross-model-review
@@ -170,7 +170,7 @@ optional threaded refinement through `codex mcp-server`.
 
 #### `super-good-pr`: Reviewer-First PR Descriptions
 
-What a PR description is actually for: handing a human the mental model fast, proving the parts they'd doubt, and being honest about what you didn't do. Lead with why, prove every claim with a receipt, name the load-bearing invariant, stay honest about blast radius. And because a body is born once but lives for weeks: surgical read-modify-write maintenance (never regenerate), SHA-keyed receipt refresh after every push, squash rewrites that carry the story into the body, and review-thread disposition ledgers. Carries the section spine, the emoji palette (and the AI-slop set to avoid), repo-template integration, and diagram guidance — topology and flow changes get native mermaid in the body, chosen by change shape.
+What a PR description is actually for: handing a human the mental model fast, proving the parts they'd doubt, and being honest about what you didn't do. Lead with why, prove every claim with a receipt, name the invariant everything rides on, stay honest about blast radius. And because a body is born once but lives for weeks: surgical read-modify-write maintenance (never regenerate), SHA-keyed receipt refresh after every push, squash rewrites that carry the story into the body, and review-thread disposition ledgers. Carries the section spine, the emoji palette (and the AI-slop set to avoid), repo-template integration, and diagram guidance: topology and flow changes get native mermaid in the body, chosen by change shape.
 
 ```bash
 /hyperskills:super-good-pr
@@ -188,7 +188,7 @@ What makes it more than another wordlist: a real scanner (`scripts/slopscan.pl`)
 
 #### `dream`: Conversation Memory Consolidation
 
-Conversation review aimed at what inline capture can't see: gotchas that repeat across sessions, prompt-stream telemetry (instruction frequency is the codify-next signal; vanished instructions prove an encoding worked), and cross-project connections. Harvests Claude Code and Codex sessions and writes durable knowledge into Sibyl — from a quick end-of-day nap up to swarm-scale mining runs (distill, fan out, merge, review).
+Conversation review aimed at what inline capture can't see: gotchas that repeat across sessions, prompt-stream telemetry (instruction frequency is the codify-next signal; vanished instructions prove an encoding worked), and cross-project connections. Harvests Claude Code and Codex sessions and writes durable knowledge into Sibyl, from a quick end-of-day nap up to swarm-scale mining runs (distill, fan out, merge, review).
 
 ```bash
 /hyperskills:dream
@@ -200,7 +200,7 @@ Specialized knowledge for specific technologies where models have stale or missi
 
 #### `git`: Advanced Git Operations
 
-The operations that actually cause problems, weighted the way real work is: the PR-branch upkeep loop (rebase, pinned-lease push, review settlement), squash-merge-aware surgery, the rewrite bracket (backup ref before, machine-checkable proof after — a clean rebase is not a correct rebase), lock file regeneration, undo operations by scenario, commit bodies via quoted heredoc or message file, and shared-repo coexistence for multi-agent worktrees.
+The operations that actually cause problems, weighted the way real work is: the PR-branch upkeep loop (rebase, pinned-lease push, review settlement), squash-merge-aware surgery, the rewrite bracket (backup ref before, machine-checkable proof after; a clean rebase is not a correct rebase), lock file regeneration, undo operations by scenario, commit bodies via quoted heredoc or message file, and shared-repo coexistence for multi-agent worktrees.
 
 ```bash
 /hyperskills:git

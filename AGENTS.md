@@ -1,4 +1,4 @@
-# Hyperskills — Contributor Guide
+# Hyperskills Contributor Guide
 
 How to add new skills to this plugin. Read this before creating or modifying any skill.
 
@@ -94,10 +94,10 @@ hyperskills/
 
 **Only build skills for things models don't already know.** Claude is already good at writing code, explaining concepts, and general problem-solving. Skills should encode:
 
-- **Procedural knowledge** — multi-step workflows that require specific ordering
-- **Decision trees** — when to choose X over Y based on situational factors
-- **Reference material** — API surfaces, Unicode catalogs, framework-specific patterns
-- **Hard-won patterns** — gotchas, anti-patterns, and real-world failure modes
+- **Procedural knowledge**: multi-step workflows that require specific ordering
+- **Decision trees**: when to choose X over Y based on situational factors
+- **Reference material**: API surfaces, Unicode catalogs, framework-specific patterns
+- **Hard-won patterns**: gotchas, anti-patterns, and real-world failure modes
 
 If the model can already do it well without guidance, don't write a skill for it.
 
@@ -133,7 +133,7 @@ description: Use this skill when [specific triggers]. Activates on mentions of [
 
 - Start with "Use this skill when" followed by concrete scenarios
 - Include "Activates on mentions of" with specific trigger words/phrases
-- Be generous with triggers — list 8-12 keywords that should activate the skill
+- Be generous with triggers: list 8-12 keywords that should activate the skill
 - Include both formal terms ("threat modeling") and casual phrasing ("security review")
 
 **Good example:**
@@ -185,9 +185,9 @@ Tables, decision trees, and procedures. Prefer tables over prose:
 **Body guidelines:**
 
 - Target 1,500-3,000 words. Move anything beyond that to `references/`
-- Use tables over prose — they scan faster and waste fewer tokens
+- Use tables over prose: they scan faster and waste fewer tokens
 - Include decision trees for branching logic
-- Add anti-pattern tables — knowing what NOT to do is as valuable as knowing what to do
+- Add anti-pattern tables; knowing what NOT to do is as valuable as knowing what to do
 - End with "What This Skill is NOT" to prevent misuse
 - Flowcharts use Graphviz `dot` format in fenced code blocks (```dot)
 
@@ -206,7 +206,7 @@ skills/<skill-name>/
 
 **Reference files:**
 
-- No YAML frontmatter needed — just plain markdown
+- No YAML frontmatter needed, just plain markdown
 - Can be large (2,000-10,000+ words)
 - Only loaded into context when Claude determines it needs them
 - Must be referenced from SKILL.md so Claude knows they exist
@@ -247,11 +247,11 @@ Add relevant keywords to the `keywords` array:
 }
 ```
 
-Bump the version. Skills are opt-in, so strict semver "breaking" rarely applies — version reflects user-facing surface change, not theoretical break risk:
+Bump the version. Skills are opt-in, so strict semver "breaking" rarely applies; version reflects user-facing surface change, not theoretical break risk:
 
 - Patch: edits to existing skills (content updates, fixes, small additions)
 - Minor: new skill added, removed, or renamed
-- Major: reserved for plugin-level architectural changes (manifest format, layout overhaul) — rare
+- Major: reserved for plugin-level architectural changes (manifest format, layout overhaul); rare
 
 #### `AGENTS.md` / `CLAUDE.md`
 
@@ -289,39 +289,39 @@ Before committing, verify:
 
 ## Existing Skill Inventory
 
-Sizes drift as skills evolve — check with `wc -w skills/*/SKILL.md` instead of trusting a table.
+Sizes drift as skills evolve, so check with `wc -w skills/*/SKILL.md` instead of trusting a table.
 
 | Skill                | References | Domain                                      |
 | -------------------- | ---------- | ------------------------------------------- |
-| `brainstorm`         | none       | Process — ideation                          |
-| `plan`               | none       | Process — decomposition                     |
-| `research`           | none       | Process — knowledge gathering               |
-| `orchestrate`        | 1 file     | Process — multi-agent dispatch              |
-| `implement`          | 2 files    | Process — implementation                    |
-| `codex-imagegen`     | none       | Process — Codex image generation delegation |
-| `cross-model-review` | 3 files    | Process — bidirectional cross-model review  |
-| `hyper-pr-review`    | 2 files    | Process — falsifier-gated PR review         |
-| `deslop`             | 4 files    | Process — AI tell removal from prose        |
-| `dream`              | 2 files    | Process — conversation memory consolidation |
-| `super-good-pr`      | none       | Process — reviewer-first PR descriptions    |
-| `git`                | none       | Domain — git operations                     |
-| `tilt`               | 2 files    | Domain — Kubernetes dev                     |
-| `tui-design`         | 2 files    | Domain — terminal UI                        |
-| `uv`                 | 3 files    | Domain — Python package management          |
-| `ruff`               | 2 files    | Domain — Python linting & formatting        |
-| `ty`                 | 2 files    | Domain — Python type checking               |
-| `uv-build`           | none       | Domain — Python build backend               |
+| `brainstorm`         | none       | Process: ideation                           |
+| `plan`               | none       | Process: decomposition                      |
+| `research`           | none       | Process: knowledge gathering                |
+| `orchestrate`        | 1 file     | Process: multi-agent dispatch               |
+| `implement`          | 2 files    | Process: implementation                     |
+| `codex-imagegen`     | none       | Process: Codex image generation delegation  |
+| `cross-model-review` | 3 files    | Process: bidirectional cross-model review   |
+| `hyper-pr-review`    | 2 files    | Process: falsifier-gated PR review          |
+| `deslop`             | 4 files    | Process: AI tell removal from prose         |
+| `dream`              | 2 files    | Process: conversation memory consolidation  |
+| `super-good-pr`      | none       | Process: reviewer-first PR descriptions     |
+| `git`                | none       | Domain: git operations                      |
+| `tilt`               | 2 files    | Domain: Kubernetes dev                      |
+| `tui-design`         | 2 files    | Domain: terminal UI                         |
+| `uv`                 | 3 files    | Domain: Python package management           |
+| `ruff`               | 2 files    | Domain: Python linting & formatting         |
+| `ty`                 | 2 files    | Domain: Python type checking                |
+| `uv-build`           | none       | Domain: Python build backend                |
 
 ## Skill Categories
 
 When adding a new skill, it should fit one of these categories:
 
-**Process skills** — HOW to approach a class of work:
+**Process skills** are HOW to approach a class of work:
 
 - `brainstorm`, `plan`, `research`, `orchestrate`, `implement`, `codex-imagegen`, `cross-model-review`, `hyper-pr-review`, `deslop`, `dream`, `super-good-pr`
 - These tend to be workflow-heavy with phases and decision gates
 
-**Domain skills** — specialized knowledge for a specific technology or practice:
+**Domain skills** are specialized knowledge for a specific technology or practice:
 
 - `git`, `tilt`, `tui-design`, `uv`, `ruff`, `ty`, `uv-build`
 - These tend to be reference-heavy with decision trees and lookup tables
@@ -332,7 +332,7 @@ When adding a new skill, it should fit one of these categories:
 - **Tables over prose:** Decision trees, comparisons, and reference data in table format
 - **Graphviz for flows:** Use ```dot fenced code blocks for process diagrams
 - **Concrete over abstract:** "Run `git rebase origin/main`" not "rebase your branch"
-- **Date volatile info:** "As of Feb 2026" — skills spoil like research
+- **Date volatile info:** "As of Feb 2026". Skills spoil like research
 - **No fluff:** Every sentence should teach something or guide a decision
 
 ## Common Mistakes
@@ -343,7 +343,7 @@ When adding a new skill, it should fit one of these categories:
 | Entire skill is >5,000 words in SKILL.md               | Split into SKILL.md (core) + references/ (detail)           |
 | Prose paragraphs explaining options                    | Convert to decision tree tables                             |
 | Duplicating what models already know                   | Only encode non-obvious procedural knowledge                |
-| No anti-patterns section                               | Add one — knowing pitfalls is half the value                |
+| No anti-patterns section                               | Add one; knowing pitfalls is half the value                 |
 | Missing "What This Skill is NOT"                       | Add scope boundaries to prevent misuse                      |
 | Reference files exist but aren't mentioned in SKILL.md | Add a References section pointing to them                   |
 | Forgetting to update plugin.json and AGENTS.md         | Always update both after adding/changing skills             |
