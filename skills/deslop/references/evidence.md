@@ -8,34 +8,42 @@ Dated Aug 2026. Lexical findings spoil fastest, structural findings least.
 
 ## Structure carries the signal, vocabulary does not
 
-**Verified.** [StoryScope: Investigating idiosyncrasies in AI fiction](https://arxiv.org/abs/2604.03136) (Russell, Rajendhran, Pham, Iyyer, Wieting) built a corpus of 61,608 stories from 10,272 prompts, each written by a human author and five LLMs. Its abstract reports that **narrative features alone achieve 93.2% macro-F1 for human versus AI detection**. Structure identifies machine text without looking at a single word choice.
+**Verified, in fiction.** [StoryScope: Investigating idiosyncrasies in AI fiction](https://arxiv.org/abs/2604.03136) (Russell, Rajendhran, Pham, Iyyer, Wieting) built a corpus of 61,608 stories from 10,272 prompts, each written by a human author and five LLMs. Its abstract reports that **narrative features alone achieve 93.2% macro-F1 for human versus AI detection**. Structure identifies machine text there without looking at a single word choice.
+
+Read the scope honestly: the measurement is narrative features on fiction, and it does not establish the same result for a README or a spec. What carries across is the mechanism, since the four verified over-used features below are syntactic rather than narrative and appear in every register.
 
 **Reported.** The same work finds surface-level rewriting barely moves detection, and separate self-similarity work finds machine text measurably over-coherent, with those features surviving paraphrase attack better than lexical baselines.
 
-Consequence for this skill: the pass order runs structure before vocabulary, and a wordlist pass alone is never sufficient.
+Consequence for this skill: the pass order runs structure before vocabulary. That ordering is a design bet supported by the fiction result and by marker rot, not a proven fact for technical prose.
 
-## Rules that point the wrong way
+## Features where the direction depends on the model
 
-**Verified (paper and general claim).** [Do LLMs write like humans? Variation in grammatical and rhetorical styles](https://arxiv.org/abs/2410.16107) (Reinhart, Markey, Laudenbach, Pantusen, Yurko, Weinberg, Brown) analyzes Llama 3 and GPT-4o variants against human corpora using Douglas Biber's linguistic feature set. Its abstract reports systematic differences between LLMs and humans that **persist as models get larger** and are **larger for instruction-tuned models than base models**, concluding that LLMs struggle to match human stylistic variation.
+**Verified.** [Do LLMs write like humans? Variation in grammatical and rhetorical styles](https://arxiv.org/abs/2410.16107) (Reinhart, Markey, Laudenbach, Pantusen, Yurko, Weinberg, Brown; [full text](https://pmc.ncbi.nlm.nih.gov/articles/PMC11874169/)) compares Llama 3 and GPT-4o variants against human corpora using Douglas Biber's feature set. Its abstract reports systematic differences that persist as models grow and are larger for instruction-tuned models than base models.
 
-**Reported (per-feature figures, from the paper's tables).** Instruction-tuned models under-use, relative to humans:
+The finding that matters most for editing is that several features **diverge in direction between model families**, which makes any universal rule about them unsupported. Verified from the paper's text:
 
-| Feature                                          | Approximate LLM rate vs human |
-| ------------------------------------------------ | ----------------------------- |
-| Agentless passive                                | ~51 to 53%                    |
-| Hedges (*at about*, *something like*, *almost*)  | ~50 to 67%                    |
-| Contractions                                     | ~60 to 63%                    |
-| Discourse particles (*so*, *well*, *actually*)   | ~60%                          |
-| First-person pronouns                            | ~62%                          |
-| Clausal coordination (*and then X happened*)     | ~59 to 63%                    |
+> Both GPT-4o models avoid clausal coordination, while all Llama 3 variants use it more frequently than humans.
 
-And over-use phrasal coordination (*X, Y, and Z*) at roughly 1.4 to 1.9 times the human rate.
+> Both GPT-4o models use downtoners more frequently than humans, while all Llama 3 variants avoid them.
 
-Three consequences, all encoded in `SKILL.md`:
+Downtoners are hedges. So "strip the hedges" is roughly right for GPT-4o prose and actively wrong for Llama 3 prose, and a skill that states either as a general rule is wrong half the time. **Reported** (from the paper's feature tables, not independently confirmed here): the same split appears in agentless passive, contractions, and first-person pronouns, where GPT-4o runs well below human rates (passive around 51 to 53%, contractions around 60 to 63%, first person around 62 to 81%) while Llama 3 Instruct sits near or above them.
 
-1. "Cut the passive voice" and "strip the hedges" move prose **toward** the machine register when applied as blanket rules. Fix only passive that hides an actor the reader needs, and only hedges that qualify nothing.
-2. Contractions, first person, and discourse particles are deslop moves rather than tells. Add them where the register allows.
-3. The tricolon feels machine-made partly because of the coordination imbalance. Rebuilding a three-item list as a sequence of clauses fixes more than deleting the third item.
+Consequence, and it is the rule in `SKILL.md`: do not apply a blanket fix to passive voice, hedges, contractions, first person, or coordination style. Ask what the sentence needs. The only defensible version of the advice is narrow, so fix passive that hides an actor the reader needs and hedges that qualify nothing.
+
+## Features verified over-used, which is where to aim
+
+**Verified**, GPT-4o rates relative to humans, from the same paper:
+
+| Feature                                                | Rate vs human |
+| ------------------------------------------------------ | ------------- |
+| Present participial clauses ("..., ensuring that...")   | 5.3x          |
+| "That" clauses as subject ("That the build failed...")  | 2.6x          |
+| Nominalizations ("the implementation of validation")    | 2.1x          |
+| Phrasal coordination ("X, Y, and Z")                    | 1.9x          |
+
+These four are the highest-confidence structural targets in this file. The participial figure is the strongest single signature measured anywhere in the sources here, which promotes the participial-tail tell (`pattern-catalog.md` N3) from a stylistic nitpick to the most reliable syntactic marker available. Nominalization and the phrasal-coordination imbalance are catalog entries N17 and N15.
+
+Note the shape of the fix for each: all four are repaired by giving a real subject a real verb, which is the same move Joseph Williams built his style manual around. Turning "the implementation of validation ensures correctness" into "the middleware validates each request" fixes a nominalization, a participial clause, and an actor-hiding construction in one edit.
 
 ## Words that look like tells and are not
 
@@ -51,7 +59,7 @@ Three consequences, all encoded in `SKILL.md`:
 
 **Reported.** Suppression resistance varies by model. Some drop by 98% when told to avoid markdown; others barely move, and some retain em dashes even under explicit prohibition. Format suppression and punctuation suppression are separate instructions, because an em dash is prose-legal and survives a "no markdown" instruction that zeroes headers and bullets.
 
-**Verified by our own scan.** The double-hyphen substitute is real and worth catching: writers and models prompted away from `—` emit `--` instead. The scanner catches both, and swapping one for the other trades a known signature for a newer one.
+**Reported.** The double-hyphen substitute is worth catching: writers and models prompted away from `—` are observed emitting `--` instead. Our fixtures verify only that the scanner detects a constructed `a--b`, not the behavioral claim. Either way, swapping one for the other trades a known signature for a newer one.
 
 Consequence: on our surfaces the dash ban is enforced because the project contract bans it, not because it proves authorship. On someone else's prose, treat dash density as a candidate and look for converging signals.
 

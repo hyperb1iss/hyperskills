@@ -36,7 +36,7 @@ The document's shape, judged with the text out of focus. Structural slop survive
 
 **S2. Bullets where the ideas connect.** Lists imply parallel, independent items. Reasoning that depends on the previous step is prose. The tell is a bulleted list whose items only make sense read in order.
 
-**S3. Symmetry.** Every section the same length, every list the same item count, every paragraph three sentences. Real writing is lumpy: the important part is longer. Uniform proportion is the machine's signature.
+**S3. Symmetry.** Every section the same length, every list the same item count, every paragraph three sentences. Real writing is lumpy, because the important part gets more room. Note the scale rule: uniformity inside a single sentence is desirable, and variation belongs across sentences and paragraphs, so these pull in opposite directions and a check that ignores scale gives the wrong answer.
 
 **S4. Reasoning in table cells.** Tables hold enumerable facts (a flag list, a version matrix, a pass/fail grid). An argument crammed into a cell loses its connective tissue and gets skimmed.
 
@@ -44,6 +44,7 @@ The document's shape, judged with the text out of focus. Structural slop survive
 - Before: `- **Performance:** Performance improved through caching.`
 - After: `- Response times dropped from 400ms to 90ms once the resolver cache landed.`
 - Not a tell: a bold lead that ends in a period, names the thing, and is followed by new information (`**Schema in TypeScript.** Tables live in one file.`).
+- Also not a tell, and this carve-out is mandatory rather than discretionary: a term-plus-definition list, which Microsoft's style guide explicitly prescribes ("for the term, use sentence case and bold... an exception to the general guideline"), and bold run-in heads, which the same guide recommends. Flagging either is a false positive against a published standard. The tell is restatement, not boldface.
 
 **S6. The restating summary.** A closing section that recaps what the reader just read. Cut it. Summaries earn their place only at the top of something long, or when they carry a decision the body did not state.
 
@@ -115,7 +116,7 @@ The argument's shape. These are the tells readers name when they say something "
 - Before: `The API stays out of your way and keeps the database close at hand.`
 - After: `Queries run in-process against a local file, so there is no connection string and no network hop.`
 
-**R14. The generic-docs test.** Any paragraph that could appear verbatim in an unrelated project's documentation says nothing about this project. Cut it or make it specific.
+**R14. The generic-docs test.** A paragraph that could appear verbatim in an unrelated project's documentation probably says nothing about this project, so make it specific or cut it. One exception that matters: required boilerplate. License text, safety warnings, prerequisites, legal notices, and shared operational instructions are supposed to be transplantable, and the reader still needs them. Transplantability is a prompt to check whether the paragraph is doing work, not a verdict.
 - Before: `Our goal is to provide a great developer experience with sensible defaults and clear errors.`
 - After: `Every error names the config key that caused it and the file it was read from.`
 
@@ -135,15 +136,18 @@ The argument's shape. These are the tells readers name when they say something "
 
 Sentence-level shape.
 
-**N1. Negative parallelism.** Watch for: not just X but Y, it's not X, it's Y, not only, more than just. State the point directly.
-- Before: `This isn't just a cache, it's a correctness guarantee.`
+**N1. Negative parallelism, in excess or empty.** Narrower than the folklore, because the construction itself is endorsed craft: Williams lists "not only X but Y" among his six devices for emphasis, and Strunk's 1918 rule 19 says "the antithesis of negative and positive is strong: *not charity, but simple justice*". No corpus measurement of AI over-use exists. Two tests catch the real defect. Does the negated half name a position someone actually holds, or is it a strawman pivot? And does the antithesis recur more than once every few hundred words? A yes to the second or a no to the first means cut it.
+- Before: `This isn't just a cache, it's a correctness guarantee.` (nobody claimed it was only a cache)
 - After: `The cache also serializes writes, so two concurrent updates cannot interleave.`
+- Mechanically safe subset, closed-class: `not careful` to `careless`, `not many` to `few`, `did not remember` to `forgot`.
 
 **N2. Tailing negation fragments.** Clipped negations bolted onto a sentence: `no guessing`, `no wasted motion`, `no config needed`, `no surprises`. Write the real clause.
 - Before: `The flags come from the schema, no guessing.`
 - After: `The flags are generated from the schema, so an unknown flag fails at parse time.`
 
-**N3. Participle pseudo-analysis.** A present participle clause bolted on to fake depth: highlighting, underscoring, emphasizing, ensuring, reflecting, symbolizing, showcasing, fostering, contributing to, cementing, paving the way for. Delete it, or promote it into a real claim with a real subject.
+**N3. Participle pseudo-analysis.** The strongest measured signature in this catalog: present participial clauses run at roughly 5.3 times the human rate (`evidence.md`), with the largest effect size of any feature tested. Watch for highlighting, underscoring, emphasizing, ensuring, reflecting, symbolizing, showcasing, fostering, contributing to, cementing, paving the way for. Delete the clause, or promote it into a real claim with a real subject.
+
+The shape itself is legitimate. Williams treats the trailing participial clause as a free modifier that comments on the subject of the nearest verb (`Leonardo da Vinci was a man of powerful intellect, driven by an insatiable curiosity`). So the discriminator is content, not form: does the clause add a fact, or restate the significance of what was just said? A fact stays.
 - Before: `The retry logic backs off exponentially, ensuring resilience and improving reliability.`
 - After: `The retry logic backs off exponentially, so a downstream outage does not turn into a thundering herd.`
 
@@ -168,11 +172,19 @@ Sentence-level shape.
 
 **N9. Staccato fragment runs.** Three or more verbless fragments in a row inflating the tone. Rebuild at least one into a full sentence and vary the lengths around it.
 
-**N10. Synonym cycling.** Repetition penalty artifact: the same referent renamed every sentence (the resolver, the parser, the component, the module). Pick one name and repeat it. Consistent terminology is a feature in technical writing.
+**N10. Referential aliasing.** The same referent renamed every sentence: the resolver, the parser, the component, the module. Pick one name and repeat it. Countable test: per referent, count the distinct definite noun phrases in a paragraph, and three or more is the tell. (The popular explanation that a repetition penalty causes this is unmeasured, and the documented penalty signature is misspelling rather than aliasing, so treat the cause as unknown and the pattern as real.)
+
+Repeating the term is not a failure, it is the requirement. Microsoft's style guide says "if you mean the same thing, use the same word"; Google's says to reuse the exact term including capitalization; ASD-STE100 allows "only one word for one meaning"; and Fowler named the anti-repetition instinct a fault a century ago. Two tiers: inside defined terms, API names, specs, safety text, legal text, or anything localized, repeating the exact term is mandatory. In general prose, vary connectives and sentence shapes, never the name of the thing.
 
 **N11. Uniform sentence length.** Not visible one sentence at a time. Check the histogram: a healthy piece has genuinely short and genuinely long sentences. A tight 12-to-25-word band is machine-flat even when every word is right.
 
-**N12. Sentence-opening monotony.** Six sentences in a row opening with the subject, or four opening with a subordinate clause. Vary the entry point.
+**N12. Sentence openings, and why not to vary them.** Do not diversify openings for variety. Williams is explicit that the common advice is wrong: changing subjects to make them different breaks the topic string that makes a passage cohere, and most writers change topic too often already. The real test is the topic-string test in `craft-moves.md`, which asks whether the openings name a small set of related ideas rather than whether they differ. What is worth fixing is a run of identical *structures* (four sentences each opening on the same subordinate-clause pattern), which is a template rather than a topic.
+
+**N17. Nominalization.** The action buried in an abstract noun instead of the verb, measured at 2.1 times the human rate (`evidence.md`). Williams' five patterns, each with its own fix: as the subject of an empty verb (`The intention of the committee is to audit` to `The committee intends to audit`); after an empty verb (`conducted an investigation into` to `investigated`); two bridged by an empty verb (`Our loss in sales was a result of their expansion` to `We lost sales because they expanded`); after `there is` (`There is no need for our further study` to `We need not study this further`); and chained by prepositions (`did a review of the evolution of the brain` to `reviewed how the brain evolved`).
+
+Four nominalizations to keep, or a pass strips the cohesion devices: a short subject referring back to the previous sentence (`These arguments all depend on...`), one replacing an awkward `the fact that`, one naming what would be the verb's object (`I accepted her request`), and one naming a concept familiar enough to act as a character (`taxation`, `revolution`).
+
+**N18. "That" clause as subject.** `That the build failed was not surprising` at 2.6 times the human rate. Rewrite with the real subject: `Nobody was surprised that the build failed`, or better, `The build had failed twice that week, so nobody was surprised`.
 
 **N13. False agency.** An inanimate subject taking a human verb, which is how a sentence avoids naming who acted. "A complaint becomes a fix" (the complaint did nothing; someone fixed it). Also "the decision emerges", "the market rewards", "the data tells us". Name the actor, or state the mechanism.
 - Before: `The migration surfaced a schema conflict that demanded attention.`
@@ -206,7 +218,7 @@ Last pass, least valuable. Word swaps on unfixed structure produce clean-soundin
 
 **L8. Hyphenated-pair uniformity.** AI hyphenates compounds in every position. Keep the hyphen when the compound modifies a following noun (`a high-quality report`), drop it when it follows the noun (`the report is high quality`). Watch: third-party, data-driven, decision-making, well-known, high-quality, real-time, long-term, end-to-end, cross-functional.
 
-**L9. Colon as a mid-sentence connector.** Colons introduce lists and explanations. As a dramatic hinge, a colon is an em dash wearing a hat.
+**L9. Colon as a mid-sentence connector.** Colons introduce lists and explanations. Used as a dramatic hinge it does the same job as the em dash it replaced, which is why a dash purge often shows up as a colon spike.
 - Before: `The tradeoff is simple: you trade memory for latency.`
 - After: `The tradeoff is memory for latency.`
 
@@ -251,6 +263,40 @@ Truth-level tells. These are the ones that make text untrustworthy rather than m
 **E14. Performed candor.** Announcing honesty rather than being honest: "let me be blunt", "the strongest version of their argument is", "worth naming that", "the uncomfortable truth". Also the withheld payoff, where a sentence promises a revelation and delivers an ordinary point: "where the real work happens", "the part nobody tells you".
 
 **E15. Clean slop, the second-order tell.** Prose that passes every check above and is still recognizable, because the aphoristic one-liner closing each paragraph and the clipped fragment pairs have themselves become a uniform. Any individual instance is fine. As a texture across a document, it is the current signature of text that has been through a deslop pass. The only fix is variation the writer actually chose.
+
+## Swap traps
+
+Each row is a fix that looks clean and reads worse, because removing a tell relocates it.
+
+| You removed           | The trap                                                    | Do this instead                                                       |
+| --------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------- |
+| An em dash            | Parenthesis spray, colon as connector, or a `--` substitute  | End the sentence. Use a comma for a tight aside                        |
+| Rule of three         | Rule of four, or three items with new rhythm                | Count the real items, then rebuild the list as clauses                 |
+| Uniform rhythm        | Mechanical short-long-short alternation                     | Vary in clusters, since human sentence runs are persistent (N11)       |
+| Bold-lead bullets     | A heading per former bullet                                 | Prose, or a bold lead ending in a period followed by new information   |
+| An AI vocabulary word | A same-register synonym ("crucial" to "vital")              | The plain word, or cut the adjective                                   |
+| Passive voice         | A fake actor ("the system", "the framework")                | The real actor, or leave the passive alone                             |
+| Hedging               | A flat overclaim                                            | The calibrated claim plus its basis                                    |
+| Synonym cycling fix   | Renaming the thing to avoid repetition                      | Repeat the term. Vary the connective instead (N10)                     |
+| A generic conclusion  | A different generic conclusion ("In short", "Ultimately")    | Stop at the last concrete fact                                         |
+| Sycophancy            | Clipped coldness                                            | A neutral, direct answer                                               |
+| Staccato drama        | One long clause-stacked sentence                            | Mixed rhythm across the paragraph                                      |
+| Decorative emoji      | Caps or bold as replacement decoration                      | Nothing. The sentence carries itself                                   |
+| "Delve into"          | "Dive into", "explore"                                      | The verb for what happened: read, measured, tested, benchmarked        |
+
+## Signal families
+
+Convergence counts by family, not by id, because several ids describe one underlying habit. Two hits inside a family count as one signal.
+
+| Family                  | Ids                          |
+| ----------------------- | ---------------------------- |
+| Texture                 | S14, N8, N9, E15             |
+| Coordination and cadence | S3, S10, N11, N15            |
+| Inflation               | R1, R2, R9, E7               |
+| Evasion                 | R3, N6, N13, E3              |
+| Ceremony                | R5, R17, R18, E9, E13, E14   |
+| Jargon                  | L6, L7, L11, L12             |
+| Abstraction             | N17, N18, R13, L1            |
 
 ## What not to flag
 

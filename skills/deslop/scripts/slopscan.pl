@@ -29,6 +29,9 @@ while (@ARGV) {
 }
 die "usage: slopscan.pl [--surface house|published|agent|sample] [--json] FILE...\n"
     unless @files;
+my %VALID = map { $_ => 1 } qw(house published agent sample);
+die "unknown surface '$surface' (house|published|agent|sample)\n"
+    unless $VALID{$surface};
 
 # Dashes are a house rule rather than a universal AI tell (see
 # references/evidence.md: published human essays out-dash frontier models).
@@ -37,14 +40,16 @@ die "usage: slopscan.pl [--surface house|published|agent|sample] [--json] FILE..
 # (published, sample) they are density candidates needing converging signals.
 my $dash_is_hard = ($surface eq 'house' || $surface eq 'agent');
 
-my ($hard_total, $cand_total) = (0, 0);
+my ($hard_total, $cand_total, $io_errors) = (0, 0, 0);
 my @report;
 
 for my $file (@files) {
-    open my $fh, '<:encoding(UTF-8)', $file or do { warn "skip $file: $!\n"; next };
+    open my $fh, '<:encoding(UTF-8)', $file
+        or do { warn "cannot read $file: $!\n"; $io_errors++; next };
     my $raw = do { local $/; <$fh> };
     close $fh;
 
+    $raw =~ s/\r\n?/\n/g;   # normalize CRLF and CR before anything else
     my $prose = mask($raw);
 
     my @hard = ();
@@ -55,13 +60,16 @@ for my $file (@files) {
         hits($prose, qr/[\x{2014}\x{2013}]/,        'em or en dash');
     push @{ $dash_is_hard ? \@hard : \@cand },
         hits($prose, qr/(?<=[[:alnum:],;:)"'])--(?=[[:alnum:]("'])|(?<=\s)--(?=\s)/, 'double-hyphen dash');
-    push @hard, hits($prose, qr/[\x{201C}\x{201D}\x{2018}\x{2019}]/, 'curly quote');
+    # A user-provided sample is the voice authority, so its typography is the
+    # author's choice rather than a defect.
+    push @{ $surface eq 'sample' ? \@cand : \@hard },
+        hits($prose, qr/[\x{201C}\x{201D}\x{2018}\x{2019}]/, 'curly quote');
     push @hard, hits($prose, qr/[\x{00A0}\x{2007}\x{202F}]/,         'non-breaking space');
     push @hard, hits($prose, qr/\x{2026}/,                            'ellipsis character');
 
     # provider and harness residue: always a hard failure, never legitimate
     push @hard, hits($prose, qr/turn\d{1,4}(?:search|news|image)\d{1,4}/, 'chat-export artifact');
-    push @hard, hits($prose, qr/\[cite:\s*\d+\]|\[span_\d+\]/,            'citation artifact');
+    push @hard, hits($prose, qr/\[cite:\s*\d+\]|\[span_\d+\]|\x{2020}\d/,  'citation artifact');
     push @hard, hits($prose, qr/utm_source=(?:chatgpt|claude)/,           'tracking parameter');
     push @hard, hits($prose, qr/\x{3010}[^\x{3011}]{0,40}\x{3011}/,       'lenticular bracket');
 
@@ -138,6 +146,7 @@ if ($json) {
     print "\nsurface=$surface hard=$hard_total candidates=$cand_total\n";
 }
 
+exit 30 if $io_errors;     # could not read an input: never report clean
 exit 20 if $hard_total;
 exit 10 if $cand_total;
 exit 0;
@@ -145,19 +154,85 @@ exit 0;
 # ---- helpers --------------------------------------------------------------
 
 # Replace every protected region with same-length blanks so line and column
-# numbers survive. Protected: YAML frontmatter, fenced code (backtick and
-# tilde, any indent, any fence length), indented code blocks, inline code
-# spans, blockquotes, and link/image targets.
+# numbers survive. A line-oriented state machine rather than multiline regexes,
+# because regex fence matching leaked in both directions: a closer at a
+# different indent masked the rest of the file, and code content that looked
+# like a closer reopened the scan inside code.
+#
+# Protected: YAML frontmatter, fenced code (either fence character, any length
+# from three up, zero to three spaces of indent, closer tail whitespace-only),
+# indented code blocks, blockquotes including lazy continuation, inline code
+# spans including multiline ones, and link, reference, and autolink targets.
 sub mask {
     my ($t) = @_;
-    $t =~ s/\A---\n.*?\n---\n/blank($&)/se;
-    $t =~ s/^([ \t]{0,3})(`{3,}|~{3,})[^\n]*\n.*?^\1?\2[^\n]*$/blank($&)/gmse;
-    $t =~ s/^([ \t]{0,3})(`{3,}|~{3,})[^\n]*\n.*\z/blank($&)/mse;   # unclosed fence
-    $t =~ s/^(?: {4}|\t)\S[^\n]*$/blank($&)/gme;
-    $t =~ s/(`+)[^`\n]*?\1/blank($&)/ge;
-    $t =~ s/^[ \t]*>[^\n]*$/blank($&)/gme;
-    $t =~ s/\]\([^)\s]+/blank($&)/ge;
-    return $t;
+    my @lines = split /\n/, $t, -1;
+
+    my $in_front = (@lines && $lines[0] eq '---') ? 1 : 0;
+    my ($fence_char, $fence_len, $in_quote, $prev_blank) = ('', 0, 0, 1);
+
+    for my $i (0 .. $#lines) {
+        my $line = $lines[$i];
+        my $blank = ($line =~ /^\s*$/) ? 1 : 0;
+
+        if ($in_front) {
+            my $end = ($i > 0 && $line =~ /^(?:---|\.\.\.)\s*$/);
+            $lines[$i] = blank($line);
+            $in_front = 0 if $end;
+            $prev_blank = $blank;
+            next;
+        }
+
+        if ($fence_len) {
+            # closer: same character, at least as long, whitespace-only tail
+            my $close = '^ {0,3}' . quotemeta($fence_char)
+                      . '{' . $fence_len . ',}\s*$';
+            $fence_len = 0 if $line =~ /$close/;
+            $lines[$i] = blank($line);
+            $prev_blank = $blank;
+            next;
+        }
+
+        # fence opener. For backtick fences the info string cannot contain a
+        # backtick, which is what keeps a prose line of code ticks from opening
+        # a fence.
+        if ($line =~ /^ {0,3}(`{3,})([^`]*)$/ || $line =~ /^ {0,3}(~{3,})(.*)$/) {
+            $fence_char = substr($1, 0, 1);
+            $fence_len  = length $1;
+            $lines[$i]  = blank($line);
+            $prev_blank = 0;
+            next;
+        }
+
+        # blockquote, including lazy continuation until a blank line
+        if ($line =~ /^ {0,3}>/) { $in_quote = 1 }
+        elsif ($blank)           { $in_quote = 0 }
+        if ($in_quote) {
+            $lines[$i] = blank($line);
+            $prev_blank = $blank;
+            next;
+        }
+
+        # indented code block: four or more spaces (or a tab) after a blank line
+        if (!$blank && $prev_blank && $line =~ /^(?: {4,}|\t)\S/) {
+            $lines[$i] = blank($line);
+            $prev_blank = 0;
+            next;
+        }
+
+        $prev_blank = $blank;
+    }
+
+    my $out = join "\n", @lines;
+
+    # inline code spans, including spans that wrap across lines
+    $out =~ s/(`+)(?:(?!\1).)*?\1/blank($&)/gse;
+    # link and image destinations: angle-bracket, bare, reference definition, autolink
+    $out =~ s/\]\(<[^>]*>/blank($&)/ge;
+    $out =~ s/\]\([^)\s]+/blank($&)/ge;
+    $out =~ s/^ {0,3}\[[^\]]+\]:\s*\S+/blank($&)/gme;
+    $out =~ s/<(?:https?|ftp|mailto):[^>\s]*>/blank($&)/ge;
+
+    return $out;
 }
 
 sub blank { my ($s) = @_; $s =~ s/[^\n]/ /g; return $s }

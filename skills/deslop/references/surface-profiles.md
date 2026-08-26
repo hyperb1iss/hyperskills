@@ -191,8 +191,8 @@ These need a rule more than a demonstration.
 | Scientific, legal, medical, forecasting, postmortem | Hedges are honest. Strip only hedges that qualify nothing, and never convert a calibrated claim into a flat one                               |
 | Fiction and creative writing                        | The no-fabrication rule does not apply. Invented detail is the work                                                                          |
 | Marketing copy the user actually wants              | Puffery is the genre. Flag it once, then respect the brief. Do not silently rewrite persuasion into a spec sheet                              |
-| Agent briefs, skill files, prompts, memories        | Exempt. Dense jargon and tables are correct for a machine reader, and prose polish here spends tokens for no reader                            |
-| Text quoting or discussing slop                     | Exempt. A watched phrase inside a quotation, a title, or an example is being discussed, not used                                              |
+| Agent briefs, skill files, prompts, memories        | Structure is exempt, prose is not. Tables, density, and house jargon are correct for a machine reader; the rhetorical, sentential, and epistemic passes still apply, and dashes stay banned because these are our files |
+| Text quoting or discussing slop                     | Exempt. A watched phrase inside a quotation, a title, or an example is being discussed rather than used                                        |
 
 ## When the surface is unclear
 

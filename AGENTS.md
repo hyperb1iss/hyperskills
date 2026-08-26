@@ -39,10 +39,12 @@ hyperskills/
 │   ├── deslop/
 │   │   ├── SKILL.md
 │   │   ├── scripts/
-│   │   │   └── slopscan.pl       # protection-aware mechanical scan
+│   │   │   ├── slopscan.pl       # protection-aware mechanical scan
+│   │   │   └── selftest.sh       # 30-case regression gate for the scanner
 │   │   └── references/
 │   │       ├── pattern-catalog.md
 │   │       ├── surface-profiles.md
+│   │       ├── craft-moves.md
 │   │       ├── evidence.md
 │   │       └── fixtures/         # slop / protected / clean, for scanner regression
 │   ├── dream/
@@ -299,7 +301,7 @@ Sizes drift as skills evolve — check with `wc -w skills/*/SKILL.md` instead of
 | `codex-imagegen`     | none       | Process — Codex image generation delegation |
 | `cross-model-review` | 3 files    | Process — bidirectional cross-model review  |
 | `hyper-pr-review`    | 2 files    | Process — falsifier-gated PR review         |
-| `deslop`             | 3 files    | Process — AI tell removal from prose        |
+| `deslop`             | 4 files    | Process — AI tell removal from prose        |
 | `dream`              | 2 files    | Process — conversation memory consolidation |
 | `super-good-pr`      | none       | Process — reviewer-first PR descriptions    |
 | `git`                | none       | Domain — git operations                     |
