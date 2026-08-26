@@ -175,6 +175,8 @@ sub checks {
                      'beyond family');
     push @cand, hits($prose, qr/\b(?:load-bearing|in service of|earns its keep|first-order concern|the binding constraint|asymmetric upside|forcing function)\b/i,
                      'house jargon or borrowed rigor');
+    push @cand, hits($prose, qr/\bcheap(?:est|ly)?\b|\bpay(?:s|ing)? rent\b|\bbuys you\b|\bcosts you nothing\b/i,
+                     'transactional effort framing');
     push @cand, hits($prose, qr/(?:^|[.!?]\s+|^\s*[-*+]\s+)(?:let me be (?:blunt|clear)|here'?s the thing|the thing is|real talk|to be honest)\b|\bworth naming that\b/i,
                      'performed candor');
     push @cand, hits($prose, qr/\b(?:epistemic status|~?\d{1,3}% confident|I hold this loosely)\b/i,

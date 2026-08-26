@@ -24,7 +24,7 @@ Deterministic. Detect with the commands in `SKILL.md`, not by eye.
 - Before: `## Configuring The Build Cache`
 - After: `## Configuring the build cache`
 
-**M6. Trailing whitespace and double spaces after periods.** Not AI-specific. Cheap to fix while you are in the file.
+**M6. Trailing whitespace and double spaces after periods.** Not AI-specific. Quick to fix while you are in the file.
 
 **M7. Uniform bullet punctuation.** Every bullet ending in a period when half are fragments, or none ending in one when all are sentences. Pick the rule the surface uses and apply it.
 
@@ -226,7 +226,7 @@ Last pass, least valuable. Word swaps on unfixed structure produce clean-soundin
 
 **L11. Era-overuse, current generation.** As of Aug 2026 the Claude-generation set is: load-bearing, in service of, earns its keep, priors, backstop, pivot point, sharp insight, key insight. These are house-fluent between agents and instantly recognizable to a human reader. The `→` arrow and an unrequested collaborative "we" belong here too. Expect this list to rot within months, which is the point of dating it.
 
-**L12. Borrowed rigor.** Economics and optimization vocabulary used as decoration: first-order concerns, the binding constraint, asymmetric upside, forcing function, the delta between, necessary but not sufficient, the operative word. Each has a precise technical meaning. Used loosely, they signal rigor without adding any.
+**L12. Borrowed rigor.** Economics and optimization vocabulary used as decoration: first-order concerns, the binding constraint, asymmetric upside, forcing function, the delta between, necessary but not sufficient, the operative word. Each has a precise technical meaning. Used loosely, they signal rigor without adding any. The same register prices effort like a market: a cheap check, an expensive migration, what a refactor buys you, a search that isn't paying rent. Write quick, easy, or small instead, or name the actual cost. Literal money and resource costs are not the tell.
 
 ## 6. Epistemic (E)
 

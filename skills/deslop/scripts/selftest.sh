@@ -246,6 +246,11 @@ check "bold-lead bullet is a house candidate" 10 "$TMP/boldlead.md"
 check "agent surface skips bold-lead check"    0 "$TMP/boldlead.md" agent
 check "agent surface skips heading case"       0 "$TMP/mixedcase.md" agent
 
+# ---- transactional effort framing ------------------------------------------
+printf 'the check is cheap and buys you headroom\n' > "$TMP/transact.md"
+check "transactional effort framing is a candidate" 10 "$TMP/transact.md"
+grep_check "transactional framing is named" 'transactional effort framing' "$TMP/transact.md"
+
 # ---- inline spans stop at blank lines --------------------------------------
 # two unpaired backtick runs in different paragraphs must not pair up and
 # blank the prose between them; this hid 24 prose dashes in AGENTS.md
