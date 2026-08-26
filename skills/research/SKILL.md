@@ -43,8 +43,8 @@ Lean on existing knowledge before spawning agents. Re-running research that alre
 ### Common moves
 
 - **Search Sibyl first:** `sibyl search "<research topic>"`, `sibyl search "<related technology>"`, `sibyl search "<prior decision in this area>"`. Surface what's already known before generating new findings.
-- **Check for staleness.** Fast-moving topics (frameworks, models, cloud services) usually warrant re-research even when Sibyl has recent entries; treat the existing knowledge as a baseline. Stable topics with recent entries often don't need a fresh pass at all. One class is never exempt: version, "latest", and SOTA facts expire no matter how recent the entry feels — recalled memory routes the investigation, live state decides. Re-verify those against the primary source before they drive a dispatch or a recommendation. Same rot law for prior research docs: anything older than the reality it describes gets a per-claim liveness check against live sources and current code before it shapes a decision.
-- **Premise-check the target.** Confirm the data, repo, or question actually exists — and disambiguate which one — before any agent launches. A wave pointed at a wrong or empty target manufactures findings.
+- **Check for staleness.** Fast-moving topics (frameworks, models, cloud services) usually warrant re-research even when Sibyl has recent entries; treat the existing knowledge as a baseline. Stable topics with recent entries often don't need a fresh pass at all. One class is never exempt: version, "latest", and SOTA facts expire no matter how recent the entry feels. Recalled memory routes the investigation, live state decides. Re-verify those against the primary source before they drive a dispatch or a recommendation. Same rot law for prior research docs: anything older than the reality it describes gets a per-claim liveness check against live sources and current code before it shapes a decision.
+- **Premise-check the target.** Confirm the data, repo, or question actually exists (and disambiguate which one) before any agent launches. A wave pointed at a wrong or empty target manufactures findings.
 - **Sharpen the research question.** "Research databases" is too vague to dispatch on. "Compare PostgreSQL vs CockroachDB for multi-region write-heavy workloads with <10ms p99 latency" gives agents enough scope to do useful work.
 - **Calibrate the research budget** to the decision the research is feeding:
 
@@ -70,7 +70,7 @@ This bit is non-negotiable: the value of research collapses when claims rest on 
 
 When primary sources disagree with secondary ones, trust the primary source and note the discrepancy. Date volatile facts explicitly, and prefer commands/sources the next agent can rerun over screenshots that go stale.
 
-**The hierarchy: a version-pinned artifact you can actually run beats official docs, which beat blog posts, which beat memory.** Names that cross a system boundary — metric names, config keys, CRD fields — get read from the actual emitter or consumer at the pinned version. And facts reported by your own research agents are claims, not evidence: before synthesis builds on a load-bearing claim, open the primary source yourself.
+**The hierarchy: a version-pinned artifact you can actually run beats official docs, which beat blog posts, which beat memory.** Names that cross a system boundary (metric names, config keys, CRD fields) get read from the actual emitter or consumer at the pinned version. And facts reported by your own research agents are claims, not evidence: before synthesis rests a conclusion on a claim, open the primary source yourself.
 
 ---
 
@@ -114,7 +114,7 @@ source as [unverified].
 
 ### Deployment notes
 
-- **Use the host's fan-out verb.** Claude Code: parallel background `Agent` calls. Codex: `spawn_agent`. Pi (pi-nova pack): the `dispatch` tool with `"mode": "parallel"` researcher tasks — keep each task narrow, source-quality explicit, and output-oriented.
+- **Use the host's fan-out verb.** Claude Code: parallel background `Agent` calls. Codex: `spawn_agent`. Pi (pi-nova pack): the `dispatch` tool with `"mode": "parallel"` researcher tasks. Keep each task narrow, source-quality explicit, and output-oriented.
 - **Background by default.** Research agents have no inter-dependencies, so foreground execution serializes work that should run in parallel.
 - **Mind the delegation gate.** Some hosts (Codex, as of Jul 2026) only allow spawning subagents when the user explicitly asked for delegation. Without that ask, run the research lanes sequentially yourself.
 - **One file per agent.** Shared outputs create write contention and lose attribution.
@@ -134,7 +134,7 @@ For technology evaluations, cover these dimensions:
 | **Cost**        | What does it cost at our scale?   |
 | **Migration**   | How hard is it to adopt/abandon?  |
 
-**Run an internal lane alongside the web wave.** When research feeds a decision about an existing system, the decisive constraint usually lives in your own repo or live state — the auth pattern, session semantics, or pinned version the winning option must survive. Finding it is a grep, not a research agent, and it costs zero agents. A web-perfect answer can still ship a broken migration.
+**Run an internal lane alongside the web wave.** When research feeds a decision about an existing system, the decisive constraint usually lives in your own repo or live state (the auth pattern, session semantics, or pinned version the winning option must survive). Finding it is a grep, not a research agent, and it costs zero agents. A web-perfect answer can still ship a broken migration.
 
 ---
 
@@ -147,7 +147,7 @@ After Wave 1, look for what's missing before synthesizing. Premature synthesis i
 - **Coverage gaps**: dimensions the wave didn't touch, missing comparisons, questions raised but not answered
 - **Contradictions**: agents reaching different conclusions on the same question (often signal for verification agents)
 - **Bias signals**: all-positive findings (suspicious, look for failure cases), only-official-docs (need community experience), same sources cited repeatedly (need source diversity)
-- **False consensus**: agents — or a second model — converging on the same version or SOTA fact is not confirmation; shared training data agrees with itself. A live registry or release-page fetch settles version claims, never vote count.
+- **False consensus**: agents (or a second model) converging on the same version or SOTA fact is not confirmation; shared training data agrees with itself. A live registry or release-page fetch settles version claims, never vote count.
 
 ### Decision Point
 
@@ -171,11 +171,11 @@ Fill specific gaps identified in the analysis. Wave 2 agents differ from Wave 1 
 
 ### When to stop
 
-Stop deploying waves when the research question can be answered with confidence, when key claims have 2+ independent sources, or when the user signals "enough, let's decide." The real stopper is yield: a wave that surfaces no new load-bearing findings is the last wave.
+Stop deploying waves when the research question can be answered with confidence, when key claims have 2+ independent sources, or when the user signals "enough, let's decide." The real stopper is yield: a wave that changes no conclusion is the last wave.
 
-Kill low-yield lanes out loud mid-wave — "this search isn't paying rent" — and re-anchor to a higher-signal source rather than re-running variants of the same walk.
+Kill low-yield lanes out loud mid-wave ("this search isn't paying rent") and re-anchor to a higher-signal source rather than re-running variants of the same walk.
 
-Three waves is a sound default budget, not a hard stop. Waves that keep surfacing new load-bearing findings can continue past it; waves that oscillate instead of narrowing mean the question itself needs reframing.
+Three waves is a sound default budget, not a hard stop. Waves that keep moving the conclusions can continue past it; waves that oscillate instead of narrowing mean the question itself needs reframing.
 
 ---
 
@@ -240,7 +240,7 @@ Three waves is a sound default budget, not a hard stop. Waves that keep surfacin
 
 1. **Present the synthesis** to the user with a clear recommendation
 
-2. **Record in Sibyl.** The capture carries: options evaluated, the choice and why, the key risk, primary source URLs, and today's date. Use the `sibyl` skill for the current verbs — CLI shapes drift faster than skills. If the capture fails (server down, verb changed), park the entry verbatim in the synthesis flagged "NOT captured" — never silently drop the Record beat, and never block on it.
+2. **Record in Sibyl.** The capture carries: options evaluated, the choice and why, the key risk, primary source URLs, and today's date. Use the `sibyl` skill for the current verbs. CLI shapes drift faster than skills. If the capture fails (server down, verb changed), park the entry verbatim in the synthesis flagged "NOT captured". Never silently drop the Record beat, and never block on it.
 
 3. **Archive research docs**: keep the wave outputs for reference:
    - If in a project: `docs/research/[topic]/`
@@ -257,7 +257,7 @@ Three waves is a sound default budget, not a hard stop. Waves that keep surfacin
 
 ### The exit artifact
 
-Research output is not a build contract. Before it feeds `plan`, force the product cuts: the first workflow, the minimal boundaries, one vertical slice. When the decision is "build," prefer exiting into the riskiest narrow slice — a canary wedge that proves or breaks the approach before anything gets polished — over a fleet-wide plan. Triage findings as adopt / borrow the ideas / ignore with confidence.
+Research output is not a build contract. Before it feeds `plan`, force the product cuts: the first workflow, the minimal boundaries, one vertical slice. When the decision is "build," prefer exiting into the riskiest narrow slice (a canary wedge that proves or breaks the approach before anything gets polished) over a fleet-wide plan. Triage findings as adopt / borrow the ideas / ignore with confidence.
 
 A report that lands as a file is a document humans read, so run `deslop` on it before handing it over. Synthesized findings are where AI tells breed: agent summaries arrive pre-slopped, and stitching them together compounds the inflated significance, the hedging, and the rule-of-three cadences. Findings written straight into chat stay on the chat surface and skip the pass.
 
@@ -280,9 +280,9 @@ For focused questions that don't need the full wave protocol:
 
 | Type                      | The non-obvious move                                                                                                                                                                                                     |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Technology evaluation** | Wave 2 hunts production experience reports and benchmarks, not more docs — and the internal lane runs alongside the whole time.                                                                                          |
+| **Technology evaluation** | Wave 2 hunts production experience reports and benchmarks, not more docs. And the internal lane runs alongside the whole time.                                                                                           |
 | **Codebase archaeology**  | Synthesize into an architecture diagram + dependency map, not prose. Often it IS the internal lane of a larger evaluation.                                                                                               |
-| **SOTA analysis**         | Vet headline claims for comparability — same benchmark version? harness released? tuned on test? gold leakage? — and verdict as "adopt the architecture, ignore the ritual." A debunked premise is a first-class result. |
+| **SOTA analysis**         | Vet headline claims for comparability (same benchmark version? harness released? tuned on test? gold leakage?) and verdict as "adopt the architecture, ignore the ritual." A debunked premise is a first-class result.   |
 | **Competitive landscape** | Absence is a finding: report what nobody is doing as deliberately as what everyone is. Verify from opened artifacts, not search-result snippets.                                                                         |
 
 ---
