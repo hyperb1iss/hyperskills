@@ -5,9 +5,9 @@ description: Use this skill when writing code, building features, fixing bugs, r
 
 # Implementation
 
-Verification-driven coding with tight feedback loops. Distilled from 21,321 tracked operations across 64+ projects, 612 debugging sessions, and ~600 transcribed working sessions from the Apr–Jul 2026 corpus. These are the patterns that consistently ship working code.
+Verification-driven coding with tight feedback loops. Distilled from 21,321 tracked operations across 64+ projects, 612 debugging sessions, and ~600 transcribed working sessions from the Apr-Jul 2026 corpus. These are the patterns that consistently ship working code.
 
-**Core insight:** Verify in tight loops, roughly every 2-3 edits — 73% of fixes go unverified across the dataset, the single biggest quality gap. And proof lives where the artifact is _consumed_, not where it was produced: green producer gates are necessary, never sufficient.
+**Core insight:** Verify in tight loops, roughly every 2-3 edits. 73% of fixes go unverified across the dataset, the single biggest quality gap. And proof lives where the artifact is _consumed_, not where it was produced: green producer gates are necessary, never sufficient.
 
 **How to read this skill:** the loop and the heuristics below are calibrated for non-trivial implementation work. Trivial fixes (config, typo, single-line) shouldn't drag through five phases. Use judgment, scale planning to scope, and skip what doesn't apply. The Code Discipline section is principles that bias toward caution; for one-line changes, just make the change.
 
@@ -35,13 +35,13 @@ digraph implement {
 }
 ```
 
-- **Oriented.** Existing code is read before anything gets touched. `Grep → Read → Read` is the dominant opening across the dataset. Sessions that read 10+ files before the first edit require fewer fix iterations downstream. Blind changes are the most expensive way to start. Before creating any new structure — module, config surface, CLI group, error type — locate the nearest in-repo exemplar and clone its shape; the repo usually solved this kind of thing once already.
+- **Oriented.** Existing code is read before anything gets touched. `Grep → Read → Read` is the dominant opening across the dataset. Sessions that read 10+ files before the first edit require fewer fix iterations downstream. Blind changes are the most expensive way to start. Before creating any new structure (module, config surface, CLI group, error type), locate the nearest in-repo exemplar and clone its shape; the repo usually solved this kind of thing once already.
 
 - **Planned.** Decomposition exists at the right scale. Trivial fixes don't need a plan; features benefit from a task list; epics earn a research swarm. The decision is "what's proportional," not "always plan."
 
 - **Implemented.** Work happens in batches of roughly 2-3 edits, then verifies. Build in dependency order (types → logic → surfaces), held loosely: migrations get written AFTER the code that needs them, and frontend drives backend changes as often as the reverse. Edit existing files 9:1 over creating new ones; that's the observed ratio in successful sessions. Fix errors as they surface; accumulating them creates cascade-debugging.
 
-- **Verified.** Typecheck is the primary inner-loop gate, fast and cheap; run it between batches. Tests fit naturally after feature-complete. Full suite before commit — and the proof ladder continues past green gates to the consumption boundary (see Verification Cadence).
+- **Verified.** Typecheck is the primary inner-loop gate, fast and cheap; run it between batches. Tests fit naturally after feature-complete. Full suite before commit, and the proof ladder continues past green gates to the consumption boundary (see Verification Cadence).
 
 - **Committed.** Atomic chunks, committed as you go. Stage specific files, commit, loop back to the next chunk. Many small commits per session is the pattern that consistently outperforms one mega-commit at the end. See **Commit Cadence** below for message anatomy.
 
@@ -69,7 +69,7 @@ Don't assume. Don't hide confusion. Surface tradeoffs.
 | Multiple interpretations of the request | Present them; don't pick silently |
 | A simpler approach is plausible         | Say so; push back when warranted  |
 | Something is unclear                    | Stop; name what's confusing; ask  |
-| You hold a load-bearing assumption      | State it explicitly               |
+| Your approach rests on an assumption    | State it explicitly               |
 | Inconsistency between request and code  | Surface it before proceeding      |
 
 ORIENT (read the code) is the prerequisite. This principle is what to do with what you find: name the gaps, don't paper over them.
@@ -86,10 +86,10 @@ Minimum code that solves the problem. Nothing speculative.
 | Build abstractions for single-use code         | Inline first; abstract when reused                                                                                   |
 | Add "flexibility" or configurability not asked | Hardcode now; parameterize on demand                                                                                 |
 | Handle errors for impossible scenarios         | Trust internal invariants; validate at edges                                                                         |
-| Add a fallback, alias, or compat shim          | Check ship status first: pre-ship, delete the old shape and tighten to final — compat is a change that needs a pitch |
+| Add a fallback, alias, or compat shim          | Check ship status first: pre-ship, delete the old shape and tighten to final. Compat is a change that needs a pitch  |
 | Write 200 lines when 50 would do               | Rewrite tighter                                                                                                      |
 
-Two tests: would a senior engineer call this overcomplicated? And how long does this code live? Lifespan scales architecture — a two-week throwaway earns no pipeline. The bar is usefulness, not smallness.
+Two tests: would a senior engineer call this overcomplicated? And how long does this code live? Lifespan scales architecture. A two-week throwaway earns no pipeline. The bar is usefulness, not smallness.
 
 ### The judo move
 
@@ -149,9 +149,9 @@ Strong success criteria let you loop independently. Weak criteria require consta
 
 ### Scope doubt
 
-"Are we overengineering?" — from the user or your own gut — gets adjudication, not reassurance: a verdict either way, the carrying cost of the extra structure quantified, and over-built work parked unpushed with revival criteria rather than silently deleted.
+"Are we overengineering?" (from the user or your own gut) gets adjudication, not reassurance: a verdict either way, the carrying cost of the extra structure quantified, and over-built work parked unpushed with revival criteria rather than silently deleted.
 
-Entering a review-fix round, triage blockers from follow-ups and declare a file budget before touching code — review loops ratchet scope monotonically (one observed loop: 8 rounds, 63 files; re-anchored to 6). "Documented why not" is a legitimate response to an absence finding.
+Entering a review-fix round, triage blockers from follow-ups and declare a file budget before touching code. Review loops ratchet scope monotonically (one observed loop: 8 rounds, 63 files; re-anchored to 6). "Documented why not" is a legitimate response to an absence finding.
 
 ---
 
@@ -208,12 +208,12 @@ Typecheck through build prove the _producer_. "It works" is proven where the art
 | Artifact         | Consumption check                                                 |
 | ---------------- | ----------------------------------------------------------------- |
 | Rendered config  | Render the composed output; grep it for the motivating invariant  |
-| Package/library  | Clean-clone install — no sibling checkout or cache to hide breaks |
+| Package/library  | Clean-clone install: no sibling checkout or cache to hide breaks  |
 | UI               | Drive the real surface (agent-browser), not just the test         |
 | CLI              | Real invocation in a clean env, including the zero-arg case       |
 | Deployed service | Walk the ladder: merged → synced → applied → running              |
 
-Assert the motivating invariant in the consumed form, not "renders without error" — a wildcard can be accepted syntactically and still match nothing. When a symptom persists after a "fix," walk the promotion ladder before reopening the code: merged is not deployed, and the label is not the artifact. Review passes are not a substitute; a bogus foreign key survived multiple model reviews and died only on real apply.
+Assert the motivating invariant in the consumed form, not "renders without error". A wildcard can be accepted syntactically and still match nothing. When a symptom persists after a "fix," walk the promotion ladder before reopening the code: merged is not deployed, and the label is not the artifact. Review passes are not a substitute; a bogus foreign key survived multiple model reviews and died only on real apply.
 
 ### A green check must demonstrably do the work
 
@@ -222,11 +222,11 @@ Hollow greens are a named defect class: cached runs replayed as fresh, test filt
 Two more signal rules:
 
 - **Flake is a verdict, not a shrug.** It needs legs: the failure trace doesn't intersect the diff, the same failure shows on main or a sibling branch, a CI-shaped local run passes. Recurrence revokes the verdict, no matter who applied the label.
-- **A guard you haven't watched fire is decoration.** New gate or detector: induce the exact failure it exists to catch and show it tripping — and staying quiet on normal — before shipping it.
+- **A guard you haven't watched fire is decoration.** New gate or detector: induce the exact failure it exists to catch and show it tripping (and staying quiet on normal) before shipping it.
 
 ### Felt surfaces need instruments
 
-"Buttery, gorgeous, no jank" becomes named acceptance criteria before work starts. Perf and visual loops need an objective signal — a metric, telemetry, a repro harness — before iteration two; loops judged by the next screenshot become random walks. For interactive perf, size the unit of work to the interaction delta before touching scheduling or concurrency. When the surface is one you can't observe (TUI feel, hardware, another machine), the human is the sensor: hand them a pre-registered expected outcome and a discriminating tell.
+"Buttery, gorgeous, no jank" becomes named acceptance criteria before work starts. Perf and visual loops need an objective signal (a metric, telemetry, a repro harness) before iteration two; loops judged by the next screenshot become random walks. For interactive perf, size the unit of work to the interaction delta before touching scheduling or concurrency. When the surface is one you can't observe (TUI feel, hardware, another machine), the human is the sensor: hand them a pre-registered expected outcome and a discriminating tell.
 
 ---
 
@@ -268,20 +268,20 @@ Most debugging resolves in 1-2 iterations when the red signal is classified befo
 | Install/env, runner syntax    | Fix the environment; don't touch code                                                                            |
 | Stale artifact or cache       | Rebuild, cache-bust, confirm the running thing is your build                                                     |
 | Self-induced parallel race    | Rerun sequentially once; don't serialize forever                                                                 |
-| Pre-existing / inherited      | Prove it by absence (your signature missing, base red in the same place), then rebase — don't "fix" it in-branch |
+| Pre-existing / inherited      | Prove it by absence (your signature missing, base red in the same place), then rebase. Don't "fix" it in-branch  |
 | Probe contradicts known state | Audit the probe first: timeouts, regexes, auth freshness                                                         |
 | Actual code                   | Explicit hypothesis ("X because Y") → one targeted fix → verify                                                  |
 
-CI red: download the raw log to a file with its exit code, collapse the cascade to its root, and reproduce with the exact CI command — approximations have missed real bugs. Full protocol in `references/recovery.md`.
+CI red: download the raw log to a file with its exit code, collapse the cascade to its root, and reproduce with the exact CI command. Approximations have missed real bugs. Full protocol in `references/recovery.md`.
 
 ### Fix the class, bound the fix
 
-A reported bug is a sample from a population. Before patching the symptom, check whether sibling call sites are just getting lucky; fix once at the choke point; after the fix, sweep the population for the same defect. Generalize the diagnosis, bound the fix — sibling fixes ship as their own scoped follow-ups, never an accidental cross-product refactor.
+A reported bug is a sample from a population. Before patching the symptom, check whether sibling call sites are just getting lucky; fix once at the choke point; after the fix, sweep the population for the same defect. Generalize the diagnosis, bound the fix. Sibling fixes ship as their own scoped follow-ups, never an accidental cross-product refactor.
 
 ### Spiral prevention
 
 - **Separate error domains.** Fix all type errors before chasing test failures; interleaving the two is how cascades compound.
-- **3-strike heuristic.** Three failed attempts on the same error demands a genuinely new hypothesis one level deeper — not variation #4, and never an adjacent refactor mid-bug. Persistence spends its budget on depth, not breadth; and the done-bar belongs to the user, so stopping isn't yours to call alone.
+- **3-strike heuristic.** Three failed attempts on the same error demands a genuinely new hypothesis one level deeper, not variation #4, and never an adjacent refactor mid-bug. Persistence spends its budget on depth, not breadth; and the done-bar belongs to the user, so stopping isn't yours to call alone.
 - **Cascade depth > 3.** Pause, enumerate all remaining issues, then fix in dependency order rather than reactive whack-a-mole.
 - **Second occurrence of the same issue.** That's a durable-capture trigger: a regression test, a pinned invariant, or a memory entry, plus a level switch to fix the class. Restart is the last resort, not the reflex.
 - **Re-entry.** After compaction, handoff, or resumption, re-derive state from the repo and re-read pinned invariants before touching adjacent code. A fresh session is the fallback when re-grounding fails, not a scheduled event.
@@ -317,7 +317,7 @@ Correctness gates can't see sprawl: a 397-file manifest factory shipped 549 gree
 git diff --name-only origin/${BASE:-main}...HEAD | awk -F/ '{print $1"/"$2}' | sort | uniq -c | sort -nr   # BASE = the PR's actual base ref
 ```
 
-Classify by top-level path against the mission and ask: would the human veto this from the diffstat? A commit boundary is also a memory boundary — the natural moment to capture a gotcha before the next chunk buries it.
+Classify by top-level path against the mission and ask: would the human veto this from the diffstat? A commit boundary is also a memory boundary, the natural moment to capture a gotcha before the next chunk buries it.
 
 ### Mirror local style
 
@@ -337,9 +337,9 @@ Conventional Commit types: `feat` (capability), `fix` (bug), `refactor` (no beha
 
 **Subject:** imperative mood, ≤76 chars, no trailing period, no filenames. "Fix null deref in token refresh" beats "Fix bug." For Conventional Commits, no emoji in the subject, it breaks parsers.
 
-**Body** (always include one): wrap at 76 chars, separated from subject by a blank line. Explain _why_, the diff shows _what_. State facts: banish "likely", "probably", "might", "seems", "appears to". If you don't know what a change does, read more before committing. Two sentences usually suffices; mention load-bearing context a future bisect would want. A commit body is plain prose a human reads years later, so the `deslop` commit-body profile applies: no em dashes, no markdown, no inflated significance, no house jargon.
+**Body** (always include one): wrap at 76 chars, separated from subject by a blank line. Explain _why_, the diff shows _what_. State facts: banish "likely", "probably", "might", "seems", "appears to". If you don't know what a change does, read more before committing. Two sentences usually suffices; mention the context a future bisect would want. A commit body is plain prose a human reads years later, so the `deslop` commit-body profile applies: no em dashes, no markdown, no inflated significance, no house jargon.
 
-Compose via `git commit -F -` with a single-quoted heredoc, never stacked `-m` flags — they ship each paragraph as one unwrapped line and burn amend cycles. Add a `Co-Authored-By` trailer naming the model and version; "Claude" alone doesn't disambiguate across multi-agent sessions. Quoting mechanics, the wrap backstop, and what to do when a shell-composed body lands mangled are in `/hyperskills:git`.
+Compose via `git commit -F -` with a single-quoted heredoc, never stacked `-m` flags. They ship each paragraph as one unwrapped line and burn amend cycles. Add a `Co-Authored-By` trailer naming the model and version; "Claude" alone doesn't disambiguate across multi-agent sessions. Quoting mechanics, the wrap backstop, and what to do when a shell-composed body lands mangled are in `/hyperskills:git`.
 
 ### Multi-agent staging
 
@@ -383,7 +383,7 @@ Never `git add -A` or `git add .` (catches other agents' WIP and secrets), never
 
 ## Cross-Model Review
 
-For high-stakes changes, run `/hyperskills:cross-model-review` after implementation. A different reviewer model breaks self-review bias and catches real bugs: migration idempotency, PII in debug logging, empty-array edge cases, missing batch limits. It does not protect against shared-training staleness — version, SOTA, and ecosystem claims need live primary sources no matter how many models agreed.
+For high-stakes changes, run `/hyperskills:cross-model-review` after implementation. A different reviewer model breaks self-review bias and catches real bugs: migration idempotency, PII in debug logging, empty-array edge cases, missing batch limits. It does not protect against shared-training staleness. Version, SOTA, and ecosystem claims need live primary sources no matter how many models agreed.
 
 ---
 
