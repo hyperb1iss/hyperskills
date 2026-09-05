@@ -12,74 +12,137 @@ Treat the repository as shared space. Check status before edits, inspect existin
 
 ## Repository Map
 
+<!-- BEGIN GENERATED: repository-map -->
+
 ```text
 hyperskills/
 ├── .claude-plugin/
-│   ├── plugin.json
-│   └── marketplace.json
+│   ├── marketplace.json
+│   └── plugin.json
+├── .github/
+│   └── workflows/
+│       ├── ci.yml
+│       ├── prepare-release.yml
+│       └── release.yml
+├── .gitignore
+├── .markdownlint.json
+├── .prettierignore
+├── .prettierrc
+├── AGENTS.md
+├── CHANGELOG.md
+├── CLAUDE.md
+├── LICENSE
+├── Makefile
+├── README.md
+├── docs/
+│   ├── library-review-2026-09.md
+│   └── releases.md
+├── evals/
+│   └── README.md
+├── release.json
+├── scripts/
+│   ├── open_release_pr.py
+│   ├── release.py
+│   ├── sync_metadata.py
+│   └── validate_skills.py
 ├── skills/
-│   ├── brainstorm/SKILL.md
-│   ├── plan/SKILL.md
-│   ├── research/SKILL.md
-│   ├── orchestrate/
-│   │   ├── SKILL.md
-│   │   └── references/dispatch-briefs.md
-│   ├── implement/
-│   │   ├── SKILL.md
-│   │   └── references/{benchmarks,recovery}.md
+│   ├── brainstorm/
+│   │   └── SKILL.md
+│   ├── codex-imagegen/
+│   │   └── SKILL.md
 │   ├── cross-model-review/
 │   │   ├── SKILL.md
-│   │   ├── references/{prompts,failure-recovery,cli-flags,observable-reviews}.md
-│   │   ├── scripts/{run_claude_review,review_status}.py
-│   │   └── tests/test_observable_review.py
-│   ├── hyper-pr-review/
-│   │   ├── SKILL.md
-│   │   └── references/{lenses,thermonuclear,report-examples}.md
-│   ├── codex-imagegen/SKILL.md
-│   ├── super-good-pr/
-│   │   ├── SKILL.md
-│   │   └── references/worked-examples.md
+│   │   ├── references/
+│   │   │   ├── cli-flags.md
+│   │   │   ├── failure-recovery.md
+│   │   │   ├── observable-reviews.md
+│   │   │   └── prompts.md
+│   │   ├── scripts/
+│   │   │   ├── review_status.py
+│   │   │   └── run_claude_review.py
+│   │   └── tests/
+│   │       └── test_observable_review.py
 │   ├── deslop/
 │   │   ├── SKILL.md
-│   │   ├── scripts/{slopscan.pl,selftest.sh}
-│   │   └── references/ # catalog, profiles, craft, evidence, fixtures
+│   │   ├── references/
+│   │   │   ├── craft-moves.md
+│   │   │   ├── evidence.md
+│   │   │   ├── fixtures/
+│   │   │   │   ├── clean.md
+│   │   │   │   ├── protected.md
+│   │   │   │   └── slop.md
+│   │   │   ├── pattern-catalog.md
+│   │   │   └── surface-profiles.md
+│   │   └── scripts/
+│   │       ├── selftest.sh
+│   │       └── slopscan.pl
 │   ├── dream/
 │   │   ├── SKILL.md
-│   │   └── references/{conversation-formats,extraction-guide}.md
-│   ├── git/SKILL.md
+│   │   └── references/
+│   │       ├── conversation-formats.md
+│   │       └── extraction-guide.md
+│   ├── git/
+│   │   └── SKILL.md
+│   ├── hyper-pr-review/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── lenses.md
+│   │       ├── report-examples.md
+│   │       └── thermonuclear.md
+│   ├── implement/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── benchmarks.md
+│   │       └── recovery.md
+│   ├── orchestrate/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── dispatch-briefs.md
+│   ├── plan/
+│   │   └── SKILL.md
+│   ├── research/
+│   │   └── SKILL.md
+│   ├── super-good-pr/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── worked-examples.md
 │   └── tui-design/
 │       ├── SKILL.md
-│       └── references/{visual-catalog,app-patterns}.md
-├── scripts/validate_skills.py
-├── tests/test_validate_skills.py
-├── evals/README.md
-├── docs/library-review-2026-09.md
-├── Makefile
-├── AGENTS.md
-├── CLAUDE.md -> AGENTS.md
-├── README.md
-└── LICENSE
+│       └── references/
+│           ├── app-patterns.md
+│           └── visual-catalog.md
+└── tests/
+    ├── test_open_release_pr.py
+    ├── test_release.py
+    ├── test_sync_metadata.py
+    └── test_validate_skills.py
 ```
 
-The brace notation groups filenames; it is not a literal path.
+<!-- END GENERATED: repository-map -->
 
 ## Skill Inventory
 
-| Skill                | References      | Purpose                                      |
-| -------------------- | --------------- | -------------------------------------------- |
-| `brainstorm`         | none            | Explore unresolved direction                 |
-| `plan`               | none            | Decompose requirements and dependencies      |
-| `research`           | none            | Gather and adjudicate evidence               |
-| `orchestrate`        | 1               | Coordinate independent work and integration  |
-| `implement`          | 2               | Implement and verify behavior                |
-| `cross-model-review` | 4               | Dispatch and consume independent reviews     |
-| `hyper-pr-review`    | 3               | Conduct evidence-based review                |
-| `codex-imagegen`     | none            | Delegate raster asset generation             |
-| `super-good-pr`      | 1               | Author and maintain PR descriptions          |
-| `deslop`             | 4 plus fixtures | Edit prose without semantic or voice damage  |
-| `dream`              | 2               | Consolidate authorized conversation evidence |
-| `git`                | none            | Perform complex Git operations               |
-| `tui-design`         | 2               | Design terminal behavior and presentation    |
+<!-- BEGIN GENERATED: skill-inventory -->
+
+| Skill                                                    | Reference files |
+| -------------------------------------------------------- | --------------- |
+| [brainstorm](skills/brainstorm/SKILL.md)                 | 0               |
+| [codex-imagegen](skills/codex-imagegen/SKILL.md)         | 0               |
+| [cross-model-review](skills/cross-model-review/SKILL.md) | 4               |
+| [deslop](skills/deslop/SKILL.md)                         | 7               |
+| [dream](skills/dream/SKILL.md)                           | 2               |
+| [git](skills/git/SKILL.md)                               | 0               |
+| [hyper-pr-review](skills/hyper-pr-review/SKILL.md)       | 3               |
+| [implement](skills/implement/SKILL.md)                   | 2               |
+| [orchestrate](skills/orchestrate/SKILL.md)               | 1               |
+| [plan](skills/plan/SKILL.md)                             | 0               |
+| [research](skills/research/SKILL.md)                     | 0               |
+| [super-good-pr](skills/super-good-pr/SKILL.md)           | 1               |
+| [tui-design](skills/tui-design/SKILL.md)                 | 2               |
+
+<!-- END GENERATED: skill-inventory -->
+
+Reference counts include every Git-visible file under `references/`, including fixtures.
 
 Process skills cover approaches to work: brainstorm, plan, research, orchestrate, implement, cross-model-review, hyper-pr-review, codex-imagegen, super-good-pr, deslop, and dream.
 
@@ -116,7 +179,7 @@ For broad changes, obtain independent verification on the final scope. A contrib
 
 ## Publishing Metadata
 
-Update the inventory and README when a skill is added, removed, renamed, or materially changes scope. Update the plugin description and keywords when the public surface changes. Keep `CLAUDE.md` as a symlink to this guide.
+Run `make sync-metadata` when files or skills change. The generated regions own the repository tree, skill inventory, reference counts, and README skill badge. Edit surrounding prose when a skill materially changes scope. Update the canonical plugin description and keywords when the public surface changes; synchronization copies the description into the marketplace entry. Keep `CLAUDE.md` as a symlink to this guide.
 
 Version changes follow the user-facing surface:
 
@@ -126,7 +189,7 @@ Version changes follow the user-facing surface:
 | Skill addition, removal, or rename            | Minor             |
 | Plugin architecture or manifest layout change | Major             |
 
-A local version bump is not permission to tag, release, or push to main. Keep temporary research notes and private session material out of commits. A requested public review report is a deliverable; an internal planning scratchpad is not.
+Ordinary skill PRs leave the version unchanged. The [release workflow](docs/releases.md) prepares the version, changelog, and release record together from explicit release intent. Merging its release PR publishes the verified merged commit. Local preparation only changes files; it does not authorize tagging or publishing. Keep temporary research notes and private session material out of commits. A requested public review report is a deliverable; an internal planning scratchpad is not.
 
 ## Maintenance Questions
 
