@@ -68,7 +68,6 @@
     "squash-merge",
     "force-with-lease",
     "transcript-mining",
-    "prompt-stream-telemetry",
     "implementation",
     "verification",
     "coding-workflow",

@@ -119,7 +119,7 @@ Store a project-scoped dream report through the current `remember` interface whe
 | Store all projects in the current project's graph    | Route each capture to its authorized project and scope |
 | Overwrite an old belief without provenance           | Use the correction flow and explain the evidence       |
 | Replay an entire growing transcript                  | Track session positions and handle appended records    |
-| Claim capture from a attempted write                 | Require an applied mutation receipt                    |
+| Claim capture from an attempted write                | Require an applied mutation receipt                    |
 
 ## What This Skill is NOT
 
