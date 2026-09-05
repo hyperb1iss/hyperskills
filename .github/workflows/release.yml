@@ -1,0 +1,39 @@
+name: Publish release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "0.9.30"
+          python-version: "3.11.14"
+          enable-cache: false
+      - name: Identify a release transition
+        id: candidate
+        run: |
+          candidate=$(uv run scripts/release.py candidate)
+          echo "publish=$candidate" >> "$GITHUB_OUTPUT"
+      - name: Validate the exact release commit
+        if: steps.candidate.outputs.publish == 'true'
+        run: make all
+      - name: Create or verify the tag and release
+        if: steps.candidate.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_REPOSITORY: ${{ github.repository }}
+        run: uv run scripts/release.py publish --repo "$RELEASE_REPOSITORY"

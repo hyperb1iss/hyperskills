@@ -6,8 +6,15 @@
   <strong>Focused skills for things capable agents still need to learn</strong>
 </p>
 
+<!-- BEGIN GENERATED: skill-badge -->
+
 <p align="center">
   <img src="https://img.shields.io/badge/Skills-13-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="13 Skills">
+</p>
+
+<!-- END GENERATED: skill-badge -->
+
+<p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-ff6ac1?style=for-the-badge" alt="MIT License"></a>
 </p>
 
@@ -190,9 +197,12 @@ make test       # Run validator, scanner, and review-runner regressions
 make all        # Run both checks and tests
 make lint       # Optional JSON, YAML, and Markdown lint tools
 make format     # Format tracked Markdown and JSON
+make sync-metadata # Regenerate the skill badge, inventory, and repository tree
 ```
 
 The validator checks concrete `references/`, `scripts/`, and `assets/` declarations in skill entrypoints. It does not execute examples, crawl external links, or grade agent behavior. Review reference contents and run relevant behavioral cases when changing a workflow.
+
+CI also checks derived metadata and release consistency. The [release workflow](docs/releases.md) prepares a single PR containing the version, changelog, and release notes, then publishes the exact merged commit after validation. Ordinary skill changes leave the version unchanged until release preparation.
 
 See [AGENTS.md](AGENTS.md) for contribution guidance. Licensed under [MIT](LICENSE).
 

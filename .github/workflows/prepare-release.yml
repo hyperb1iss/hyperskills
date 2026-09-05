@@ -1,0 +1,53 @@
+name: Prepare release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Patch for content, minor for skill inventory, major for plugin architecture"
+        type: choice
+        options: [patch, minor, major]
+        required: true
+      notes:
+        description: "Human-readable release notes (Markdown)"
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "0.9.30"
+          python-version: "3.11.14"
+          enable-cache: false
+      - name: Validate release source
+        run: make all
+      - name: Prepare version and notes
+        env:
+          RELEASE_BUMP: ${{ inputs.bump }}
+          RELEASE_NOTES: ${{ inputs.notes }}
+        run: |
+          printf '%s\n' "$RELEASE_NOTES" > "$RUNNER_TEMP/release-notes.md"
+          uv run scripts/release.py prepare --bump "$RELEASE_BUMP" --notes-file "$RUNNER_TEMP/release-notes.md"
+      - name: Open or reuse the release PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_REPOSITORY: ${{ github.repository }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          uv run scripts/open_release_pr.py --repo "$RELEASE_REPOSITORY"
