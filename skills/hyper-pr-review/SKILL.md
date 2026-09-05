@@ -100,33 +100,53 @@ Lead with the conclusion. Use these verdicts as meanings, not a mandatory render
 | APPROVE WITH FINDINGS | Required review is complete; only material nonblocking findings remain                              |
 | APPROVE               | Required review is complete with no material finding                                                |
 
-Explain each finding in complete sentences: what triggers it, what breaks, where, what proves it, and the smallest suitable remedy. Verify file anchors by content. Separate blocking defects, nonblocking improvements, and out-of-scope follow-ups. State what was checked and what was not, especially when reporting no findings.
+Make the opening answer the merge decision and name the consequence driving it. For an incomplete review, put the missing required coverage beside the verdict; do not bury it after reassuring prose. If a confirmed blocker exists, report needs changes even when other coverage remains incomplete, and name both facts.
 
-Use an orientation paragraph or a diagram only when component relationships need explanation. Preserve uncertainty and the author's voice while applying the relevant prose rules. A review report should not become a tour of every file or a checklist of things the reviewer knows.
+### Make Findings Usable
 
-For example:
+Lead each finding with a short consequence or corrective action, followed by the smallest useful source anchor. Write the explanation as a causal argument: the triggering input or state, the user or system impact, and the mechanism that connects them. Add the decisive evidence and a remedy that addresses that cause. These are ingredients, not five mandatory labels. A complete static trace is valid evidence; never upgrade it to a reproduced failure in the prose.
 
-```text
-Needs changes. The retry path can create a second charge after the provider
-accepted the first request but the response timed out.
+Anchor the responsible behavior, not a nearby declaration or a whole file. Verify the anchor against the reviewed revision and link it when the output surface supports links. Include a second location only when the causal chain needs it. Quote only enough code or output to make the claim checkable. If several locations share one cause and one remedy, report one finding with representative anchors; distinct remedies can justify distinct findings.
 
-The payment handler (payments.ts:84) generates a new idempotency key on each
-attempt. The timeout fixture reproduces two provider calls with different
-keys. Keep the key stable for the logical payment and test partial success.
+Offer the smallest suitable correction or state the invariant the fix must restore. A suggestion block helps when the local replacement is known to preserve behavior. Avoid presenting an untested redesign as the required fix. Explain uncertainty in the remedy without weakening an established defect.
 
-I traced the caller and ran the timeout fixture. Provider settlement behavior
-was outside this local review.
-```
+### Separate Consequences from Choices
+
+Use the repository's severity vocabulary when defined. Otherwise, say whether action is required before merge, nonblocking, or an unresolved question. Severity follows reachable consequence, affected users, and the established contract, not dramatic phrasing, the number of mentions, or difficulty of the fix.
+
+| Kind of feedback                                        | Treatment                                                                                                |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Confirmed contract violation or required-check failure  | Explain what must change before merge and why                                                            |
+| Feasible improvement with no current contract violation | Mark nonblocking; state the benefit and respect equally valid designs                                    |
+| Missing fact that could change the merge decision       | Name the exact question and evidence needed; keep the review inconclusive if no blocker is yet confirmed |
+| Personal preference or mechanical lint noise            | Omit unless requested or needed to satisfy a project rule; consolidate repeated tool output              |
+| Useful discovery outside the review scope               | Identify as follow-up without silently widening the current merge conditions                             |
+
+Ask a real question when information is missing. State a demonstrated defect directly instead of disguising a required change as "Could we maybe...?" Before asking, check accessible code, tests, and documentation. A review should not make the author retrieve facts the reviewer already has.
+
+### Present a Report a Human Can Scan
+
+Order findings by consequence, with clear spacing and descriptive titles when there are several. Use connected prose inside each finding; tables help comparisons but usually make causal explanations harder to read. A small review can be a few paragraphs. Broader reports can separate required changes, useful options, and review limits without empty sections or a ceremonial scorecard.
+
+Keep the scope and verification receipt compact: reviewed revisions, decisive checks and outcomes, and material gaps. Retain detailed command output or a coverage ledger separately when needed for follow-up. Do not repeat each inline comment in the summary; summarize the common risk and link to its findings. A clean review says no material issues were found in the checked scope and names the actual checks, without inventing praise or implying proof of absence.
+
+Preserve useful strengths when they constrain the remedy, such as an authorization boundary that must remain centralized. Address the code and its effects, not the author's competence. Use an orientation paragraph or a diagram only when relationships need explanation. Apply the project's prose conventions without stripping uncertainty, quantities, or evidence.
+
+See [worked report examples](references/report-examples.md) when calibrating the transition from raw review notes to a blocking finding, an incomplete review, or a nonblocking design choice. They illustrate evidence and hierarchy, not a required template.
 
 ## Act Only Within the Requested Role
 
 A review-only request stays read-only. A request to implement findings permits a separate fix pass after adjudication. Changes then need verification of the updated artifact; the reviewer must not silently edit the evidence it is judging.
 
-Posting comments, submitting approval, requesting changes on GitHub, or contacting others requires authorization for that external action. Before posting, recheck the live revisions and anchors. Read issue comments, inline threads, and review bodies when addressing existing feedback so resolved concerns are not duplicated. Prefer one coherent review submission over scattered comments.
+Posting comments, submitting approval, requesting changes on GitHub, or contacting others requires authorization for that external action. Before posting, recheck the live revisions and anchors. Read issue comments, inline threads, and review bodies when addressing existing feedback so resolved concerns are not duplicated. Prefer one coherent review submission over scattered comments. On GitHub, a comment-only review does not grant approval or request changes; select the external action that matches the established verdict and authorization. Use `super-good-pr` when writing replies to existing review feedback.
 
 ## Research Basis
 
 Reviewed on 2026-09-04. [Anthropic's evaluation guidance](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) distinguishes outcomes, traces, and grader limitations; use all three when assessing a review workflow. [OpenAI's GPT-6 Astra guidance](https://developers.openai.com/api/docs/guides/latest-model) warns that conflicting skill instructions can block work. The practical choice here is explicit scope and evidence requirements, with procedural defaults left adaptable.
+
+For report craft, [Google's reviewer comment guidance](https://google.github.io/eng-practices/review/reviewer/comments.html) supports explaining rationale and distinguishing required changes from suggestions. Its [review standard](https://google.github.io/eng-practices/review/reviewer/standard.html) favors code health and progress over personal perfection. These are practitioner guidelines, not measured guarantees for model output.
+
+The Microsoft field study [Expectations, Outcomes, and Challenges of Modern Code Review](https://www.microsoft.com/en-us/research/publication/expectations-outcomes-and-challenges-of-modern-code-review/) (Bacchelli and Bird, ICSE 2013) identifies understanding and knowledge transfer alongside defect finding. Its human-team setting does not establish agent-review effectiveness; the application here is to preserve the explanation that makes a finding useful. [GitHub's review documentation](https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/reviewing-proposed-changes-in-a-pull-request) defines the distinct comment, approve, and request-changes actions. These sources were checked on 2026-09-04.
 
 Benchmark results depend on the model, task set, harness, and grader. No published recall percentage establishes a universal ceiling for this skill, and no fixed rejection rate is a target for candidate findings.
 

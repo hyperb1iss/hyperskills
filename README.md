@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Skills-14-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="14 Skills">
+  <img src="https://img.shields.io/badge/Skills-13-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="13 Skills">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-ff6ac1?style=for-the-badge" alt="MIT License"></a>
 </p>
 
@@ -15,7 +15,7 @@
 
 A model does not need a tutorial for every tool it touches. Hyperskills carries the parts that are easy to miss: how to preserve another worker's edits during Git surgery, distinguish a review finding from a plausible story, verify a generated artifact at its destination, or extract useful memory without turning an old transcript into new instructions.
 
-The process skills help with decisions and evidence. They adapt to the task instead of prescribing agent counts, approval rituals, or a fixed pipeline. Domain skills remain where the operational details justify them: Git, Tilt, and terminal UI design. Use the installed tool's help and current official documentation for ordinary package management, linting, and type checking.
+The process skills help with decisions and evidence. They adapt to the task instead of prescribing agent counts, approval rituals, or a fixed pipeline. Domain skills remain where the operational details justify them: Git and terminal UI design. Use the installed tool's help and current official documentation for ordinary package management, linting, and type checking.
 
 Skills load independently. [Sibyl](https://github.com/hyperb1iss/sibyl) adds durable project memory when available. Host permissions and the user's actual request govern execution; a skill does not create authorization or override a settled decision.
 
@@ -114,7 +114,7 @@ Launch and consume an independent review of code, a specification, a diagnosis, 
 
 ### `hyper-pr-review`
 
-Conduct the review yourself. Trace changed behavior and actual callers, try to disprove each candidate, and report the trigger, impact, and evidence. Deep review adds deliberate coverage of rollout, security, and structural quality. Required checks that could not run produce an inconclusive verdict.
+Conduct the review yourself. Trace changed behavior and actual callers, try to disprove each candidate, and explain each finding as a concrete cause and consequence. Group repeated symptoms under their shared remedy and distinguish required changes from useful options. Deep review adds deliberate coverage of rollout, security, and structural quality. Unfinished required checks stay visible beside the verdict and prevent approval.
 
 ```text
 /hyperskills:hyper-pr-review
@@ -130,7 +130,7 @@ Delegate raster generation or editing when another harness needs Codex's image c
 
 ### `super-good-pr`
 
-Write and maintain PR descriptions around the problem, resulting behavior, and evidence a reviewer needs. Preserve human-authored sections and template requirements. Refresh claims when the artifact changes, and distinguish a rewritten commit identity from changed content.
+Write and maintain PR descriptions with a clear title, a causal opening, and a visible path through the mechanism and evidence. Worked examples show how a small fix, a complex boundary, and a scoped update need different amounts of explanation. Preserve human-authored sections and template requirements. Refresh claims when the artifact changes, and distinguish a rewritten commit identity from changed content.
 
 ```text
 /hyperskills:super-good-pr
@@ -162,14 +162,6 @@ Handle rebases, stacked branches, conflict resolution, and shared worktrees. Pre
 /hyperskills:git
 ```
 
-### `tilt`
-
-Diagnose the path from file change to build, sync, process reload, and readiness. Covers Live Update ordering, resource dependencies, CI completion, and environment-sensitive operations. References hold the operational patterns that matter when a valid Tiltfile still does the wrong thing.
-
-```text
-/hyperskills:tilt
-```
-
 ### `tui-design`
 
 Design terminal interfaces around capabilities, state, input, and lifecycle. Covers layout and visual hierarchy alongside Unicode width, fallback rendering, keyboard access, resize behavior, and terminal restoration. Includes a visual catalog and examples from existing applications.
@@ -183,6 +175,8 @@ Design terminal interfaces around capabilities, state, input, and lifecycle. Cov
 Metadata supports discovery; the entrypoint contains the essential decisions; references hold conditional detail. Short is useful when the procedure remains complete. A long reference is worthwhile only when an agent can find and use the relevant part.
 
 Version 3.11 removes the `uv`, `ruff`, `ty`, and `uv-build` skills. Their generic tool guidance belongs in model knowledge and current official documentation, while copied version tables require maintenance without adding enough value.
+
+Version 3.12 also retires the Tilt skill. Use current Tilt documentation and keep project-specific development patterns with the project.
 
 The [September 2026 review](docs/library-review-2026-09.md) records the substantive changes and research limits. The [evaluation cases](evals/README.md) exercise task behavior and routing; schema validation alone cannot establish that a skill helps.
 

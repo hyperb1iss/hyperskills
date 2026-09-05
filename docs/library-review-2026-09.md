@@ -1,6 +1,6 @@
 # Hyperskills Review: September 2026
 
-The library now contains 14 skills. The four Astral skills were removed at the user's direction, and the retained workflows were revised around decisions, evidence, and operational details that still earn their context cost. The review started from commit `63dc003` and covered all 18 original skill entrypoints, their references, the prose scanner, and repository metadata.
+Version 3.11.0 contained 14 skills. The Tilt skill was subsequently retired in 3.12.0; this report records the audit before that removal. The four Astral skills were removed at the user's direction, and the retained workflows were revised around decisions, evidence, and operational details that still earn their context cost. The review started from commit `63dc003` and covered all 18 original skill entrypoints, their references, the prose scanner, and repository metadata.
 
 The central problem was accumulated instruction conflict. Useful lessons had become universal rules: prescribed fleet sizes, approval pauses after an already authorized request, fixed confidence thresholds, and claims that a second model's agreement established correctness. Some copied tool examples were also wrong. The changes preserve the useful operational constraints while removing those defaults.
 

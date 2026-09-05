@@ -16,7 +16,7 @@ The coordinating reviewer checks proposed falsifiers, discards disproved candida
 ## 1. Correctness & Keystone
 
 - **Identify the critical invariants** from the requirements, then trace how the code enforces them (ordering, fail-closed defaults, idempotency). A subsystem may have several. Compare independently observed behavior with the author's explanation.
-- **Falsifiable-invariant inventory**: before drilling into files, inventory each changed high-risk behavior as a falsifiable invariant with a concrete representative input, principal, or resource. For each: base result, head result, controlling gate, impact. A `No findings` verdict requires resolving this inventory, not sampling the diff.
+- **Falsifiable-invariant inventory**: before drilling into files, inventory each changed high-risk behavior as a falsifiable invariant with a concrete representative input, principal, or resource. For each: base result, head result, controlling gate, impact. An approval requires resolving the required inventory. If coverage remains partial, report any supported findings with the unresolved coverage; do not call the full scope clean.
 - **Guards verified in both directions**: clean input passes AND an injected violation fails loudly. A validator that silently passes the exact drift it exists to catch is a confirmed finding, not a test gap.
 - **The guard-deletion question**: would deleting the guard cause an existing check to fail? If not, name the untested behavior and assess its regression risk. Missing coverage alone does not prove the guard is useless.
 - **Error paths and races**: what happens on the failure branch, the concurrent call, the retry that lands twice.
@@ -65,7 +65,7 @@ Something broke under load, concurrency, or scale, and the diff responds by rest
 
 Compare the change footprint with its purpose. A passing suite does not establish that every new layer or generated artifact is necessary.
 
-- **Mechanical measures first**: `git diff --stat` against the PR's stated scope; `wc -l` on files claimed split or refactored (a claimed decomposition once concealed a 3,955-line facade); committed generated output; the count of new services, configs, layers, and modes.
+- **Check structural claims mechanically**: compare `git diff --stat` with the stated scope, inspect files claimed split or refactored, and account for generated output and new services or modes. Report a measure only when it supports a concrete maintenance consequence.
 - **The footprint question**: a narrow feature reaching into core primitives (auth, shared inference, the database layer, the workflow engine) or spanning many components is a design signal. Evaluate whether it is also a finding.
 - **Structural claims get mechanical falsifiers**: measure, count, and list; never take "this is now simpler" from the description.
 - **The remedy framing**: preserve required behavior while reducing unnecessary concepts; deletion count alone does not measure quality.
@@ -96,4 +96,4 @@ Compare the claimed result with the artifact after tracing behavior. Apply the s
 - **Deleted or weakened tests**: removed assertions, raised thresholds, broadened tolerances, skipped suites, `--no-verify` residue, CI gates removed or made advisory.
 - **Ticket compliance, when linked**: does the diff fulfill the stated intent? Partial fulfillment described as complete is drift.
 - **Docs and runbooks**: changed operational or security guidance is verified against executable behavior; material drift there is a contract defect, not a docs nit.
-- **The grade**: where the repo uses `super-good-pr`, assess the body against [The content that matters](../../super-good-pr/SKILL.md#the-content-that-matters). Grade description inaccuracy by its actual impact on review, rollout, or user expectations. A wording nit is not automatically blocking.
+- **The grade**: where the repo uses `super-good-pr`, assess the body against [Make the title and opening carry the change](../../super-good-pr/SKILL.md#make-the-title-and-opening-carry-the-change). Grade description inaccuracy by its actual impact on review, rollout, or user expectations. A wording nit is not automatically blocking.
