@@ -21,16 +21,13 @@ Fetch or refresh the relevant refs before deriving the local diff. A three-dot c
 
 Gather the original requirement, final behavior, decisive files, and checks that actually ran. Separate observed evidence from expected behavior. Avoid universal claims such as "safe" or "fully covered" when the evidence establishes only a narrower property.
 
-## The content that matters
+## Make the title and opening carry the change
 
-| Reviewer need          | Include                                                                     |
-| ---------------------- | --------------------------------------------------------------------------- |
-| Understand the problem | Concrete trigger and previous behavior                                      |
-| Understand the result  | What happens now and why that solves the problem                            |
-| Evaluate the design    | The mechanism, important trade-off, and invariant if one carries the change |
-| Navigate the diff      | Decisive files, functions, or ordering; omit a file-by-file changelog       |
-| Assess confidence      | Checks run, outcomes, relevant coverage, and material gaps                  |
-| Assess adoption        | Compatibility, migration, rollout, or follow-up detail when applicable      |
+Name the behavior or design decision in the title. A reader scanning the PR list should distinguish this change from other work in the same subsystem. Prefer "Keep export retries attached to the original request" to "Improve export reliability." Follow the repository's title convention, including a Conventional Commit prefix when required; avoid packing internal symbols into the title at the expense of meaning.
+
+Open with the situation that makes the change necessary and what the reader can expect afterward. Connect the mechanism to that result when it helps explain the fix. For a refactor, name the engineering constraint it removes and the behavior it preserves; do not invent a user-facing defect. These are relationships to explain, not three mandatory sentences or headings.
+
+Keep the causal chain intact: trigger, consequence, changed behavior, reason the mechanism works. A list of edited files cannot supply that chain. Keep internal identifiers out of the opening until the reader knows what they represent.
 
 Describe the final system. Leave routine development history in the commits and conversation. A rejected approach belongs in the body only when explaining its trade-off helps evaluate the chosen design. After a squash, retain that design rationale without recreating a session diary.
 
@@ -40,7 +37,7 @@ State boundaries that affect adoption or review. Do not enumerate untouched file
 
 Use the repository template first. Preserve required metadata and checkboxes. An unavailable value gets the template's accepted "not applicable" or an explanation; never invent an issue ID or silently remove a required field.
 
-Without a template, choose the sections that carry useful information. Use a semantic emoji on headings you add under the house style. A body does not need every heading, an extra H1 repeating its title, or a context blockquote for a standalone fix.
+Without a template, let the opening stand on its own and add headings when they help a reader find a different kind of information. Use a semantic emoji on headings you add under the house style. A body does not need every heading, an extra H1 repeating its title, or a context blockquote for a standalone fix. Prefer a specific heading such as `## 🛠️ Accept before processing` when it communicates more than a generic label.
 
 | Section              | When it helps                                                             |
 | -------------------- | ------------------------------------------------------------------------- |
@@ -55,9 +52,13 @@ Without a template, choose the sections that carry useful information. Use a sem
 
 Keep explanations in prose and use tables for comparisons or enumerable facts. A numbered sequence is useful when operation order matters. Preserve semantic emoji and other deliberate formatting during a prose cleanup pass; follow a repository's stricter template when it conflicts with house defaults.
 
+Give the body a reading path: the opening explains the change; the visible sections explain the decision, evidence, and adoption concerns; optional detail supports a closer inspection. Keep a failed integration check, a required migration, or an unresolved correctness question visible. A `<details>` block can hold long command output or supplemental measurements, with a summary that says what the reader will find. It must not hide a condition that changes whether the PR is ready.
+
+Use review guidance to connect a question to its evidence: "Start with the transaction in `accept_delivery`; its commit must precede the acknowledgment." Link the decisive code when a stable link is available. Omit inventories of every touched file and requests to "review carefully" without a concrete concern. Put a limitation next to the claim it qualifies, even when fuller receipts live in Validation.
+
 ## Validation evidence
 
-Record the command or named CI job, outcome, and what it establishes. Use counts when the tool reports meaningful counts. A linter's successful exit does not need an invented test count. Identify skipped tests and a failing prerequisite when either limits the claim.
+Record the command or named CI job, outcome, and what it establishes. "Tests pass" leaves the reader guessing whether the changed path ran. "The retry regression passes with a simulated lost acknowledgment; delivery to the live provider was not exercised" identifies both the evidence and its limit. Use counts when the tool reports meaningful counts. A linter's successful exit does not need an invented test count. Identify skipped tests and a failing prerequisite when either limits the claim.
 
 For a regression fix, a failing-before and passing-after reproduction can be the decisive evidence. For a deployed migration, show the relevant compatibility or state transition when available. Prefer the narrow check that exercises the changed behavior to a long inventory of unrelated green suites.
 
@@ -123,6 +124,8 @@ Use the project voice and required attribution. Under the Bliss/Nova contract, f
 
 A generated-by footer in a PR body can stay; do not remove attribution as part of prose cleanup.
 
+Put the disposition first, then the causal reason and supporting check. For an unresolved design choice, state the recommendation and the trade-off the reviewer is deciding. A reply should answer the original concern without requiring the reviewer to infer the answer from a commit link or an unrelated green suite.
+
 ## Voice and prose cleanup
 
 Use plain, complete sentences. Lead with the English noun before a path or SHA, keep the subject near its verb, and explain consequences in the order the reader needs them. Preserve calibrated uncertainty; remove empty hedges and inflated significance.
@@ -130,6 +133,8 @@ Use plain, complete sentences. Lead with the English noun before a path or SHA, 
 No em or en dashes in house-authored prose. The ban is a house convention, not evidence that punctuation identifies AI authorship. Avoid house jargon such as "load-bearing" in a PR body. Words used to describe the desired quality in chat, such as "banger" or "cinematic," are not copy for the artifact.
 
 Run the relevant `deslop` prose checks without removing meaningful emoji, required headers, or evidence. Keep the body as short as its explanation permits and as detailed as review requires. Do not compress causal reasoning into fragments or add sections to make a small change appear substantial.
+
+Read the draft as a reviewer returning cold: can the title and opening explain the result, can the visible body support a readiness decision, and can the detailed evidence guide inspection? Repair the missing connection or remove the redundant passage. Do not add a section simply because the draft looks short.
 
 ## Stacked PRs
 
@@ -148,6 +153,12 @@ Split by coherent review and verification boundaries. A description should clari
 | Overwrite a human's latest edit                   | Re-read and merge only authorized changes                       |
 | Turn a limitation into unsolicited implementation | Complete authorized requirements and state real boundaries      |
 | Publish because drafting finished                 | Check the action is authorized                                  |
+
+## Worked examples and basis
+
+Consult [worked examples](references/worked-examples.md) when choosing the shape of a small fix, explaining an asynchronous correctness boundary, or making a scoped template edit. Each example starts with its complete factual packet; the output cannot claim more than that packet establishes.
+
+The examples also link the primary guidance behind these choices. Google and GitHub describe useful engineering practices and supported formatting, not a measured universal optimum for PR length, heading count, or model output quality.
 
 ## What This Skill is NOT
 

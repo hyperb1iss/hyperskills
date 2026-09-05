@@ -45,3 +45,5 @@ Block when the change violates an established boundary, creates a demonstrable c
 Keep useful alternatives nonblocking when the current design meets its contracts and the benefit depends on speculative future work. For an explicit redesign request, make a clear recommendation and show the migration path. Avoid extending an ordinary bug fix into a rewrite merely to satisfy this review's ambition.
 
 Report the most consequential findings first. Be direct about a tangled implementation without making the review personal. Name verified strengths when they constrain the remedy, such as a correctly centralized authorization boundary that should stay intact.
+
+A structural review should finish with a ranked recommendation, not an inventory of everything that could be redesigned. Connect each required change to a present maintenance consequence and preserve the author's valid choices. Use the [report guidance](../SKILL.md#write-an-actionable-report) to distinguish merge conditions from optional architectural directions.
