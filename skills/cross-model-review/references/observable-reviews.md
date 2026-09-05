@@ -1,44 +1,70 @@
 # Observable Claude Reviews
 
-Use this path for Codex → Claude reviews when Codex or a human needs progress visibility while the reviewer runs.
+Use the optional runner when a Claude CLI review needs progress visibility and durable recovery artifacts. A native host with adequate progress reporting can use its own tools. The runner requires Python 3.11 or newer and an installed Claude CLI.
 
-## Launch Contract
+## Launch and Observe
 
-1. Write the complete review brief to a temporary prompt file.
-2. Run `scripts/run_claude_review.py --prompt-file <path> --cwd <repo> --label <scope>` with `yield_time_ms: 1000`.
-3. Record the printed review directory and returned Codex shell session ID.
-4. Treat `Process running` as success. Never launch a duplicate reviewer.
-5. Read progress with `scripts/review_status.py <review-dir>` and reap only the original shell session in 20–30 second windows.
-6. Freeze the entire reviewed Git worktree while Claude runs. Reads are safe; any net tracked or non-ignored untracked difference present at completion voids the verdict.
-7. After process exit, require `status.json` state `complete` before consuming `final.md`.
+Write the complete brief to a file. Include the original request, exact scope, captured diff or revision, relevant project constraints, and permitted actions. Safe mode disables automatic project instruction discovery; the brief must carry the constraints the reviewer needs.
 
-The runner rejects empty prompts and reused non-empty review directories. A caller-supplied `--review-dir` must live outside the resolved Git worktree and is forced to mode `0700`; omit it for an equally private unique system-temporary directory. `--claude-bin` exists for alternate installations and deterministic tests. The runner strips `ANTHROPIC_API_KEY` and `ANTHROPIC_AUTH_TOKEN`, supplies the prompt through file-backed stdin that reaches EOF, defers to the user's configured Claude model, and disables session persistence. Claude's `--safe-mode` disables customizations including MCP servers and custom agents while preserving auth, model selection, built-in tools, and permissions; `--tools` then allowlists only `Read`, `Glob`, and `Grep`, with Write/Edit/Bash tools explicitly denied as defense in depth.
+```bash
+python3 <skill-dir>/scripts/run_claude_review.py \
+  --prompt-file /absolute/path/review-brief.md \
+  --cwd /absolute/path/repo --label cancellation-review \
+  --auth-mode inherit
+```
 
-## Artifact Contract
+Choose authentication deliberately. The default `inherit` mode preserves the configured environment for API, proxy, or existing subscription authentication. Use `--auth-mode subscription` when the intended route is local subscription credentials and inherited `ANTHROPIC_API_KEY` or `ANTHROPIC_AUTH_TOKEN` would select another route. That mode removes those variables only from the child environment; it does not configure or guarantee a subscription login.
 
-The runner creates a unique temporary directory:
+The runner prints its review directory and status path before fingerprinting file contents or starting Claude. Retain the original shell session or process handle. Poll that handle using the host's supported wait parameters, and inspect saved activity separately:
 
-| File           | Contract                                                                             |
-| -------------- | ------------------------------------------------------------------------------------ |
-| `meta.json`    | Launch context plus the child PID and initial Git snapshot                           |
-| `events.jsonl` | Append-only raw Claude `stream-json`; use for diagnosis, not routine context loading |
-| `status.json`  | Atomically replaced high-level state safe to poll while the review runs              |
-| `stderr.log`   | Claude startup, authentication, permission, and transport errors                     |
-| `final.md`     | Final result extracted only from Claude's `result` event                             |
+```bash
+python3 <skill-dir>/scripts/review_status.py /absolute/path/review-dir
+python3 <skill-dir>/scripts/review_status.py /absolute/path/review-dir --json
+```
 
-`status.json` progresses through `starting`, `running`, then `complete`, `failed`, or `stale`. Its active phase is normally `starting`, `inspecting`, `validating`, or `reporting`; the terminal phase matches the terminal state. A `stale` result means HEAD or the tracked/non-ignored-untracked worktree fingerprint differs between launch and completion, or a freshness check that succeeded at launch became unavailable at completion. The runner exits 90, so discard the verdict and inspect the worktree delta; `freshness_error` explains a check that became unavailable. Wrapper exit 91 means Claude did not produce a usable, non-empty success result; inspect `status.json` for its actual child exit code or result error. `target_stale=unknown` means Git freshness could not be established at launch; disclose that boundary before using a non-Git review.
+The status describes the last observed event. An unchanged event count is not a failure verdict, and a saved `running` state is not proof the process remains alive. Check the original process and stderr before deciding it is stuck. Never start another reviewer solely because the host yielded or final text has not appeared.
 
-## Monitoring Rules
+## Scope and Freshness
 
-- Report meaningful phase changes to the user; do not narrate every file read.
-- Use status changes, `last_event_at`, event count, and process state as liveness evidence.
-- Do not enable `--include-partial-messages` by default. Partial deltas are noisy and can persist content that is irrelevant to progress.
-- Do not expose hidden reasoning from the raw stream. The status helper derives only coarse activity from system, tool-use, assistant-text, and final-result events.
-- Do not parse `stderr.log` as a verdict. On failure, preserve and report the exact error boundary.
-- Do not delete the review directory until findings have been dispositioned; its files are the recovery record if the Codex shell handle is lost. After disposition, remove it only when local retention policy permits, because raw events can contain source excerpts and thinking blocks.
+By default, compare the entire Git worktree. For a narrower review, repeat `--scope` with literal repository-relative file or directory paths (no glob or Git pathspec expansion):
 
-## Stall Recovery
+```bash
+python3 <skill-dir>/scripts/run_claude_review.py \
+  --prompt-file /absolute/path/review-brief.md --cwd /absolute/path/repo \
+  --scope src/cancellation.py --scope tests/test_cancellation.py
+```
 
-If `status.json` stops changing, compare two monitoring windows and inspect the original process state. Growing `events.jsonl` means Claude is alive. An unchanged event count with a live process warrants one more window, then the isolation ladder in `failure-recovery.md`. Kill only a confirmed-stuck process tree, never respawn blindly.
+The selected scope must cover the actual evidence the reviewer uses, including relevant callers and configuration. Scope selection controls change detection, not filesystem access. Absolute paths and paths escaping the worktree are rejected. Preserve the reviewed artifact while the reviewer reads it; independent work outside a deliberately scoped packet can continue.
 
-If the process exits but state remains `starting` or `running`, inspect `stderr.log` and `events.jsonl`; treat the review as failed. If state is `complete` but the Git snapshot no longer matches, treat the verdict as stale even if `final.md` says PASS.
+The fingerprint includes staged content, unstaged content, and non-ignored untracked files. It compares launch and completion snapshots. Equal endpoints cannot prove files were unchanged between them, and ignored files, submodule contents, or external inputs need separate evidence. Unknown Git freshness is disclosed as unknown. Losing a previously available snapshot invalidates the result.
+
+## Artifacts and Completion
+
+The runner uses a unique private directory outside the worktree. A caller-supplied `--review-dir` must be empty and outside that tree. The directory is restricted to its owner.
+
+| File           | Purpose                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------ |
+| `prompt.md`    | Copy of the actual submitted brief                                                         |
+| `meta.json`    | Launch context, prompt digest, process identity, authentication mode, and initial snapshot |
+| `events.jsonl` | Raw event stream retained for diagnosis                                                    |
+| `status.json`  | Atomically replaced activity and terminal state                                            |
+| `stderr.log`   | Startup, permission, authentication, and transport diagnostics                             |
+| `final.md`     | Nonempty text from a successful terminal result event                                      |
+
+A usable result requires successful child completion and a successful, non-error result event. Missing or malformed results cannot become approval. Interpret wrapper status before consuming a saved final file:
+
+| Wrapper outcome          | Action                                                                                 |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| Exit 0, state `complete` | Read the report and its limitations; process completion is not reviewer approval       |
+| Exit 90, state `stale`   | Compare the artifact delta and obtain the required new review                          |
+| Exit 91, state `failed`  | Inspect the child exit/result error; no usable completed result was obtained           |
+| Exit 127                 | Resolve the startup failure before relaunching                                         |
+| Interrupt or termination | Confirm the owned process group stopped; retain partial evidence without granting PASS |
+
+On POSIX systems, cancellation targets the owned process group even if its leader has exited. Other platforms support direct-child termination only; use a host supervisor when descendant cleanup is required.
+
+The reviewer receives only Read, Glob, and Grep, with noninteractive permission denial. Safe mode, restricted tools, and explicit MCP denial remove common side effects; they are not a filesystem or network sandbox. The runner preserves configured model selection and disables resumable session persistence. Raw external logs still exist and may contain source excerpts or reasoning blocks. Use compact activity for routine updates, never expose hidden reasoning, and apply the project's retention policy after disposition.
+
+The helper's deterministic tests use a fake Claude executable. They verify lifecycle and protocol handling, not a model's review quality. For a live check, observe activity before completion, reap the original process, inspect terminal status, and compare the saved prompt and final artifact with the intended request.
+
+The [Claude CLI reference](https://code.claude.com/docs/en/cli-reference) and [programmatic usage guide](https://code.claude.com/docs/en/headless) document the streaming and permission surfaces. Flags were checked against local Claude Code 2.1.261 on 2026-09-04; inspect current help when the installed CLI differs.

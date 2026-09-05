@@ -44,6 +44,18 @@ Use disposable fixtures for writes. Avoid real publishing, account changes, imag
 | "The provider requires a concurrency limit."               | Inspect the provider contract and workload; distinguish valid admission control from an undiagnosed local bottleneck |
 | A review is interrupted after reading half the named files | Retain partial findings and report incomplete coverage; no full-scope PASS                                           |
 
+## Observable Review Runner
+
+Use the optional runner's deterministic fixtures for process and evidence boundaries:
+
+- Change only staged content while leaving worktree bytes and porcelain status unchanged. The result becomes stale.
+- Change an unrelated file during an explicitly scoped review. The selected evidence remains usable; a changed scoped file invalidates it.
+- Cancel a reviewer whose descendant ignores termination, including when the leader has already exited. Confirm the owned group stops and no completion verdict is granted.
+- Run inherited and subscription authentication modes with dummy credentials. Verify the child receives only the selected configuration and no credential values appear in the artifacts.
+- Replace the original prompt file after launch. The submitted bytes and saved digest still identify the captured brief.
+
+For a live Claude smoke check, observe at least one activity update before completion and read the final result from the original process. Fake events establish wrapper behavior; they do not establish current provider compatibility or review quality.
+
 ## Receipts
 
 A useful receipt contains the case, artifact identity, model/host configuration, observed actions, resulting files or response, grader result, and limitations. Keep private fixtures and provider transcripts out of the public repository. Record a failure even when a later retry succeeds.

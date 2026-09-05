@@ -5,8 +5,8 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import Any
 
 
@@ -33,12 +33,22 @@ def main() -> int:
         print(f"invalid status file {status_path}: {error}", file=sys.stderr)
         return 2
 
+    if not isinstance(status, dict):
+        print(f"invalid status file {status_path}: expected an object", file=sys.stderr)
+        return 2
+
     if args.json:
         print(json.dumps(status, indent=2, sort_keys=True))
         return 0
 
     print(f"state={display(status.get('state'))}")
     print(f"phase={display(status.get('phase'))}")
+    if "scope" in status:
+        print(
+            f"scope={json.dumps(status['scope']) if status['scope'] else 'whole-worktree'}"
+        )
+    if "auth_mode" in status:
+        print(f"auth_mode={status['auth_mode']}")
     print(f"activity={display(status.get('last_activity'))}")
     print(f"last_event_at={display(status.get('last_event_at'))}")
     print(f"event_count={display(status.get('event_count'))}")
