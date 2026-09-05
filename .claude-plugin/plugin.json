@@ -1,7 +1,7 @@
 {
   "name": "hyperskills",
-  "version": "3.10.6",
-  "description": "Focused AI agent skills: brainstorming, planning, research, orchestration, implementation, image generation delegation, dreaming (conversation review & knowledge consolidation), git operations, Tilt Kubernetes development, TUI design, cross-model code review, falsifier-gated PR review, deslopping human-facing prose, and Python tooling (uv, ruff, ty, uv-build)",
+  "version": "3.11.0",
+  "description": "Focused skills for capable coding agents: design exploration, research, planning, implementation, multi-agent coordination, independent review, prose editing, memory, Git, Tilt, terminal UI, and delegated image generation.",
   "author": {
     "name": "Stefanie Jane",
     "url": "https://hyperbliss.tech"
@@ -19,7 +19,6 @@
     "knowledge-gathering",
     "multi-agent",
     "orchestration",
-    "agent-swarm",
     "git",
     "tilt",
     "kubernetes",
@@ -78,23 +77,10 @@
     "commit-messages",
     "atomic-commits",
     "commit-as-you-go",
-    "karpathy",
     "code-discipline",
     "surgical-changes",
     "simplicity",
     "code-quality",
-    "judo-move",
-    "python",
-    "uv",
-    "ruff",
-    "ty",
-    "uv-build",
-    "python-packaging",
-    "linter",
-    "formatter",
-    "type-checker",
-    "astral",
-    "pyproject-toml",
     "dream",
     "dreaming",
     "memory-consolidation",
@@ -116,6 +102,8 @@
     "slop-scanner",
     "corpus-evidence",
     "over-correction",
-    "surface-profiles"
+    "surface-profiles",
+    "skill-evaluation",
+    "context-engineering"
   ]
 }

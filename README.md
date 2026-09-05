@@ -3,327 +3,203 @@
 </h1>
 
 <p align="center">
-  <strong>Focused AI agent skills for things models don't already know</strong>
+  <strong>Focused skills for things capable agents still need to learn</strong>
 </p>
 
 <p align="center">
-  <em>Knowledge, guidance, wisdom, SOTA. Reach for what fits.</em>
+  <img src="https://img.shields.io/badge/Skills-14-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="14 Skills">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-ff6ac1?style=for-the-badge" alt="MIT License"></a>
 </p>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Skills-18-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="18 Skills">
-  <img src="https://img.shields.io/badge/skills.sh-Compatible-ff6ac1?style=for-the-badge&logo=vercel&logoColor=white" alt="skills.sh">
-</p>
+## What earns a skill
 
-<p align="center">
-  <a href="https://github.com/hyperb1iss/hyperskills/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/hyperb1iss/hyperskills?style=flat-square&logo=opensourceinitiative&logoColor=white" alt="License">
-  </a>
-  <a href="https://github.com/hyperb1iss/hyperskills/releases">
-    <img src="https://img.shields.io/github/v/release/hyperb1iss/hyperskills?style=flat-square&logo=github&logoColor=white" alt="Release">
-  </a>
-</p>
+A model does not need a tutorial for every tool it touches. Hyperskills carries the parts that are easy to miss: how to preserve another worker's edits during Git surgery, distinguish a review finding from a plausible story, verify a generated artifact at its destination, or extract useful memory without turning an old transcript into new instructions.
 
----
+The process skills help with decisions and evidence. They adapt to the task instead of prescribing agent counts, approval rituals, or a fixed pipeline. Domain skills remain where the operational details justify them: Git, Tilt, and terminal UI design. Use the installed tool's help and current official documentation for ordinary package management, linting, and type checking.
 
-## 💎 What This Is
+Skills load independently. [Sibyl](https://github.com/hyperb1iss/sibyl) adds durable project memory when available. Host permissions and the user's actual request govern execution; a skill does not create authorization or override a settled decision.
 
-Models already know how to write React components, Kubernetes manifests, and PyTorch code. They don't need 300 lines of examples for that.
-
-hyperskills is built around an agent workflow. Brainstorming structured by the Double Diamond. Wave-based research with deferred synthesis. Verification-driven planning and implementation. Cross-model peer review that catches what self-review misses. Seven orchestration strategies for multi-agent work. Conversation consolidation that pulls signal out of past sessions into persistent memory. The process skills are the heart of it, mined from thousands of real dispatches and tens of thousands of tracked operations, most recently re-hardened against a 100-day corpus of 600 real Claude and Codex sessions (Jul 2026).
-
-Domain skills round out the toolbox where models have stale or missing knowledge: current Astral Python tooling, Tilt operational decision trees, and terminal UI design that survives across emulators.
-
-Each skill encodes procedural knowledge, decision trees, anti-patterns, and current SOTA. None prescribes a strict workflow. They give you knowledge and framing; you decide when to reach for them. Skills carry procedural knowledge in-context; [Sibyl](https://github.com/hyperb1iss/sibyl) carries decisions, patterns, and learnings across sessions. 18 skills, all installable independently.
-
-## ⚡ Installation
+## Installation
 
 ### Claude Code
 
-```bash
-# Register the marketplace, then install
+```text
 /plugin marketplace add hyperb1iss/hyperskills
 /plugin install hyperskills@hyperb1iss
 ```
 
-### Vercel Skills (skills.sh)
+### Skills CLI
 
 ```bash
-# All skills
-npx skills add hyperbliss/hyperskills --all
-
-# Pick what you need
-npx skills add hyperbliss/hyperskills --skill implement
-npx skills add hyperbliss/hyperskills --skill orchestrate
-npx skills add hyperbliss/hyperskills --skill codex-imagegen
+npx skills add hyperb1iss/hyperskills --all
+npx skills add hyperb1iss/hyperskills --skill implement
 ```
 
-### Manual
+Use the installer's supported agent selection to choose your host. Check its current help rather than assuming every host has the same skill directory or invocation syntax.
 
-```bash
-git clone https://github.com/hyperb1iss/hyperskills.git
-ln -s $(pwd)/hyperskills/skills ~/.claude/skills/hyperskills
-```
-
-## 🪄 Composing Skills
-
-Skills are independent. None of them require the others. A typo fix doesn't need brainstorming, a clear bug doesn't need research, and the Python tooling skills compose freely.
-
-A few combinations come up often, more as observation than prescription:
-
-| Situation               | Skills that pair well                                 |
-| ----------------------- | ----------------------------------------------------- |
-| New feature             | brainstorm, plan, implement, cross-model-review       |
-| Greenfield project      | brainstorm, research, plan, orchestrate, implement    |
-| Architecture decision   | brainstorm, research                                  |
-| Large refactor          | plan, orchestrate, implement, cross-model-review      |
-| Bug fix                 | implement (the skill scales itself for trivial fixes) |
-| Raster asset delegation | codex-imagegen from any shell-capable agent harness   |
-| Opening a PR            | super-good-pr, then announce it in your own voice     |
-| Anything humans read    | deslop before it ships, whatever produced the draft   |
-| Reviewing a PR          | hyper-pr-review, with cross-model-review as a lane    |
-| Python project work     | uv, ruff, ty, uv-build                                |
-| Knowledge consolidation | dream pulls insights from past sessions into Sibyl    |
-
-Domain skills (git, tilt, tui-design, uv, ruff, ty, uv-build) plug in wherever the work touches their territory. Any skill can loop back when new questions emerge.
-
-## 🔮 Skills
-
-### Process Skills
-
-How to approach a class of work: workflows, phases, decision gates. The interesting part of hyperskills lives here.
-
-#### `brainstorm`: Structured Ideation
-
-Double Diamond model for creative work. Diverge on the problem, converge on a definition, diverge on solutions, converge on a decision. Grounded in Sibyl so you don't re-explore solved problems. Reads the ask before picking a mode (stakes plus uncertainty means explore wide, not plan), pressure-tests both dials of the bar (ambitious destination, boring mechanism), and carries the multi-model shapes that survive contact with real work: artifact-mediated design consults and cross-model convergence as a confidence signal.
-
-```bash
-/hyperskills:brainstorm
-```
-
-#### `research`: Multi-Agent Knowledge Gathering
-
-Wave-based research with deferred synthesis. Deploy agents in waves across a research surface, run gap analysis between waves, then synthesize with the full picture. Covers technology evaluation, codebase archaeology, SOTA analysis, and competitive landscape patterns. The wave budget is a churn guard, not a wall: keep going while waves yield, reframe when they oscillate. Epistemics come first: premise-check before any fan-out, date-anchored briefs, and consensus-is-not-verification, where version claims settle against a live registry, never vote count.
-
-```bash
-/hyperskills:research
-```
-
-#### `plan`: Task Decomposition
-
-Verification-driven planning centered on a durable spec artifact: pinned invariants (including the deliberately-open decisions that model priors love to erase), adversarial fact-audits that patch the spec rather than comment on it, completion criteria of complete-and-validated, and shape checkpoints at wave boundaries that catch the sprawl green gates miss. Decomposes into dependency-ordered tasks with parallelizable waves, tracks in Sibyl when work outlives a session, and scales review ceremony by stakes rather than task number.
-
-```bash
-/hyperskills:plan
-```
-
-#### `implement`: Verification-Driven Coding
-
-Distilled from 21,321 tracked operations across 64+ projects. Patterns that consistently ship working code:
-
-- 2-3 edits then verify, the cadence that prevents debugging spirals
-- Proof lives at the consumption boundary, and a green check only counts if it demonstrably did the work
-- Scale selection from trivial (1-5 edits) to epic (1000+ edits), with the right strategy for each
-- The judo move, the shape checkpoint at commit, and fix-the-class-bound-the-fix
-- Error recovery: name the failure class first, spiral prevention, incident mode (depth up, breadth flat)
-
-```bash
-/hyperskills:implement
-```
-
-#### `orchestrate`: Multi-Agent Coordination
-
-Seven orchestration strategies mined from 597+ real agent dispatches: Research Swarm, Epic Parallel Build, Sequential Pipeline, Parallel Sweep, Multi-Dimensional Audit, Fleet/Stack Maintenance, and Full Lifecycle. Covers the whole arc, not just launch: worker-brief anatomy (scope fences, done-means, traps, receipts-already-run), deviation adjudication, the fleet verification lifecycle, slow-vs-stuck watcher contracts, and shape checkpoints against the scope drift that kills long fan-outs. Copyable dispatch briefs live in references.
-
-```bash
-/hyperskills:orchestrate
-```
-
-#### `cross-model-review`: Bidirectional Cross-Model Code Review
-
-The author model writes, a different model reviews, and the independence claim is scoped honestly: it breaks self-review bias, not shared-training staleness. Works in either direction: Claude Code calls Codex via `codex review` (structured diff, custom prompt supported) or `codex exec` (freeform deep-dive), and Codex calls Claude via `claude -p`, whose gnarly gotchas (the `yield_time_ms: 300000` rule, the `--` separator for variadic flags, the `ANTHROPIC_API_KEY` billing trap, output capture to a file rather than `tail`) are all documented. Covers the receiving half too: findings are claims to verify, findings-ledger re-review loops that converge instead of churning, verdict freshness (a PASS covers a SHA), the hang playbook for both directions, and a labeled degradation ladder. Beyond code review: claim-level fact-checks, diagnosis checks before fix mode, and artifact-mediated design consults.
-
-```bash
-/hyperskills:cross-model-review
-```
-
-#### `hyper-pr-review`: Falsifier-Gated PR Review
-
-Conducting the review yourself, with precision as the explicit target: frontier reviewers catch a fraction of what humans flag, so every reported finding has to be worth the reader's trust. Candidate findings pass a three-stage pipeline (hard exclusion rules, then the quickest disproof actually run, then CONFIRMED/PLAUSIBLE labels with named evidence tiers), the PR narrative stays quarantined until the intent-drift pass checks it against the diff, and eight lenses cover what single-pass review misses: contract tightening vs real callers, fragility, nerf detection, sprawl, rollout reality, and description drift. Thermonuclear mode layers on the structural ambition pass: code judo, spaghetti growth, and an approval bar where "it works" isn't enough. The report itself is written for the human who acts on it: principal-engineer prose, mermaid where topology changed, negative-space reporting on every deep pass, and inline-first delivery (findings as anchored review comments, a top-level summary as needed) when posting to GitHub. Memory is the differentiator: Sibyl recall arms the attack plan before the first file is read, known error patterns carry their falsifiers in, and every review writes its defect classes back to the graph.
-
-```bash
-/hyperskills:hyper-pr-review
-```
-
-#### `codex-imagegen`: Codex Image Generation Delegation
-
-Generate or edit raster assets from Claude Code, Pi, Cursor, or another
-shell-capable harness by delegating to Codex's built-in `$imagegen` capability.
-Uses headless `codex exec` as the zero-setup path, keeps the desktop UI out of
-the loop, fans independent images out concurrently, carries edit invariants and
-reference-image roles, verifies every final workspace artifact, and supports
-optional threaded refinement through `codex mcp-server`.
-
-```bash
-/hyperskills:codex-imagegen
-```
-
-#### `super-good-pr`: Reviewer-First PR Descriptions
-
-What a PR description is actually for: handing a human the mental model fast, proving the parts they'd doubt, and being honest about what you didn't do. Lead with why, prove every claim with a receipt, name the invariant everything rides on, stay honest about blast radius. And because a body is born once but lives for weeks: surgical read-modify-write maintenance (never regenerate), SHA-keyed receipt refresh after every push, squash rewrites that carry the story into the body, and review-thread disposition ledgers. Carries the section spine, the emoji palette (and the AI-slop set to avoid), repo-template integration, and diagram guidance: topology and flow changes get native mermaid in the body, chosen by change shape.
-
-```bash
-/hyperskills:super-good-pr
-```
-
-#### `deslop`: AI Tell Removal
-
-The pass that runs on anything a human reads outside the terminal. AI tells sit at three levels (characters, words, shape) and the easy two carry the least signal, which is why a vocabulary scrub leaves text still recognizable. So the five passes reach vocabulary last, and every rule is gated by a surface profile, because a pass tuned for a blog post will strip the semantic emoji a PR body requires and flatten the calibrated uncertainty that makes a postmortem honest.
-
-What makes it more than another wordlist: a real scanner (`scripts/slopscan.pl`) that masks frontmatter, code fences in every form, inline code, blockquotes, and link targets before any check, so it never reports a hit inside code or inside a quoted example, with slop/protected/clean fixtures to prove it still works. A `references/evidence.md` that separates what corpus research supports from what practitioners assert, and corrects the folklore: on passive voice, hedges, contractions and first person the direction *reverses between model families*, so the usual blanket advice to strip them is unsupported and can make prose worse. And a craft layer (`references/craft-moves.md`) that connects the measurement to the fix: the three features with the largest verified gap against human prose (GPT-4o uses participial clauses at 5.3x the human rate, that-clause subjects at 2.6x, nominalizations at 2.1x) map onto exactly what Williams and Gopen & Swan teach, so the skill carries their diagnostics (the verb-list test, the topic-string test, the stress-position test) along with the guards that stop a craft pass from overshooting. Plus a convergence rule so one marker never convicts, a swap-trap table for tells that relocate instead of dying, and a second axis for the opposite failure, where prose gets cut into anti-AI cosplay.
-
-```bash
-/hyperskills:deslop
-```
-
-#### `dream`: Conversation Memory Consolidation
-
-Conversation review aimed at what inline capture can't see: gotchas that repeat across sessions, prompt-stream telemetry (instruction frequency is the codify-next signal; vanished instructions prove an encoding worked), and cross-project connections. Harvests Claude Code and Codex sessions and writes durable knowledge into Sibyl, from a quick end-of-day nap up to swarm-scale mining runs (distill, fan out, merge, review).
-
-```bash
-/hyperskills:dream
-```
-
-### Domain Skills
-
-Specialized knowledge for specific technologies where models have stale or missing training data. Reference material, decision trees, field-tested patterns.
-
-#### `git`: Advanced Git Operations
-
-The operations that actually cause problems, weighted the way real work is: the PR-branch upkeep loop (rebase, pinned-lease push, review settlement), squash-merge-aware surgery, the rewrite bracket (backup ref before, machine-checkable proof after; a clean rebase is not a correct rebase), lock file regeneration, undo operations by scenario, commit bodies via quoted heredoc or message file, and shared-repo coexistence for multi-agent worktrees.
-
-```bash
-/hyperskills:git
-```
-
-#### `tilt`: Kubernetes Development
-
-Tilt operational guide. CLI commands for log viewing, resource management, and debugging. Tiltfile authoring with build strategy selectors, live update decision trees, and resource configuration. Full API catalog and power patterns live in progressive disclosure references.
-
-```bash
-/hyperskills:tilt
-```
-
-#### `tui-design`: Terminal UI Design System
-
-Framework-agnostic TUI design patterns. Layout paradigm selector, interaction model decision trees, terminal color theory, visual hierarchy techniques, data visualization, and animation patterns. Works with Ratatui, Ink, Textual, Bubbletea, or any TUI toolkit. Includes a Unicode visual catalog and a gallery of real TUI app design patterns.
-
-```bash
-/hyperskills:tui-design
-```
-
-#### `uv`: Python Package & Project Management
-
-Astral uv workflows for projects, scripts, tools, Python versions, workspaces, locking, publishing, and Docker / CI patterns. Encodes when to use project commands instead of the pip interface.
-
-```bash
-/hyperskills:uv
-```
-
-#### `ruff`: Python Linting & Formatting
-
-Current Ruff guidance for lint rule selection, formatter compatibility, suppression, preview mode, dependency graph analysis, and debugging resolved configuration.
-
-```bash
-/hyperskills:ruff
-```
-
-#### `ty`: Python Type Checking
-
-Astral ty guidance for beta adoption, CLI usage, configuration, suppression comments, editor and LSP setup, current limitations, and migration from mypy or Pyright.
-
-```bash
-/hyperskills:ty
-```
-
-#### `uv-build`: Python Build Backend
-
-uv_build backend guidance for pure Python packages, module discovery, namespace and stub packages, file inclusion, publishing workflows, migration from setuptools / hatchling / flit, and reproducible build checks.
-
-```bash
-/hyperskills:uv-build
-```
-
-## 🧪 Architecture
-
-Skills use progressive disclosure. Light when you don't need depth, deep when you do.
-
-```text
-Level 1: Metadata (name + description)     ← Always in context, ~100 words
-Level 2: SKILL.md body                     ← Loaded when the skill triggers, 1,500-3,000 words
-Level 3: references/                       ← Loaded on demand, no length cap
-```
-
-Skills with reference files for the deep-dive material:
-
-| Skill                | Reference Files                                                                               |
-| -------------------- | --------------------------------------------------------------------------------------------- |
-| `implement`          | `benchmarks.md`, `recovery.md`: quantitative data from 21k operations, error-recovery detail  |
-| `cross-model-review` | `prompts.md`, `failure-recovery.md`, `cli-flags.md`: prompts, hang ladders, flag surface      |
-| `hyper-pr-review`    | `lenses.md`, `thermonuclear.md`: per-lens checklists and the structural ambition pass         |
-| `orchestrate`        | `dispatch-briefs.md`: copyable worker, reviewer, and research dispatch briefs                 |
-| `dream`              | `conversation-formats.md`, `extraction-guide.md`: session schemas and memory extraction rules |
-| `tilt`               | `api-reference.md`, `patterns.md`: full Tiltfile API and power patterns                       |
-| `tui-design`         | `visual-catalog.md`, `app-patterns.md`: Unicode catalog and app gallery                       |
-| `uv`                 | `configuration.md`, `docker-ci.md`, `resolution.md`: uv config, CI patterns, resolver details |
-| `ruff`               | `configuration.md`, `rules.md`: Ruff config and rule catalog snapshot                         |
-| `ty`                 | `migration.md`, `type-system.md`: migration from mypy or Pyright and beta type-system support |
-
-## Compatibility
-
-| Platform           | Installation                                                                                 |
-| ------------------ | -------------------------------------------------------------------------------------------- |
-| **Claude Code**    | `/plugin marketplace add hyperb1iss/hyperskills`<br>`/plugin install hyperskills@hyperb1iss` |
-| **Codex CLI**      | `npx skills add hyperbliss/hyperskills -a codex`                                             |
-| **Cursor**         | `npx skills add hyperbliss/hyperskills -a cursor`                                            |
-| **GitHub Copilot** | `npx skills add hyperbliss/hyperskills -a copilot`                                           |
-| **Gemini CLI**     | `npx skills add hyperbliss/hyperskills -a gemini`                                            |
-
-## 🛠️ Development
+### Local development
 
 ```bash
 git clone https://github.com/hyperb1iss/hyperskills.git
 cd hyperskills
-
-make lint       # Run linters
-make format     # Format files
-make check      # Validate plugin structure
-make stats      # Show plugin statistics
+make install
 ```
 
-See [AGENTS.md](AGENTS.md) for the contributor guide on adding new skills.
+The installer links each skill into `~/.agents/skills` and `~/.claude/skills`. Existing directories are backed up before replacement. Installing a plugin or updating this checkout does not automatically remove older standalone copies of retired skills; inspect those copies before removing them.
 
-## License
+## Composing skills
 
-Licensed under the MIT License. See [LICENSE](LICENSE) for details.
+Start where the uncertainty is. A clear bug can go straight to implementation; an open product question benefits from exploration before a plan. The combinations below are examples.
 
----
+| Situation                            | Useful combination                                          |
+| ------------------------------------ | ----------------------------------------------------------- |
+| Unresolved feature direction         | brainstorm, then research where facts decide the choice     |
+| Large change with known requirements | plan, implement, independent review                         |
+| Independent workstreams              | orchestrate with explicit ownership and integration         |
+| PR review                            | hyper-pr-review; cross-model-review for another perspective |
+| PR authoring                         | super-good-pr                                               |
+| Prose cleanup                        | deslop with the artifact's existing voice and format        |
+| Raster asset from another harness    | codex-imagegen                                              |
+| Durable lessons from past sessions   | dream                                                       |
 
-<p align="center">
-  💜
-</p>
+## Process skills
 
-<p align="center">
-  <a href="https://github.com/hyperb1iss">
-    <img src="https://img.shields.io/badge/GitHub-hyperb1iss-181717?style=for-the-badge&logo=github" alt="GitHub">
-  </a>
-  <a href="https://bsky.app/profile/hyperbliss.tech">
-    <img src="https://img.shields.io/badge/Bluesky-@hyperbliss.tech-1185fe?style=for-the-badge&logo=bluesky" alt="Bluesky">
-  </a>
-</p>
+### `brainstorm`
 
-<p align="center">
-  <sub>
-    Built by <a href="https://hyperbliss.tech"><strong>Hyperbliss Technologies</strong></a>
-  </sub>
-</p>
+Explore the problem and alternatives before committing to a design. Uses the Double Diamond as a flexible frame, separates requirements from assumptions, and identifies the experiment that would change the recommendation. Clear implementation requests do not need a brainstorming detour.
+
+```text
+/hyperskills:brainstorm
+```
+
+### `research`
+
+Gather evidence for a question, from a targeted lookup to independent research lanes. Tracks source lineage, contradictions, and benchmark comparability. Synthesize as evidence arrives; deepen the investigation when an unresolved fact could change the answer.
+
+```text
+/hyperskills:research
+```
+
+### `plan`
+
+Turn requirements into dependency-aware tasks with observable completion criteria. Keep tests with the behavior they verify, preserve deliberately open decisions, and give each worker enough context to resume without reconstructing the conversation.
+
+```text
+/hyperskills:plan
+```
+
+### `implement`
+
+Make a focused change and verify the behavior where another component consumes it. Covers error diagnosis, shared-workspace ownership, meaningful test receipts, compatibility, and recovery. Verification grows with the uncertainty and consequences of the change.
+
+```text
+/hyperskills:implement
+```
+
+### `orchestrate`
+
+Partition independent work, define ownership beyond file paths, and integrate results against the original request. Includes worker and reviewer briefs, lifecycle tracking, artifact verification, and honest handling of incomplete work. Agent count follows useful parallelism and available capacity.
+
+```text
+/hyperskills:orchestrate
+```
+
+### `cross-model-review`
+
+Launch and consume an independent review of code, a specification, a diagnosis, or factual claims. Covers current CLI discovery, process handles, output capture, permissions, billing intent, and evidence-based finding disposition. A second model adds a perspective; agreement still needs proof.
+
+```text
+/hyperskills:cross-model-review
+```
+
+### `hyper-pr-review`
+
+Conduct the review yourself. Trace changed behavior and actual callers, try to disprove each candidate, and report the trigger, impact, and evidence. Deep review adds deliberate coverage of rollout, security, and structural quality. Required checks that could not run produce an inconclusive verdict.
+
+```text
+/hyperskills:hyper-pr-review
+```
+
+### `codex-imagegen`
+
+Delegate raster generation or editing when another harness needs Codex's image capability. Preserve reference roles and edit invariants, keep jobs and receipts distinct, and verify the delivered files. Prefer native image tools when already available; capability and billing depend on the configured environment.
+
+```text
+/hyperskills:codex-imagegen
+```
+
+### `super-good-pr`
+
+Write and maintain PR descriptions around the problem, resulting behavior, and evidence a reviewer needs. Preserve human-authored sections and template requirements. Refresh claims when the artifact changes, and distinguish a rewritten commit identity from changed content.
+
+```text
+/hyperskills:super-good-pr
+```
+
+### `deslop`
+
+Edit prose while preserving meaning, uncertainty, and the author's voice. Includes a protection-aware scanner, surface profiles, editing techniques, and a dated evidence catalog. Scanner candidates prompt judgment; stylistic patterns do not establish authorship.
+
+```text
+/hyperskills:deslop
+```
+
+### `dream`
+
+Review authorized conversation history for decisions and recurring lessons that should survive a session. Separates visible evidence from speculation, preserves provenance, checks current state before storing claims, and keeps project scope and sensitive data boundaries intact.
+
+```text
+/hyperskills:dream
+```
+
+## Domain skills
+
+### `git`
+
+Handle rebases, stacked branches, conflict resolution, and shared worktrees. Preserve inspected remote expectations with explicit leases, compare rewrites using the appropriate evidence, and commit only owned staged content. Recovery begins by preserving the candidate state.
+
+```text
+/hyperskills:git
+```
+
+### `tilt`
+
+Diagnose the path from file change to build, sync, process reload, and readiness. Covers Live Update ordering, resource dependencies, CI completion, and environment-sensitive operations. References hold the operational patterns that matter when a valid Tiltfile still does the wrong thing.
+
+```text
+/hyperskills:tilt
+```
+
+### `tui-design`
+
+Design terminal interfaces around capabilities, state, input, and lifecycle. Covers layout and visual hierarchy alongside Unicode width, fallback rendering, keyboard access, resize behavior, and terminal restoration. Includes a visual catalog and examples from existing applications.
+
+```text
+/hyperskills:tui-design
+```
+
+## Maintaining the library
+
+Metadata supports discovery; the entrypoint contains the essential decisions; references hold conditional detail. Short is useful when the procedure remains complete. A long reference is worthwhile only when an agent can find and use the relevant part.
+
+Version 3.11 removes the `uv`, `ruff`, `ty`, and `uv-build` skills. Their generic tool guidance belongs in model knowledge and current official documentation, while copied version tables require maintenance without adding enough value.
+
+The [September 2026 review](docs/library-review-2026-09.md) records the substantive changes and research limits. The [evaluation cases](evals/README.md) exercise task behavior and routing; schema validation alone cannot establish that a skill helps.
+
+## Development
+
+The checks use `uv` (Python and isolated PyYAML), Bash, and Perl. Markdown linting and formatting use the tools named in the Makefile.
+
+```bash
+make check      # Parse manifests, YAML frontmatter, and bundled references
+make test       # Exercise malformed inputs and scanner regressions
+make all        # Run both checks and tests
+make lint       # Optional JSON, YAML, and Markdown lint tools
+make format     # Format tracked Markdown and JSON
+```
+
+The validator checks concrete `references/`, `scripts/`, and `assets/` declarations in skill entrypoints. It does not execute examples, crawl external links, or grade agent behavior. Review reference contents and run relevant behavioral cases when changing a workflow.
+
+See [AGENTS.md](AGENTS.md) for contribution guidance. Licensed under [MIT](LICENSE).
+
+<p align="center">💜 Built by <a href="https://hyperbliss.tech">Hyperbliss Technologies</a></p>
