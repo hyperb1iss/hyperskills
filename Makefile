@@ -89,7 +89,13 @@ format-check:
 #─────────────────────────────────────────────
 check:
 	@uv run scripts/validate_skills.py
+	@uv run scripts/sync_metadata.py --check
+	@uv run scripts/release.py check
 	@echo "$(GREEN)✓ Plugin structure valid$(RESET)"
+
+.PHONY: sync-metadata
+sync-metadata:
+	@uv run scripts/sync_metadata.py
 
 validate-structure validate-frontmatter: check
 
@@ -233,6 +239,7 @@ help:
 	@echo "  $(GREEN)format$(RESET)           Format all files with prettier"
 	@echo "  $(GREEN)format-check$(RESET)     Check if files are formatted"
 	@echo "  $(GREEN)check$(RESET)            Validate plugin structure"
+	@echo "  $(GREEN)sync-metadata$(RESET)    Regenerate the skill badge, inventory, and tree"
 	@echo "  $(GREEN)test$(RESET)             Run validator and prose scanner regressions"
 	@echo "  $(GREEN)stats$(RESET)            Show plugin statistics"
 	@echo "  $(GREEN)test-local$(RESET)       Show command to test locally"
