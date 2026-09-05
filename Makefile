@@ -1,7 +1,7 @@
 # Hyperskills Plugin - Development Makefile
 # ─────────────────────────────────────────────
 
-.PHONY: all lint format check clean help stats install
+.PHONY: all lint format check clean help stats install test test-validator test-deslop validate-structure validate-frontmatter
 
 # Colors (SilkCircuit palette)
 PURPLE := \033[38;2;225;53;255m
@@ -24,7 +24,7 @@ TRACKED_YAML := ($(LS) '*.yml' '*.yaml' 2>/dev/null | $(NOLINK) || find . -name 
 #─────────────────────────────────────────────
 # Default target
 #─────────────────────────────────────────────
-all: check
+all: check test
 	@echo "$(GREEN)✓ All checks passed$(RESET)"
 
 #─────────────────────────────────────────────
@@ -87,28 +87,19 @@ format-check:
 #─────────────────────────────────────────────
 # Validation
 #─────────────────────────────────────────────
-check: validate-structure validate-frontmatter
+check:
+	@uv run scripts/validate_skills.py
 	@echo "$(GREEN)✓ Plugin structure valid$(RESET)"
 
-validate-structure:
-	@echo "$(CYAN)→ Validating plugin structure...$(RESET)"
-	@test -f .claude-plugin/plugin.json || (echo "$(RED)✗ Missing plugin.json$(RESET)" && exit 1)
-	@echo "$(GREEN)  ✓ plugin.json exists$(RESET)"
-	@test -d skills || (echo "$(RED)✗ Missing skills directory$(RESET)" && exit 1)
-	@echo "$(GREEN)  ✓ skills/ exists$(RESET)"
-	@for skill in skills/*/; do \
-		test -f "$$skill/SKILL.md" || (echo "$(RED)✗ Missing SKILL.md in $$skill$(RESET)" && exit 1); \
-	done
-	@echo "$(GREEN)  ✓ All skills have SKILL.md$(RESET)"
+validate-structure validate-frontmatter: check
 
-validate-frontmatter:
-	@echo "$(CYAN)→ Validating frontmatter...$(RESET)"
-	@for f in skills/*/SKILL.md; do \
-		if [ -f "$$f" ]; then \
-			head -1 "$$f" | grep -q "^---$$" || (echo "$(RED)✗ Missing frontmatter in $$f$(RESET)" && exit 1); \
-		fi \
-	done
-	@echo "$(GREEN)  ✓ Frontmatter valid$(RESET)"
+test: test-validator test-deslop
+
+test-validator:
+	@uv run --with 'pyyaml==6.0.3' python -m unittest discover -s tests -v
+
+test-deslop:
+	@bash skills/deslop/scripts/selftest.sh
 
 #─────────────────────────────────────────────
 # Install — symlink skills into ~/.agents and ~/.claude
@@ -239,6 +230,7 @@ help:
 	@echo "  $(GREEN)format$(RESET)           Format all files with prettier"
 	@echo "  $(GREEN)format-check$(RESET)     Check if files are formatted"
 	@echo "  $(GREEN)check$(RESET)            Validate plugin structure"
+	@echo "  $(GREEN)test$(RESET)             Run validator and prose scanner regressions"
 	@echo "  $(GREEN)stats$(RESET)            Show plugin statistics"
 	@echo "  $(GREEN)test-local$(RESET)       Show command to test locally"
 	@echo "  $(GREEN)clean$(RESET)            Remove temp files"
