@@ -1,138 +1,157 @@
 ---
 name: super-good-pr
-description: Use this skill when writing, polishing, or maintaining a pull request description, including drafting a PR body, opening a PR, rewriting a weak one, updating or refreshing a description after new commits or a rebase, keeping a PR body accurate, or when asked to make a PR "good" or "a banger". Produces reviewer-first descriptions that lead with why, prove every claim with evidence, name the decisive files and invariants, and state the real blast radius. Activates on mentions of write a PR, PR description, draft a PR, open a pull request, polish this PR, make this PR good, banger PR, PR body, update the PR description, refresh the PR body, keep the PR description accurate, describe these changes, or PR writeup.
+description: Use this skill when writing or maintaining a pull request description or responding to review feedback. Activates on mentions of write a PR, PR description, draft a PR, open a pull request, polish this PR, make this PR good, banger PR, PR body, refresh the PR body, review reply, or describe these changes.
 ---
 
 # Super Good PR Descriptions
 
-A PR description is read by a human who has to rebuild your mental model from zero and decide whether to trust it. The job is to hand them that model fast, prove the parts they'd doubt, and say plainly what you didn't do.
+Give reviewers the context they need to evaluate the final change. Lead with the concrete problem and resulting behavior, explain the design choices that matter, and support validation claims with actual evidence. The body should work for someone who did not watch the session.
 
-**Core insight:** lead with _why_, prove with _evidence_, state the real _blast radius_. A changelog tells the reviewer what moved. A super-good PR tells them what to believe, where to look, and what could still bite. The difference is entirely in altitude and receipts, not length.
+A small fix may need two paragraphs and validation. A migration may need ordering, compatibility, and rollout detail. Match the explanation to reviewer uncertainty; a long section checklist does not make a small PR more credible.
 
-**How to read this skill:** the spine below is a map, not a script. Real PRs drop sections that don't apply and add domain-specific ones that do. A one-file fix doesn't need a rollout-sequencing section; a migration does. Match the shape to the change. The non-negotiables carry the weight; the section order is just a reliable way to deliver them.
+## Establish the source of truth
 
-## The non-negotiables
+Read the live PR body, title, base branch, head commit, and repository template before an update. Read the actual diff against that base; do not assume every PR targets `main`. For an existing PR:
 
-These are what make a description land. If a section doesn't serve one of these, cut it.
+```bash
+gh pr view NUMBER --json title,body,baseRefName,headRefName,headRefOid,url
+```
 
-- **Open with the mental model, not the diff.** First paragraph says what this _is_ and, when there's a naive version a reader would assume, why that version is wrong. "IP/CIDR allowlists are the wrong primitive here: behind a shared cloud edge, allowing an IP means allowing every tenant on it." Now the reviewer knows why the code looks the way it does before they read a line of it.
-- **Describe the system, not the session.** The body explains what the code does now and why, never the journey. No "then we refactored", no review round-by-round, no tooling provenance. Development history is sludge to a reviewer; the making-of belongs in the chat synthesis, not the artifact. This binds hardest when you edit an existing body: an approach you abandoned mid-PR is not news, so "an earlier version of this change kept X" and "originally this did Y" turn the description into a revision log about you. When a rejected alternative genuinely helps a reviewer, argue it in the present tense as a property of the system, so "accepting `gradial` buys nothing, because the namespace is empty on every cluster" rather than "we used to accept `gradial`". The `🔁 What changed since the last review round` section is the only place a delta belongs, it is scoped to what reviewers asked for, and it does not exist on a first-round PR.
-- **Name the invariant everything rides on and tell reviewers to anchor on it.** Most PRs have one property that, if broken, breaks everything: an ordering, a fail-closed default, an idempotency key. Say it out loud. "Anchor on one property: no upstream socket is opened until every check passes." That sentence directs the entire review.
-- **Name actual files, functions, and patterns.** `proxy.rs`, `resolvePolicy()`, `ON CONFLICT (id) DO UPDATE`, "the write → audit → revoke ordering." A reviewer should be able to navigate the diff cold from your prose. Vague nouns ("the handler", "some validation") make them hunt.
-- **Prove every claim with a receipt.** Not "tests pass" but `cargo test -p proxy → 98 passed, 0 failed`. Not "it's safe" but the test that pins it. Assertions are free; evidence is the whole point of the section.
-- **State the real blast radius.** What's untouched ("default deployments get none of this"), what's deliberately _not_ built (the dangerous-but-obvious alternative you rejected, and why), and what's a known gap shipping as a follow-up. Hiding the gaps reads as not knowing them.
-- **Close the gap instead of disclosing it.** A gap you could have fixed in the time it took to write the paragraph explaining it should have been fixed. Before describing any gap, ask whether it is genuinely blocked (needs an approval, a live install, an external system, a decision that is not yours) or merely unfinished. Unfinished work gets finished before the PR opens. What survives is a real boundary, so state it as a fact about the system and what settles it, never as a confession.
-- **Never label your own writing honest.** No "Honest gaps", no "the honest answer", no "to be honest". Honesty is the floor, not an achievement, and announcing it reads as unconfident and implies the rest might not be. Say what was done and what was not, and let the receipts carry the credibility.
+Fetch or refresh the relevant refs before deriving the local diff. A three-dot comparison uses the merge base and matches the usual PR comparison model. A stacked PR targets its preceding branch, so a diff against `main` would describe other layers too. GitHub documents these distinctions in its [PR reference](https://docs.github.com/en/pull-requests/reference/pull-requests).
 
-## The spine
+Gather the original requirement, final behavior, decisive files, and checks that actually ran. Separate observed evidence from expected behavior. Avoid universal claims such as "safe" or "fully covered" when the evidence establishes only a narrower property.
 
-Use the headers that carry weight for this change. Each is a `##` with a semantic emoji (palette below).
+## The content that matters
 
-1. **`# <emoji> <short evocative title>`**: a noun phrase that names the thing, not a verbatim copy of the commit subject. "Per-tenant rate limiting, end to end", not "feat(api): add limiter".
-2. **Context blockquote (`>`)**: one to three lines orienting the reader. For a standalone PR, where it sits and what it assumes. For a stack, the nav line (see Stacked PRs and granularity below).
-3. **`## 💡 What this is`**: the core, two to four sentences. Lead with the mental model; kill the naive primitive here if there is one.
-4. **`## 🤔 Why we need it & what it replaces`**: the old world and why it falls short; what's deliberately _not_ built and why the obvious version was dangerous; the blast-radius framing ("dark by default", "non-X deployments untouched").
-5. **`## 🎯 The invariant / anchor`** _(when one property carries the change)_: the single thing to anchor the review on. Optional but powerful; skip it if the change has no single crux.
-6. **`## 🛠️ How it works`**: a numbered, sub-headed walkthrough a reviewer follows cold. Name files. Name patterns by name. This is where most of the body lives. Topology, flow, and ordering changes get a diagram here (see Diagrams and visual enrichment below).
-7. **Domain deep-dives** _(as needed)_: `## 🗄️ The database`, `## 🔗 Identity, end to end`. Add one when a subsystem deserves its own focused pass.
-8. **`## 🚦 Rollout sequencing (and why it's safe)`** _(for anything deployed)_: the order of operations, what's safe to stop at, what the old path keeps doing, and the expected day-one surprises: the alert that fires legitimately, the manual step that remains.
-9. **`## 🔁 What changed since the last review round`** _(on re-review)_: the delta. Credit reviewers by handle. Mark security/critical fixes (🛡️ / 🚨). This is how a re-reviewer reloads without re-reading.
-10. **`## 🧪 Validation`**: the receipts. Test suites with PASS counts, typecheck clean, render/lint green; one `⚠️` line for what's _not_ covered, with the backstop and the open follow-up.
-11. **`## 🔍 What reviewers should focus on`**: the three-to-five trickiest surfaces, bulleted. End with what's intentionally out of scope. Consider closing by inviting the strongest objection: name the one counter-example that would change the design, and ask for it.
-12. **`## 📌 Follow-ups (deliberate non-fixes)`** _(when known gaps exist)_: bounded gaps, why each is safe to defer, and what must still happen before merge.
+| Reviewer need | Include |
+| --- | --- |
+| Understand the problem | Concrete trigger and previous behavior |
+| Understand the result | What happens now and why that solves the problem |
+| Evaluate the design | The mechanism, important trade-off, and invariant if one carries the change |
+| Navigate the diff | Decisive files, functions, or ordering; omit a file-by-file changelog |
+| Assess confidence | Checks run, outcomes, relevant coverage, and material gaps |
+| Assess adoption | Compatibility, migration, rollout, or follow-up detail when applicable |
 
-## Evidence, not assertion
+Describe the final system. Leave routine development history in the commits and conversation. A rejected approach belongs in the body only when explaining its trade-off helps evaluate the chosen design. After a squash, retain that design rationale without recreating a session diary.
 
-The Validation section is where trust is won or lost. Rules:
+State boundaries that affect adoption or review. Do not enumerate untouched files or hypothetical alternatives just to fill a blast-radius section. If necessary work is unfinished and authorized, finish it. A draft PR can still be useful for early design feedback or external validation; label its incomplete work and readiness accurately. Do not expand the implementation scope while writing a description merely to avoid disclosing a gap.
 
-- Show the command and its result, not a summary of the result. `pnpm turbo typecheck` across the changed package and its dependents → 112 tasks clean.
-- Count things. "25 passed", "98 passed, 0 failed", "12 passed (dark-by-default, label-gate dependencies, patch ordering...)". The parenthetical says _what_ the count proves.
-- One `⚠️` line about a real gap beats ten green checks. "Local integration tests stay blocked by a local socket conflict; the CI job is the backstop, and a dedicated CI job for them is an open follow-up." That single line builds more trust than the whole rest of the section.
-- If you didn't verify something, say so. Never imply a check ran that didn't.
-- Receipts are keyed to a SHA. Any rebase, squash, or amend expires them, so re-run the gates against the new head and re-stamp the body. Stale green is a lie with a timestamp.
-- Prefer integration-level proof with before/after state over local-test narration. If the PR ships a guard, show the guard tripping, because the induced failure is the receipt.
-- After posting or editing, read the rendered body once. That pass catches quoting mangles, stale timestamps, and claims the final diff no longer supports.
+## Shape the body
 
-## Diagrams and visual enrichment
+Use the repository template first. Preserve required metadata and checkboxes. An unavailable value gets the template's accepted "not applicable" or an explanation; never invent an issue ID or silently remove a required field.
 
-When a PR changes topology (services, request paths, data flow, state machines, deployment shape), prose makes the reviewer rebuild the picture in their head. Hand them the picture instead. GitHub renders ` ```mermaid ` fenced blocks natively, so a diagram costs nothing to ship and lives in the body itself.
+Without a template, choose the sections that carry useful information. Use a semantic emoji on headings you add under the house style. A body does not need every heading, an extra H1 repeating its title, or a context blockquote for a standalone fix.
 
-| Change shape                                   | Visual                                               |
-| ---------------------------------------------- | ---------------------------------------------------- |
-| Service/network topology, request path changes | Mermaid `flowchart`, before/after pair               |
-| Protocol, handshake, cross-service call order  | Mermaid `sequenceDiagram`                            |
-| State machine or lifecycle changes             | Mermaid `stateDiagram-v2`                            |
-| Schema relationships, new tables/FKs           | Mermaid `erDiagram`                                  |
-| Rollout phases and gates                       | Mermaid `flowchart` with the safe-stop points        |
-| UI changes                                     | Screenshot or short clip, drag-dropped as attachment |
+| Section | When it helps |
+| --- | --- |
+| `## 💡 What changes` | Explain the problem and result |
+| `## 🛠️ How it works` | Explain a mechanism reviewers cannot infer from a small diff |
+| `## 🎯 Invariant` | Identify the specific property the design must preserve |
+| `## 🚦 Rollout` | State deployment order, compatibility, safe stopping points, and recovery |
+| `## 🧪 Validation` | Record evidence and material limitations |
+| `## 🔍 Review focus` | Direct attention to actual uncertainty or difficult surfaces |
+| `## 📌 Follow-ups` | Name deliberate deferred work and what blocks readiness |
+| `## 🔁 Review delta` | Help returning reviewers find changes since their review |
 
-Rules that keep diagrams doing real work:
+Keep explanations in prose and use tables for comparisons or enumerable facts. A numbered sequence is useful when operation order matters. Preserve semantic emoji and other deliberate formatting during a prose cleanup pass; follow a repository's stricter template when it conflicts with house defaults.
 
-- **Mermaid first.** It renders natively, survives branch deletion, edits like text on later refreshes, and never 404s. Reach for an image only when mermaid can't express it.
-- **Before/after beats single-state.** For a topology change, two small diagrams (old path, new path), or one diagram with the removed edge visibly styled out, show the delta the way a diff shows code.
-- **Draw at the invariant's altitude.** The diagram shows the property the review anchors on: the new hop, the moved boundary, the enforced ordering, never every box in the system. If it needs a legend, it's too big.
-- **A diagram is a factual claim.** A redesign that changes the shape expires it exactly like a receipt, so refresh it with the rest of the body, and include it in the post-edit rendered-body read (a mermaid syntax error renders as an ugly error block, not a diagram).
-- **SVG caveat.** GitHub's drag-drop attachments accept PNG/JPG/GIF/MP4 but not SVG. An SVG must live in the repo and be referenced by URL, which couples the body to a file that can move or vanish, so prefer mermaid, or export to PNG and attach.
-- **Decorative diagrams are slop.** A diagram restating a trivial diff ("handler calls service") costs reviewer time instead of saving it. Draw only what prose can't carry in one read.
+## Validation evidence
 
-## Maintaining the body
+Record the command or named CI job, outcome, and what it establishes. Use counts when the tool reports meaningful counts. A linter's successful exit does not need an invented test count. Identify skipped tests and a failing prerequisite when either limits the claim.
 
-The body outlives the push that created it. It's a document with a truth obligation, and often one a human has invested taste in.
+For a regression fix, a failing-before and passing-after reproduction can be the decisive evidence. For a deployed migration, show the relevant compatibility or state transition when available. Prefer the narrow check that exercises the changed behavior to a long inventory of unrelated green suites.
 
-- **Read the live body before every edit.** Update by surgical string edits; regenerating from scratch destroys human-crafted prose and reads as vandalism. Fetch the current body and edit it as a file (`gh pr edit --body-file`), since inline shell strings are where quoting mangles come from.
-- **Refresh factual lines after every push.** SHAs, receipts, counts, and "green CI" claims all reference a specific head. After a redesign mid-PR, re-derive every claim from `git diff origin/main...HEAD`, because description drift is a blocking review finding.
-- **A freeze is absolute.** "Don't update the desc" covers even a factually stale section, which waits for explicit go-ahead, and compliance is itself a receipt: "PR description untouched." Update frequency is the human's dial; when they cap it, accuracy notes move to the wrap-up instead.
-- **After a squash or history rewrite, the body carries the story the commits no longer tell**: the design narrative of what and why, never a resurrected process diary.
-- **Bodies, titles, and drafts a human wrote are read-only** unless they explicitly hand them to you.
-- **Before merge, a body that accreted as a receipt ledger gets one deliberate rewrite** from the cold reader's seat.
+Keep receipts tied to the tested revision and relevant environment. A changed SHA requires checking what changed; it does not automatically invalidate every result:
+
+| Change since verification | Required action |
+| --- | --- |
+| Source, dependency, configuration, or relevant environment changed | Run affected checks again; broaden when interactions changed |
+| Rebase incorporates a changed base or resolves conflicts | Verify the integrated result and required CI for the new head |
+| Commit-message amend with an identical tree | Preserve applicable local evidence, identify the tested tree, and follow required head-specific CI |
+| Squash with an identical final tree | Preserve applicable content evidence; rerun checks dependent on history or the new head |
+| Live external behavior is the claim | Recheck when external state may have changed |
+
+Do not claim CI passed for a new head because an earlier run passed. GitHub's merge requirements and repository rules still govern. A content-equivalence check can justify reusing local evidence; it cannot waive required checks.
+
+After a push that changes the described behavior, refresh an agent-owned body within the authorized scope. Update claims that actually changed. If the user froze the description, put factual drift in the session handoff and wait for authorization to edit the frozen artifact.
+
+## Diagrams and visual evidence
+
+Use a diagram when it resolves reviewer uncertainty about request flow, state, trust boundaries, or deployment order. Use a screenshot or clip for a visual behavior change. Skip diagrams that merely restate a trivial call chain.
+
+GitHub supports Mermaid fenced blocks; its [diagram documentation](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams) explains supported rendering and version inspection. Keep labels and syntax compatible with the renderer, and verify the rendered result when available.
+
+| Change | Useful visual |
+| --- | --- |
+| Request path or topology | Small flowchart; before/after if the changed edge is otherwise unclear |
+| Protocol or call ordering | Sequence diagram |
+| State transitions | State diagram |
+| Schema relationships | Entity relationship diagram |
+| UI behavior | Screenshot or short clip showing the relevant state |
+
+A diagram is a factual claim. Draw only verified components and ordering. Include a legend when needed rather than hiding meaningful distinctions. Do not place secrets, customer data, or private operational details in public attachments.
+
+## Edit and publish without losing human work
+
+Writing a draft and posting it are different actions. Publish only when the user has authorized the relevant external action. A request to open a PR authorizes creating that PR; a request to draft its body does not. Sending review replies needs its own applicable authorization.
+
+Human-authored bodies, titles, and drafts remain read-only until the user authorizes editing them. An explicit request to polish an existing human-authored body supplies that authorization within its stated scope. A freeze remains binding. Do not interpret routine branch maintenance as permission to rewrite human prose.
+
+For authorized edits, work from a captured live body and preserve unrelated content. Re-fetch before writing. If another person changed it, merge your intended edits into the new version; do not overwrite their revision with the stale draft. A wholesale rewrite is appropriate only when authorized and needed to reflect the final design.
+
+Prefer a file to shell-interpolated prose:
+
+```bash
+gh pr edit NUMBER --body-file /path/to/reviewed-pr-body.md
+```
+
+Use a securely quoted heredoc or an editing tool to create that file. Backticks and `$()` inside a double-quoted shell string can execute before GitHub receives the text. Structured connector arguments are also suitable.
+
+Read back the saved body after a write. Inspect rendering when available to catch broken diagrams, literal escape sequences, link errors, and formatting drift. API readback confirms saved text; it does not by itself prove visual rendering. Report a rendering limitation when it matters.
 
 ## Answering reviews
 
-Replies are part of the PR's prose surface, with the same voice and the same receipts.
+When replies are authorized, give each substantive finding a clear disposition: fixed with a commit or test, no action with a reason, deferred with a concrete follow-up, or stale with evidence. A reply can cover related comments without spamming one message per sentence.
 
-- Every piece of feedback, every round, gets an itemized disposition visible on the PR: fixed (with the SHA), no action (with the reason, addressed to the reviewer), follow-up, or stale.
-- A reply pairs what changed with the receipt that pins it: the fix commit or the regression test.
-- Resolution belongs to the reviewer: answer the thread, don't self-resolve it.
-- Trivial nits get taken, not argued. A reviewer calling the description inaccurate gets code-defect priority.
+Explain what changed and why it addresses the concern. Credit useful catches. Take valid nits when they fit the request, but inspect automated suggestions instead of accepting them mechanically. Answer the thread and leave resolution to the reviewer unless the user or repository explicitly authorizes resolving it.
 
-## Emoji palette
+Use the project voice and required attribution. Under the Bliss/Nova contract, final PR comment replies end on their own final line with:
 
-Semantic, never decorative, never stacked. Section-semantic set that works:
-
-`💡` what · `🤔` why · `🎯` anchor/invariant · `🛠️` how · `🗄️` database · `🔗` identity · `🎫` issuance · `📡` serve/API · `🧹` cleanup/retention · `🚦` rollout · `🔁` what-changed · `🧪` validation · `🔍` reviewer-focus · `📌` follow-ups · `🛡️` security fix · `🚨` critical fix · `🏷️` labels · `🔄` reconnect/refresh.
-
-The house palette is fair game when a header wants personality, one emoji per header, chosen because it means something.
-
-**Banned, the AI-slop set, never use:** 🚀 ✨ 💯 🙏 👀 🎉 👍 🔥 (👀 is the tempting pick for reviewer-focus, so use `🔍` instead).
-
-## Voice and anti-slop
-
-This section is the anti-slop authority for a PR body, and it wins outright on structure. Semantic emoji headers are required here, so no cleanup pass gets to remove them. Run `deslop` for the prose patterns (em dashes, rule-of-three, inflated significance, chatbot closers, "-ing" pseudo-analysis, copula avoidance, filler and hedging); its PR-body surface profile defers to this section on shape, leaving the palette above, the bold section leads, and the reviewer-focus and follow-up sections intact. A general-purpose humanizer pass without that profile strips emoji, boldface, and bold-led bullets on sight, which guts all three.
-
-- Sentences resolve left to right. Never open one on a bare identifier, path, or SHA: lead with the English noun and demote the symbol into apposition, so "the backfill commit (`23581131`)" rather than the bare hash. Never let That, It, or This be the subject of a sentence crossing a heading. Detail that a reader can skip belongs in parentheses; detail they must parse to follow the argument belongs in its own sentence.
-- **"Banger" is the quality bar, not vocabulary.** Never write "this is a banger / gorgeous / sick / cinematic" into a PR body. Those are words for talking _about_ the work, not in it. The bar means: leads with why, proves claims, states the real blast radius. Real PR voice is plain, root-cause-first, full sentences.
-- Full sentences that build linearly. No fragment-style compression, no corporate slop ("in order to", "it should be noted"), no hedging ("just", "simply", "basically").
-- No em dashes or en dashes, ever. They are the most reliable AI tell, so this is a boundary rather than a "use sparingly" preference. Replace each one with a period, a comma, a colon, or parentheses, whichever the sentence actually wants. Scan the body for `—` and `–` before posting; a hit means it is not ready.
-- **The slop lexicon evolves with model generations** (as of Jul 2026): the "it's not an X, it's a Y" cadence, and "load-bearing", a word that must never land in a PR body. House jargon is fine between agents; sweep it from anything a human reads.
-- **Never instruct yourself or a generator to be "concise" for a PR body**, because compression produces reviewer-hostile paste. Size to understanding; chat length anchors don't govern artifacts humans read later. On a host whose defaults favor terseness, suspend that default explicitly for anything leaving the terminal.
-- A generator drafting the body gets the real receipts enumerated and a no-invented-validation constraint; fact-check its output against the diff before posting, since generators drift on paths and claims.
-- Tables only for enumerable facts: a profile→mode mapping, a port list, a pass/fail grid. Never pack reasoning into table cells; reasoning goes in prose.
-- A generated-by attribution footer is fine to leave in, since many harnesses add one automatically.
-
-## When the repo has a PR template
-
-Make the template sing; don't abandon it. Map this spine onto the repo's sections, so a `Changes / Reason / Validation / Reviewer notes` template absorbs the same content, just under its own headers. The non-negotiables don't change; only the section labels do. Keep any required checkboxes and metadata the template demands. If a required slot has no real value (no ticket, no linked issue), omit it; a fabricated ID reads as real and rots.
-
-## Stacked PRs and granularity
-
-Granularity answers to reviewer cost, and it gets corrected in both directions. Phases are rollout gates inside one PR unless review domains or ownership force a split; live-ops work consolidates to one end-state PR. When you do split, split by proof, not by directory, and each layer's body states in one line what that PR proves. Split mechanics live in `git` and `plan`; this skill carries the body-side consequence.
-
-A stack needs a nav blockquote at the top of every PR so a reviewer always knows where they are and what's landed:
-
-```markdown
-> **Stack PR 2 of 4 · PROJ-481**: the policy engine.
-> `#101` (data plane, ✅ merged) → **`#102` you are here** → `#103` (admin surface) → `#104` (client adoption).
-> Rebased onto current `main`.
+```text
+~ via nova ⚡
 ```
 
-Each PR's "What this is" then says what the _previous_ PR established and what this one adds, so the stack reads as one argument across several documents. End each with what's deferred to the next PR in the stack.
+A generated-by footer in a PR body can stay; do not remove attribution as part of prose cleanup.
+
+## Voice and prose cleanup
+
+Use plain, complete sentences. Lead with the English noun before a path or SHA, keep the subject near its verb, and explain consequences in the order the reader needs them. Preserve calibrated uncertainty; remove empty hedges and inflated significance.
+
+No em or en dashes in house-authored prose. The ban is a house convention, not evidence that punctuation identifies AI authorship. Avoid house jargon such as "load-bearing" in a PR body. Words used to describe the desired quality in chat, such as "banger" or "cinematic," are not copy for the artifact.
+
+Run the relevant `deslop` prose checks without removing meaningful emoji, required headers, or evidence. Keep the body as short as its explanation permits and as detailed as review requires. Do not compress causal reasoning into fragments or add sections to make a small change appear substantial.
+
+## Stacked PRs
+
+Use a small navigation block naming the current layer, its base, and adjacent PRs. The body says what this layer contributes and what belongs to later layers. Confirm status before marking a predecessor merged or claiming a rebase onto the current base.
+
+Split by coherent review and verification boundaries. A description should clarify the chosen stack, not prescribe universal PR-size limits or force an unrelated branch restructuring. Stack mechanics belong to `git` and `plan`.
+
+## Anti-Patterns
+
+| Mistake | Correction |
+| --- | --- |
+| Paste a changelog as the explanation | Explain the problem, behavior, and design |
+| Fill every heading for a small fix | Keep only sections that help review |
+| Repeat old green CI against a new head | Check which evidence remains applicable and run required checks |
+| Assume the base is `main` | Read the PR's actual base |
+| Overwrite a human's latest edit | Re-read and merge only authorized changes |
+| Turn a limitation into unsolicited implementation | Complete authorized requirements and state real boundaries |
+| Publish because drafting finished | Check the action is authorized |
+
+## What This Skill is NOT
+
+- A fixed twelve-section template or a changelog generator.
+- Permission to overwrite human prose, post messages, merge, or deploy.
+- A substitute for implementation review or validation.
+- A reason to enlarge a small change or conceal unfinished work.

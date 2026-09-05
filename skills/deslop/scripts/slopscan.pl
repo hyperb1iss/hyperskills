@@ -9,10 +9,11 @@
 # Usage:   slopscan.pl [--surface NAME] [--json] FILE...
 # Surface: house (default) | published | agent | sample
 #
-# Exit 0 clean, 10 candidates only, 20 hard failures present.
+# Exit 0 clean, 10 candidates only, 20 hard failures, 30 unreadable input.
 
 use strict;
 use warnings;
+use Encode qw(decode FB_CROAK);
 
 binmode STDOUT, ':encoding(UTF-8)';
 binmode STDERR, ':encoding(UTF-8)';
@@ -35,8 +36,7 @@ my %VALID = map { $_ => 1 } qw(house published agent sample);
 die "unknown surface '$surface' (house|published|agent|sample)\n"
     unless $VALID{$surface};
 
-# Dashes are a house rule rather than a universal AI tell (see
-# references/evidence.md: published human essays out-dash frontier models).
+# Dashes are a house rule rather than evidence of authorship.
 # They are hard failures on our own files, house and agent alike, because the
 # project contract bans them in anything we write. On someone else's prose
 # (published, sample) they are density candidates needing converging signals.
@@ -44,10 +44,28 @@ my ($hard_total, $cand_total, $io_errors) = (0, 0, 0);
 my @report;
 
 for my $file (@files) {
-    open my $fh, '<:encoding(UTF-8)', $file
+    unless (-f $file) {
+        warn "not a regular input file: $file\n";
+        $io_errors++;
+        next;
+    }
+    open my $fh, '<:raw', $file
         or do { warn "cannot read $file: $!\n"; $io_errors++; next };
-    my $raw = do { local $/; <$fh> };
-    close $fh;
+    $! = 0;
+    my $bytes = do { local $/; <$fh> };
+    my $read_error = $! ? "$!" : '';
+    close $fh or $read_error ||= "$!";
+    if ($read_error) {
+        warn "cannot read $file: $read_error\n";
+        $io_errors++;
+        next;
+    }
+    my $raw = eval { decode('UTF-8', $bytes // '', FB_CROAK) };
+    if ($@) {
+        warn "invalid UTF-8 input: $file\n";
+        $io_errors++;
+        next;
+    }
 
     $raw =~ s/\A\x{FEFF}//;  # a byte-order mark otherwise hides the frontmatter
     $raw =~ s/\r\n?/\n/g;   # normalize CRLF and CR before anything else
@@ -75,31 +93,20 @@ for my $file (@files) {
     my $srhy  = spread('sentence', \@sent);
     my $prhy  = spread('paragraph', \@paras);
 
-    # over-correction trip: deterministic, no judgment
-    my $trip = '';
-    if (@sent >= 4) {
-        my ($m, $sd) = stats(\@sent);
-        my $tiny = grep { $_ < 6 } @sent;
-        $trip = sprintf('OVER-CORRECTED: mean %.1f words, sd %.1f', $m, $sd)
-            if $m < 10 && $sd < 4;
-        $trip = sprintf('OVER-CORRECTED: %d%% of sentences under 6 words',
-                        int(100 * $tiny / @sent))
-            if $tiny / @sent > 0.6;
-    }
-
     $hard_total += scalar @hard;
     $cand_total += scalar @cand;
 
     push @report, { file => $file, hard => \@hard, cand => \@cand,
                     suppressed => \@suppressed,
-                    sent => $srhy, para => $prhy, trip => $trip };
+                    sent => $srhy, para => $prhy };
 }
 
 # ---- output ---------------------------------------------------------------
 if ($json) {
     print "{\n";
     print qq(  "surface": "$surface",\n);
-    print qq(  "hard": $hard_total,\n  "candidates": $cand_total\n);
+    print qq(  "hard": $hard_total,\n  "candidates": $cand_total,\n);
+    print qq(  "io_errors": $io_errors\n);
     print "}\n";
 } else {
     for my $r (@report) {
@@ -121,7 +128,6 @@ if ($json) {
         }
         print "  rhythm: $r->{sent}\n";
         print "          $r->{para}\n";
-        print "  $r->{trip}\n" if $r->{trip};
         print "  clean\n" if !@{ $r->{hard} } && !@{ $r->{cand} };
     }
     print "\nsurface=$surface hard=$hard_total candidates=$cand_total\n";
@@ -144,25 +150,28 @@ sub checks {
         hits($prose, qr/[\x{2014}\x{2013}]/,        'em or en dash');
     push @{ $dash_hard ? \@hard : \@cand },
         hits($prose, qr/(?<=[[:alnum:],;:)"'])--(?=[[:alnum:]("'])|(?<=\s)--(?=\s)/, 'double-hyphen dash');
-    # A user-provided sample is the voice authority, so its typography is the
-    # author's choice rather than a defect.
-    push @{ $surf eq 'sample' ? \@cand : \@hard },
+    # Typography outside house surfaces follows the author's or publication's
+    # conventions; a glyph can be intentional, including in localized prose.
+    push @{ $dash_hard ? \@hard : \@cand },
         hits($prose, qr/[\x{201C}\x{201D}\x{2018}\x{2019}]/, 'curly quote');
-    # LLMs emit eight apostrophe glyphs (Rudnicka & Juzek); the curly pair
-    # above catches two. These four are flanked-by-letters only, so a prime
+    # These variants are flanked-by-letters only, so a prime
     # in "the 5' UTR" or a bare accent stays clean. Grave accent (U+0060) is
     # excluded: it is the inline-code delimiter and the masker owns it.
-    push @{ $surf eq 'sample' ? \@cand : \@hard },
+    push @{ $dash_hard ? \@hard : \@cand },
         hits($prose, qr/(?<=[[:alpha:]])[\x{02BC}\x{00B4}\x{2032}\x{201B}](?=[[:alpha:]])/,
              'apostrophe variant glyph');
-    push @hard, hits($prose, qr/[\x{00A0}\x{2007}\x{202F}]/,         'non-breaking space');
-    push @hard, hits($prose, qr/\x{2026}/,                            'ellipsis character');
+    push @{ $dash_hard ? \@hard : \@cand },
+        hits($prose, qr/[\x{00A0}\x{2007}\x{202F}]/, 'non-breaking space');
+    push @{ $dash_hard ? \@hard : \@cand },
+        hits($prose, qr/\x{2026}/, 'ellipsis character');
 
-    # provider and harness residue: always a hard failure, never legitimate
+    # Unresolved provider tokens are hard findings in visible prose. Generic
+    # footnote punctuation and brackets also have legitimate uses.
     push @hard, hits($prose, qr/turn\d{1,4}(?:search|news|image)\d{1,4}/, 'chat-export artifact');
-    push @hard, hits($prose, qr/\[cite:\s*\d+\]|\[span_\d+\]|\x{2020}\d/,  'citation artifact');
-    push @hard, hits($prose, qr/utm_source=(?:chatgpt|claude)/,           'tracking parameter');
-    push @hard, hits($prose, qr/\x{3010}[^\x{3011}]{0,40}\x{3011}/,       'lenticular bracket');
+    push @hard, hits($prose, qr/\[cite:\s*\d+\]|\[span_\d+\]/, 'citation artifact');
+    push @cand, hits($prose, qr/\x{2020}\d/, 'dagger footnote marker');
+    push @cand, hits($prose, qr/utm_source=(?:chatgpt|claude)/, 'tracking parameter');
+    push @cand, hits($prose, qr/\x{3010}[^\x{3011}]{0,40}\x{3011}/, 'lenticular bracket');
 
     # ---- candidates: need judgment ----------------------------------------
     # Structural candidates are skipped on the agent surface, where the
@@ -370,10 +379,8 @@ sub heading_case {
                @$minor;
 }
 
-# Stacked rhetorical frames, the Opus 5 signature (catalog N19). Any single
-# frame is voice; three or more DISTINCT families in one paragraph is the
-# airless texture. Diversity rather than repetition, so a paragraph that
-# legitimately needs several `so` clauses never fires. List items count as
+# Stacked rhetorical frames (catalog N19). Three distinct families generate a
+# candidate, not a quality judgment or model fingerprint. List items count as
 # their own paragraphs so separate bullets cannot pool into a false hit.
 sub stacked_frames {
     my ($text) = @_;
@@ -470,7 +477,6 @@ sub spread {
     my ($m, $sd) = stats($vals);
     my $cv = $m ? $sd / $m : 0;
     my @s = sort { $a <=> $b } @$vals;
-    return sprintf('%s spread: n=%d min=%d median=%d max=%d mean=%.1f cv=%.2f%s',
-                   $kind, scalar @s, $s[0], $s[int(@s / 2)], $s[-1], $m, $cv,
-                   $cv < 0.35 ? '  <- flat, look at the rhythm' : '');
+    return sprintf('%s spread: n=%d min=%d median=%d max=%d mean=%.1f cv=%.2f',
+                   $kind, scalar @s, $s[0], $s[int(@s / 2)], $s[-1], $m, $cv);
 }

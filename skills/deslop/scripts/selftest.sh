@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Regression gate for slopscan.pl. Every case here is one the scanner got
-# wrong at some point. Run it after any edit to the masker.
+# Regression gate for slopscan.pl. Cases cover preservation, candidate
+# classification, and interface behavior. Run after changing the scanner.
 #
 #   ./skills/deslop/scripts/selftest.sh
 #
@@ -212,11 +212,50 @@ if [ $? -ne 0 ]; then pass=$((pass + 1)); else
 fi
 
 printf 'a dagger marker\xe2\x80\xa01 here\n' > "$TMP/dagger.md"
-check "dagger citation marker"         20 "$TMP/dagger.md"
+check "dagger footnote needs judgment" 10 "$TMP/dagger.md"
 
 printf 'the author wrote \xe2\x80\x9cthis\xe2\x80\x9d deliberately\n' > "$TMP/curly.md"
 check "curly quotes hard on house"     20 "$TMP/curly.md"
 check "curly quotes soft on a sample"  10 "$TMP/curly.md" sample
+check "curly quotes soft on published" 10 "$TMP/curly.md" published
+
+printf 'Wait\342\200\246 10\302\240km away.\n' > "$TMP/typography.md"
+check "house typography remains enforced" 20 "$TMP/typography.md" house
+check "sample typography needs judgment" 10 "$TMP/typography.md" sample
+check "published typography needs judgment" 10 "$TMP/typography.md" published
+
+printf '\343\200\220Notice\343\200\221 Read the instructions.\n' > "$TMP/brackets.md"
+check "brackets are not provider proof" 10 "$TMP/brackets.md" published
+
+printf 'Open the lid. Check the seal. Close the lid. Press the switch.\n' > "$TMP/short.md"
+check "short instructions remain clean" 0 "$TMP/short.md"
+short_output=$(perl "$SCAN" "$TMP/short.md")
+if [[ "$short_output" == *OVER-CORRECTED* || "$short_output" == *'flat, look'* ]]; then
+  fail=$((fail + 1)); printf '  FAIL  rhythm diagnostics asserted a quality verdict\n'
+else
+  pass=$((pass + 1))
+fi
+
+io_output=$(perl "$SCAN" --json "$TMP/missing-json.md" 2>/dev/null)
+io_exit=$?
+if [[ "$io_exit" -eq 30 && "$io_output" == *'"io_errors": 1'* ]]; then
+  pass=$((pass + 1))
+else
+  fail=$((fail + 1)); printf '  FAIL  JSON output concealed unreadable input\n'
+fi
+
+check "directory input is an I/O error" 30 "$TMP"
+: > "$TMP/empty.md"
+check "empty regular file is valid" 0 "$TMP/empty.md"
+printf '\377' > "$TMP/invalid-utf8.md"
+check "invalid UTF-8 is an I/O error" 30 "$TMP/invalid-utf8.md"
+io_output=$(perl "$SCAN" --json "$TMP" "$TMP/empty.md" 2>/dev/null)
+io_exit=$?
+if [[ "$io_exit" -eq 30 && "$io_output" == *'"io_errors": 1'* ]]; then
+  pass=$((pass + 1))
+else
+  fail=$((fail + 1)); printf '  FAIL  valid sibling concealed directory input error\n'
+fi
 
 printf 'an em dash \xe2\x80\x94 in someone else prose\n' > "$TMP/dash.md"
 check "dash hard on house"             20 "$TMP/dash.md"
@@ -258,8 +297,8 @@ printf -- '- kept rather than dropped\n- retries, so the queue drains\n- the del
 check "frames across separate list items stay clean" 0 "$TMP/listframes.md"
 
 # ---- apostrophe variant glyphs ---------------------------------------------
-# LLMs emit eight apostrophe glyphs; only two are curly quotes. A variant
-# between letters is a hard failure, a prime after a digit is legitimate.
+# A variant between letters is a house-style failure; a prime after a digit
+# is legitimate technical notation.
 printf 'this don\xc2\xb4t and this don\xe2\x80\xb2t read as apostrophes\n' > "$TMP/aposvariant.md"
 check "apostrophe variant between letters fires"  20 "$TMP/aposvariant.md"
 printf 'the 5\xe2\x80\xb2 UTR and a bare accent \xc2\xb4 alone stay clean\n' > "$TMP/primeok.md"

@@ -1,201 +1,125 @@
 # Surface profiles
 
-One profile per surface, each with a worked artifact-level example. Sentence-level fixes live in `pattern-catalog.md`; this file is about what a whole artifact should look like when it is clean, and which rules do not apply where.
+Use the artifact's purpose and authority to choose an edit. A correct rule applied to the wrong surface can remove necessary structure, uncertainty, or voice. The main skill contains the authority map; these examples show how that map changes a revision.
 
-Read the profile before editing. The worst deslop failure is a correct rule applied to a surface that needed the opposite.
+## README and project introduction
 
-## Authority map
+Lead with what the project does and who it serves. Preserve code, installation commands, badges, links, and supported capabilities. Do not add a benchmark to make an introduction sound concrete.
 
-When a surface has its own skill, that skill owns the artifact's structure and this skill contributes prose patterns only.
+Before:
 
-| Surface                          | Structural authority | Deslop contributes                     |
-| -------------------------------- | -------------------- | -------------------------------------- |
-| PR body, PR comment reply        | `super-good-pr`      | Prose patterns, never shape            |
-| PR review report                 | `hyper-pr-review`    | Prose patterns, never severity markers |
-| Commit message                   | `implement`, `git`   | Prose patterns, plain-text enforcement |
-| Spec, plan document              | `plan`               | Prose patterns, full pass              |
-| Research report                  | `research`           | Prose patterns, full pass              |
-| README, docs, blog, Slack, email | This skill           | Everything                             |
-| Agent brief, skill file, memory  | This skill           | Prose patterns only. Structure exempt  |
+> Nexus is a powerful, seamless task runner built for modern development workflows. Leveraging a dependency graph, it delivers blazing-fast builds.
 
-## README and project intro
+After:
 
-Register: plain, concrete, second person. The reader is deciding whether to keep reading, so the first two sentences must say what the thing is and what it does, with no positioning.
+> Nexus is a task runner that schedules work using a dependency graph.
 
-Never touch: code blocks, install commands, badge markup, link targets.
-
-Common failure: the intro is entirely unfalsifiable claims (E7) plus puffery (R2), and says nothing a competing project's README does not also say (R14).
-
-**Before:**
-
-> Nexus is a powerful, seamless task runner built for modern development workflows. Leveraging a robust dependency graph, it delivers blazing-fast builds while maintaining an elegant developer experience. Whether you're working on a small script or orchestrating a complex monorepo, Nexus provides the flexibility you need.
-
-**After:**
-
-> Nexus is a task runner for monorepos. It builds a dependency graph from your task definitions, runs independent tasks in parallel, and skips any task whose inputs have not changed since the last run.
->
-> On a 40-package repo, a no-op build takes 300ms.
-
-The rewrite drops every adjective and keeps only claims a reader can check. The number is only allowed here because the draft's author supplied it; if it were invented, that is E1 and a worse defect than the puffery it replaced.
+The source does not establish parallel execution, caching, or any timing result. Add those only when the repository or supplied evidence supports them.
 
 ## Documentation body
 
-Register: mechanism first. Every paragraph should tell the reader something they could act on or verify.
+Describe current behavior and mechanisms. Preserve API signatures, error strings, configuration, frontmatter, examples, and qualifications.
 
-Never touch: code blocks, CLI output, config samples, frontmatter, API signatures, error strings.
+Before:
 
-Common failure: feeling instead of mechanism (R13) and signposting (R5), with header inflation (S1) chopping a two-paragraph explanation into four labeled stubs.
+> Let's dive into how Nexus handles caching. Nexus uses content hashing to determine what needs to rebuild, ensuring an excellent development experience.
 
-**Before:**
+After:
 
-> ## Understanding Caching
->
-> Caching is important.
->
-> Let's dive into how Nexus handles caching. Nexus provides a powerful caching layer that ensures your builds stay fast, leveraging content hashing to intelligently determine what needs to rebuild.
+> Nexus uses content hashes to determine what needs to rebuild.
 
-**After:**
+A deeper explanation of cache keys needs code or documentation evidence. Do not invent which environment variables are hashed or claim a failure mode is the most common without support.
 
-> ## Caching
->
-> Nexus hashes every task's declared inputs (source files, environment variables, and the task definition itself) and stores the output under that hash. On the next run, a matching hash means the task is skipped and its cached output is restored.
->
-> A task that does not declare an input will not invalidate when that input changes. This is the most common cause of a stale build.
+## Release notes and migration guides
 
-Note what the fix adds: the actual mechanism, and the failure mode a reader needs. Some tells want expansion rather than deletion.
+Narrating a change is the purpose here. Keep versions, compatibility consequences, deprecations, and migration instructions. A factual change summary is appropriate even when the same phrasing would age badly in a code comment.
 
-## Release notes and changelogs
+Before:
 
-Register: version-scoped and factual.
+> Version 2.4 marks a pivotal moment for caching. The cache now includes the task definition in its key, so changing a task command invalidates the entry. The future looks bright!
 
-Diff-anchored writing (E6) is **correct** here. These documents exist to narrate change, so "replaces the old resolver" is the point, not a tell.
+After:
 
-Common failure: significance inflation (R1) and a generic upbeat close (R6) attached to an ordinary patch release.
+> Version 2.4 includes the task definition in the cache key. Changing a task command now invalidates the entry.
 
-**Before:**
-
-> ## 2.4.0
->
-> This release marks an exciting milestone in our journey, delivering a host of powerful improvements that enhance the developer experience. We've completely revamped the caching layer for blazing-fast performance. The future looks bright for Nexus!
-
-**After:**
-
-> ## 2.4.0
->
-> The cache now keys on the task definition as well as its inputs, so editing a task's command invalidates it. Previously an edited command reused the old output.
->
-> Breaking: `nexus run --force` is now `--no-cache`.
+Do not insert a renamed flag or breaking change absent from the source. When creating release notes from a diff, that diff can supply the missing facts.
 
 ## Commit body
 
-Register: plain text, factual, written for someone reading it years later during a bisect.
+Follow the repository's commit contract. Under the house rules, use plain text, a Conventional Commit subject, a body explaining why, and 76-column wrapping. Required trailers and unavoidable URLs follow the contract's exceptions.
 
-Hard rules: no markdown, no fences, no headers, no emoji in the subject, wrap at 76 columns. Attribution trailers and URLs are exempt from the wrap and from tell scanning.
+Example with supplied evidence:
 
-Common failure: house jargon (L7) and narrating the session instead of the change.
+```text
+fix(cache): include the task command in cache keys
 
-**Before:**
-
-```
-fix: various improvements to the cache
-
-Refactored the caching layer to be more robust. This should
-significantly improve performance and probably fixes the stale
-build issue that was load-bearing for the CI flake.
+Editing a task command reused output from the previous command because
+cache keys covered declared inputs only. Include the resolved command
+in the key so a command change invalidates the cached result.
 ```
 
-**After:**
-
-```
-fix(cache): key cache entries on the task definition
-
-Editing a task's command reused the previous output, because the
-cache key covered declared inputs but not the command itself. CI
-saw this as an intermittent stale build whenever a task definition
-changed in the same commit as its sources.
-
-The key now includes a hash of the resolved task definition.
-```
-
-Note what the rewrite adds: the actual key change, and the symptom stated as an observation rather than a guess.
+Use that explanation only if the diff establishes the described key change. Preserve uncertainty when a suspected failure has not been reproduced. A prose cleanup does not prove the implementation correct.
 
 ## Slack and email
 
-Register: warm, complete sentences, peer energy. Explain at whatever length understanding requires.
+Match the sender's voice. Preserve thread references, code, meaningful courtesy, and required signatures. Do not add a commitment the sender did not make.
 
-Never touch: a required signature footer, thread links, code snippets.
-
-Common failure: chatbot artifacts (E4) and sycophancy (E5), plus compression into fragments that read as curt.
-
-**Before:**
+Before:
 
 > Great question! Happy to help clarify. So basically the deploy failed due to the fact that the migration timed out. Let me know if you'd like me to dig deeper!
 
-**After:**
+After:
 
-> The deploy failed because the migration hit the 30-second statement timeout while backfilling `orders.tenant_id`. The table is 40M rows, so it needs to run in batches instead of one statement. I can push that change today if you want it in this release.
+> The deploy failed because the migration timed out.
 
-## PR body: what not to strip
+A timeout value, row count, root cause, batching recommendation, or promise to push a fix needs separate support. A warmer or more detailed reply can be appropriate when the context supplies it.
 
-The instructive case. A PR body has required structure that a general cleanup pass destroys.
+## PR body and reply
 
-Preserve: semantic emoji headers, bold section leads, tables of enumerable facts, severity markers, and the receipts with their counts. A body a human wrote is edited surgically or not at all: when they hand it over for editing, keep the choices they clearly made and change only what the findings name.
+Use `super-good-pr` for structure and authorization. Preserve semantic emoji, reviewer guidance, validation receipts, and human-authored choices. Cut inflated significance without stripping useful evidence or calibrated uncertainty.
 
-Fix: em dashes, inflated significance, hedging, chatbot closers, house jargon, participle pseudo-analysis.
+Before:
 
-**Before:**
-
-> ## 💡 What this is
+> ## 💡 What changes
 >
-> This PR fundamentally reimagines the rate limiter — a pivotal step toward a more robust API — leveraging a token bucket to ensure fairness across tenants, showcasing our commitment to reliability.
+> The limiter now uses one token bucket per tenant, a pivotal step toward a more robust API that showcases our commitment to reliability.
 
-**After:**
+After:
 
-> ## 💡 What this is
+> ## 💡 What changes
 >
-> Per-tenant rate limiting, enforced at the gateway. A shared global limit let one noisy tenant consume the whole budget, so each tenant now gets its own token bucket keyed on the tenant id from the request's signed context.
+> The limiter now uses one token bucket per tenant.
 
-The emoji header stays because the artifact requires it. The rest of the original made three claims about significance and none about the mechanism.
+A gateway enforcement point or signed tenant identity would be additional facts. Include them when the implementation establishes them. Do not convert a narrow proofreading request into a wholesale PR rewrite.
 
 ## Code comments and docstrings
 
-Register: describe the thing as it is.
+Describe the current behavior or the non-obvious reason for an implementation choice. Preserve code examples, doctests, output, parameter names, and API contracts unless changing them is authorized.
 
-Diff-anchored comments are a tell here, unlike changelogs. A comment saying "replaces the old loop" rots the moment the old loop is forgotten.
+Before:
 
-Never touch: doctest bodies, type annotations, parameter names, example output.
-
-**Before:**
-
-```python
-# We now use a heap here instead of sorting the whole list every time,
-# which was the previous approach and was really slow.
+```text
+We now use a heap instead of sorting the whole list every time.
 ```
 
-**After:**
+After:
 
-```python
-# A heap keeps the k smallest without sorting the full list: O(n log k)
-# rather than O(n log n), which matters because n is the full event
-# backlog and k is the page size.
+```text
+A heap avoids sorting the whole list for each operation.
 ```
 
-## Profiles without worked examples
+An asymptotic complexity claim needs the actual operations and bounds. The word `heap` alone does not establish which elements are retained or how the algorithm uses them.
 
-These need a rule more than a demonstration.
+## Other registers
 
-| Surface                                             | The rule that matters most                                                                                                                   |
-| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Blog, essay, opinion, personal writing              | Voice belongs here. Sterile neutrality is its own tell, so stance, mixed feelings, and uneven rhythm are the fix, not a violation             |
-| Encyclopedic, reference, neutral docs               | Neutral **is** the human register. Never inject first person or opinion. This is where an over-eager "add soul" pass does real damage          |
-| Scientific, legal, medical, forecasting, postmortem | Hedges are honest. Strip only hedges that qualify nothing, and never convert a calibrated claim into a flat one                               |
-| Fiction and creative writing                        | The no-fabrication rule does not apply. Invented detail is the work                                                                          |
-| Marketing copy the user actually wants              | Puffery is the genre. Flag it once, then respect the brief. Do not silently rewrite persuasion into a spec sheet                              |
-| Agent briefs, skill files, prompts, memories        | Structure is exempt, prose is not. Tables, density, and house jargon are correct for a machine reader; the rhetorical, sentential, and epistemic passes still apply, and dashes stay banned because these are our files |
-| Text quoting or discussing slop                     | Exempt. A watched phrase inside a quotation, a title, or an example is being discussed rather than used                                        |
+| Surface | Preserve |
+| --- | --- |
+| Personal essay or blog | The author's stance, voice, and deliberate imagery |
+| Encyclopedic or reference text | Neutrality, defined terms, and source attribution |
+| Scientific, legal, medical, forecasting, postmortem | Qualification, evidence limits, approved language, and uncertainty |
+| Fiction | The creative brief and the distinction between invention and factual attribution |
+| Marketing | Persuasive intent with support for factual claims |
+| Agent brief, skill, or memory | Useful tables and precise terminology; clarity still matters |
+| Quoted material | Exact wording unless the request authorizes adaptation |
 
-## When the surface is unclear
-
-Ask one question: who reads this, and can they ask a follow-up? A reader who can ask (the user in chat, an agent in a brief) tolerates jargon and density. A reader who cannot (anyone downstream of a published artifact) needs the full pass.
-
-If the answer is genuinely both, treat it as published and run the pass.
+When the surface is unclear, infer it from the destination and surrounding artifact. Ask only when the answer would materially change the revision. A second model or an agent reader still needs a clear instruction; being able to ask follow-up questions does not make confusing prose acceptable.

@@ -1,234 +1,104 @@
-# Dream Extraction Guide
+# Dream extraction guide
 
-## What to Extract vs Skip
+Capture a lesson another session can use without mistaking an observation for a universal rule. The examples below illustrate evidence handling; they are not claims about the current state of the named tools.
 
-### High-Value Extractions
+## The candidate record
 
-| Signal                             | Sibyl Type                     | Example                                                                                       |
-| ---------------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------- |
-| User corrects assistant's approach | `error_pattern`                | "Don't use `uv pip`. Use `uv add` for project dependencies"                                   |
-| Technical decision with trade-offs | `episode` (category: decision) | "Chose Temporal over BullMQ because workflow visibility matters more than simplicity"         |
-| Non-obvious debugging insight      | `pattern`                      | "FalkorDB WRONGTYPE errors mean the key schema changed. Run FLUSHALL on dev"                  |
-| Reusable code pattern              | `pattern`                      | "Use `select!` with heartbeat future for long-running Temporal activities"                    |
-| Hard constraint discovered         | `rule`                         | "Never commit .env files. Gradial uses SOPS for secrets"                                      |
-| Unresolved question deferred       | `episode` (category: tension)  | "Should Sibyl use Graphiti's built-in community detection or custom?"                         |
-| New tool/library adoption          | `episode` (category: decision) | "Adopted better-auth for v2, replacing next-auth due to multi-tenant needs"                   |
-| Performance finding                | `pattern`                      | "Batch Sibyl writes via REST API, not individual CLI calls (10x faster)"                      |
-| Configuration quirk                | `error_pattern`                | "moon workspace requires `.moon/toolchains.yml` even if empty"                                |
-| User unblock one-liner             | `pattern` or `rule`            | "need to run `./gx setup env --legacy`" (the incantation is the learning)                     |
-| Taste directive / standing rule    | `rule`                         | "Preserve the pretty PR body; prove rebases with range-diff"                                  |
-| Evidence-trust calibration         | `error_pattern`                | "Green render + unit suites missed four live-behavior failures in this lane"                  |
-| Tool limit hit                     | `rule` (conditional)           | "git-iris PR generation hangs above ~174 files / 24k lines (condition, not ban)"              |
-| Retired risk                       | `episode` (category: decision) | "Postgres-off risk disproven, evidence attached (closed so it doesn't linger as a fake TODO)" |
+| Field | What to retain |
+| --- | --- |
+| Title | A specific trigger, decision, or finding |
+| Claim | The useful conclusion and conditions where it applies |
+| Provenance | Source host, session ID, event ID or line range, and project |
+| Evidence | Relevant visible user decision, tool result, artifact, or primary source |
+| Time | Observation date; distinguish historical truth from current state |
+| Basis | `observed`, `told`, `inferred`, or `assumed` |
+| Scope | Authorized project and access scope; tags do not enforce access |
+| Action | New capture, correction, duplicate, unresolved claim, or skip |
 
-### Skip These (Low/No Value)
+Keep enough provenance to revisit a conclusion without copying secrets, raw tool output, or unrelated private conversation. An assistant summary is a pointer to evidence, not independent corroboration. Forks, compactions, and repeated inherited prompts can repeat a single claim many times.
 
-| Signal                                           | Why Skip                                                      |
-| ------------------------------------------------ | ------------------------------------------------------------- |
-| Simple Q&A ("what does X do?")                   | No transfer value (answer is in the docs)                     |
-| File reads / directory listings                  | Ephemeral navigation, not knowledge                           |
-| Routine git operations                           | Git history captures this                                     |
-| Typo corrections                                 | Not a pattern or learning                                     |
-| Boilerplate generation                           | The code is the artifact, not the conversation                |
-| "Make it work" debugging with no root cause      | No insight to capture if root cause unknown                   |
-| Conversations that only resulted in reading code | Reading isn't learning unless something non-obvious was found |
+## Useful versus noisy
 
----
+| Candidate | Decision |
+| --- | --- |
+| "Updated the README" | Skip; the commit is the artifact |
+| "Use React" | Skip unless the conversation records a meaningful decision and rationale |
+| "The author chose queue A because delayed-job visibility was required" | Capture as a scoped decision with provenance |
+| "An operation hung twice with a 174-file diff" | Capture the observed conditions if useful; do not assert all larger inputs fail or smaller ones work |
+| "A unit suite passed while the browser flow failed" | Capture what the suite missed and which browser check exposed it |
+| "A command in assistant text would fix the issue" | Keep as an unverified proposal only if the uncertainty matters |
+| "The user supplied a setup command and the following result confirms the missing environment was created" | Capture the command's prerequisites and observed result |
+| "The user repeats a preference already present in the contract" | Investigate execution friction; do not add a duplicate rule |
 
-## Quality Bar for Extractions
+The transfer test includes a future session in the same project. A local decision can be worth retaining without being a cross-project rule. An unresolved question can also be useful; label it unresolved rather than forcing it into an executable recipe.
 
-### Bad Extractions (Don't Write These)
+## Worked extraction: tool failure
+
+Suppose a session contains:
 
 ```text
-"Fixed the auth bug"
-→ No: What bug? What was the root cause? What's the transferable insight?
-
-"Used React for the frontend"
-→ No: This is a project fact derivable from package.json, not a learning.
-
-"Updated the README"
-→ No: The git commit says this. No knowledge to capture.
+User: The report generator has stopped producing output.
+Assistant: It may be the size of this diff.
+Tool result: The generator stayed running with no output on a 174-file diff.
+Tool result: A second attempt on the same diff also produced no output.
+Assistant: I wrote the report from the diff and test output instead.
 ```
 
-### Good Extractions
+A sound capture:
 
 ```text
-"JWT refresh tokens fail silently when Redis TTL expires before token expiry.
-Root cause: token service catches WRONGTYPE error but swallows it.
-Fix: Add explicit type check before SET, regenerate token on type mismatch.
-Applies to: Any service using Redis for JWT storage with independent TTLs."
-→ Yes: Root cause, fix, transferability.
-
-"Temporal activity futures need periodic heartbeats, not just start/completion markers.
-Pattern: Wrap the activity future in a select! loop emitting heartbeats every 30s.
-Without this, Temporal marks the activity as failed after the heartbeat timeout."
-→ Yes: Non-obvious behavior, concrete pattern, prevents future mistakes.
-
-"Chose FalkorDB over Neo4j for Sibyl because: (1) Redis-compatible protocol for
-existing infra, (2) built-in vector similarity search, (3) 10x faster for small
-graphs (<1M nodes). Trade-off: less mature ecosystem, fewer community resources."
-→ Yes: Decision with rationale, alternatives, trade-offs.
+The report generator produced no output in two observed attempts on the
+same 174-file diff (session <id>, events <ids>, observed <date>). Diff size
+is a hypothesis, not a proven cause; smaller and larger inputs were not
+compared. The report was completed manually using the diff and validation
+receipts. Next diagnosis should compare a minimal input and inspect the
+process or service state before assigning a size limit.
 ```
 
-### The Transfer Test
-
-Before writing an extraction, ask: **"Would this be useful in a different project or a different session?"**
-
-- Yes → Write it
-- Maybe → Write it with narrow scope tags
-- No → Skip it
-
-### The Gate Test
-
-The strongest entries become active constraints, not trivia: a future session should be able to turn the entry into a **gate, a constraint, or an executable recipe**. Observed payoffs: an `error_pattern` written mid-incident powered an instant diagnosis hours later ("next time any workflow 403s with 'for installation,' the diagnosis is one recall away"); a 409 gotcha resurfaced in a refactor and was promoted to a hard verification gate. If the entry can only be read, not acted on, sharpen it until it names the trigger condition and the move.
-
-### Wider Taxonomy: Worked Examples
-
-The highest-leverage captures are often not technical gotchas. Same format, same bar:
+An unsound capture:
 
 ```text
-"Trust calibration: this lane's render + unit suites stayed green while four live
-behaviors broke (as of 2026-07). Before trusting green here, drive the affected
-flow — the suites don't cover live composition."
-→ Yes: names the lying signal, the lane, and the compensating check.
-
-"Tool limit: git-iris PR generation hung twice at 174 files / 24k lines of draft
-diff with zero output (2026-06). Condition, not ban: fine below the boundary;
-write the body manually from validation receipts above it."
-→ Yes: exact boundary captured as a condition — the tool gets re-admitted once
-PRs are right-sized.
-
-"Risk retired: 'Postgres may be off in staging' disproven 2026-04, evidence
-attached. Closed so it doesn't linger as a fake TODO in future sessions."
-→ Yes: dated evidence retires the risk instead of letting it haunt the backlog.
+The generator cannot handle more than 173 files. Always split larger PRs.
 ```
 
----
+The second version invents a threshold and turns a diagnostic gap into a product restriction.
 
-## Entity Type Selection Guide
+## Worked extraction: memory correction
 
-```dot
-digraph entity_selection {
-    rankdir=TB;
-    node [shape=diamond];
+Suppose an older memory says a staging service was unavailable. A later session checks the service and gets a healthy response.
 
-    Q1 [label="Is it a reusable\napproach that worked?"];
-    Q2 [label="Is it something\nthat went wrong?"];
-    Q3 [label="Is it a hard\nconstraint?"];
-    Q4 [label="Is it a decision\nwith trade-offs?"];
-    Q5 [label="Is it unresolved?"];
+The later check establishes availability at that observation time. It does not prove that the original outage never happened. Preserve the historical incident, then correct any claim that still describes the service as currently unavailable. If the old memory concerns another environment, retain both with their environment labels.
 
-    node [shape=box, style=filled];
-    pattern [label="pattern", fillcolor="#e8ffe8"];
-    error [label="error_pattern", fillcolor="#ffe8e8"];
-    rule [label="rule", fillcolor="#fff8e0"];
-    decision [label="episode\n(category: decision)", fillcolor="#e8e8ff"];
-    tension [label="episode\n(category: tension)", fillcolor="#ffe8ff"];
-    skip [label="Skip\n(not extractable)", fillcolor="#f0f0f0"];
+Before correction, retrieve the source memory and inspect its scope. Use the live `sibyl correct` flow and its raw-memory ID. Do not rewrite a projected entity or delete history merely because titles look similar.
 
-    Q1 -> pattern [label="yes"];
-    Q1 -> Q2 [label="no"];
-    Q2 -> error [label="yes"];
-    Q2 -> Q3 [label="no"];
-    Q3 -> rule [label="yes"];
-    Q3 -> Q4 [label="no"];
-    Q4 -> decision [label="yes"];
-    Q4 -> Q5 [label="no"];
-    Q5 -> tension [label="yes"];
-    Q5 -> skip [label="no"];
-}
-```
+## Worked extraction: user preference
 
----
+A user says, "don't rewrite this PR body; I edited it by hand." Preserve that request for the current PR. Generalize it into a standing rule only when the user makes that scope explicit or a current project contract already establishes it.
 
-## Deduplication Strategy
+A user asks for a temporary workaround during an incident. Capture its name, reason, expiry condition, and path back. Do not promote it into an unconditional architectural recommendation.
 
-### Before Writing to Sibyl
+## Writing through Sibyl
 
-1. **Exact match check:**
+Load `sibyl skill get contract` and `sibyl skill get core` before writing. The current contract supports kinds including `decision`, `procedure`, `error_pattern`, `rule`, `claim`, and `note`. Legacy `pattern` and category-based examples from transcripts may not match the installation.
 
-   ```bash
-   sibyl search "[exact entity title]" --limit 3
-   ```
+Use `sibyl context` to retrieve related knowledge, inspect relevant source records, then use `sibyl remember` or `sibyl correct` with verified live flags. Choose epistemic basis for the specific claim: a user's decision is `told`; a command result you inspected is `observed`; an explanation inferred from those facts is `inferred`.
 
-2. **Semantic similarity check:**
+For content containing shell syntax, prefer a content file or single-quoted heredoc using the installed interface. Never interpolate transcript text into a shell command. Review the mutation receipt before adding the capture to the applied list.
 
-   ```bash
-   sibyl search "[key concepts from the extraction]" --limit 5
-   ```
+## Deduplicate without erasing differences
 
-3. **Decision matrix:**
+Compare claims within the extraction batch first, then against existing memory. Merge only when subject, conditions, time, and conclusion align. Multiple source sessions can strengthen provenance without requiring multiple memories.
 
-   | Search Result                  | Action                                                                                                                               |
-   | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-   | No matches                     | Create new entity                                                                                                                    |
-   | Same topic, older info         | Update existing entity (note: Sibyl tracks temporal validity)                                                                        |
-   | Same topic, same info          | Skip (already captured)                                                                                                              |
-   | Same topic, contradictory info | New evidence supersedes: correct the old entry in place, titled "Correction: ...". Genuinely unresolved: tension entity linking both |
-   | Related but distinct           | Create new entity with RELATED_TO relationship                                                                                       |
+| Relationship | Action |
+| --- | --- |
+| Same evidence repeated by a summary or fork | Treat as one source chain |
+| Independent evidence for the same scoped claim | Add evidence using the supported flow |
+| New decision replaces an older decision | Supersede explicitly and retain why |
+| Conflicting claims about different versions or environments | Separate their conditions |
+| Conflicting evidence under the same conditions | Preserve uncertainty and identify the next decisive check |
 
-### Within a Single Dream Cycle
+## Validate the capture
 
-Multiple sessions may contain the same insight (e.g., same bug hit twice). Deduplicate within the extraction batch before writing to Sibyl:
+Read the proposed memory as someone who cannot see the transcript. The entry should identify the trigger and useful action, preserve uncertainty, and make its source recoverable. Remove credentials, personal detail, customer data, and irrelevant excerpts before persistence. Route each memory to the correct authorized project; a `project:name` tag is descriptive metadata and does not change storage scope.
 
-1. Group extractions by topic/keyword
-2. Merge duplicates. Keep the richest description
-3. Note multiple source sessions in the entity metadata
-
----
-
-## Tagging Conventions
-
-Consistent tags make future search and REM exploration effective.
-
-### Required Tags
-
-- `project:<name>`: Which project this relates to (e.g., `project:sibyl`, `project:v2`)
-- Source conversation type: `source:claude` or `source:codex`
-
-### Recommended Tags
-
-- `domain:<area>`: Technical domain (e.g., `domain:auth`, `domain:graph`, `domain:deployment`)
-- `stack:<tech>`: Technology involved (e.g., `stack:temporal`, `stack:react`, `stack:kubernetes`)
-- `confidence:<level>`: How sure are we? `high`, `medium`, `low`
-
-### Dream-Specific Tags
-
-- `dream`: All entities created during dream cycles
-- `dream-date:YYYY-MM-DD`: When the dream cycle ran
-- `stale`: Flagged for review during REM phase
-- `needs-review`: Low-confidence extraction requiring human validation
-- `cross-project`: REM-discovered cross-project connections
-
----
-
-## Examples: Full Extraction from a Conversation
-
-### Input: Claude Code Session Excerpt
-
-```text
-User: "the SessionEnd hook isn't firing when I close the terminal"
-Assistant: [investigates, finds the issue]
-Assistant: "The problem is that SessionEnd only fires on clean exits —
-if the terminal is killed (SIGKILL), the hook never runs. You need to
-also handle SIGTERM in your hook registration..."
-User: "ah that explains why the data was missing. let's add SIGTERM handling"
-```
-
-### Extractions
-
-**1. Error Pattern:**
-
-```bash
-sibyl add "SessionEnd hook doesn't fire on terminal kill" \
-  "Claude Code SessionEnd hook only fires on clean exits (user types exit, Ctrl+D, /clear). Terminal kill (SIGKILL, closing window) bypasses the hook entirely. SIGTERM may or may not fire depending on the terminal emulator. Workaround: Also register a SIGTERM handler in hook scripts, and use a heartbeat/watchdog pattern for critical post-session processing." \
-  --type error_pattern --category hooks --tags "project:dreamer,source:claude,stack:claude-code"
-```
-
-**2. Pattern:**
-
-```bash
-sibyl add "Pattern: Heartbeat watchdog for session-end processing" \
-  "Instead of relying solely on SessionEnd hook (which can miss unclean exits), use a dual approach: (1) SessionEnd hook for immediate processing, (2) Background watchdog that detects stale session PIDs and runs cleanup. Check ~/.claude/sessions/<pid>.json for active sessions." \
-  --type pattern --category hooks --tags "project:dreamer,source:claude,stack:claude-code"
-```
+A failed write remains pending. Save only a sanitized payload in an authorized local artifact, record the error, and give the next session enough information to retry through the current interface. Do not claim that a report was stored simply because it appeared in terminal output.
