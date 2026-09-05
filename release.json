@@ -1,1 +1,7 @@
-null
+{
+  "version": "3.12.1",
+  "previous_version": "3.12.0",
+  "source_commit": "5c2f96185a7ea1f9a3e9e397b1687f674c4c8c36",
+  "notes": "Automate release preparation and publication through a verified release PR. Generate skill counts, inventories, and marketplace metadata from canonical source. Preserve staged work and existing remote artifacts when retrying interrupted releases.\n",
+  "bump": "patch"
+}
