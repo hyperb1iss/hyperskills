@@ -11,14 +11,14 @@ Design around the user's repeated action, the data they must keep in view, and t
 
 ## Choose the Layout from the Work
 
-| Work | Layout | Useful invariant |
-| --- | --- | --- |
-| Browse related lists and details | Persistent multi-panel | Stable panel roles and visible focus |
-| Navigate a hierarchy | Miller columns or drill-down stack | Back restores selection and scroll position |
-| Monitor changing measurements | Widget dashboard | Labels, units, freshness, and a path to details |
-| Edit requests, queries, or configuration | Sidebar, editor, results | Keep editing state when switching panels |
-| Select a value for a shell command | Inline picker or overlay | Return a clean value and preserve shell scrollback |
-| Read logs or events | Fixed controls plus virtualized list | Follow mode is explicit; scrolling back stops auto-follow |
+| Work                                     | Layout                               | Useful invariant                                          |
+| ---------------------------------------- | ------------------------------------ | --------------------------------------------------------- |
+| Browse related lists and details         | Persistent multi-panel               | Stable panel roles and visible focus                      |
+| Navigate a hierarchy                     | Miller columns or drill-down stack   | Back restores selection and scroll position               |
+| Monitor changing measurements            | Widget dashboard                     | Labels, units, freshness, and a path to details           |
+| Edit requests, queries, or configuration | Sidebar, editor, results             | Keep editing state when switching panels                  |
+| Select a value for a shell command       | Inline picker or overlay             | Return a clean value and preserve shell scrollback        |
+| Read logs or events                      | Fixed controls plus virtualized list | Follow mode is explicit; scrolling back stops auto-follow |
 
 Read [app-patterns.md](references/app-patterns.md) for examples and tradeoffs. Read [visual-catalog.md](references/visual-catalog.md) only when selecting glyphs, borders, charts, or indicators.
 
@@ -30,15 +30,15 @@ Test narrow, ordinary, and wide layouts, including rapid resizing. The minimum u
 
 ## Input, Focus, and Editing
 
-| Concern | Decision |
-| --- | --- |
-| Basic navigation | Support arrows, Enter, Escape, and discoverable focus movement |
-| Expert shortcuts | Add vim motions or a command palette when they improve repeated work |
-| Text fields | Printable keys edit text; `q`, `j`, `/`, and mnemonic actions must not fire globally |
-| Multi-key shortcuts | Show pending context and resolve Escape/prefix ambiguity through the input library |
-| Modal dialog | Route input only to the modal; restore the prior valid focus target when it closes |
-| Destructive action | Show the exact target and consequence; choose confirmation proportional to reversibility |
-| Mouse support | Match keyboard actions and provide a way to disable capture for terminal text selection |
+| Concern             | Decision                                                                                 |
+| ------------------- | ---------------------------------------------------------------------------------------- |
+| Basic navigation    | Support arrows, Enter, Escape, and discoverable focus movement                           |
+| Expert shortcuts    | Add vim motions or a command palette when they improve repeated work                     |
+| Text fields         | Printable keys edit text; `q`, `j`, `/`, and mnemonic actions must not fire globally     |
+| Multi-key shortcuts | Show pending context and resolve Escape/prefix ambiguity through the input library       |
+| Modal dialog        | Route input only to the modal; restore the prior valid focus target when it closes       |
+| Destructive action  | Show the exact target and consequence; choose confirmation proportional to reversibility |
+| Mouse support       | Match keyboard actions and provide a way to disable capture for terminal text selection  |
 
 Maintain one owner for input parsing. With Crossterm, do not mix `EventStream` with `read`/`poll`, or run competing readers. Handle key press, repeat, and release deliberately; one physical press must not submit twice.
 
@@ -63,15 +63,15 @@ digraph tui_state {
 }
 ```
 
-| Failure mode | Design response |
-| --- | --- |
-| Search A completes after search B | Tag requests and discard results that no longer match the active query |
-| A row moves after a refresh | Track selection by stable identity, not only a row index |
-| A view closes while work runs | Cancel owned work or detach it deliberately; late results must not resurrect the view |
-| A cancelled write may already have reached the server | Distinguish cancelled waiting from confirmed rollback; reconcile remote state |
-| Logs arrive faster than screen updates | Retain required events in the data layer and render a virtualized viewport |
-| Work blocks the UI despite `async` syntax | Identify blocking calls or CPU work and move them off the input/render path |
-| Repeated action would start duplicate writes | Track pending operation identity and show its result before accepting a conflicting action |
+| Failure mode                                          | Design response                                                                            |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Search A completes after search B                     | Tag requests and discard results that no longer match the active query                     |
+| A row moves after a refresh                           | Track selection by stable identity, not only a row index                                   |
+| A view closes while work runs                         | Cancel owned work or detach it deliberately; late results must not resurrect the view      |
+| A cancelled write may already have reached the server | Distinguish cancelled waiting from confirmed rollback; reconcile remote state              |
+| Logs arrive faster than screen updates                | Retain required events in the data layer and render a virtualized viewport                 |
+| Work blocks the UI despite `async` syntax             | Identify blocking calls or CPU work and move them off the input/render path                |
+| Repeated action would start duplicate writes          | Track pending operation identity and show its result before accepting a conflicting action |
 
 Batch state updates and render changed frames. Coalesce replaceable visual snapshots, not audit events or mutations. Diagnose queue growth, indexing, and allocation costs before dropping data or capping concurrency.
 
@@ -79,14 +79,14 @@ Batch state updates and render changed frames. Coalesce replaceable visual snaps
 
 Explicit application settings take precedence. In automatic mode, respect a non-empty `NO_COLOR` before color detection. A color override can opt back in deliberately; disabling color need not disable bold, underline, layout, or every terminal feature.
 
-| Capability | Evidence and fallback |
-| --- | --- |
-| Interactive terminal | Check the actual input/output TTYs; support plain output or explain the need for a TTY |
-| True color | Use the library's detection, terminfo, or negotiated support; `COLORTERM` is a hint, not a requirement |
-| 256/16 colors | Map semantic slots to supported colors and preserve labels and focus without hue |
-| Images, hyperlinks, clipboard | Negotiate the protocol through multiplexers; provide a text or file alternative |
-| Nerd Font icons | Make them explicit or user-configurable; there is no portable reliable font-detection API |
-| Unicode layout | Segment graphemes and measure terminal cell width; do not use byte or code-point length |
+| Capability                    | Evidence and fallback                                                                                  |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Interactive terminal          | Check the actual input/output TTYs; support plain output or explain the need for a TTY                 |
+| True color                    | Use the library's detection, terminfo, or negotiated support; `COLORTERM` is a hint, not a requirement |
+| 256/16 colors                 | Map semantic slots to supported colors and preserve labels and focus without hue                       |
+| Images, hyperlinks, clipboard | Negotiate the protocol through multiplexers; provide a text or file alternative                        |
+| Nerd Font icons               | Make them explicit or user-configurable; there is no portable reliable font-detection API              |
+| Unicode layout                | Segment graphemes and measure terminal cell width; do not use byte or code-point length                |
 
 Truncate only at grapheme boundaries, accounting for wide cells, combining marks, variation selectors, and emoji sequences. Width libraries and emulators can disagree; test representative user text and offer ASCII indicators where rendering is uncertain.
 
@@ -118,15 +118,15 @@ Exercise launch, typing, paste, resize, modal open/close, slow or failed I/O, an
 
 ## Anti-Patterns
 
-| Anti-Pattern | Better action |
-| --- | --- |
-| `NO_COLOR` checked after true-color detection | Resolve user preference before capability selection |
-| Global mnemonic shortcuts consume text input | Route events through focus and active mode |
-| Unicode release cutoff presented as compatibility | Measure graphemes/cells and test supported emulators |
-| Async request completion overwrites newer state | Correlate result identity with current view/query |
-| Screen clears or escape codes from background logging | Send logs through state or a separate sink |
-| Lower FPS or concurrency hides an overloaded queue | Profile the producer, state processing, and renderer separately |
-| Only normal exit restores the terminal | Use lifecycle guards and framework panic/signal handling |
+| Anti-Pattern                                          | Better action                                                   |
+| ----------------------------------------------------- | --------------------------------------------------------------- |
+| `NO_COLOR` checked after true-color detection         | Resolve user preference before capability selection             |
+| Global mnemonic shortcuts consume text input          | Route events through focus and active mode                      |
+| Unicode release cutoff presented as compatibility     | Measure graphemes/cells and test supported emulators            |
+| Async request completion overwrites newer state       | Correlate result identity with current view/query               |
+| Screen clears or escape codes from background logging | Send logs through state or a separate sink                      |
+| Lower FPS or concurrency hides an overloaded queue    | Profile the producer, state processing, and renderer separately |
+| Only normal exit restores the terminal                | Use lifecycle guards and framework panic/signal handling        |
 
 ## Primary Sources
 

@@ -38,12 +38,12 @@ An inline picker should return one well-defined result to its caller and send in
 
 ## Compose Only What the Task Needs
 
-| User need | Start with | Add only when justified |
-| --- | --- | --- |
-| Choose one value | List, filter, preview | Multi-select, saved searches |
-| Explore a hierarchy | Stack or columns | Bookmarks, multiple independent panes |
-| Edit structured data | Editor plus validation/result view | Tabs, jump labels, command palette |
-| Operate resources | Selector, details, explicit action state | Batch operations with a reviewed target set |
-| Monitor events | List, filter, follow state | Charts or correlated detail views |
+| User need            | Start with                               | Add only when justified                     |
+| -------------------- | ---------------------------------------- | ------------------------------------------- |
+| Choose one value     | List, filter, preview                    | Multi-select, saved searches                |
+| Explore a hierarchy  | Stack or columns                         | Bookmarks, multiple independent panes       |
+| Edit structured data | Editor plus validation/result view       | Tabs, jump labels, command palette          |
+| Operate resources    | Selector, details, explicit action state | Batch operations with a reviewed target set |
+| Monitor events       | List, filter, follow state               | Charts or correlated detail views           |
 
 The recommendations above are design synthesis. Source behavior was checked 2026-09-04; revisit the application docs for current keybindings and configuration syntax.

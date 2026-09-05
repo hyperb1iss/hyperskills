@@ -13,20 +13,20 @@ Remove formulaic writing that obscures meaning or flattens the author's voice. N
 
 The user, publication, and project contract set the register. An artifact's authority skill decides its structure; this skill supplies prose diagnostics.
 
-| Surface | Authority and preservation |
-| --- | --- |
-| PR body, PR comment reply | `super-good-pr`; preserve semantic emoji, reviewer guidance, receipts, and human-authored choices |
-| PR review report | `hyper-pr-review`; preserve severity and finding structure |
-| Commit body | Repository commit rules; plain text and required trailers |
-| Spec, plan, research report | Preserve decisions, alternatives that matter, uncertainty, citations, and requirements |
-| README, docs, guides | Explain the actual system; preserve commands, examples, signatures, and error strings |
-| Changelog, release notes | Narrating the change is the purpose; keep versions and migration consequences |
-| Slack, email | Match the sender; preserve signatures and thread links |
-| Blog, essay, fiction | Match the author; creative invention is allowed only within the creative brief |
-| Scientific, legal, medical, postmortem | Preserve calibrated uncertainty and approved language |
-| Marketing | Follow the brief; persuasion does not authorize invented claims |
-| Agent brief, skill, memory | Keep useful tables and terminology; clarity and factual checks still apply |
-| Interactive chat | Skip a separate pass; follow the project register |
+| Surface                                | Authority and preservation                                                                        |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| PR body, PR comment reply              | `super-good-pr`; preserve semantic emoji, reviewer guidance, receipts, and human-authored choices |
+| PR review report                       | `hyper-pr-review`; preserve severity and finding structure                                        |
+| Commit body                            | Repository commit rules; plain text and required trailers                                         |
+| Spec, plan, research report            | Preserve decisions, alternatives that matter, uncertainty, citations, and requirements            |
+| README, docs, guides                   | Explain the actual system; preserve commands, examples, signatures, and error strings             |
+| Changelog, release notes               | Narrating the change is the purpose; keep versions and migration consequences                     |
+| Slack, email                           | Match the sender; preserve signatures and thread links                                            |
+| Blog, essay, fiction                   | Match the author; creative invention is allowed only within the creative brief                    |
+| Scientific, legal, medical, postmortem | Preserve calibrated uncertainty and approved language                                             |
+| Marketing                              | Follow the brief; persuasion does not authorize invented claims                                   |
+| Agent brief, skill, memory             | Keep useful tables and terminology; clarity and factual checks still apply                        |
+| Interactive chat                       | Skip a separate pass; follow the project register                                                 |
 
 Read `references/surface-profiles.md` when a surface needs a worked example. A writing sample guides voice; it does not override an explicit instruction from the user.
 
@@ -70,13 +70,13 @@ Treat candidates as prompts to inspect, never automatic replacements. Rhythm dia
 
 Start with missing meaning or a confusing argument, then work toward sentence detail. These are diagnostic lenses, not five mandatory invocations:
 
-| Lens | Look for | Useful move |
-| --- | --- | --- |
-| Document | Repeated summaries, decorative headings, reasoning split into unrelated bullets | Keep the structure that helps the reader navigate or act |
-| Argument | Inflated significance, unsupported attribution, imaginary counterarguments | State the actual claim and its support |
-| Sentence | Unclear actor, buried action, clause stacks, empty participial tails | Give the relevant subject a clear verb; split only where meaning benefits |
-| Vocabulary | Filler, imprecise metaphor, jargon the reader cannot interpret | Use the precise familiar term; preserve defined terminology |
-| Evidence | Invented specificity, overstated certainty, stale claims, process narration | Restore qualifications and attribution; flag source gaps |
+| Lens       | Look for                                                                        | Useful move                                                               |
+| ---------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Document   | Repeated summaries, decorative headings, reasoning split into unrelated bullets | Keep the structure that helps the reader navigate or act                  |
+| Argument   | Inflated significance, unsupported attribution, imaginary counterarguments      | State the actual claim and its support                                    |
+| Sentence   | Unclear actor, buried action, clause stacks, empty participial tails            | Give the relevant subject a clear verb; split only where meaning benefits |
+| Vocabulary | Filler, imprecise metaphor, jargon the reader cannot interpret                  | Use the precise familiar term; preserve defined terminology               |
+| Evidence   | Invented specificity, overstated certainty, stale claims, process narration     | Restore qualifications and attribution; flag source gaps                  |
 
 The catalog in `references/pattern-catalog.md` gives stable IDs and examples. Consult relevant entries instead of loading every rule for every artifact. The craft moves in `references/craft-moves.md` help when a sentence's shape is the problem.
 
@@ -101,13 +101,13 @@ For difficult passages, useful questions are: what would deletion lose; what doe
 
 ## Invocation modes
 
-| Mode | Result |
-| --- | --- |
-| Embedded | Return or insert the finished text without an audit preamble |
-| File | Edit the authorized prose and summarize material changes |
-| Pasted | Return the revision; explain the edits when requested |
-| Gate | Report concrete unresolved defects and applicable style violations |
-| Audit | Give located feedback without rewriting or judging authorship |
+| Mode     | Result                                                             |
+| -------- | ------------------------------------------------------------------ |
+| Embedded | Return or insert the finished text without an audit preamble       |
+| File     | Edit the authorized prose and summarize material changes           |
+| Pasted   | Return the revision; explain the edits when requested              |
+| Gate     | Report concrete unresolved defects and applicable style violations |
+| Audit    | Give located feedback without rewriting or judging authorship      |
 
 Default to embedded when another skill invokes this one. An audit request does not authorize file edits or publication.
 
@@ -117,15 +117,15 @@ Studies show differences between particular model outputs and human corpora. The
 
 ## Anti-patterns
 
-| Mistake | Correction |
-| --- | --- |
-| Fix a wordlist and stop | Check the argument and meaning first |
-| Require several markers for an obvious defect | Report the defect on its own evidence |
-| Turn a vague claim into an invented measurement | Use supplied evidence or retain a plain limited claim |
-| Strip every hedge, passive, heading, or list | Judge its function and the surface |
+| Mistake                                         | Correction                                             |
+| ----------------------------------------------- | ------------------------------------------------------ |
+| Fix a wordlist and stop                         | Check the argument and meaning first                   |
+| Require several markers for an obvious defect   | Report the defect on its own evidence                  |
+| Turn a vague claim into an invented measurement | Use supplied evidence or retain a plain limited claim  |
+| Strip every hedge, passive, heading, or list    | Judge its function and the surface                     |
 | Apply our typography to another author's sample | Follow the requested register and explicit constraints |
-| Treat scanner output as a rewrite command | Inspect candidates and protected regions |
-| Keep rewriting toward an arbitrary score | Stop on satisfied requirements and preserved meaning |
+| Treat scanner output as a rewrite command       | Inspect candidates and protected regions               |
+| Keep rewriting toward an arbitrary score        | Stop on satisfied requirements and preserved meaning   |
 
 ## What This Skill is NOT
 

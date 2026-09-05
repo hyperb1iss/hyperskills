@@ -11,12 +11,12 @@ Recover decisions and lessons that inline capture missed, then connect repeated 
 
 Use the requested projects and time span. When unspecified, start with recent sessions for the current project and say what you covered. Cross-project discovery is appropriate for an explicitly broad dream; access to a transcript is not permission to move its contents into another project's memory.
 
-| Mode | Scope and result |
-| --- | --- |
-| Quick | Recent work in the current project; capture the useful missed lessons |
-| Default | Sessions since the previous checkpoint; consolidate recurring decisions and failures |
-| Deep | Requested projects and interval; add cross-session synthesis and staleness checks |
-| Lucid | Named sessions or topic; targeted extraction |
+| Mode       | Scope and result                                                                                |
+| ---------- | ----------------------------------------------------------------------------------------------- |
+| Quick      | Recent work in the current project; capture the useful missed lessons                           |
+| Default    | Sessions since the previous checkpoint; consolidate recurring decisions and failures            |
+| Deep       | Requested projects and interval; add cross-session synthesis and staleness checks               |
+| Lucid      | Named sessions or topic; targeted extraction                                                    |
 | Mining run | Explicit corpus-scale request; partition independent session sets when delegation is authorized |
 
 These modes set depth, not output quotas. A short session can contain a decisive correction; a large transcript can contain only duplicated context and tool output. Do not infer value from byte size or require a fixed number of captures.
@@ -46,16 +46,16 @@ Before sending an excerpt to a remote service or memory store, remove secrets an
 
 ## Extract the useful delta
 
-| Signal | Capture |
-| --- | --- |
-| User correction or unblock instruction | The mistaken assumption, corrected action, and context where it applies |
-| Confirmed debugging result | Trigger, cause, verified remedy, and boundary of the evidence |
-| Decision with trade-offs | Choice, reason, decision-maker, alternatives that mattered, and date |
-| Repeated tool or harness failure | Observed conditions and useful diagnosis; distinguish observations from a proven limit |
-| Green check followed by failure | What the check covered, what it missed, and the stronger verification |
-| Standing preference | The exact preference and its project or session scope |
-| Retired risk | The evidence resolving it and when that evidence was valid |
-| Open question | What remains uncertain and the evidence or decision needed next |
+| Signal                                 | Capture                                                                                |
+| -------------------------------------- | -------------------------------------------------------------------------------------- |
+| User correction or unblock instruction | The mistaken assumption, corrected action, and context where it applies                |
+| Confirmed debugging result             | Trigger, cause, verified remedy, and boundary of the evidence                          |
+| Decision with trade-offs               | Choice, reason, decision-maker, alternatives that mattered, and date                   |
+| Repeated tool or harness failure       | Observed conditions and useful diagnosis; distinguish observations from a proven limit |
+| Green check followed by failure        | What the check covered, what it missed, and the stronger verification                  |
+| Standing preference                    | The exact preference and its project or session scope                                  |
+| Retired risk                           | The evidence resolving it and when that evidence was valid                             |
+| Open question                          | What remains uncertain and the evidence or decision needed next                        |
 
 Do not persist routine navigation, boilerplate, or facts readily recoverable from the code unless they explain a decision. Preserve a failed hypothesis only when knowing why it failed prevents repeated wasted work.
 
@@ -74,14 +74,14 @@ sibyl skill get core
 
 Load the full pack before the first mutation. The installed contract and live help own verbs, enums, and correction shapes. Use `remember` for new knowledge and `correct` for existing raw memory; do not revive deprecated examples from old transcripts.
 
-| Evidence relationship | Action |
-| --- | --- |
-| Same claim, scope, and evidence | Skip the duplicate |
-| Useful new evidence for the same claim | Add the evidence through the supported correction flow |
-| New finding supersedes an old belief | Preserve provenance and explicitly supersede or correct the old memory |
-| Different conditions explain apparent disagreement | Keep both with their conditions |
-| Actual unresolved contradiction | Record the uncertainty and link the competing sources |
-| New durable knowledge | Remember it in the correct project and scope |
+| Evidence relationship                              | Action                                                                 |
+| -------------------------------------------------- | ---------------------------------------------------------------------- |
+| Same claim, scope, and evidence                    | Skip the duplicate                                                     |
+| Useful new evidence for the same claim             | Add the evidence through the supported correction flow                 |
+| New finding supersedes an old belief               | Preserve provenance and explicitly supersede or correct the old memory |
+| Different conditions explain apparent disagreement | Keep both with their conditions                                        |
+| Actual unresolved contradiction                    | Record the uncertainty and link the competing sources                  |
+| New durable knowledge                              | Remember it in the correct project and scope                           |
 
 Use current kinds such as `decision`, `procedure`, `error_pattern`, `rule`, `claim`, or `note`; verify against live help if the installation differs. Do not silently relabel a failed write just to obtain a success response. A projected graph entity is not the raw-memory ID expected by every correction operation.
 
@@ -110,16 +110,16 @@ Store a project-scoped dream report through the current `remember` interface whe
 
 ## Anti-Patterns
 
-| Mistake | Correction |
-| --- | --- |
-| Treat every occurrence of a role string as that role | Parse top-level fields and content-block types |
-| Mine hidden reasoning for durable truth | Use visible messages and observable evidence |
-| Assume a planned command ran | Match calls with outcomes and inspect the result |
-| Turn two hangs into a universal size limit | Record the observed conditions and unknown boundary |
-| Store all projects in the current project's graph | Route each capture to its authorized project and scope |
-| Overwrite an old belief without provenance | Use the correction flow and explain the evidence |
-| Replay an entire growing transcript | Track session positions and handle appended records |
-| Claim capture from a attempted write | Require an applied mutation receipt |
+| Mistake                                              | Correction                                             |
+| ---------------------------------------------------- | ------------------------------------------------------ |
+| Treat every occurrence of a role string as that role | Parse top-level fields and content-block types         |
+| Mine hidden reasoning for durable truth              | Use visible messages and observable evidence           |
+| Assume a planned command ran                         | Match calls with outcomes and inspect the result       |
+| Turn two hangs into a universal size limit           | Record the observed conditions and unknown boundary    |
+| Store all projects in the current project's graph    | Route each capture to its authorized project and scope |
+| Overwrite an old belief without provenance           | Use the correction flow and explain the evidence       |
+| Replay an entire growing transcript                  | Track session positions and handle appended records    |
+| Claim capture from a attempted write                 | Require an applied mutation receipt                    |
 
 ## What This Skill is NOT
 

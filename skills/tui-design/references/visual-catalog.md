@@ -286,13 +286,13 @@ Choose thresholds from the metric: high CPU utilization may be healthy while hig
 
 Use only with an explicit user setting or a known bundled font. No portable terminal query reliably establishes Nerd Font availability. Provide a Unicode/ASCII fallback.
 
-| Meaning | Unicode fallback | ASCII fallback |
-| --- | --- | --- |
-| Directory | ▸ | > |
-| File | · | * |
-| Success | ✓ | OK |
-| Error | ✗ | ERR |
-| Warning | ⚠ | ! |
+| Meaning   | Unicode fallback | ASCII fallback |
+| --------- | ---------------- | -------------- |
+| Directory | ▸                | >              |
+| File      | ·                | *              |
+| Success   | ✓                | OK             |
+| Error     | ✗                | ERR            |
+| Warning   | ⚠                | !              |
 
 **Rule:** Never assume Nerd Fonts are installed. Always define a fallback using standard Unicode or ASCII.
 

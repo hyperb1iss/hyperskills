@@ -4,11 +4,11 @@ Checked 2026-09-04. Transcript layouts are host implementation details, not stab
 
 ## Discover without dumping content
 
-| Host | Candidate source | Discovery caveat |
-| --- | --- | --- |
+| Host        | Candidate source                                | Discovery caveat                                                                         |
+| ----------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | Claude Code | `${CLAUDE_CONFIG_DIR:-$HOME/.claude}/projects/` | Project directory names are encoded paths; confirm project identity from record metadata |
-| Codex | `${CODEX_HOME:-$HOME/.codex}/sessions/` | Include `archived_sessions/` only when it belongs to the requested interval |
-| Either host | Session index or history log | Useful for finding sessions; not a complete conversation |
+| Codex       | `${CODEX_HOME:-$HOME/.codex}/sessions/`         | Include `archived_sessions/` only when it belongs to the requested interval              |
+| Either host | Session index or history log                    | Useful for finding sessions; not a complete conversation                                 |
 
 Prefer a filename listing before inspecting content:
 
@@ -57,13 +57,13 @@ Common conversation records have `uuid`, `parentUuid`, `sessionId`, `timestamp`,
 
 Both user and assistant content can be strings or typed-block arrays. User records can carry tool results and are not necessarily user-authored prompts.
 
-| Content block | Interpretation |
-| --- | --- |
-| `text` | Visible text; retain its enclosing role |
-| `tool_use` | Proposed tool invocation with an ID; inspect only relevant inputs |
-| `tool_result` | Tool output, commonly in a user-role message; correlate `tool_use_id` |
-| `thinking`, redacted or opaque reasoning | Skip during extraction |
-| Image or other content | Note that text-only extraction does not cover it |
+| Content block                            | Interpretation                                                        |
+| ---------------------------------------- | --------------------------------------------------------------------- |
+| `text`                                   | Visible text; retain its enclosing role                               |
+| `tool_use`                               | Proposed tool invocation with an ID; inspect only relevant inputs     |
+| `tool_result`                            | Tool output, commonly in a user-role message; correlate `tool_use_id` |
+| `thinking`, redacted or opaque reasoning | Skip during extraction                                                |
+| Image or other content                   | Note that text-only extraction does not cover it                      |
 
 Metadata can include titles, summaries, progress, file-history snapshots, and PR links. Treat summaries as navigation aids and verify consequential claims against original events. Reconstruct relevant parent chains for branched or compacted sessions instead of assuming every line belongs to one uninterrupted conversation.
 
@@ -73,14 +73,14 @@ Subagent logs may appear under `<session-id>/subagents/`. Include them when they
 
 Common top-level shapes are `session_meta`, `response_item`, `event_msg`, and `turn_context`, with type-specific data in `payload`. The upstream [protocol source](https://github.com/openai/codex/blob/main/codex-rs/protocol/src/protocol.rs) defines session metadata and events; inspect the installed or pinned version when writing a parser.
 
-| Record | Useful data and limits |
-| --- | --- |
-| `session_meta` | Session ID, cwd, CLI version, source, provider, and optional git context; provider is not a model ID |
-| `turn_context` | Per-turn model and execution settings when present; model may change within a session |
-| `response_item` message | Role and typed content, including visible `input_text` or `output_text` |
-| `response_item` function/custom call | Tool name, call ID, and inputs; correlate with the corresponding output variant |
-| `event_msg` | Lifecycle and visible-message events that can duplicate response-item text |
-| Reasoning item | Opaque or internal material; skip rather than attempting recovery |
+| Record                               | Useful data and limits                                                                               |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `session_meta`                       | Session ID, cwd, CLI version, source, provider, and optional git context; provider is not a model ID |
+| `turn_context`                       | Per-turn model and execution settings when present; model may change within a session                |
+| `response_item` message              | Role and typed content, including visible `input_text` or `output_text`                              |
+| `response_item` function/custom call | Tool name, call ID, and inputs; correlate with the corresponding output variant                      |
+| `event_msg`                          | Lifecycle and visible-message events that can duplicate response-item text                           |
+| Reasoning item                       | Opaque or internal material; skip rather than attempting recovery                                    |
 
 Project identity can change during a rollout. Keep relevant cwd and git context with the event being interpreted; do not attribute all work to the initial directory. Child agents can have their own sessions and source metadata. Do not assume Codex has no subagents.
 

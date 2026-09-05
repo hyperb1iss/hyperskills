@@ -112,14 +112,14 @@ An asymptotic complexity claim needs the actual operations and bounds. The word 
 
 ## Other registers
 
-| Surface | Preserve |
-| --- | --- |
-| Personal essay or blog | The author's stance, voice, and deliberate imagery |
-| Encyclopedic or reference text | Neutrality, defined terms, and source attribution |
-| Scientific, legal, medical, forecasting, postmortem | Qualification, evidence limits, approved language, and uncertainty |
-| Fiction | The creative brief and the distinction between invention and factual attribution |
-| Marketing | Persuasive intent with support for factual claims |
-| Agent brief, skill, or memory | Useful tables and precise terminology; clarity still matters |
-| Quoted material | Exact wording unless the request authorizes adaptation |
+| Surface                                             | Preserve                                                                         |
+| --------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Personal essay or blog                              | The author's stance, voice, and deliberate imagery                               |
+| Encyclopedic or reference text                      | Neutrality, defined terms, and source attribution                                |
+| Scientific, legal, medical, forecasting, postmortem | Qualification, evidence limits, approved language, and uncertainty               |
+| Fiction                                             | The creative brief and the distinction between invention and factual attribution |
+| Marketing                                           | Persuasive intent with support for factual claims                                |
+| Agent brief, skill, or memory                       | Useful tables and precise terminology; clarity still matters                     |
+| Quoted material                                     | Exact wording unless the request authorizes adaptation                           |
 
 When the surface is unclear, infer it from the destination and surrounding artifact. Ask only when the answer would materially change the revision. A second model or an agent reader still needs a clear instruction; being able to ask follow-up questions does not make confusing prose acceptable.

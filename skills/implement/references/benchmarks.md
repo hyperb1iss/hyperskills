@@ -12,14 +12,14 @@ Measure delivered behavior and the effort needed to achieve it. A failed check t
 
 Record the model, reasoning configuration, harness, tools, task input, repository revision, and environment. Change one meaningful factor at a time where feasible. Model and harness interact, so an older workaround deserves re-evaluation after a model upgrade.
 
-| Dimension | Useful evidence | Misleading substitute |
-| --- | --- | --- |
-| Correctness | Required behavior and preserved existing behavior | Agent's claim that the work is complete |
-| Reliability | Repeated trials and observed failure modes | Best selected run |
-| Efficiency | Cost and elapsed time per successful outcome | Tokens per second or raw tool-call count |
-| Scope control | Necessary changed behavior and maintenance cost | Fewer lines regardless of semantics |
-| Recovery | Correct diagnosis and successful repair | Number of retries |
-| Handoff | Another session resumes from recorded state | Length of the summary |
+| Dimension     | Useful evidence                                   | Misleading substitute                    |
+| ------------- | ------------------------------------------------- | ---------------------------------------- |
+| Correctness   | Required behavior and preserved existing behavior | Agent's claim that the work is complete  |
+| Reliability   | Repeated trials and observed failure modes        | Best selected run                        |
+| Efficiency    | Cost and elapsed time per successful outcome      | Tokens per second or raw tool-call count |
+| Scope control | Necessary changed behavior and maintenance cost   | Fewer lines regardless of semantics      |
+| Recovery      | Correct diagnosis and successful repair           | Number of retries                        |
+| Handoff       | Another session resumes from recorded state       | Length of the summary                    |
 
 Use representative tasks, including the failure modes the skill is meant to prevent. For skill changes, compare realistic requests with and without the changed guidance when the cost is warranted. Check task completion, unnecessary pauses, scope drift, incorrect tool use, and required verification. A Markdown validator proves syntax, not behavior.
 

@@ -11,11 +11,11 @@ The user's instructions take precedence over this skill's guidelines. Planning d
 
 ## Size the Plan by Uncertainty
 
-| Work shape | Planning depth |
-| --- | --- |
-| Clear, reversible change with a direct check | Execute with a brief mental or inline plan |
-| Several dependent behaviors with known patterns | Record tasks, interfaces, and acceptance checks |
-| Uncertain architecture or migration | Resolve decisive unknowns and plan a representative vertical slice |
+| Work shape                                      | Planning depth                                                       |
+| ----------------------------------------------- | -------------------------------------------------------------------- |
+| Clear, reversible change with a direct check    | Execute with a brief mental or inline plan                           |
+| Several dependent behaviors with known patterns | Record tasks, interfaces, and acceptance checks                      |
+| Uncertain architecture or migration             | Resolve decisive unknowns and plan a representative vertical slice   |
 | Work spanning agents, sessions, or environments | Preserve ownership, state, dependencies, and resumption instructions |
 
 File count is a poor proxy for risk. A one-line authorization change can need more analysis than a mechanical rename across many files. Plan enough to expose the uncertain or irreversible parts, not enough to predict every edit.
@@ -46,14 +46,14 @@ Keep implementation and its behavioral verification in the same accountable task
 
 Use only the fields the task needs:
 
-| Field | Content |
-| --- | --- |
-| Outcome | The behavior or artifact delivered |
-| Scope | Known files/modules and permitted expansion rules |
-| Dependencies | Required inputs or interfaces, with their producer |
-| Verification | Exact runnable check plus the behavior it proves |
-| Completion evidence | Expected artifact, assertion, observation, or report |
-| Risk and recovery | Compatibility, rollback, or unresolved external dependency when material |
+| Field               | Content                                                                  |
+| ------------------- | ------------------------------------------------------------------------ |
+| Outcome             | The behavior or artifact delivered                                       |
+| Scope               | Known files/modules and permitted expansion rules                        |
+| Dependencies        | Required inputs or interfaces, with their producer                       |
+| Verification        | Exact runnable check plus the behavior it proves                         |
+| Completion evidence | Expected artifact, assertion, observation, or report                     |
+| Risk and recovery   | Compatibility, rollback, or unresolved external dependency when material |
 
 Example:
 
@@ -102,15 +102,15 @@ The procedures here use that distinction: preserve a testable contract and adapt
 
 ## Anti-Patterns
 
-| Anti-pattern | Better move |
-| --- | --- |
-| Exact edit predictions before reading code | Specify verified boundaries and uncertain details |
-| Separate every feature from its tests | Keep one owner accountable for delivered behavior |
-| Parallelize based only on filenames | Inspect shared interfaces and runtime resources |
-| Demand approval after authorization to build | Continue within the existing scope |
-| Ease review because the task is late | Match review to current risk and evidence |
-| Maintain several competing progress ledgers | Keep one authoritative plan with linked receipts |
-| Keep decomposing after success is covered | Execute; replan when evidence changes the work |
+| Anti-pattern                                 | Better move                                       |
+| -------------------------------------------- | ------------------------------------------------- |
+| Exact edit predictions before reading code   | Specify verified boundaries and uncertain details |
+| Separate every feature from its tests        | Keep one owner accountable for delivered behavior |
+| Parallelize based only on filenames          | Inspect shared interfaces and runtime resources   |
+| Demand approval after authorization to build | Continue within the existing scope                |
+| Ease review because the task is late         | Match review to current risk and evidence         |
+| Maintain several competing progress ledgers  | Keep one authoritative plan with linked receipts  |
+| Keep decomposing after success is covered    | Execute; replan when evidence changes the work    |
 
 ## What This Skill is NOT
 

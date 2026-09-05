@@ -4,15 +4,15 @@ Use these procedures when verification fails or an incident changes the operatin
 
 ## Classify the First Failure
 
-| Failure class | Evidence to seek | Response |
-| --- | --- | --- |
+| Failure class            | Evidence to seek                                                       | Response                                                      |
+| ------------------------ | ---------------------------------------------------------------------- | ------------------------------------------------------------- |
 | Runner or infrastructure | Checkout, network, resource, or runner failure before the target check | Diagnose that resource; rerun only when conditions justify it |
-| Install or environment | Missing dependencies, wrong version, missing generated prerequisite | Repair the demonstrated environment mismatch |
-| Invocation | Flags rejected, filter selects nothing, shell parsing error | Correct the command and rerun the intended check |
-| Stale artifact | Running revision or built output differs from inspected source | Rebuild the affected artifact and verify identity |
-| Shared-output race | Concurrent writers use the same path, port, or fixture | Reproduce in isolation, then fix ownership or isolation |
-| Pre-existing failure | Matching symptom on an appropriate base under controlled conditions | Report the baseline and analyze whether the change worsens it |
-| Runtime defect | Reproducer reaches the changed behavior with incorrect results | Test the cause, make a targeted repair, re-verify |
+| Install or environment   | Missing dependencies, wrong version, missing generated prerequisite    | Repair the demonstrated environment mismatch                  |
+| Invocation               | Flags rejected, filter selects nothing, shell parsing error            | Correct the command and rerun the intended check              |
+| Stale artifact           | Running revision or built output differs from inspected source         | Rebuild the affected artifact and verify identity             |
+| Shared-output race       | Concurrent writers use the same path, port, or fixture                 | Reproduce in isolation, then fix ownership or isolation       |
+| Pre-existing failure     | Matching symptom on an appropriate base under controlled conditions    | Report the baseline and analyze whether the change worsens it |
+| Runtime defect           | Reproducer reaches the changed behavior with incorrect results         | Test the cause, make a targeted repair, re-verify             |
 
 The table guides investigation; it is not an elimination algorithm that proves the last remaining category. Several causes can coexist.
 
@@ -42,14 +42,14 @@ Temporary serialized reproduction can establish a race; the permanent fix belong
 
 ## Incident Recovery
 
-| Need | Action |
-| --- | --- |
-| Stop an ongoing harmful operation | Use the authorized containment action and preserve the current state |
-| Understand impact | Inspect deployed revision, affected population, and first failure |
-| Keep recovery work isolated | Use an owned branch/worktree; do not stash or reset shared edits |
-| Restore service | Choose the smallest evidence-supported mitigation or rollback within authority |
-| Verify restoration | Check the consumer path and relevant health signals |
-| Prevent recurrence | Add the justified regression check, alert, or runbook correction |
+| Need                              | Action                                                                         |
+| --------------------------------- | ------------------------------------------------------------------------------ |
+| Stop an ongoing harmful operation | Use the authorized containment action and preserve the current state           |
+| Understand impact                 | Inspect deployed revision, affected population, and first failure              |
+| Keep recovery work isolated       | Use an owned branch/worktree; do not stash or reset shared edits               |
+| Restore service                   | Choose the smallest evidence-supported mitigation or rollback within authority |
+| Verify restoration                | Check the consumer path and relevant health signals                            |
+| Prevent recurrence                | Add the justified regression check, alert, or runbook correction               |
 
 A hotfix from the deployed revision and a separate durable patch may be appropriate when release state diverges. They are not mandatory tracks for every incident. Record any temporary relaxation, its owner, and the restoration condition. Do not automatically suspend a known safe recovery to perform a ceremonial freeze.
 

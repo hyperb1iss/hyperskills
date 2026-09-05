@@ -23,14 +23,14 @@ Gather the original requirement, final behavior, decisive files, and checks that
 
 ## The content that matters
 
-| Reviewer need | Include |
-| --- | --- |
-| Understand the problem | Concrete trigger and previous behavior |
-| Understand the result | What happens now and why that solves the problem |
-| Evaluate the design | The mechanism, important trade-off, and invariant if one carries the change |
-| Navigate the diff | Decisive files, functions, or ordering; omit a file-by-file changelog |
-| Assess confidence | Checks run, outcomes, relevant coverage, and material gaps |
-| Assess adoption | Compatibility, migration, rollout, or follow-up detail when applicable |
+| Reviewer need          | Include                                                                     |
+| ---------------------- | --------------------------------------------------------------------------- |
+| Understand the problem | Concrete trigger and previous behavior                                      |
+| Understand the result  | What happens now and why that solves the problem                            |
+| Evaluate the design    | The mechanism, important trade-off, and invariant if one carries the change |
+| Navigate the diff      | Decisive files, functions, or ordering; omit a file-by-file changelog       |
+| Assess confidence      | Checks run, outcomes, relevant coverage, and material gaps                  |
+| Assess adoption        | Compatibility, migration, rollout, or follow-up detail when applicable      |
 
 Describe the final system. Leave routine development history in the commits and conversation. A rejected approach belongs in the body only when explaining its trade-off helps evaluate the chosen design. After a squash, retain that design rationale without recreating a session diary.
 
@@ -42,16 +42,16 @@ Use the repository template first. Preserve required metadata and checkboxes. An
 
 Without a template, choose the sections that carry useful information. Use a semantic emoji on headings you add under the house style. A body does not need every heading, an extra H1 repeating its title, or a context blockquote for a standalone fix.
 
-| Section | When it helps |
-| --- | --- |
-| `## 💡 What changes` | Explain the problem and result |
-| `## 🛠️ How it works` | Explain a mechanism reviewers cannot infer from a small diff |
-| `## 🎯 Invariant` | Identify the specific property the design must preserve |
-| `## 🚦 Rollout` | State deployment order, compatibility, safe stopping points, and recovery |
-| `## 🧪 Validation` | Record evidence and material limitations |
-| `## 🔍 Review focus` | Direct attention to actual uncertainty or difficult surfaces |
-| `## 📌 Follow-ups` | Name deliberate deferred work and what blocks readiness |
-| `## 🔁 Review delta` | Help returning reviewers find changes since their review |
+| Section              | When it helps                                                             |
+| -------------------- | ------------------------------------------------------------------------- |
+| `## 💡 What changes` | Explain the problem and result                                            |
+| `## 🛠️ How it works` | Explain a mechanism reviewers cannot infer from a small diff              |
+| `## 🎯 Invariant`    | Identify the specific property the design must preserve                   |
+| `## 🚦 Rollout`      | State deployment order, compatibility, safe stopping points, and recovery |
+| `## 🧪 Validation`   | Record evidence and material limitations                                  |
+| `## 🔍 Review focus` | Direct attention to actual uncertainty or difficult surfaces              |
+| `## 📌 Follow-ups`   | Name deliberate deferred work and what blocks readiness                   |
+| `## 🔁 Review delta` | Help returning reviewers find changes since their review                  |
 
 Keep explanations in prose and use tables for comparisons or enumerable facts. A numbered sequence is useful when operation order matters. Preserve semantic emoji and other deliberate formatting during a prose cleanup pass; follow a repository's stricter template when it conflicts with house defaults.
 
@@ -63,13 +63,13 @@ For a regression fix, a failing-before and passing-after reproduction can be the
 
 Keep receipts tied to the tested revision and relevant environment. A changed SHA requires checking what changed; it does not automatically invalidate every result:
 
-| Change since verification | Required action |
-| --- | --- |
-| Source, dependency, configuration, or relevant environment changed | Run affected checks again; broaden when interactions changed |
-| Rebase incorporates a changed base or resolves conflicts | Verify the integrated result and required CI for the new head |
-| Commit-message amend with an identical tree | Preserve applicable local evidence, identify the tested tree, and follow required head-specific CI |
-| Squash with an identical final tree | Preserve applicable content evidence; rerun checks dependent on history or the new head |
-| Live external behavior is the claim | Recheck when external state may have changed |
+| Change since verification                                          | Required action                                                                                    |
+| ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| Source, dependency, configuration, or relevant environment changed | Run affected checks again; broaden when interactions changed                                       |
+| Rebase incorporates a changed base or resolves conflicts           | Verify the integrated result and required CI for the new head                                      |
+| Commit-message amend with an identical tree                        | Preserve applicable local evidence, identify the tested tree, and follow required head-specific CI |
+| Squash with an identical final tree                                | Preserve applicable content evidence; rerun checks dependent on history or the new head            |
+| Live external behavior is the claim                                | Recheck when external state may have changed                                                       |
 
 Do not claim CI passed for a new head because an earlier run passed. GitHub's merge requirements and repository rules still govern. A content-equivalence check can justify reusing local evidence; it cannot waive required checks.
 
@@ -81,13 +81,13 @@ Use a diagram when it resolves reviewer uncertainty about request flow, state, t
 
 GitHub supports Mermaid fenced blocks; its [diagram documentation](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams) explains supported rendering and version inspection. Keep labels and syntax compatible with the renderer, and verify the rendered result when available.
 
-| Change | Useful visual |
-| --- | --- |
-| Request path or topology | Small flowchart; before/after if the changed edge is otherwise unclear |
-| Protocol or call ordering | Sequence diagram |
-| State transitions | State diagram |
-| Schema relationships | Entity relationship diagram |
-| UI behavior | Screenshot or short clip showing the relevant state |
+| Change                    | Useful visual                                                          |
+| ------------------------- | ---------------------------------------------------------------------- |
+| Request path or topology  | Small flowchart; before/after if the changed edge is otherwise unclear |
+| Protocol or call ordering | Sequence diagram                                                       |
+| State transitions         | State diagram                                                          |
+| Schema relationships      | Entity relationship diagram                                            |
+| UI behavior               | Screenshot or short clip showing the relevant state                    |
 
 A diagram is a factual claim. Draw only verified components and ordering. Include a legend when needed rather than hiding meaningful distinctions. Do not place secrets, customer data, or private operational details in public attachments.
 
@@ -139,15 +139,15 @@ Split by coherent review and verification boundaries. A description should clari
 
 ## Anti-Patterns
 
-| Mistake | Correction |
-| --- | --- |
-| Paste a changelog as the explanation | Explain the problem, behavior, and design |
-| Fill every heading for a small fix | Keep only sections that help review |
-| Repeat old green CI against a new head | Check which evidence remains applicable and run required checks |
-| Assume the base is `main` | Read the PR's actual base |
-| Overwrite a human's latest edit | Re-read and merge only authorized changes |
-| Turn a limitation into unsolicited implementation | Complete authorized requirements and state real boundaries |
-| Publish because drafting finished | Check the action is authorized |
+| Mistake                                           | Correction                                                      |
+| ------------------------------------------------- | --------------------------------------------------------------- |
+| Paste a changelog as the explanation              | Explain the problem, behavior, and design                       |
+| Fill every heading for a small fix                | Keep only sections that help review                             |
+| Repeat old green CI against a new head            | Check which evidence remains applicable and run required checks |
+| Assume the base is `main`                         | Read the PR's actual base                                       |
+| Overwrite a human's latest edit                   | Re-read and merge only authorized changes                       |
+| Turn a limitation into unsolicited implementation | Complete authorized requirements and state real boundaries      |
+| Publish because drafting finished                 | Check the action is authorized                                  |
 
 ## What This Skill is NOT
 

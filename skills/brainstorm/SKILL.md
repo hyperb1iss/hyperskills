@@ -11,13 +11,13 @@ The user's instructions take precedence over this skill's guidelines. Preserve t
 
 ## Choose the Work Shape
 
-| Situation | Useful output |
-| --- | --- |
-| The user wants open exploration | Distinct directions with concrete tradeoffs and unresolved questions |
-| The problem is clear but the mechanism is uncertain | A recommendation and the evidence that would overturn it |
-| One assumption determines feasibility | A small test of that assumption before elaborating designs |
-| The approach is selected and implementation is authorized | Continue into implementation |
-| The user asks why something happens | Diagnose the cause before designing a fix |
+| Situation                                                 | Useful output                                                        |
+| --------------------------------------------------------- | -------------------------------------------------------------------- |
+| The user wants open exploration                           | Distinct directions with concrete tradeoffs and unresolved questions |
+| The problem is clear but the mechanism is uncertain       | A recommendation and the evidence that would overturn it             |
+| One assumption determines feasibility                     | A small test of that assumption before elaborating designs           |
+| The approach is selected and implementation is authorized | Continue into implementation                                         |
+| The user asks why something happens                       | Diagnose the cause before designing a fix                            |
 
 ## Ground the Question
 
@@ -37,8 +37,8 @@ Generate alternatives along meaningful dimensions: ownership of state, migration
 
 Compare viable options in the dimensions relevant to this decision:
 
-| Approach | What improves | Carrying cost | Main uncertainty | Decisive check |
-| --- | --- | --- | --- | --- |
+| Approach    | What improves            | Carrying cost                     | Main uncertainty           | Decisive check           |
+| ----------- | ------------------------ | --------------------------------- | -------------------------- | ------------------------ |
 | [Mechanism] | [User or system outcome] | [Maintenance, runtime, migration] | [What could invalidate it] | [Experiment or evidence] |
 
 Keep ambition and mechanism separate. Simplifying the machinery should preserve the useful destination. A small implementation that proves only connectivity may miss the actual product; an elaborate one may bury it. Use expected lifetime and likely change boundaries to judge architecture, rather than equating fewer lines with better design.
@@ -49,13 +49,13 @@ Before extending a design, ask where each responsibility belongs. A decision rep
 
 Choose the next action by its ability to change the decision. A compatibility check, representative benchmark, or rough interaction prototype can settle more than another design paragraph.
 
-| Evidence gap | Next move |
-| --- | --- |
-| An API or model capability may have changed | Open current primary documentation and inspect the installed version |
-| Performance determines feasibility | Test a representative workload with a baseline and explicit resource limits |
+| Evidence gap                                  | Next move                                                                    |
+| --------------------------------------------- | ---------------------------------------------------------------------------- |
+| An API or model capability may have changed   | Open current primary documentation and inspect the installed version         |
+| Performance determines feasibility            | Test a representative workload with a baseline and explicit resource limits  |
 | Several independent domains affect the choice | Delegate bounded research when permitted, or batch independent reads locally |
-| Stakeholders value different outcomes | Surface the actual value tradeoff for the user |
-| A favored approach has weak support | Seek a concrete counterexample or failure condition |
+| Stakeholders value different outcomes         | Surface the actual value tradeoff for the user                               |
+| A favored approach has weak support           | Seek a concrete counterexample or failure condition                          |
 
 Independent opinions can expose assumptions, but agreement is not proof. Reviewers may share training, sources, or framing. Resolve consequential disagreements through code, source material, or an experiment. State when evidence remains inconclusive.
 
@@ -75,14 +75,14 @@ The [OpenAI Astra guidance](https://developers.openai.com/api/docs/guides/latest
 
 ## Anti-Patterns
 
-| Anti-pattern | Better move |
-| --- | --- |
-| Brainstorm before every code edit | Explore only unresolved direction |
+| Anti-pattern                                | Better move                                     |
+| ------------------------------------------- | ----------------------------------------------- |
+| Brainstorm before every code edit           | Explore only unresolved direction               |
 | Ask the user to reconfirm known constraints | Carry prior authorization and decisions forward |
-| Offer options that differ only cosmetically | Compare different mechanisms or tradeoffs |
-| Treat reviewer consensus as validation | Check the claim against independent evidence |
-| Polish an approach with an untested premise | Run the feasibility check first |
-| Turn an anecdote into a universal rule | Retain the mechanism and state its conditions |
+| Offer options that differ only cosmetically | Compare different mechanisms or tradeoffs       |
+| Treat reviewer consensus as validation      | Check the claim against independent evidence    |
+| Polish an approach with an untested premise | Run the feasibility check first                 |
+| Turn an anecdote into a universal rule      | Retain the mechanism and state its conditions   |
 
 ## What This Skill is NOT
 

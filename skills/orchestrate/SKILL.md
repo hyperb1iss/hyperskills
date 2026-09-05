@@ -17,14 +17,14 @@ Use the host's supported delegation tools when permitted. An external CLI review
 
 ## Choose the Shape by Dependency
 
-| Work shape | Coordination pattern |
-| --- | --- |
-| Independent research questions | Parallel investigators, evidence-based synthesis |
-| Disjoint feature ownership with stable interfaces | Parallel builders, designated integration owner |
-| One change repeated across modules | Scoped automated transform or partitioned workers, combined verification |
-| Dependent edits or shared mutable state | One owner for the dependency, parallelize work around it |
-| Consequential review | Independent read-only reviewers with useful risk lenses |
-| Small, tightly coupled change | Direct execution |
+| Work shape                                        | Coordination pattern                                                     |
+| ------------------------------------------------- | ------------------------------------------------------------------------ |
+| Independent research questions                    | Parallel investigators, evidence-based synthesis                         |
+| Disjoint feature ownership with stable interfaces | Parallel builders, designated integration owner                          |
+| One change repeated across modules                | Scoped automated transform or partitioned workers, combined verification |
+| Dependent edits or shared mutable state           | One owner for the dependency, parallelize work around it                 |
+| Consequential review                              | Independent read-only reviewers with useful risk lenses                  |
+| Small, tightly coupled change                     | Direct execution                                                         |
 
 Agent count follows named useful lanes, available capacity, and integration cost. More agents are worthwhile when they add distinct evidence or shorten independent work. Do not use historical fleet sizes as defaults. Check the critical path: accelerating a branch that is already waiting on one shared interface may add no throughput.
 
@@ -34,11 +34,11 @@ Before launching builders, inspect repository status and existing worktrees. Map
 
 Choose isolation based on the work:
 
-| Isolation | Appropriate use | Required coordination |
-| --- | --- | --- |
-| Shared tree, disjoint paths | Small independent changes with clear ownership | Single owner for contended files and Git index operations |
-| Separate worktrees | Workers need independent branches or build state | Known base, branch/path, merge order, and integration owner |
-| Read-only revision | Review or research | Fixed revision/diff plus permitted scratch outputs |
+| Isolation                   | Appropriate use                                  | Required coordination                                       |
+| --------------------------- | ------------------------------------------------ | ----------------------------------------------------------- |
+| Shared tree, disjoint paths | Small independent changes with clear ownership   | Single owner for contended files and Git index operations   |
+| Separate worktrees          | Workers need independent branches or build state | Known base, branch/path, merge order, and integration owner |
+| Read-only revision          | Review or research                               | Fixed revision/diff plus permitted scratch outputs          |
 
 Worktrees isolate tracked files and the index; they do not automatically isolate ports, databases, or external services. Follow the project's worktree layout. Never overwrite a human's or sibling's edits to clear a conflict.
 
@@ -50,14 +50,14 @@ Define how partial progress becomes integrated progress before dispatch. Name th
 
 Give each worker the original relevant request and a bounded assignment. Include facts that are expensive to rediscover or absent from their checkout, especially user corrections and untracked decisions. Use absolute paths and exact revisions when location matters.
 
-| Brief element | Purpose |
-| --- | --- |
-| Outcome and scope | The result needed, owned surfaces, and exclusions |
-| Current evidence | Relevant code, versions, interfaces, and verified premises |
-| Dependencies | What is ready, what is promised, and who owns it |
-| Authority | Permitted mutations, commit rights, external actions |
-| Verification | Checks and acceptance conditions for this contribution |
-| Return | Changed artifacts or findings, evidence, limitations, justified deviations |
+| Brief element     | Purpose                                                                    |
+| ----------------- | -------------------------------------------------------------------------- |
+| Outcome and scope | The result needed, owned surfaces, and exclusions                          |
+| Current evidence  | Relevant code, versions, interfaces, and verified premises                 |
+| Dependencies      | What is ready, what is promised, and who owns it                           |
+| Authority         | Permitted mutations, commit rights, external actions                       |
+| Verification      | Checks and acceptance conditions for this contribution                     |
+| Return            | Changed artifacts or findings, evidence, limitations, justified deviations |
 
 Allow workers to challenge a premise and report necessary scope expansion. Their brief should constrain the task, not force a known-bad mechanism. Keep mandatory templates short; detailed examples live in `references/dispatch-briefs.md`.
 
@@ -83,11 +83,11 @@ For non-trivial changes where the project requires independent verification, obt
 
 Tie review evidence to a revision or recorded working-tree snapshot and environment. Use these verdicts:
 
-| Verdict | Meaning |
-| --- | --- |
-| PASS | The declared review scope completed with no unresolved blocking findings |
-| FAIL | A supported defect violates the requested outcome or applicable contract |
-| INCOMPLETE | Review or a required check did not finish; list uncovered scope |
+| Verdict    | Meaning                                                                  |
+| ---------- | ------------------------------------------------------------------------ |
+| PASS       | The declared review scope completed with no unresolved blocking findings |
+| FAIL       | A supported defect violates the requested outcome or applicable contract |
+| INCOMPLETE | Review or a required check did not finish; list uncovered scope          |
 
 An interrupted review cannot grant a full PASS. Agreement does not establish severity; impact and exploitability do. Adjudicate disagreements through the code, specification, or a reproducer. A reproduced base failure can distinguish regression from pre-existing behavior, but neither label substitutes for analyzing the changed path.
 
@@ -107,15 +107,15 @@ The [Astra guidance](https://developers.openai.com/api/docs/guides/latest-model)
 
 ## Anti-Patterns
 
-| Anti-pattern | Better move |
-| --- | --- |
-| Choose a fleet size before finding independent work | Name useful lanes and their integration path |
-| Assume different files imply isolation | Inspect shared runtime resources and generated outputs |
-| Treat an external reviewer as a policy bypass | Apply the same authority and permission boundaries |
-| Give partial review a forced binary verdict | Report INCOMPLETE with the missing coverage |
-| Vote-count findings | Verify mechanism and impact |
-| Let all shared-tree workers commit concurrently | Assign ownership of the index and commit operation |
-| Reduce review automatically over time | Match checks to current risk and changed evidence |
+| Anti-pattern                                        | Better move                                            |
+| --------------------------------------------------- | ------------------------------------------------------ |
+| Choose a fleet size before finding independent work | Name useful lanes and their integration path           |
+| Assume different files imply isolation              | Inspect shared runtime resources and generated outputs |
+| Treat an external reviewer as a policy bypass       | Apply the same authority and permission boundaries     |
+| Give partial review a forced binary verdict         | Report INCOMPLETE with the missing coverage            |
+| Vote-count findings                                 | Verify mechanism and impact                            |
+| Let all shared-tree workers commit concurrently     | Assign ownership of the index and commit operation     |
+| Reduce review automatically over time               | Match checks to current risk and changed evidence      |
 
 ## References
 

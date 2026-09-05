@@ -21,14 +21,14 @@ Distinguish diagnosis from implementation. "Why does this happen?" calls for a c
 
 ## Select a Verifiable Slice
 
-| Situation | Next move |
-| --- | --- |
-| Clear, low-impact edit | Make the edit and use the relevant structural or behavioral check |
-| Bug with an observable failure | Reproduce it, isolate the cause, then verify the correction |
-| New behavior across boundaries | Implement a representative end-to-end slice with its tests |
-| Shared interface or schema change | Trace consumers and compatibility before changing the contract |
-| Large uncertain change | Use `plan` for dependencies and acceptance criteria |
-| Independent work with a useful integration path | Use authorized delegation and explicit ownership |
+| Situation                                       | Next move                                                         |
+| ----------------------------------------------- | ----------------------------------------------------------------- |
+| Clear, low-impact edit                          | Make the edit and use the relevant structural or behavioral check |
+| Bug with an observable failure                  | Reproduce it, isolate the cause, then verify the correction       |
+| New behavior across boundaries                  | Implement a representative end-to-end slice with its tests        |
+| Shared interface or schema change               | Trace consumers and compatibility before changing the contract    |
+| Large uncertain change                          | Use `plan` for dependencies and acceptance criteria               |
+| Independent work with a useful integration path | Use authorized delegation and explicit ownership                  |
 
 Keep implementation and its verification together. Do not defer all tests until the feature is complete when an earlier test can guide the design. Equally, do not create tests for a reversible text edit merely to satisfy ceremony.
 
@@ -38,15 +38,15 @@ Break work at coherent behavior or contract boundaries. File count and number of
 
 Follow local patterns unless a concrete problem justifies departing from them. Explain the reason, not a generic preference for a different style.
 
-| Pressure | Decision |
-| --- | --- |
-| New modes or configuration appear | Tie each to a requested behavior or demonstrated variation |
-| The same decision repeats across callers | Give that decision one appropriate owner |
-| A wrapper only forwards calls | Inspect whether it enforces an API, policy, or test boundary before removing it |
-| A cast conceals incompatible data | Fix or validate the contract at its actual boundary |
-| A fallback hides an error | Preserve the failure cause and handle the intended recovery explicitly |
-| Compatibility code grows | Check shipped consumers and rollout requirements before keeping or deleting it |
-| Complexity keeps increasing | Re-examine ownership and data flow before adding another special case |
+| Pressure                                 | Decision                                                                        |
+| ---------------------------------------- | ------------------------------------------------------------------------------- |
+| New modes or configuration appear        | Tie each to a requested behavior or demonstrated variation                      |
+| The same decision repeats across callers | Give that decision one appropriate owner                                        |
+| A wrapper only forwards calls            | Inspect whether it enforces an API, policy, or test boundary before removing it |
+| A cast conceals incompatible data        | Fix or validate the contract at its actual boundary                             |
+| A fallback hides an error                | Preserve the failure cause and handle the intended recovery explicitly          |
+| Compatibility code grows                 | Check shipped consumers and rollout requirements before keeping or deleting it  |
+| Complexity keeps increasing              | Re-examine ownership and data flow before adding another special case           |
 
 An abstraction can be valuable before a second caller when it enforces a real boundary. A shorter implementation can be worse when it obscures error behavior or compatibility. Judge the concepts and contracts, not line count alone.
 
@@ -58,13 +58,13 @@ When a scale problem appears, identify the contended resource. Fix isolation, in
 
 Choose checks from the actual repository and affected behavior:
 
-| Check | What it can establish | Common limit |
-| --- | --- | --- |
-| Type/static analysis | Selected type and structural properties | Does not execute runtime behavior |
-| Focused behavioral test | The intended cases exercise the changed path | Mocks may bypass integration |
-| Package or integration checks | Contracts between affected components hold | May omit packaging or deployment differences |
-| Build/package validation | The artifact can be produced | Does not prove it can be installed or used |
-| Consumer check | The artifact serves its intended consumer | Limited to the observed environment and cases |
+| Check                         | What it can establish                        | Common limit                                  |
+| ----------------------------- | -------------------------------------------- | --------------------------------------------- |
+| Type/static analysis          | Selected type and structural properties      | Does not execute runtime behavior             |
+| Focused behavioral test       | The intended cases exercise the changed path | Mocks may bypass integration                  |
+| Package or integration checks | Contracts between affected components hold   | May omit packaging or deployment differences  |
+| Build/package validation      | The artifact can be produced                 | Does not prove it can be installed or used    |
+| Consumer check                | The artifact serves its intended consumer    | Limited to the observed environment and cases |
 
 Use scoped checks for the inner loop and run required repository gates before the relevant commit or delivery boundary. Broaden testing when shared dependencies, failures, or residual risk justify it. Once appropriate checks pass, continue to completion instead of repeatedly running unrelated suites.
 
@@ -74,14 +74,14 @@ A useful receipt names the command, revision or working-tree state, environment 
 
 ### Check the Consumption Boundary
 
-| Artifact | Representative proof |
-| --- | --- |
-| Generated configuration | Inspect composed output for the motivating invariant |
-| Package | Install and invoke the built distribution without undeclared sibling dependencies |
-| UI | Exercise the changed interaction in the real surface, using `agent-browser` when available |
-| CLI | Invoke the relevant command, including affected error/default paths |
-| Database migration | Apply against representative schema/data and check compatibility or rollback requirements |
-| Service | Confirm the running revision and exercise the changed request path |
+| Artifact                | Representative proof                                                                       |
+| ----------------------- | ------------------------------------------------------------------------------------------ |
+| Generated configuration | Inspect composed output for the motivating invariant                                       |
+| Package                 | Install and invoke the built distribution without undeclared sibling dependencies          |
+| UI                      | Exercise the changed interaction in the real surface, using `agent-browser` when available |
+| CLI                     | Invoke the relevant command, including affected error/default paths                        |
+| Database migration      | Apply against representative schema/data and check compatibility or rollback requirements  |
+| Service                 | Confirm the running revision and exercise the changed request path                         |
 
 Check the invariant, not merely "the command succeeded." A syntactically valid selector can match nothing. A package can build while omitting files the importer needs. A merged fix can leave the deployed artifact unchanged.
 
@@ -121,15 +121,15 @@ Read `references/benchmarks.md` when evaluating workflow effectiveness or interp
 
 ## Anti-Patterns
 
-| Anti-pattern | Better move |
-| --- | --- |
-| Verify after an arbitrary number of edits | Verify before relying on a new uncertain contract |
-| Run every suite for a small change | Run required and relevant gates; expand for evidence-based reasons |
-| Accept a green badge without coverage | Inspect what ran and what assertion it supports |
-| Call an issue pre-existing from an empty grep | Compare controlled executions and trace causality |
-| Delete compatibility because it looks old | Check consumers and rollout obligations |
-| Request permission for each routine choice | Carry existing authorization through execution |
-| Treat reviewer approval as consumer proof | Test the changed behavior where its output is used |
+| Anti-pattern                                  | Better move                                                        |
+| --------------------------------------------- | ------------------------------------------------------------------ |
+| Verify after an arbitrary number of edits     | Verify before relying on a new uncertain contract                  |
+| Run every suite for a small change            | Run required and relevant gates; expand for evidence-based reasons |
+| Accept a green badge without coverage         | Inspect what ran and what assertion it supports                    |
+| Call an issue pre-existing from an empty grep | Compare controlled executions and trace causality                  |
+| Delete compatibility because it looks old     | Check consumers and rollout obligations                            |
+| Request permission for each routine choice    | Carry existing authorization through execution                     |
+| Treat reviewer approval as consumer proof     | Test the changed behavior where its output is used                 |
 
 ## What This Skill is NOT
 

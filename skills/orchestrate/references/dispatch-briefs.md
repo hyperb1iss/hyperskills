@@ -30,6 +30,7 @@ Workspace: /absolute/path/to/owned/workspace
 Base revision: [SHA or recorded working-tree state].
 
 Original relevant user request:
+
 > [verbatim request]
 
 Own: [explicit paths or modules].
@@ -78,6 +79,7 @@ Commit rights: [explicit owner].
 ```markdown
 Independently verify [change] at [revision or stable snapshot].
 Original request:
+
 > [user's relevant words]
 
 Inspect: [base-to-head diff and relevant consumers].
@@ -96,6 +98,7 @@ risks from observed failures. No minimum finding count applies.
 Do not treat reviewer agreement or an empty trace grep as proof.
 
 Verdict:
+
 - PASS: declared review scope completed, no unresolved blockers.
 - FAIL: supported blocking defect, with evidence.
 - INCOMPLETE: missing coverage, unavailable check, or interrupted review.
@@ -112,6 +115,7 @@ Use a warm reviewer when prior context helps test closure. A fresh reviewer can 
 
 ```markdown
 Re-verify [fix revision] against your finding:
+
 > [finding verbatim]
 
 Fix claim: [what changed and why it should address the mechanism].
