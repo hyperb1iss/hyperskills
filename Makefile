@@ -96,7 +96,7 @@ validate-structure validate-frontmatter: check
 test: test-validator test-deslop
 
 test-validator:
-	@uv run --with 'pyyaml==6.0.3' python -m unittest discover -s tests -v
+	@uv run --python '>=3.11' --with 'pyyaml==6.0.3' python -m unittest discover -s tests -v
 
 test-deslop:
 	@bash skills/deslop/scripts/selftest.sh

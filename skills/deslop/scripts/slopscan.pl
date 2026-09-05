@@ -14,6 +14,7 @@
 use strict;
 use warnings;
 use Encode qw(decode FB_CROAK);
+use IO::Handle ();
 
 binmode STDOUT, ':encoding(UTF-8)';
 binmode STDERR, ':encoding(UTF-8)';
@@ -53,7 +54,7 @@ for my $file (@files) {
         or do { warn "cannot read $file: $!\n"; $io_errors++; next };
     $! = 0;
     my $bytes = do { local $/; <$fh> };
-    my $read_error = $! ? "$!" : '';
+    my $read_error = $fh->error ? ($! ? "$!" : 'input error') : '';
     close $fh or $read_error ||= "$!";
     if ($read_error) {
         warn "cannot read $file: $read_error\n";
