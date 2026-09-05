@@ -6,13 +6,16 @@ Advanced configuration and operational patterns for real-world Tiltfiles.
 
 ### Tiltfile Organization
 
-For projects with 10+ services, split configuration across files and compose with `load()`:
+Split configuration when service ownership or repeated patterns justify it; compose with `load()`:
 
 ```python
 # Root Tiltfile
 load('./services/frontend/Tiltfile', 'frontend_resources')
 load('./services/backend/Tiltfile', 'backend_resources')
 load('./services/infra/Tiltfile', 'infra_resources')
+frontend_resources()
+backend_resources()
+infra_resources()
 
 # Group in UI with labels
 k8s_resource('frontend', labels=['web'])
@@ -38,8 +41,8 @@ def standard_service(name, path, port, deps=[]):
 
 # Root Tiltfile
 load('./lib/helpers.Tiltfile', 'standard_service')
-standard_service('users', './services/users', 8001)
-standard_service('orders', './services/orders', 8002, deps=['users'])
+standard_service('users', os.path.join(config.main_dir, 'services/users'), 8001)
+standard_service('orders', os.path.join(config.main_dir, 'services/orders'), 8002, deps=['users'])
 ```
 
 ## Environment-Based Configuration
@@ -62,6 +65,7 @@ config.set_enabled_resources(resources)
 
 # Conditional live update only for services being edited
 editable = cfg.get('to-edit', [])
+all_services = ['frontend', 'api', 'worker']
 for svc in all_services:
     lu = [sync('./' + svc + '/src', '/app/src')] if svc in editable else []
     docker_build('myco/' + svc, './' + svc, live_update=lu)
@@ -72,7 +76,7 @@ if cfg.get('with-monitoring', False):
     k8s_yaml('./monitoring/grafana.yaml')
 ```
 
-**Runtime changes:** `tilt args frontend api -- --to-edit frontend` reconfigures without restart.
+**Runtime changes:** `tilt args -- frontend api --to-edit frontend` reconfigures without restart (match the arguments defined by this Tiltfile).
 
 ### Preset Service Groups
 
@@ -100,7 +104,7 @@ For frameworks with built-in hot reload (React, Next.js, Flask debug mode):
 docker_build('myco/frontend', './frontend', live_update=[
     sync('./frontend/src', '/app/src'),
     sync('./frontend/public', '/app/public'),
-    # No restart_container() — framework watches files internally
+    # The framework watches files internally
 ])
 ```
 
@@ -108,24 +112,18 @@ docker_build('myco/frontend', './frontend', live_update=[
 
 ```python
 docker_build('myco/api', './api', live_update=[
-    fall_back_on(['Dockerfile']),
+    fall_back_on(['./api/Dockerfile']),
     sync('./api', '/app'),
-    run('pip install -r requirements.txt', trigger=['./api/requirements.txt']),
-    run('npm install', trigger=['./api/package.json']),
+    run('cd /app && pip install -r requirements.txt', trigger=['./api/requirements.txt']),
+    run('cd /app && npm ci', trigger=['./api/package.json', './api/package-lock.json']),
 ])
 ```
 
-### Process Restart via entr
+### Kubernetes Process Restart
 
-For containers without shell-based restart support (distroless, scratch):
+Use the application's file watcher when available. Otherwise, inspect and load the maintained `restart_process` extension. Verify its wrapper and runtime requirements against the image before copying an example. A shell pipeline using `entr` cannot run in a distroless image without explicitly supplying those programs.
 
-```python
-# In Dockerfile: CMD echo /tmp/restart | entr -rz /app/server
-docker_build('myco/api', './api', live_update=[
-    sync('./api/src', '/app/src'),
-    run('date > /tmp/restart'),  # Touch trigger file, entr restarts process
-])
-```
+A process restart must preserve signal delivery and shutdown behavior. Test a source edit, a failed reload, and a subsequent correction; a one-time startup success does not prove the update loop works.
 
 ### Monorepo with Selective Context
 
@@ -146,12 +144,12 @@ docker_build('myco/api', '.', dockerfile='services/api/Dockerfile',
 ```python
 # Layer ordering: deps first, code last
 # Dockerfile:
-# COPY package.json .
-# RUN npm install
+# COPY package.json package-lock.json .
+# RUN npm ci
 # COPY . .
 
 # Tilt: use only= to limit context
-docker_build('myco/app', '.', only=['src', 'package.json', 'tsconfig.json'])
+docker_build('myco/app', '.', only=['src', 'package.json', 'package-lock.json', 'tsconfig.json'])
 ```
 
 ### Parallel Updates
@@ -168,10 +166,8 @@ local_resource('typecheck', cmd='tsc --noEmit', deps=['./src'], allow_parallel=T
 ### Ignore Patterns
 
 ```python
-# Global: skip test files, docs, CI config from triggering rebuilds
+# Global: ignore only files irrelevant to every watched resource
 watch_settings(ignore=[
-    '**/*_test.go',
-    '**/testdata/**',
     'docs/**',
     '.github/**',
 ])
@@ -194,7 +190,6 @@ Place in the same directory as the Tiltfile. Uses `.dockerignore` syntax. Preven
 *.md
 docs/
 .github/
-**/*_test.go
 ```
 
 ## CI Integration
@@ -208,22 +203,15 @@ docs/
 ci_settings(
     timeout='30m',            # Overall timeout (default 30m, 0 = no timeout)
     readiness_timeout='5m',   # Per-resource readiness timeout
-    k8s_grace_period='10s',   # Grace period for pod termination
+    k8s_grace_period='10s',   # Recovery window after resource failure
 )
 ```
 
-### GitHub Actions
+### CI Environment
 
-```yaml
-- name: Setup cluster
-  uses: helm/kind-action@v1
-- name: Install Tilt
-  uses: yokawasa/action-setup-tools@v0.9.0
-  with:
-    tilt: "0.36.3"
-- name: Run Tilt CI
-  run: tilt ci -- --profile ci
-```
+Install the repository's pinned Tilt version and create the intended disposable Kubernetes context before `tilt ci`. Preserve logs and snapshots on failure. CI mode executes Tiltfile commands and deploys workloads, so it is not a safe parser-only check of an unfamiliar Tiltfile.
+
+Keep independent builds parallel. Investigate shared CPU, memory, registry, or filesystem contention before changing concurrency; a fixed serial setting is not a general CI optimization.
 
 ### Conditional CI Behavior
 
@@ -231,7 +219,6 @@ ci_settings(
 if config.tilt_subcommand == 'ci':
     # Skip dev-only resources in CI
     config.set_enabled_resources(['api', 'worker', 'integration-tests'])
-    update_settings(max_parallel_updates=1)  # Conserve CI resources
 else:
     # Dev mode: everything enabled
     pass
@@ -242,7 +229,7 @@ else:
 ### Scripting with tilt get
 
 ```bash
-# Check if all resources are ready
+# Inspect resource runtime status (task completion also needs update status)
 tilt get uiresources -o json | jq '.items[] | {name: .metadata.name, status: .status.runtimeStatus}'
 
 # Wait for a specific resource
@@ -302,71 +289,19 @@ k8s_resource('api', links=[
 
 ## Extension Ecosystem
 
-Load extensions from the community repository:
+Load a maintained extension only for a required capability:
 
 ```python
-# v1alpha1 API (recommended)
-v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-extensions')
-v1alpha1.extension(name='restart_process', repo_name='default', repo_path='restart_process')
-
-# Shorthand (auto-discovers from default repo)
 load('ext://restart_process', 'docker_build_with_restart')
 ```
 
-### Key Extensions
+Inspect the extension's Tiltfile and README at the revision the project resolves. Pin the extension repository when reproducibility matters. Extension loads execute code, so an API-name catalog is not evidence that a symbol, its arguments, or its shell prerequisites still match.
 
-| Extension         | Purpose                                  | Import                                                       |
-| ----------------- | ---------------------------------------- | ------------------------------------------------------------ |
-| `restart_process` | Restart container process on live update | `load('ext://restart_process', 'docker_build_with_restart')` |
-| `helm_remote`     | Deploy Helm charts from remote repos     | `load('ext://helm_remote', 'helm_remote')`                   |
-| `namespace`       | Create namespace if it doesn't exist     | `load('ext://namespace', 'namespace_create')`                |
-| `secret`          | Create k8s secrets from local values     | `load('ext://secret', 'secret_create_generic')`              |
-| `configmap`       | Create ConfigMaps from files/literals    | `load('ext://configmap', 'configmap_create')`                |
-| `git_resource`    | Deploy from a git repo                   | `load('ext://git_resource', 'git_checkout')`                 |
-| `uibutton`        | Add custom buttons to Tilt UI            | `load('ext://uibutton', 'cmd_button')`                       |
-| `ko`              | Build Go images with ko                  | `load('ext://ko', 'ko_build')`                               |
-| `pack`            | Build with Cloud Native Buildpacks       | `load('ext://pack', 'pack')`                                 |
-| `dotenv`          | Load .env files                          | `load('ext://dotenv', 'dotenv')`                             |
-| `cancel`          | Add cancel buttons to resources          | `load('ext://cancel', 'register')`                           |
-| `local_output`    | Capture local command output             | `load('ext://local_output', 'local_output')`                 |
-
-### Custom UI Buttons
-
-```python
-load('ext://uibutton', 'cmd_button', 'location')
-
-# Add a button to a resource
-cmd_button('seed-db',
-    argv=['make', 'seed'],
-    resource='database',
-    icon_name='database',
-    text='Seed Database',
-)
-
-# Add a global nav button
-cmd_button('run-all-tests',
-    argv=['make', 'test'],
-    location=location.NAV,
-    icon_name='check_circle',
-    text='Run Tests',
-)
-```
+The [extension repository](https://github.com/tilt-dev/tilt-extensions) supplies process restart, remote Helm, custom buttons, configuration helpers, and builder integrations. Keep the required example with the project rather than copying unrelated extension setup.
 
 ## Custom Build Patterns
 
-### ko (Go images)
-
-```python
-load('ext://ko', 'ko_build')
-ko_build('myco/api', './cmd/api', deps=['./cmd/api', './pkg'])
-```
-
-### Buildpacks
-
-```python
-load('ext://pack', 'pack')
-pack('myco/api', path='./api', builder='paketobuildpacks/builder:base')
-```
+Use the maintained builder extension when it supplies the required image contract; otherwise make the custom builder's output explicit.
 
 ### Bazel
 
@@ -460,3 +395,7 @@ def resource_name(id):
 
 workload_to_resource_function(resource_name)
 ```
+
+## Primary Sources
+
+Checked 2026-09-04: [live update](https://docs.tilt.dev/live_update_reference.html), [CI](https://docs.tilt.dev/ci.html), and [maintained extensions](https://github.com/tilt-dev/tilt-extensions). Extension APIs can evolve independently of Tilt; inspect the loaded revision before using a symbol or argument.

@@ -278,24 +278,26 @@ Disk: [████████████████████████�
 Bat:  [████████░░░░░░░░░░░░░░░░░░░░░] 27%  ⚡ charging
 ```
 
-Color thresholds: green (0-60%), yellow (60-80%), red (80-100%).
+Choose thresholds from the metric: high CPU utilization may be healthy while high disk usage may require action. Label the value and units so color is never the only signal.
 
 ---
 
 ## Common Nerd Font Icons
 
-Only use when Nerd Font detection is available. Always provide a Unicode/ASCII fallback.
+Use only with an explicit user setting or a known bundled font. No portable terminal query reliably establishes Nerd Font availability. Provide a Unicode/ASCII fallback.
 
-```text
-Nerd Font → Fallback
-        → >     (directory/folder)
-        → *     (file)
-        → ⚙     (settings/config)
-        → ●     (git branch)
-        → ✓     (success)
-        → ✗     (error)
-        → ⚠     (warning)
-        → ℹ     (info)
-```
+| Meaning   | Unicode fallback | ASCII fallback |
+| --------- | ---------------- | -------------- |
+| Directory | ▸                | >              |
+| File      | ·                | *              |
+| Success   | ✓                | OK             |
+| Error     | ✗                | ERR            |
+| Warning   | ⚠                | !              |
 
 **Rule:** Never assume Nerd Fonts are installed. Always define a fallback using standard Unicode or ASCII.
+
+## Width and Accessibility
+
+These glyphs are examples, not width guarantees. Use grapheme-aware truncation and the toolkit's cell-width handling; test wide text, combining marks, and emoji sequences. A braille chart needs a numeric summary or table when its pattern is not accessible. Pair status symbols with labels and offer ASCII where fonts or screen readers need it.
+
+Primary reference (checked 2026-09-04): [Unicode text segmentation](https://unicode.org/reports/tr29/). Terminal cell width is an additional rendering concern, not something grapheme segmentation alone decides.

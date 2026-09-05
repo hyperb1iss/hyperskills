@@ -1,349 +1,135 @@
 # Hyperskills Contributor Guide
 
-How to add new skills to this plugin. Read this before creating or modifying any skill.
+Read this before adding or changing a skill. Hyperskills supplies non-obvious procedural knowledge for capable agents. Model names and tool versions change; useful constraints, evidence, and operational failure modes should survive them.
 
-## Project Structure
+## Design Contract
+
+A skill earns its place when it changes a decision the model would otherwise get wrong. Keep fragile operation ordering, meaningful decision criteria, and reusable checks. Remove generic tutorials, repeated host policy, unsupported performance claims, and historical anecdotes presented as universal rules.
+
+User instructions take precedence over skill guidelines. Skills preserve the requested scope and existing authorization; they do not invent approval gates, silently expand external actions, or bypass host permissions. Use the current tool schema for dispatch, waits, and capabilities.
+
+Treat the repository as shared space. Check status before edits, inspect existing diffs, and own explicit paths. Follow the user's commit and publishing policy. Do not modify installed user configuration as a side effect of editing a skill.
+
+## Repository Map
 
 ```text
 hyperskills/
 ├── .claude-plugin/
-│   ├── plugin.json          # Plugin manifest (version, keywords, metadata)
-│   └── marketplace.json     # skills.sh marketplace listing
+│   ├── plugin.json
+│   └── marketplace.json
 ├── skills/
-│   ├── brainstorm/
-│   │   └── SKILL.md
-│   ├── plan/
-│   │   └── SKILL.md
-│   ├── research/
-│   │   └── SKILL.md
+│   ├── brainstorm/SKILL.md
+│   ├── plan/SKILL.md
+│   ├── research/SKILL.md
 │   ├── orchestrate/
-│   │   └── SKILL.md
+│   │   ├── SKILL.md
+│   │   └── references/dispatch-briefs.md
 │   ├── implement/
 │   │   ├── SKILL.md
-│   │   └── references/
-│   │       ├── benchmarks.md
-│   │       └── recovery.md
-│   ├── codex-imagegen/
-│   │   └── SKILL.md
+│   │   └── references/{benchmarks,recovery}.md
 │   ├── cross-model-review/
 │   │   ├── SKILL.md
-│   │   └── references/
-│   │       ├── prompts.md
-│   │       ├── failure-recovery.md
-│   │       └── cli-flags.md
+│   │   └── references/{prompts,failure-recovery,cli-flags}.md
 │   ├── hyper-pr-review/
 │   │   ├── SKILL.md
-│   │   └── references/
-│   │       ├── lenses.md
-│   │       └── thermonuclear.md
+│   │   └── references/{lenses,thermonuclear}.md
+│   ├── codex-imagegen/SKILL.md
+│   ├── super-good-pr/SKILL.md
 │   ├── deslop/
 │   │   ├── SKILL.md
-│   │   ├── scripts/
-│   │   │   ├── slopscan.pl       # protection-aware mechanical scan
-│   │   │   └── selftest.sh       # regression gate for the scanner
-│   │   └── references/
-│   │       ├── pattern-catalog.md
-│   │       ├── surface-profiles.md
-│   │       ├── craft-moves.md
-│   │       ├── evidence.md
-│   │       └── fixtures/         # slop / protected / clean, for scanner regression
+│   │   ├── scripts/{slopscan.pl,selftest.sh}
+│   │   └── references/ # catalog, profiles, craft, evidence, fixtures
 │   ├── dream/
 │   │   ├── SKILL.md
-│   │   └── references/
-│   │       ├── conversation-formats.md
-│   │       └── extraction-guide.md
-│   ├── git/
-│   │   └── SKILL.md
+│   │   └── references/{conversation-formats,extraction-guide}.md
+│   ├── git/SKILL.md
 │   ├── tilt/
 │   │   ├── SKILL.md
-│   │   └── references/
-│   │       ├── api-reference.md
-│   │       └── patterns.md
-│   ├── super-good-pr/
-│   │   └── SKILL.md
-│   ├── tui-design/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   │       ├── visual-catalog.md
-│   │       └── app-patterns.md
-│   ├── uv/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   │       ├── docker-ci.md
-│   │       ├── resolution.md
-│   │       └── configuration.md
-│   ├── ruff/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   │       ├── rules.md
-│   │       └── configuration.md
-│   ├── ty/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   │       ├── type-system.md
-│   │       └── migration.md
-│   └── uv-build/
-│       └── SKILL.md
-├── CLAUDE.md -> AGENTS.md   # Claude reads the same contributor guide
-├── AGENTS.md                # This file — contributor guide
-├── LICENSE
-└── README.md
+│   │   └── references/{api-reference,patterns}.md
+│   └── tui-design/
+│       ├── SKILL.md
+│       └── references/{visual-catalog,app-patterns}.md
+├── scripts/validate_skills.py
+├── tests/test_validate_skills.py
+├── evals/README.md
+├── docs/library-review-2026-09.md
+├── Makefile
+├── AGENTS.md
+├── CLAUDE.md -> AGENTS.md
+├── README.md
+└── LICENSE
 ```
 
-## Design Philosophy
+The brace notation groups filenames; it is not a literal path.
 
-**Only build skills for things models don't already know.** Claude is already good at writing code, explaining concepts, and general problem-solving. Skills should encode:
+## Skill Inventory
 
-- **Procedural knowledge**: multi-step workflows that require specific ordering
-- **Decision trees**: when to choose X over Y based on situational factors
-- **Reference material**: API surfaces, Unicode catalogs, framework-specific patterns
-- **Hard-won patterns**: gotchas, anti-patterns, and real-world failure modes
+| Skill                | References      | Purpose                                      |
+| -------------------- | --------------- | -------------------------------------------- |
+| `brainstorm`         | none            | Explore unresolved direction                 |
+| `plan`               | none            | Decompose requirements and dependencies      |
+| `research`           | none            | Gather and adjudicate evidence               |
+| `orchestrate`        | 1               | Coordinate independent work and integration  |
+| `implement`          | 2               | Implement and verify behavior                |
+| `cross-model-review` | 3               | Dispatch and consume independent reviews     |
+| `hyper-pr-review`    | 2               | Conduct evidence-based review                |
+| `codex-imagegen`     | none            | Delegate raster asset generation             |
+| `super-good-pr`      | none            | Author and maintain PR descriptions          |
+| `deslop`             | 4 plus fixtures | Edit prose without semantic or voice damage  |
+| `dream`              | 2               | Consolidate authorized conversation evidence |
+| `git`                | none            | Perform complex Git operations               |
+| `tilt`               | 2               | Diagnose build, sync, reload, and readiness  |
+| `tui-design`         | 2               | Design terminal behavior and presentation    |
 
-If the model can already do it well without guidance, don't write a skill for it.
+Process skills cover approaches to work: brainstorm, plan, research, orchestrate, implement, cross-model-review, hyper-pr-review, codex-imagegen, super-good-pr, deslop, and dream.
 
-## Adding a New Skill
+Domain skills cover specialized operational knowledge: git, tilt, and tui-design. Ordinary package management, linting, and type checking use current tool help and official documentation; the former Astral skills are retired.
 
-### Step 1: Create the Directory
+## Authoring
 
-```bash
-mkdir -p skills/<skill-name>
-touch skills/<skill-name>/SKILL.md
-```
-
-Add `references/` only if the skill needs detailed reference material that would bloat the main SKILL.md beyond ~3,000 words:
-
-```bash
-mkdir -p skills/<skill-name>/references
-```
-
-### Step 2: Write SKILL.md
-
-Every SKILL.md has two parts: YAML frontmatter and markdown body.
-
-#### Frontmatter (Required)
+Every skill directory contains `SKILL.md` with valid YAML frontmatter:
 
 ```yaml
 ---
 name: skill-name
-description: Use this skill when [specific triggers]. Activates on mentions of [keyword1], [keyword2], [keyword3], or [keyword4].
+description: Use this skill when a specific workflow needs its specialized guidance. Activates on concrete task language.
 ---
 ```
 
-**Description rules:**
+The name matches its directory, uses lowercase letters, digits, and single hyphens, and is at most 64 characters. The description is a nonempty string of at most 1,024 characters. Describe the capability and realistic triggers; add exclusions when they prevent likely misrouting. Keyword counts are not a quality measure.
 
-- Start with "Use this skill when" followed by concrete scenarios
-- Include "Activates on mentions of" with specific trigger words/phrases
-- Be generous with triggers: list 8-12 keywords that should activate the skill
-- Include both formal terms ("threat modeling") and casual phrasing ("security review")
+Keep the entrypoint as short as the task permits. Under 5,000 words is the repository ceiling, not a target. Put conditional detail in `references/` as soon as it helps retrieval. Link each supporting file where it becomes useful. A self-contained skill needs no reference directory.
 
-**Good example:**
+Write imperative guidance for the non-obvious moves. Use tables for comparisons and decisions, prose for connected reasoning, and examples for fragile mechanics. Include relevant anti-patterns and a clear scope boundary, conventionally titled "What This Skill is NOT". Graphviz `dot` is the default for internal workflow diagrams; choose a diagram only when it explains something prose cannot efficiently show.
 
-```yaml
-description: Use this skill for complex git operations including rebases, merge conflict resolution, cherry-picking, branch management, or repository archaeology. Activates on mentions of git rebase, merge conflict, cherry-pick, git history, branch cleanup, git bisect, worktree, force push, or complex git operations.
-```
+Label local conventions, observed incidents, and external evidence distinctly. A research claim needs a source, date or version where relevant, and limits. Do not generalize one model's benchmark into a permanent agent-count, token, confidence, or review-round quota. If a new model makes a workaround unnecessary, retire it after checking the behavior it protected.
 
-**Bad example:**
+Scripts belong in `scripts/` when deterministic execution improves reliability. Explain dependencies and side effects. Never present generated files or a model's self-report as proof without inspecting the actual output.
 
-```yaml
-description: Helps with git stuff.
-```
+## Validation and Evaluation
 
-#### Body Structure
+Run `make check` for manifests, parsed YAML, required metadata, size limits, and concrete bundled references. The validator inspects all skill directories, including new untracked skills. Run `make test` for validator and scanner regressions. The checks use uv to run isolated Python with PyYAML, plus Bash and Perl.
 
-The body is what Claude reads when the skill triggers. Structure it for fast scanning:
+For a workflow change, select realistic cases from [evals/README.md](evals/README.md) or add a case for a newly discovered failure. Evaluate the produced artifact and actions, not whether the response repeats a heading or phrase. Include a negative routing case when changing discovery metadata. A task requiring additional live access or publishing uses an isolated fixture or stops at a reviewable artifact.
 
-```markdown
-# Skill Title
+For broad changes, obtain independent verification on the final scope. A contributor's self-check is useful evidence but is not independent review. Record unavailable checks as unavailable. Do not report a model-performance improvement without a comparable baseline, repeat trials, and an outcome-based grader.
 
-One-paragraph summary of what this skill provides and its core insight.
+## Publishing Metadata
 
-## Section 1: [Core Content]
+Update the inventory and README when a skill is added, removed, renamed, or materially changes scope. Update the plugin description and keywords when the public surface changes. Keep `CLAUDE.md` as a symlink to this guide.
 
-Tables, decision trees, and procedures. Prefer tables over prose:
+Version changes follow the user-facing surface:
 
-| Situation | Action |
-| --------- | ------ |
-| X         | Do Y   |
-| Z         | Do W   |
+| Change                                        | Version increment |
+| --------------------------------------------- | ----------------- |
+| Existing skill fixes or content updates       | Patch             |
+| Skill addition, removal, or rename            | Minor             |
+| Plugin architecture or manifest layout change | Major             |
 
-## Section 2: [More Content]
+A local version bump is not permission to tag, release, or push to main. Keep temporary research notes and private session material out of commits. A requested public review report is a deliverable; an internal planning scratchpad is not.
 
-...
+## Maintenance Questions
 
-## Anti-Patterns
+Before adding another instruction, ask what failure it prevents, whether that failure still occurs, and whether a tool or test can enforce the invariant better. Check the new instruction against the other skills that commonly compose with it. Prefer one clear owner for a procedure over several almost-identical copies.
 
-| Anti-Pattern   | Fix             |
-| -------------- | --------------- |
-| Common mistake | How to avoid it |
-
-## What This Skill is NOT
-
-- Not a replacement for [X]
-- Not required for [Y]
-```
-
-**Body guidelines:**
-
-- Target 1,500-3,000 words. Move anything beyond that to `references/`
-- Use tables over prose: they scan faster and waste fewer tokens
-- Include decision trees for branching logic
-- Add anti-pattern tables; knowing what NOT to do is as valuable as knowing what to do
-- End with "What This Skill is NOT" to prevent misuse
-- Flowcharts use Graphviz `dot` format in fenced code blocks (```dot)
-
-### Step 3: Add Reference Files (Optional)
-
-For skills with extensive reference material, use progressive disclosure:
-
-```text
-skills/<skill-name>/
-├── SKILL.md                    # Core procedures (~2,000 words)
-└── references/
-    ├── api-reference.md        # Full API surface
-    ├── patterns.md             # Advanced patterns
-    └── visual-catalog.md       # Lookup tables, catalogs
-```
-
-**Reference files:**
-
-- No YAML frontmatter needed, just plain markdown
-- Can be large (2,000-10,000+ words)
-- Only loaded into context when Claude determines it needs them
-- Must be referenced from SKILL.md so Claude knows they exist
-
-**Reference from SKILL.md like this:**
-
-```markdown
-## References
-
-For detailed API documentation, consult `references/api-reference.md`.
-For advanced configuration patterns, see `references/patterns.md`.
-```
-
-**When to use references vs inline:**
-
-| Content Type                    | Where         |
-| ------------------------------- | ------------- |
-| Core workflow steps             | SKILL.md body |
-| Decision trees                  | SKILL.md body |
-| Quick-reference tables          | SKILL.md body |
-| Anti-patterns                   | SKILL.md body |
-| Full API surfaces               | `references/` |
-| Unicode/visual catalogs         | `references/` |
-| Advanced patterns (>20 entries) | `references/` |
-| Real-world app galleries        | `references/` |
-
-### Step 4: Update Plugin Metadata
-
-After creating the skill, update these files:
-
-#### `.claude-plugin/plugin.json`
-
-Add relevant keywords to the `keywords` array:
-
-```json
-{
-  "keywords": ["existing-keyword", "new-skill-keyword-1", "new-skill-keyword-2"]
-}
-```
-
-Bump the version. Skills are opt-in, so strict semver "breaking" rarely applies; version reflects user-facing surface change, not theoretical break risk:
-
-- Patch: edits to existing skills (content updates, fixes, small additions)
-- Minor: new skill added, removed, or renamed
-- Major: reserved for plugin-level architectural changes (manifest format, layout overhaul); rare
-
-#### `AGENTS.md` / `CLAUDE.md`
-
-`CLAUDE.md` is a symlink to `AGENTS.md`. Edit `AGENTS.md`; Claude sees the same file.
-
-Update two places here: the project-structure tree and the skill-inventory table. Add the new skill to the matching list under Skill Categories as well.
-
-#### `README.md`
-
-The per-skill prose lives here, not in `AGENTS.md`. Add a `####` entry under Process Skills or Domain Skills carrying what the skill provides and why it exists, followed by its invocation:
-
-```bash
-/hyperskills:<skill-name>
-```
-
-Add a row to the Composing Skills table when the skill pairs with others in a common situation.
-
-### Step 5: Validate
-
-Before committing, verify:
-
-- [ ] `skills/<name>/SKILL.md` exists with valid YAML frontmatter
-- [ ] Frontmatter has both `name` and `description` fields
-- [ ] Description includes specific trigger phrases (8-12 keywords)
-- [ ] Body is under 5,000 words (ideally 1,500-3,000)
-- [ ] All files referenced from SKILL.md actually exist
-- [ ] No duplicate content between SKILL.md and reference files
-- [ ] Tables used instead of prose where possible
-- [ ] Anti-patterns section included
-- [ ] "What This Skill is NOT" section included
-- [ ] `plugin.json` keywords updated
-- [ ] `AGENTS.md` updated: structure tree, inventory table, category list
-- [ ] `README.md` updated: skill entry with invocation, plus a composing-table row if it applies
-- [ ] Version bumped in `plugin.json`
-
-## Existing Skill Inventory
-
-Sizes drift as skills evolve, so check with `wc -w skills/*/SKILL.md` instead of trusting a table.
-
-| Skill                | References | Domain                                      |
-| -------------------- | ---------- | ------------------------------------------- |
-| `brainstorm`         | none       | Process: ideation                           |
-| `plan`               | none       | Process: decomposition                      |
-| `research`           | none       | Process: knowledge gathering                |
-| `orchestrate`        | 1 file     | Process: multi-agent dispatch               |
-| `implement`          | 2 files    | Process: implementation                     |
-| `codex-imagegen`     | none       | Process: Codex image generation delegation  |
-| `cross-model-review` | 3 files    | Process: bidirectional cross-model review   |
-| `hyper-pr-review`    | 2 files    | Process: falsifier-gated PR review          |
-| `deslop`             | 4 files    | Process: AI tell removal from prose         |
-| `dream`              | 2 files    | Process: conversation memory consolidation  |
-| `super-good-pr`      | none       | Process: reviewer-first PR descriptions     |
-| `git`                | none       | Domain: git operations                      |
-| `tilt`               | 2 files    | Domain: Kubernetes dev                      |
-| `tui-design`         | 2 files    | Domain: terminal UI                         |
-| `uv`                 | 3 files    | Domain: Python package management           |
-| `ruff`               | 2 files    | Domain: Python linting & formatting         |
-| `ty`                 | 2 files    | Domain: Python type checking                |
-| `uv-build`           | none       | Domain: Python build backend                |
-
-## Skill Categories
-
-When adding a new skill, it should fit one of these categories:
-
-**Process skills** are HOW to approach a class of work:
-
-- `brainstorm`, `plan`, `research`, `orchestrate`, `implement`, `codex-imagegen`, `cross-model-review`, `hyper-pr-review`, `deslop`, `dream`, `super-good-pr`
-- These tend to be workflow-heavy with phases and decision gates
-
-**Domain skills** are specialized knowledge for a specific technology or practice:
-
-- `git`, `tilt`, `tui-design`, `uv`, `ruff`, `ty`, `uv-build`
-- These tend to be reference-heavy with decision trees and lookup tables
-
-## Writing Style
-
-- **Imperative form:** "Search Sibyl first" not "You should search Sibyl first"
-- **Tables over prose:** Decision trees, comparisons, and reference data in table format
-- **Graphviz for flows:** Use ```dot fenced code blocks for process diagrams
-- **Concrete over abstract:** "Run `git rebase origin/main`" not "rebase your branch"
-- **Date volatile info:** "As of Feb 2026". Skills spoil like research
-- **No fluff:** Every sentence should teach something or guide a decision
-
-## Common Mistakes
-
-| Mistake                                                | Fix                                                         |
-| ------------------------------------------------------ | ----------------------------------------------------------- |
-| Vague description with no trigger words                | Add 8-12 specific keywords after "Activates on mentions of" |
-| Entire skill is >5,000 words in SKILL.md               | Split into SKILL.md (core) + references/ (detail)           |
-| Prose paragraphs explaining options                    | Convert to decision tree tables                             |
-| Duplicating what models already know                   | Only encode non-obvious procedural knowledge                |
-| No anti-patterns section                               | Add one; knowing pitfalls is half the value                 |
-| Missing "What This Skill is NOT"                       | Add scope boundaries to prevent misuse                      |
-| Reference files exist but aren't mentioned in SKILL.md | Add a References section pointing to them                   |
-| Forgetting to update plugin.json and AGENTS.md         | Always update both after adding/changing skills             |
+The [Agent Skills specification](https://agentskills.io/specification) defines the metadata format. [OpenAI's Astra guidance](https://developers.openai.com/api/docs/guides/latest-model) explains why conflicting skill instructions deserve attention. Both were checked on 2026-09-04; current host behavior remains authoritative for execution details.

@@ -1,6 +1,6 @@
 ---
 name: tilt
-description: This skill should be used when the user asks to "write a Tiltfile", "configure Tilt", "set up live update", "debug Tilt", "add a resource to Tilt", "optimize Tilt builds", "view Tilt logs", "restart a Tilt resource", or mentions Tiltfile, tilt up, tilt ci, tilt down, live_update, docker_build, custom_build, k8s_resource, local_resource, or Kubernetes local development with Tilt.
+description: Use this skill when the user asks to "write a Tiltfile", "configure Tilt", "set up live update", "debug Tilt", "add a resource to Tilt", "optimize Tilt builds", "view Tilt logs", "restart a Tilt resource", or mentions Tiltfile, tilt up, tilt ci, tilt down, live_update, docker_build, custom_build, k8s_resource, local_resource, or Kubernetes local development with Tilt.
 ---
 
 # Tilt: Kubernetes Dev Toolkit
@@ -9,7 +9,7 @@ Tilt automates the local Kubernetes development loop: watch files, build images,
 
 ## CLI Operations
 
-The commands an agent uses to interact with a running Tilt instance.
+Check `tilt version`, the selected Kubernetes context, and any existing Tilt instance before operations. Explicit requests to start, restart, or stop the intended environment authorize that operation. A read-only diagnosis does not authorize teardown. Editing a Tiltfile can immediately reconfigure a running session, so inspect its watchers and affected resources first.
 
 ### Lifecycle
 
@@ -45,7 +45,7 @@ On Ctrl+C from `tilt up`: K8s and Docker Compose resources **keep running**. Loc
 | List all resources            | `tilt get uiresources`                              |
 | Resource status as JSON       | `tilt get uiresources -o json`                      |
 | Describe a resource in detail | `tilt describe uiresource <name>`                   |
-| Force rebuild a resource      | `tilt trigger <resource>`                           |
+| Trigger a resource update     | `tilt trigger <resource>`                           |
 | Enable a disabled resource    | `tilt enable <resource>`                            |
 | Disable a resource            | `tilt disable <resource>`                           |
 | Wait for resource readiness   | `tilt wait --for=condition=Ready uiresource/<name>` |
@@ -79,22 +79,22 @@ The Tilt API server runs on `localhost:10350` by default. All `tilt get/describe
 
 Live update replaces full image rebuilds with in-place container file syncs, seconds instead of minutes.
 
-| Step                      | Purpose                                           | Ordering           |
-| ------------------------- | ------------------------------------------------- | ------------------ |
-| `fall_back_on(files)`     | Force full rebuild when these files change        | Must come first    |
-| `sync(local, remote)`     | Copy changed files into running container         | After fall_back_on |
-| `run(cmd, trigger=files)` | Execute command in container (e.g., install deps) | After sync         |
-| `restart_container()`     | Restart the container process                     | Must come last     |
+| Step                      | Purpose                                                           | Ordering                                                                          |
+| ------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `initial_sync()`          | Optional full sync when a container is first observed or restarts | First, when supported and requested                                               |
+| `fall_back_on(files)`     | Force full rebuild when these files change                        | After optional initial_sync, before sync                                          |
+| `sync(local, remote)`     | Copy changed files into running container                         | After fall_back_on                                                                |
+| `run(cmd, trigger=files)` | Execute command in container (e.g., install deps)                 | After sync                                                                        |
+| `restart_container()`     | Docker Compose container restart only                             | Last step; use application reload or the restart_process extension for Kubernetes |
 
 ```python
 docker_build('myapp', '.', live_update=[
     fall_back_on(['requirements.txt']),
     sync('./src', '/app/src'),
-    run('pip install -r requirements.txt', trigger=['requirements.txt']),
 ])
 ```
 
-**When live update breaks:** Changes to files outside the `docker_build` context trigger a full rebuild. Changes outside any `sync()` path also trigger a full rebuild. First `tilt up` always does a full build, live update requires a running container.
+**Coverage matters:** Unwatched files do nothing. Watched build inputs outside the sync set require a rebuild; fallback paths deliberately choose that rebuild. A live update needs an existing container. Verify one sync change and one fallback change rather than assuming every source edit follows the same route.
 
 ## Resource Configuration
 
@@ -132,32 +132,32 @@ local_resource('storybook',
 ```text
 Service crashing?     → tilt logs -f <resource> --source runtime
 Build failing?        → tilt logs -f <resource> --source build
-                        tilt docker -- build <args>  (reproduces Tilt's exact build)
+                        tilt docker -- build <args>  (uses Tilt's Docker environment; supply the build flags)
 Wrong files rebuild?  → tilt get filewatches
                         tilt describe filewatch <name>
                         Check .tiltignore, watch_settings(ignore=), ignore= param
 Force a rebuild?      → tilt trigger <resource>
 Resource stuck?       → tilt describe uiresource <name>
                         Check resource_deps chain
-                        For CRDs: pod_readiness='ignore'
+                        For CRDs: inspect controller status and pod discovery first
 General diagnostics?  → tilt doctor
 Full state dump?      → tilt dump engine | jq .
 ```
 
 ## Top 10 Pitfalls
 
-| Pitfall                                           | Fix                                                                   |
-| ------------------------------------------------- | --------------------------------------------------------------------- |
-| `local()` calls don't track file deps             | Wrap with `read_file()` or add `watch_file()`                         |
-| Live update paths outside docker_build context    | Ensure sync local paths fall within context dir                       |
-| Local resources block each other                  | Set `allow_parallel=True` on independent resources                    |
-| `resource_deps` doesn't re-gate on updates        | It only checks first-ever readiness, not current version              |
-| Starlark has no while/try-except/class/recursion  | Use for loops, `fail()` for errors, dicts for state                   |
-| `.tiltignore` doesn't affect Docker build context | Use `.dockerignore` to exclude from both rebuild triggers AND context |
-| `$EXPECTED_REF` not used in custom_build          | Build script MUST tag the image with this env var                     |
-| `run()` trigger files not in a `sync()` step      | Trigger paths must also be covered by a sync step                     |
-| First `tilt up` always does full build            | Live update cannot work until a container is running                  |
-| CRD pods stuck in pending                         | Set `pod_readiness='ignore'` on CRD resources                         |
+| Pitfall                                           | Fix                                                                                                                                     |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `local()` calls don't track file deps             | Wrap with `read_file()` or add `watch_file()`                                                                                           |
+| Live update paths outside docker_build context    | Ensure sync local paths fall within context dir                                                                                         |
+| Local resources block each other                  | Set `allow_parallel=True` on independent resources                                                                                      |
+| `resource_deps` doesn't re-gate on updates        | It only checks first-ever readiness, not current version                                                                                |
+| Starlark has no while/try-except/class/recursion  | Use for loops, `fail()` for errors, dicts for state                                                                                     |
+| `.tiltignore` doesn't affect Docker build context | Use `.dockerignore` to exclude from both rebuild triggers AND context                                                                   |
+| Custom image output cannot be located             | Tag with `$EXPECTED_REF`, or deliberately configure `outputs_image_ref_to`                                                              |
+| `run()` trigger files not in a `sync()` step      | Trigger paths must also be covered by a sync step                                                                                       |
+| First launch has no running container             | Live update requires a container; verify startup/build separately                                                                       |
+| CRD resource never ready                          | Inspect scheduling/controller conditions and pod discovery; ignore pod readiness only when pods are not the resource's readiness signal |
 
 ## Additional Resources
 
@@ -165,21 +165,27 @@ Full state dump?      → tilt dump engine | jq .
 
 For detailed API signatures and advanced patterns, consult:
 
-- **`references/api-reference.md`**: Complete Tiltfile API catalog organized by category, Starlark language notes, ignore mechanism comparison
+- **`references/api-reference.md`**: Focused Tiltfile API contracts organized by failure mode, Starlark language notes, ignore mechanism comparison
 - **`references/patterns.md`**: Multi-service architectures, environment config, CI integration, performance optimization, programmatic Tilt interaction, extension ecosystem
 
 ## Anti-Patterns
 
-| Anti-Pattern                              | Fix                                               |
-| ----------------------------------------- | ------------------------------------------------- |
-| Starting or stopping Tilt without consent | Ask before changing long-running dev environments |
-| Treating `tilt up` as a build command     | Use `tilt ci` for batch verification              |
-| Live update without fallbacks             | Put build/dependency files in `fall_back_on`      |
-| Debugging from Kubernetes YAML only       | Inspect `uiresources`, file watches, and logs     |
-| Using `local()` for watched shell work    | Use `local_resource` with explicit `deps`         |
+| Anti-Pattern                                  | Fix                                                                                                       |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Re-asking after an explicit lifecycle request | Use existing authorization for the named environment; confirm only an unresolved destructive target       |
+| Treating `tilt ci` as read-only validation    | CI mode executes commands and deploys resources; use the intended test environment                        |
+| An invalid live-update partition              | Choose rebuild or synchronized install for each dependency file; do not put the same change on both paths |
+| Debugging from Kubernetes YAML only           | Inspect `uiresources`, file watches, and logs                                                             |
+| Using `local()` for watched shell work        | Use `local_resource` with explicit `deps`                                                                 |
+
+## Verification
+
+Inspect the active resource graph and file watches before changing live-update paths. Exercise a source edit, a dependency change, and a failure/recovery case in the intended environment. Preserve evidence of which route ran (sync, command, image rebuild, or deploy), not only the final ready state. A successful Tiltfile evaluation cannot establish that a live update reaches the container.
+
+Documentation and CLI checked 2026-09-04 (Tilt 0.37.7). Source contracts live in [api-reference.md](references/api-reference.md).
 
 ## What This Skill is NOT
 
 - Not a Kubernetes primer.
-- Not permission to run, restart, or tear down a dev environment.
+- Not an expansion of the user's requested environment or lifecycle scope.
 - Not a substitute for reading `tilt doctor` and resource logs.

@@ -51,7 +51,6 @@ node_modules/
 # Local research corpus — mined from private session histories, stays out
 # of the public repo (durable learnings live in Sibyl)
 /research/*
-!/research/security-best-practices-2026.md
 
 # Internal calibration sets — real PR exemplars are repo- and team-specific
 # (often internal), so they stay local and out of the public repo
@@ -59,3 +58,6 @@ skills/*/references/canonical-prs.md
 
 # Generated artifacts
 /README.pdf
+
+# Python validation artifacts
+__pycache__/

@@ -1,249 +1,49 @@
-# TUI App Design Patterns Gallery
+# TUI Patterns Worth Borrowing
 
-Real-world design analysis of exceptional TUI applications, organized by the pattern they exemplify. Use for inspiration and precedent when designing your own TUI.
+Use these applications as design references, not benchmark rankings or API documentation. Copy the interaction principle only when it serves the current task.
 
----
+## Persistent Context: lazygit
 
-## Persistent Multi-Panel Pattern
+A selector plus detail pane lets a user move among files, history, and changes while preserving a place to inspect the selected item. Context-sensitive actions reduce the need to memorize global shortcuts. The useful lesson is stable panel responsibility, not an exact panel count or a claim that every panel is always visible.
 
-### lazygit: The Gold Standard
+Use this shape for related resource lists. On narrow terminals, collapse secondary context and restore its selection when it returns. Avoid squeezing six panels into a viewport where no value is readable.
 
-**Framework:** Go (gocui fork) | **Layout:** 5 left panels + right detail
+Primary reference: [lazygit repository and feature demonstrations](https://github.com/jesseduffield/lazygit).
 
-The defining multi-panel TUI. All views (status, files, branches, commits, stash) remain visible simultaneously. The left column acts as a selector; the right column shows context for the selected item.
+## Hierarchy and Preview: Yazi
 
-**Key innovations:**
+Parent/current/preview columns keep location and consequence visible during navigation. Preview work may be slow, so the cursor must move independently of decoding or file I/O. Tag preview requests with the selected resource identity to prevent late results replacing the current preview.
 
-- **Contextual keybinding footer**: available actions update as focus changes. Goal: zero memorization.
-- **Popup layering**: confirmation dialogs and commit editors appear as overlays without losing spatial context.
-- **Command transparency**: shows the actual git commands being executed under the hood.
-- **Guided multi-step workflows**: interactive rebase, conflict resolution use progressive disclosure through confirmations.
+Use columns for hierarchical exploration. Prefer a stack with back-navigation when width is limited. Preserve the user's selection and scrolling per location instead of resetting every visit to the first row.
 
-**Why it works:** Users build spatial memory. Branches are _always_ top-left, commits are _always_ middle-left. No navigation required to see the full picture.
+Primary reference: [Yazi layout and preview configuration](https://yazi-rs.github.io/docs/configuration/yazi/).
 
-### lazydocker: Real-Time Dashboard Variant
+## Direct Focus: Posting
 
-**Framework:** Go (gocui) | **Layout:** Master list (left) + detail tabs (right)
+A multi-panel HTTP client benefits from a way to focus a distant control without cycling through every field. Posting's jump mode demonstrates visible target labels; a command palette can provide a complementary action route.
 
-Two-pane horizontal split. Left switches between Docker objects; right shows live detail with tabs for logs, stats, config. Live ASCII resource graphs render directly in the detail pane.
+Use direct-focus labels when the screen has many interactive targets. Keep ordinary Tab navigation and ensure printable input belongs to the editor while it is focused. Labels should follow the visible layout and must not survive after their target disappears.
 
-**Key innovation:** Docker Compose awareness. Auto-groups containers into "Services" and "Standalone." The layout adapts to project structure.
+Primary reference: [Posting guide](https://posting.sh/guide/).
 
-### oxker: Single-Screen Everything
+## Live Data: Dashboard and Log Patterns
 
-**Framework:** Rust (Ratatui) | **Layout:** All panels always visible
+A dashboard needs stable units, update freshness, and an explicit distinction between unavailable and zero. A log viewer needs a stable viewport, follow/pause behavior, and searchable retained events. Decorative activity is not evidence that the underlying request or stream remains healthy.
 
-Containers list, logs, CPU charts, memory charts, and port mappings visible simultaneously. No tabs, no drill-down. Click-sortable column headers bring spreadsheet interaction to the terminal.
+For high data rates, virtualize rows and separate storage from presentation. Keep selected item identity stable as sorting changes. If a paused view has new data, show the count or time boundary instead of dragging the user back to the end.
 
-**Key innovation:** Mixed input. Full keyboard AND mouse support. Neither forced; both first-class.
+## Shell Integration: Picker Pattern
 
----
+An inline picker should return one well-defined result to its caller and send interactive chrome to the appropriate terminal stream. Cancellation must differ from selecting an empty value. Restore terminal state before the shell consumes the result, and preserve scrollback where the chosen presentation allows it.
 
-## Drill-Down Stack Pattern
+## Compose Only What the Task Needs
 
-### k9s: Command-Mode Navigation
+| User need            | Start with                               | Add only when justified                     |
+| -------------------- | ---------------------------------------- | ------------------------------------------- |
+| Choose one value     | List, filter, preview                    | Multi-select, saved searches                |
+| Explore a hierarchy  | Stack or columns                         | Bookmarks, multiple independent panes       |
+| Edit structured data | Editor plus validation/result view       | Tabs, jump labels, command palette          |
+| Operate resources    | Selector, details, explicit action state | Batch operations with a reviewed target set |
+| Monitor events       | List, filter, follow state               | Charts or correlated detail views           |
 
-**Framework:** Go (tcell/tview) | **Navigation:** Enter descends, Esc ascends, `:resource` jumps
-
-The Kubernetes TUI. An infinite drill-down through resources: cluster → namespace → deployment → pod → container → logs.
-
-**Key innovations:**
-
-- **`:resource` command mode**: type `:pods`, `:deployments` to jump directly. The TUI equivalent of a URL bar.
-- **XRay mode**: unique tree visualization showing a resource and all its related resources across types.
-- **Pulse view**: heads-up display of cluster health metrics.
-- **Context-aware skins**: different color schemes per Kubernetes cluster. Production is visually distinct from staging. Safety through color.
-
-**Why it works:** The command-mode (`:`) plus drill-down (Enter/Esc) creates two navigation dimensions: direct jumps for known targets, exploration for discovery.
-
-### diskonaut: Spatial Treemap
-
-**Framework:** Rust (tui-rs) | **Navigation:** Arrow keys select blocks, Enter drills in
-
-The entire terminal fills with rectangles proportional to file/directory size. A genuine treemap visualization in text mode.
-
-**Key innovations:**
-
-- **Progressive scanning**: treemap builds in real-time as filesystem scan progresses. Explore already-scanned regions while scanning continues.
-- **Zoom levels**: `+`/`-` reveal smaller files that appear as `x` at default zoom.
-- **Deletion tracking**: inline delete with cumulative freed-space counter.
-
-**Why it works:** Spatial reasoning. You literally _see_ which files are largest by their visual area. No need to compare numbers.
-
----
-
-## Miller Columns Pattern
-
-### yazi: Async-First File Management
-
-**Framework:** Rust (Ratatui + Tokio) | **Layout:** 3 columns: parent / current / preview
-
-The modern file manager. Miller columns with async I/O for never-blocking navigation.
-
-**Key innovations:**
-
-- **Inline image previews**: renders images directly in terminal via auto-detected protocols (Kitty, iTerm2, Sixel).
-- **Async architecture**: dual-priority task queue (micro: metadata reads, macro: file transfers). UI never freezes.
-- **Smart preview preloading**: predictive loading based on cursor position. Code gets syntax highlighting, images get decoded, archives get listed.
-- **Concurrent Lua plugins**: `ya.sync()` and `ya.async()` modes for parallel plugin execution.
-
-**Why it works:** The "never freeze" principle. Large directories, slow network mounts, big file previews. The interface stays responsive. The three-column layout provides past/present/future spatial context at every level.
-
-### ranger: Vim-Native Miller Columns
-
-**Framework:** Python (curses) | **Navigation:** hjkl maps to column movement
-
-The original vim-keybinding file manager. `h` goes up a directory (left column), `l` enters (right column).
-
-**Key innovation:** **Bookmarks** (`m<key>` to set, `'<key>` to jump) provide teleportation. Bypass hierarchical navigation entirely.
-
----
-
-## Tab-Based Workspace Pattern
-
-### gitui: Performance as UX
-
-**Framework:** Rust (Ratatui) | **Layout:** 5 top tabs, split panes within each
-
-Five tabs (Status, Log, Files, Stashing, Stashes) provide persistent navigation landmarks. Each tab is a focused workspace.
-
-**Key innovations:**
-
-- **Line-level staging**: stage individual hunks or lines in the diff view.
-- **Single-key mnemonics**: interface shows `[c]ommit [a]mend [p]ush` directly inline.
-- **Performance**: 2× faster than lazygit with 1/15th memory on the Linux kernel repo (900k+ commits). Speed changes interaction patterns. Users browse and explore rather than search-and-jump.
-
-**Why it works:** When navigating 900k commits feels instant, speed becomes a design feature.
-
-### harlequin: Terminal IDE
-
-**Framework:** Python (Textual) | **Layout:** 3 panels: catalog / editor / results
-
-Full SQL IDE in the terminal. Data catalog tree (left), tabbed query editor (center), virtualized results table (bottom).
-
-**Key innovations:**
-
-- **1M+ row virtual tables**: scrollable results that don't load everything into memory.
-- **Full-screen toggle**: `F10` expands any panel to fill the terminal (IDE "zen mode").
-- **12+ community themes**: Catppuccin, Dracula, Nord, Monokai out of the box.
-- **Adapter plugins**: database backends installed as pip packages.
-
-**Why it works:** Proves that "terminal = limited" is a myth. DBeaver-level functionality with htop-level responsiveness.
-
----
-
-## Overlay / Popup Pattern
-
-### atuin: Augmented Shell Primitive
-
-**Framework:** Rust (Ratatui) | **Trigger:** Replaces Ctrl+R
-
-Replaces the 40-year-old Ctrl+R shell history with a full TUI overlay that appears on demand and disappears after selection.
-
-**Key innovations:**
-
-- **Multi-dimensional filtering**: toggle filters for host, session, directory, and global scope.
-- **Rich metadata**: each entry shows command, duration, exit code, host, timestamp.
-- **Configurable density**: from single-line fzf-style to full-screen explorer.
-- **Cross-device sync**: encrypted history sync across machines.
-
-**Why it works:** The "popup TUI" pattern (summoned, used, dismissed). Invisible when not needed. Transforms a basic shell feature with structure and intelligence.
-
-### posting: IDE Patterns in Terminal
-
-**Framework:** Python (Textual) | **Layout:** IDE three-panel with innovations
-
-HTTP client for terminals. The Postman-for-terminal that introduced several novel TUI interaction patterns.
-
-**Key innovations:**
-
-- **Jump mode.** Vimium-style: press a key, letter overlays appear on every interactive element, press the letter to jump directly. Eliminates Tab cycling entirely.
-- **Command palette**: `Ctrl+P` opens VS Code-style fuzzy command search.
-- **YAML-based request storage**: git-friendly, version-controllable, team-shareable.
-- **Environment-aware styling**: production URLs get blinking red backgrounds as visual safety rails.
-
-**Why it works:** Jump mode is genuinely novel for TUIs. Instead of navigating _through_ the interface to reach a target, users navigate _to_ the target directly.
-
----
-
-## Widget Dashboard Pattern
-
-### btop: Polished System Monitor
-
-**Framework:** C++ (custom) | **Layout:** T-shaped grid of bordered widget boxes
-
-Per-core CPU graphs, memory breakdown, network I/O, disk activity, and process table in a T-shaped dashboard.
-
-**Key innovations:**
-
-- **Bordered box zones**: each widget is a self-contained panel with title, creating a dashboard-of-dashboards.
-- **Braille sparklines**: high-resolution graphs using Unicode braille characters.
-- **Theme ecosystem**: rich theming with 24-bit truecolor and 256-color fallback.
-
-### bottom (btm): Configurable Widget Composition
-
-**Framework:** Rust (Ratatui) | **Layout:** Configurable widget grid
-
-Similar to btop but the dashboard layout is configurable via TOML. Users define their own widget arrangement.
-
-**Key innovations:**
-
-- **Braille + dot sparklines**: Unicode braille default with dot marker fallback.
-- **Basic mode**: `--basic` flag strips graphs, shows htop-style tables only. Progressive complexity.
-- **Battery and temperature**: first-class hardware widgets beyond CPU/memory.
-
----
-
-## Terminal Multiplexer Pattern
-
-### zellij: Reimagined Workspace
-
-**Framework:** Rust (custom) | **Layout:** Tiled + floating panes
-
-Modern terminal multiplexer that treats the terminal as a workspace, not just a multiplexer.
-
-**Key innovations:**
-
-- **Floating panes**: first-class floating windows that overlay tiled panes. Toggle with `Alt+f`.
-- **Stacked panes**: when resize shrinks a pane too small, it stacks with neighbors showing only title bars. The active one expands. Novel responsive behavior.
-- **Session resurrection**: closed sessions preserve full state. Resurrect any previous session exactly.
-- **Modal keybinding**: enter Pane mode, then use simple keys. Status bar shows current mode and available keys. Solves tmux's discoverability problem.
-- **KDL layout files**: declarative, version-controllable workspace definitions.
-- **WASM plugins**: sandboxed, crash-proof, language-agnostic extensions.
-
----
-
-## Classic Patterns Still Relevant
-
-### vim/neovim: Composable Grammar
-
-The interaction model where keystrokes compose as a language: `d2w` = "delete 2 words." Grammar: `{operator}{count}{motion}`. The key insight: **composable grammar over memorized shortcuts**.
-
-Modern extensions: Telescope (fuzzy finder popup), Which-Key (shows continuations after prefix), floating windows for previews.
-
-### tmux: Prefix Key Namespace
-
-All commands sit behind a prefix key (`Ctrl+b`), preventing collisions with inner programs. The **status bar as wayfinding strip** pattern, a single persistent line showing session/window/pane context.
-
-### htop: Semantic Color Encoding
-
-CPU meter colors encode meaning: green = user processes, red = kernel, blue = low-priority, cyan = virtualization overhead. Expert users diagnose system state at a glance from color ratios alone. **Color as data channel, not decoration.**
-
-### Midnight Commander: Orthodox File Manager
-
-The dual-pane paradigm: source and destination simultaneously visible. `Tab` switches active panel. File operations default to using the opposite panel as destination. 40 years old and still unbeaten for power-user file manipulation.
-
-### tig: View Stack Navigation
-
-Views push onto a navigation stack. Close a view → return to previous. Browser-like back-navigation through git data. Master-detail split: list view above, detail below. **The view stack pattern makes complex data navigable.**
-
----
-
-## Cross-Cutting Insights
-
-1. **The best TUIs feel alive**: real-time updates, responsive to every keypress, async operations never freeze.
-2. **Spatial consistency builds mastery**: users remember _where_ things are, not _how_ to find them.
-3. **The modern TUI trinity**: command palette + vim motions + contextual footer covers every skill level.
-4. **Speed is a feature**: sub-millisecond response to keypresses creates a fundamentally different interaction quality.
-5. **Configuration as code**: YAML/TOML/KDL config files enable version control, sharing, and reproducibility.
-6. **Every great TUI has an escape hatch**: `q` to quit, `Esc` to go back, `?` for help. Always.
+The recommendations above are design synthesis. Source behavior was checked 2026-09-04; revisit the application docs for current keybindings and configuration syntax.

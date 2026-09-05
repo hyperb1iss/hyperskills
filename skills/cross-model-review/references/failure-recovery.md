@@ -1,48 +1,30 @@
-# Failure Recovery: Triage Tables and the Hang Ladder
+# Review Failure Recovery
 
-Lookup material for when a cross-model review errors, stalls, or goes silent. SKILL.md carries the headline rules; this file carries the full symptom map. Drawn from a Jun 2026 audit of 4k+ Claude/Codex JSONL conversations plus a Jul 2026 pass over ~600 sessions. Most failures are wrapper mechanics, not model quality.
+Preserve the original prompt, output path, process handle, and error. Classify the failure before changing anything. Never run a duplicate beside an active reviewer.
 
-## Codex → Claude Failure Triage
+| Signal                         | Interpretation and next check                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| A process/session/cell ID      | The host yielded. Poll that handle with its supported wait operation                                    |
+| Missing prompt error           | Check variadic options and the `--` separator; confirm prompt stdin is nonempty                         |
+| Read-only shell variable error | Rename the wrapper variable; inspect output because the reviewer may already have completed             |
+| Exit 124                       | A surrounding timeout ended the process; it is not a model verdict                                      |
+| Exit 130 or 143                | Interrupted or terminated; retain partial findings and mark incomplete coverage                         |
+| Lost polling handle            | Inspect saved output and the exact process tree before relaunching; the reviewer may still be alive     |
+| Auth, quota, or provider error | Report the actual access problem; do not change credentials or billing routes silently                  |
+| Tool denied                    | Decide whether the check can be performed with existing access; otherwise disclose the missing evidence |
 
-Classify the failure before changing tactics.
+## Slow Versus Stuck
 
-| Symptom                                                 | Meaning                                   | Recovery                                                                           |
-| ------------------------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------- |
-| `Process running with session ID NNNN`                  | The review is alive; Codex yielded early  | Reap `session_id` with `yield_time_ms: 300000`; never re-run the command           |
-| `Input must be provided either through stdin...`        | A variadic flag swallowed the prompt      | Re-run once with `--` before the prompt, or use the gold-path template             |
-| `zsh: read-only variable: status`                       | The shell wrapper assigned `status=$?`    | Rename the variable to `rc` or `exit_code`; the Claude invocation may have worked  |
-| Exit `124`                                              | A shell `timeout` killed the review       | Remove `timeout`; if an external guard is mandatory, use a much longer one         |
-| Exit `130`, exit `143`, or `aborted by user`            | The process was interrupted or terminated | Read the output file first; do not infer a review verdict from the exit code alone |
-| `write_stdin failed: stdin is closed`                   | The host lost the reaping handle          | Read the output file if printed; otherwise re-run once with the gold-path template |
-| `Execution error` with little output                    | Claude runner failed after launch         | Inspect the output file, then retry once with a narrower prompt or diff packet     |
-| `Unable to connect to API`, spend limit, or auth errors | External auth/billing/network state       | Stop retrying; surface the exact error and ask for auth or quota repair            |
+Read output growth and process state together. A quiet process can be computing, waiting on stdin, or blocked by a helper. Neither quiet output nor a long runtime proves failure. Growing output can also be an unproductive loop.
 
-**Timeout policy:** default to no shell `timeout` around `claude -p`. Codex already has the reap loop, and real reviews in the audited logs exceeded 180-240 seconds often enough that short timeouts created false failures.
+When progress is uncertain, identify the contended resource or pending operation. Inspect the specific child process, available stderr, and host session state. Do not print its environment or unrelated process command lines (they may contain credentials).
 
-## When the Reviewer Hangs
+If startup customizations are implicated, isolate them with supported safe-mode controls. If permissions are waiting for input, use the host's noninteractive denial mode and report any check it prevents. Close unused stdin when the prompt is an argument. Change one diagnosed cause per retry.
 
-Silence is not failure. Output-file growth plus process state is the discriminator, never elapsed time. Growing output across reaps means still working, and slow can be a quality signal: a fast rubber stamp on a large surface would be suspicious. Work the ladder top-down:
+Choose a stopping condition that fits the review's scope and the user's time or budget constraints. A deadline can end incomplete work; it cannot convert it into PASS. Terminate only the identified job and its children, confirm termination, then consider a narrower retry. If the environment still cannot support the review, report INCONCLUSIVE with the captured error and useful partial results.
 
-| Rung         | Move                                                                                                                                                                                                                                |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Diagnose** | Check output-file size and the process tree before declaring it stuck                                                                                                                                                               |
-| **Isolate**  | One variable at a time. Startup hooks / MCP helpers: `claude --bare` (drops subscription auth) or `--safe-mode` (keeps auth, drops hooks). Permission waits: `--permission-mode dontAsk`. Stdin hangs: pass the diff as an argument |
-| **Degrade**  | No-tools piped diff, narrower file scope. Same question, less payload                                                                                                                                                               |
-| **Kill**     | Only the stuck process tree, never respawn blind. Pre-declare the give-up condition ("if this attempt sticks, I record the review as unavailable") and disclose the failed review in the wrap                                       |
+## Recover the Result Before Repeating Work
 
-Wedges observed in the field (as of Jul 2026): a stray MCP helper in the reviewer's startup path, a broken MCP transport, and permission prompts waiting on a stdin nobody was reading. Each was found by isolating one variable, not by rerunning the same command harder.
+A process exit and a substantive verdict are separate evidence. Read the entire saved result or locate all findings plus the final verdict without discarding the original. A large transcript can contain a valid review; a short report can be an error message.
 
-If every rung fails, step down the Degradation Ladder in SKILL.md. A recorded "review unavailable" beats a fake green check.
-
-## Claude → Codex Hangs
-
-Even correctly-scoped `codex review` calls hang; it's the top operational failure in this direction. Same discriminator as above: the output file is the liveness instrument, judged by growth and process state, never elapsed time.
-
-| Signal                         | Move                                                                                                                                                       |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Output file growing            | Keep waiting; it's working                                                                                                                                 |
-| Empty file, process tree alive | Wait one more window, then isolate variables (as of Jul 2026, wedged MCP servers and startup hooks are the usual culprits)                                 |
-| Empty file, process wedged     | Kill only that process tree; retry once with fewer degrees of freedom: exact diff on stdin, narrower file list, lower effort. Same question, less payload  |
-| Retry also sticks              | Pre-declare the give-up, record the failed review as failed                                                                                                |
-
-Never spawn a duplicate alongside a live reviewer. And size alone is not the failure signal: a 1MB+ `codex exec` transcript can be a successful deep exploration with the verdict at the tail. Grep for verdict and severity markers instead of dumping the trace. The real failure shape is no output growth, or growth with no convergence toward a verdict.
+For a follow-up, resume the same session only if persistence was enabled and the CLI supports it. Otherwise launch a new scoped review with the prior finding and exact delta. A fresh reviewer must not inherit an unverified PASS.
