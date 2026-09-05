@@ -52,6 +52,8 @@ For code, request each finding's trigger, impact, location, and evidence. For a 
 
 ## Launch Once, Retain the Handle
 
+For long Claude CLI reviews, use `scripts/run_claude_review.py` and inspect its saved status with `scripts/review_status.py`. Read `references/observable-reviews.md` for launch, authentication, scope, and recovery details. The helper retains events and stderr without requiring another reviewer process. Native host progress tools or a direct CLI capture remain suitable when they provide enough visibility.
+
 Capture the full output to a unique file, and print that path before launch. Keep prompt content in a file or single-quoted heredoc. Do not interpolate untrusted text into shell code. A quoted `"$(cat "$review_prompt")"` reads a trusted prompt file as one argument; an unquoted heredoc can execute embedded shell syntax.
 
 A running process or cell ID means the job is active. Poll that same handle with the host's supported wait operation. Wait duration controls when the host yields, not whether the reviewer succeeds. Use legal wait values and leave room for user updates; do not hardcode a five-minute initial wait into every harness.

@@ -1,7 +1,7 @@
 # Hyperskills Plugin - Development Makefile
 # ─────────────────────────────────────────────
 
-.PHONY: all lint format check clean help stats install test test-validator test-deslop validate-structure validate-frontmatter
+.PHONY: all lint format check clean help stats install test test-validator test-deslop test-review-runner validate-structure validate-frontmatter
 
 # Colors (SilkCircuit palette)
 PURPLE := \033[38;2;225;53;255m
@@ -93,10 +93,13 @@ check:
 
 validate-structure validate-frontmatter: check
 
-test: test-validator test-deslop
+test: test-validator test-deslop test-review-runner
 
 test-validator:
 	@uv run --python '>=3.11' --with 'pyyaml==6.0.3' python -m unittest discover -s tests -v
+
+test-review-runner:
+	@uv run --python ">=3.11" python -m unittest discover -s skills/cross-model-review/tests -v
 
 test-deslop:
 	@bash skills/deslop/scripts/selftest.sh

@@ -1,6 +1,6 @@
 # Review Briefs
 
-Use the launcher in `cli-flags.md`. The examples below are prompt content, not shell code. Replace placeholders with captured facts. Do not hand the reviewer an expected conclusion during an independent first pass.
+Use the direct launcher in `cli-flags.md` or the progress-aware helper in [observable-reviews.md](observable-reviews.md). The examples below are prompt content, not shell code. Replace placeholders with captured facts. Do not hand the reviewer an expected conclusion during an independent first pass.
 
 ## Artifact Review
 

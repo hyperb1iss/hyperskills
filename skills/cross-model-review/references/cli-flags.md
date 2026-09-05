@@ -21,6 +21,8 @@ Capture the process transcript separately from the final message when `--output-
 
 ## Claude
 
+For observable execution, use the optional [runner](observable-reviews.md). It assembles the restricted launch, captures progress, and preserves the selected authentication route. The direct launcher below is useful when final-output capture is sufficient.
+
 The flags have different jobs:
 
 | Flag                              | Effect                                                                              |
