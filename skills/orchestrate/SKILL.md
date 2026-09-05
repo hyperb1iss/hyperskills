@@ -1,490 +1,128 @@
 ---
 name: orchestrate
-description: Use this skill when orchestrating multi-agent work at scale - research swarms, parallel feature builds, wave-based dispatch, build-review-fix pipelines, or any task requiring 3+ agents. Activates on mentions of swarm, parallel agents, multi-agent, orchestrate, fan-out, wave dispatch, research army, unleash, dispatch agents, or parallel work.
+description: Use this skill when coordinating independent agents with explicit ownership, dependencies, integration, and verification. Activates on mentions of swarm, parallel agents, multi-agent, orchestrate, fan-out, wave dispatch, research army, unleash, dispatch agents, or parallel work.
 ---
 
 # Multi-Agent Orchestration
 
-Meta-orchestration patterns mined from 597+ real agent dispatches across production codebases. The skill maps orchestration strategy to work shape, brief structure to agent type, and background/foreground to supervision and integration needs.
+Use independent agents to add useful capacity while keeping one coherent result. Partition by the questions, artifacts, and resources that can progress independently. The coordinator owns integration and the final claim of completion.
 
-**Core principle:** Match the strategy to the work, partition agents by independence, inject enough context that parallelism is real, and let review overhead adapt as trust earns itself. The strategies below are reference patterns. Pick the one that fits, blend two when the work is mixed, invent your own when the patterns don't match.
+The user's instructions take precedence over this skill's guidelines. Delegation, tools, and external actions remain subject to current host instructions and authorization. This skill does not grant a worker broader authority than the coordinator has.
 
-## Dispatch Surface by Host
+## Check Capabilities Before Dispatch
 
-The strategies are host-agnostic; the fan-out verb differs:
+Inspect the available tools and their current schemas. Hosts differ in agent lifecycle, inherited context, filesystem sharing, worktree isolation, asynchronous results, and permissions. Discover those properties instead of inferring them from a product name or copying stale arguments.
 
-| Host                      | Fan-out surface                                                   | Notes                                                      |
-| ------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------- |
-| Claude Code               | `Agent` tool: parallel calls in one block, background for swarms | Worktree isolation via the agent's isolation option         |
-| Codex                     | `spawn_agent` with a role-appropriate `agent_type`                | Delegation gate precedence below                           |
-| Pi (pi-nova pack)         | `dispatch` tool with `"mode": "parallel"`                         | Children inherit the safety gate via `PI_CODING_AGENT_DIR` |
-| Any host, no fan-out verb | Task queue as bus: Sibyl tasks + worktree isolation              | A real dispatch mode, not a degraded one                    |
+Use the host's supported delegation tools when permitted. An external CLI reviewer still consumes resources and remains subject to delegation and permission rules; it is not an escape hatch around a restriction. Without a suitable delegation surface, execute directly or prepare tasks for authorized external workers. A task queue alone does not launch an agent.
 
-**Codex delegation gate precedence:** contract-mandated verification counts as warranted subagent work, or route it through external CLI review processes, which don't count as subagents. Exploratory swarms still need the user's ask. Standing user grants ("spawn subagents any time you want") persist across sessions; record them in memory.
+## Choose the Shape by Dependency
 
-**Task queue as bus:** when the host lacks a fan-out verb, orchestrate through the task graph plus worktree isolation. Write self-contained cold-pickup task descriptions (repo, refs, tags, done-means) at the same quality bar as a dispatch brief.
+| Work shape | Coordination pattern |
+| --- | --- |
+| Independent research questions | Parallel investigators, evidence-based synthesis |
+| Disjoint feature ownership with stable interfaces | Parallel builders, designated integration owner |
+| One change repeated across modules | Scoped automated transform or partitioned workers, combined verification |
+| Dependent edits or shared mutable state | One owner for the dependency, parallelize work around it |
+| Consequential review | Independent read-only reviewers with useful risk lenses |
+| Small, tightly coupled change | Direct execution |
 
-On Pi, builder children should use worktree isolation and return branch/patch info for review. Never auto-merge child output. Use the reservation budget cap for large waves so scheduling stops before runaway spend. Copyable Pi dispatch shape in `references/dispatch-briefs.md`.
+Agent count follows named useful lanes, available capacity, and integration cost. More agents are worthwhile when they add distinct evidence or shorten independent work. Do not use historical fleet sizes as defaults. Check the critical path: accelerating a branch that is already waiting on one shared interface may add no throughput.
 
-## Strategy Selection
+## Establish Ownership and Integration
 
-| Strategy                    | When                                     | Agents    | Background | Key Pattern                                            |
-| --------------------------- | ---------------------------------------- | --------- | ---------- | ------------------------------------------------------ |
-| **Research Swarm**          | Knowledge gathering, docs, SOTA research | 10-60+    | Yes (100%) | Fan-out, each writes own doc                           |
-| **Epic Parallel Build**     | Plan with independent epics/features     | 20-60+    | Yes (90%+) | Wave dispatch by subsystem                             |
-| **Sequential Pipeline**     | Dependent tasks, shared files            | 3-15      | No (0%)    | Implement -> Review -> Fix chain                       |
-| **Parallel Sweep**          | Same fix/transform across modules        | 4-10      | No (0%)    | Partition by directory, fan-out                        |
-| **Multi-Dimensional Audit** | Quality gates, deep assessment           | 6-9       | No (0%)    | Same code, different review lenses                     |
-| **Fleet/Stack Maintenance** | Many PRs/branches, shared review context | 1         | No (0%)    | Inventory first, serial fixer, evidence-based closures |
-| **Full Lifecycle**          | New project from scratch                 | All above | Mixed      | Research -> Plan -> Build -> Review -> Harden          |
+Before launching builders, inspect repository status and existing worktrees. Map shared resources as well as files: generated artifacts, schemas, lockfiles, database fixtures, ports, build outputs, and package caches can collide across otherwise disjoint modules.
 
-Serial is a dispatch mode, not a fallback: thirteen open PRs sharing review context got one inventory-first serial fixer, not a fan-out. Before any long unattended loop, ask whether progress accumulates between iterations. Without auto-merge, an overnight loop makes parallel worktrees, not cumulative progress; one long worker beats many orphaned ones. Design loops for mid-run patching; they will need upgrades while running.
+Choose isolation based on the work:
 
----
+| Isolation | Appropriate use | Required coordination |
+| --- | --- | --- |
+| Shared tree, disjoint paths | Small independent changes with clear ownership | Single owner for contended files and Git index operations |
+| Separate worktrees | Workers need independent branches or build state | Known base, branch/path, merge order, and integration owner |
+| Read-only revision | Review or research | Fixed revision/diff plus permitted scratch outputs |
 
-## Strategy 1: Research Swarm
+Worktrees isolate tracked files and the index; they do not automatically isolate ports, databases, or external services. Follow the project's worktree layout. Never overwrite a human's or sibling's edits to clear a conflict.
 
-Mass-deploy background agents to build a knowledge corpus. Each agent researches one topic and writes one markdown document. Zero dependencies between agents.
+For shared trees, let workers report patches and checks while one coordinator stages and commits scoped changes, unless another explicit ownership scheme is agreed. Avoid broad staging and repository-wide autofixes during concurrent editing. Inspect hook side effects before accepting a commit. For lock contention, investigate the actual owner; an inconclusive process listing does not establish that a lock is safe to remove. Consult `git` for recovery.
 
-### When to Use
+Define how partial progress becomes integrated progress before dispatch. Name the artifact each consumer expects and the condition under which it is ready. Do not leave completed branches without an owner to inspect and combine them.
 
-- Kicking off a new project (need SOTA for all technologies)
-- Building a skill/plugin (need comprehensive domain knowledge)
-- Technology evaluation (compare multiple options in parallel)
+## Write Briefs That Transfer the Necessary Context
 
-### The Pattern
+Give each worker the original relevant request and a bounded assignment. Include facts that are expensive to rediscover or absent from their checkout, especially user corrections and untracked decisions. Use absolute paths and exact revisions when location matters.
 
-```text
-Phase 1: Deploy research army (ALL BACKGROUND)
-    Wave 1 (10-20 agents): Core technology research
-    Wave 2 (10-20 agents): Specialized topics, integrations
-    Wave 3 (5-10 agents): Gap-filling based on early results
+| Brief element | Purpose |
+| --- | --- |
+| Outcome and scope | The result needed, owned surfaces, and exclusions |
+| Current evidence | Relevant code, versions, interfaces, and verified premises |
+| Dependencies | What is ready, what is promised, and who owns it |
+| Authority | Permitted mutations, commit rights, external actions |
+| Verification | Checks and acceptance conditions for this contribution |
+| Return | Changed artifacts or findings, evidence, limitations, justified deviations |
 
-Phase 2: Monitor and supplement
-    - Check completed docs as they arrive
-    - Identify gaps, deploy targeted follow-up agents
-    - Read completed research to inform remaining dispatches
+Allow workers to challenge a premise and report necessary scope expansion. Their brief should constrain the task, not force a known-bad mechanism. Keep mandatory templates short; detailed examples live in `references/dispatch-briefs.md`.
 
-Phase 3: Synthesize
-    - Read all research docs (foreground)
-    - Create architecture plans, design docs
-    - Use Plan agent to synthesize findings
-```
+For an independent first review, provide the original request and raw change without coaching toward the implementer's desired conclusion. For follow-up verification, include the finding and fix claim so the reviewer can test closure. These are different review jobs.
 
-**What good research-agent prompts share** (copyable template in `references/dispatch-briefs.md`):
+## Supervise Without Becoming the Bottleneck
 
-- Explicit output file path (no ambiguity about where to write)
-- Search hints with year ("search [TECH] 2026") so agents have recency guidance
-- Numbered coverage list (8-12 items) that scopes the research precisely
-- Background dispatch by default, since research topics have no inter-dependencies
+Launch independent work together and continue useful local work. Harvest dependency-ready results as they arrive rather than waiting for an arbitrary wave to finish. Use waves when there is a real shared checkpoint or a method needs calibration before wider dispatch.
 
----
+Monitor results, tool status, artifact progress, and reported obstacles. Silence alone does not prove an agent is stuck. When progress stops, ask a discriminating question or inspect the relevant resource before interrupting. Keep user steering responsive; polling and waits must respect the host's actual limits.
 
-## Strategy 2: Epic Parallel Build
+When requirements change, notify affected workers and update the shared contract. Preserve completed valid work. Stop obsolete actions at a safe point, and cancel only processes or watchers this run owns. Report abandoned work and any side effects already taken.
 
-Deploy background agents to implement independent features/epics simultaneously. Each agent builds one feature in its own directory/module. No two agents touch the same files.
+A watcher needs a checkable completion condition, a way to detect failure, an expiry or escalation condition, and a stale-state check before any authorized action. Test its signal on a known state. Detailed watcher guidance is in `references/dispatch-briefs.md`.
 
-### When to Use
+## Harvest, Integrate, Verify
 
-- Implementation plan with 10+ independent tasks
-- Monorepo with isolated packages/modules
-- Sprint backlog with non-overlapping features
+Read deviations and limitations alongside the result. Inspect actual diffs and open consequential sources; a worker's summary is a claim, not evidence. An incomplete contribution may contain usable work, but acceptance depends on inspecting it against the task, not its length or the worker's confidence.
 
-### The Pattern
+Integrate at a stable checkpoint, then run checks that cover the combined behavior. Separate worker tests can miss incompatible assumptions between interfaces. Confirm the accumulated diff still serves the user's outcome and explicit constraints.
 
-```text
-Phase 1: Scout (FOREGROUND)
-    - Deploy one Explore agent to map the codebase
-    - Identify dependency chains and independent workstreams
-    - Group tasks by subsystem to prevent file conflicts
+For non-trivial changes where the project requires independent verification, obtain it before completion. The implementer can report its checks but cannot certify an independent PASS. Additional reviewers should cover distinct risks or provide a deliberately independent assessment; no finding count is a target.
 
-Phase 2: Deploy build army (ALL BACKGROUND — legitimate because each
-    builder has worktree isolation and the orchestrator integrates;
-    see Background vs Foreground)
-    Wave 1: Infrastructure/foundation (Redis, DB, auth)
-    Wave 2: Backend APIs (each in own module directory)
-    Wave 3: Frontend pages (each in own route directory)
-    Wave 4: Integrations (MCP servers, external services)
-    Wave 5: DevOps (CI, Docker, deployment)
-    Wave 6: Bug fixes from review findings
+Tie review evidence to a revision or recorded working-tree snapshot and environment. Use these verdicts:
 
-Phase 3: Monitor and coordinate
-    - Check git status for completed commits
-    - Handle git lock contention (lock-owner forensics, below)
-    - Deploy remaining tasks as agents complete
-    - Track via Sibyl tasks or TodoWrite
+| Verdict | Meaning |
+| --- | --- |
+| PASS | The declared review scope completed with no unresolved blocking findings |
+| FAIL | A supported defect violates the requested outcome or applicable contract |
+| INCOMPLETE | Review or a required check did not finish; list uncovered scope |
 
-Phase 4: Review and harden (FOREGROUND)
-    - Run `/hyperskills:cross-model-review` on completed work
-    - Dispatch fix agents for critical findings
-    - Integration testing
-```
+An interrupted review cannot grant a full PASS. Agreement does not establish severity; impact and exploitability do. Adjudicate disagreements through the code, specification, or a reproducer. A reproduced base failure can distinguish regression from pre-existing behavior, but neither label substitutes for analyzing the changed path.
 
-**What good build-agent prompts share** (copyable worker brief in `references/dispatch-briefs.md`):
+After changes, reassess which reviewed claims are invalidated and re-verify affected behavior plus relevant integration. Do not reuse a PASS for changed runtime code. A documentation-only change need not trigger unrelated runtime checks unless project policy requires them.
 
-- Each agent gets its own directory scope; overlapping file ownership produces merge conflicts and lost work
-- Existing patterns to follow ("Follow pattern from X"), which saves the agent from inventing one
-- Infrastructure context ("Redis available at X"), which prevents the agent from re-discovering what already exists
-- Explicit git hygiene; with 30+ parallel agents this is not optional
-- Task IDs for traceability across the swarm
+## Finish With an Honest State
 
-### Git coordination for parallel agents
+Report integrated outcomes, actual checks and their revision, unresolved limits, and the location of remaining artifacts. When an external gate is unavailable, complete independent authorized work and name the exact blocker and action needed. Follow the host's rules for recording task/goal status; do not claim completion for unverified required work.
 
-When running 10+ agents concurrently, a few realities matter:
+Capture durable coordination failures through configured project memory: the contended resource, failure mechanism, fix, and conditions. Keep ephemeral logs and worker chatter out of permanent guidance.
 
-- **On `index.lock` contention, identify the owner before acting.** `lsof`/`ps` the holder: live owner → wait or hand off "verified but uncommitted"; no owner → stale lock, clean it and proceed. Report a blocker only after it reproduces; after a few blocked turns, escalate with evidence (pid + age) as a question
-- **Each agent commits only its own files.** The prompt has to say this explicitly or agents will scoop up siblings' WIP
-- **`git add .` and `git add -A` are out.** Specific paths only
-- **Monitor with `git log --oneline -20`** periodically to spot stalled or off-pattern agents
-- **Push is the orchestrator's call**, not the agent's, after integration
+## Evidence and Limits
 
-### Same-worktree fleets
+Reviewed 2026-09-04. Anthropic's [multi-agent research case study](https://www.anthropic.com/engineering/multi-agent-research-system) supports explicit scope and parallel independent investigations, while warning about coordination and token overhead. Research results do not establish a best coding-agent count.
 
-Directory partitioning is the default. When several agents must share ONE working tree, the mechanics change:
-
-- Each brief lists owned paths, forbidden paths, AND the interfaces sibling agents are producing that this one may rely on ("another agent is adding `GET /api/ready?probe=k8s`")
-- Uniquely contended files get a single named owner
-- Repo-wide pre-commit hooks create commit-_ordering_ constraints. Hold workstream commits until the last agent lands, then commit each atomically
-- Shared-environment health (disk, memory) preempts the pipeline; one worker's full disk can ENOSPC the others mid-build
-
----
-
-## Strategy 3: Sequential Pipeline
-
-Execute dependent tasks one at a time with review gates. Each task builds on the previous task's output.
-
-### When to Use
-
-- Tasks that modify shared files
-- Integration boundary work (JNI bridges, auth chains)
-- Review-then-fix cycles where each fix depends on review findings
-- Complex features where implementation order matters
-
-### The Pattern
-
-```text
-For each task:
-    1. Dispatch implementer (FOREGROUND)
-    2. Dispatch spec reviewer (FOREGROUND)
-    3. Dispatch code quality reviewer (FOREGROUND)
-    4. Fix any issues found
-    5. Move to next task
-
-Trust Gradient (adapt over time):
-    Early tasks:  Implement -> Spec Review -> Code Review (full ceremony)
-    Middle tasks: Implement -> Spec Review (lighter)
-    Late tasks:   Implement only (pattern proven, high confidence)
-```
-
-### Trust gradient
-
-As patterns prove reliable, lighten review overhead instead of running full ceremony on every task. The cost of full review on the 12th identical CRUD endpoint is real and the signal-to-noise drops:
-
-| Phase              | Review overhead                         | Typically                            |
-| ------------------ | --------------------------------------- | ------------------------------------ |
-| **Full ceremony**  | Implement + Spec Review + Code Review   | First 3-4 tasks                      |
-| **Standard**       | Implement + Spec Review                 | Tasks 5-8, after patterns stabilize  |
-| **Light**          | Implement + quick spot-check            | Late tasks with established patterns |
-| **Cost-optimized** | Use the host's configured fast reviewer | Formulaic review passes              |
-
-This is earned confidence, not cutting corners. The gradient resets when a task departs from the established pattern; escalate back to full ceremony for anything genuinely new.
-
-The gradient covers correctness ceremony only. Three things never decay: shape checkpoints at wave boundaries (see Supervising the Fleet), mutation gates, and standing-correction recall. A vetoed pattern once re-appeared ~315 autonomous items later, so user vetoes re-enter every late-task brief verbatim. Risk escalates regardless of position in the run: security-critical or spec-level work goes back to rounds-until-PASS, iterating until it converges, not until a count is hit.
-
----
-
-## Strategy 4: Parallel Sweep
-
-Apply the same transformation across partitioned areas of the codebase. Every agent does the same TYPE of work but on different FILES.
-
-### When to Use
-
-- Lint/format fixes across modules
-- Type annotation additions across packages
-- Test writing for multiple modules
-- Documentation updates across components
-- UI polish across pages
-
-### The Pattern
-
-```text
-Phase 1: Analyze the scope
-    - Run the tool (ruff, ty, etc.) to get full issue list
-    - Auto-fix what you can
-    - Group remaining issues by module/directory
-
-Phase 2: Fan-out fix agents (4-10 agents)
-    - One agent per module/directory
-    - Each gets: issue count by category, domain-specific guidance
-    - All foreground (need to verify each completes)
-
-Phase 3: Verify and repeat
-    - Run the tool again to check remaining issues
-    - If issues remain, dispatch another wave
-    - Repeat until clean
-```
-
-**What good sweep-agent prompts share** (copyable template in `references/dispatch-briefs.md`):
-
-- Issue counts by category, not "fix everything", so agents have a target to verify against
-- Domain-specific guidance so agents understand _why_ patterns exist (otherwise they cargo-cult or override)
-- Directory partitioning to prevent overlap
-- Wave shape: fix → verify → fix remaining → verify, until the issue count converges
-
----
-
-## Strategy 5: Multi-Dimensional Audit
-
-Deploy multiple reviewers to examine the same code from different angles simultaneously. Each reviewer has a different focus lens.
-
-### When to Use
-
-- Major feature complete, need comprehensive review
-- Pre-release quality gate
-- Security audit
-- Performance assessment
-
-### The Pattern
-
-```text
-Dispatch 6 parallel reviewers (ALL FOREGROUND):
-    1. Code quality & safety reviewer
-    2. Integration correctness reviewer
-    3. Spec completeness reviewer
-    4. Test coverage reviewer
-    5. Performance analyst
-    6. Security auditor
-
-Wait for all to complete, then:
-    - Synthesize findings into prioritized action list
-    - Dispatch targeted fix agents for critical issues
-    - Re-review only the dimensions that had findings
-```
-
-Each reviewer gets named files, dimension-specific questions, and a fixed report format (findings with severity, an Approved/Needs Changes verdict, prioritized recommendations). Copyable verifier brief in `references/dispatch-briefs.md`.
-
-### Lens-locked panels
-
-Run the fact-checker first, then parallel judgment reviewers, each locked to ONE lens with explicit non-goals ("do NOT fact-check technical claims. Another reviewer owns that") and a fixed return schema (3 strongest / top 5 problems / the one change). Independent same-brief reviewers on one diff produce complementary, non-overlapping true findings; N=1 coverage on a risky diff is demonstrably incomplete.
-
-Give reviewers the lenses tests structurally can't reach: mixed-version rollout windows, config inheritance scope, guards one level below their threat model, rollback paths, what the fix _removed_.
-
-### Read-only review brief (hardening)
-
-A reviewer that can edit, checkout, or mutate state is a liability in a fan-out. Bound every read-only reviewer/auditor explicitly:
-
-- **Sandbox the agent:** "Do NOT edit, checkout, switch branches, or mutate any state. Read only."
-- **Read without checkout:** give the exact diff range plus `git show <ref>:<path>` / `git diff <base>..<head>` so the agent inspects the change without touching the working tree.
-- **Prior findings to verify:** hand it the open findings so it confirms or refutes rather than re-deriving from scratch.
-- **Prioritized risk lenses:** name the attack/failure categories that matter most (header smuggling, RLS bypass, apply-time CRD pruning, etc.) so coverage is deliberate, not generic.
-
-**Synthesis: adjudicate, don't vote-count.** When reviewers disagree, gather primary evidence (live read-only state, a render, the spec) and let it decide. Independent convergence (two agents finding the same issue without coordination) is a severity signal, not noise.
-
-**Commit ownership for review/fix waves:** the orchestrator commits, agents report. Re-run the agent's tightest test and spot-check its central claims before trusting a self-reported PASS. The implementer never self-assigns PASS.
-
-### Verification lifecycle
-
-A PASS is not a permanent state; it covers a SHA.
-
-- **Any commit after the verifier's pass voids it.** Changed runtime code after a PASS? Get a fresh independent read before summarizing.
-- **Freeze the tree while a verifier reads it.** Fill the wait only with work that is safe regardless of the verdict: reads, memory capture, other lanes.
-- **Re-verify warm or fresh.** Warm re-verify (resume the same verifier with a delta brief: prior finding verbatim, fix SHA, enumerated proof cases) converges FAIL→fix rounds and catches regressions the fix itself introduced. A fresh verifier ("a prior PASS is never inherited") suits final certification. Both are practiced; as of Jul 2026 the evidence doesn't settle a single rule. Pick per round purpose.
-- **Interrupt contract.** A verifier can be interrupted mid-flight: status, stop at the current safe point, PASS/FAIL on what it has seen, no file edits. Amend scope by injecting a message rather than kill-and-respawn.
-- **Reproduce a FAIL on the base** before accepting it as introduced by the change under review.
-
----
-
-## Strategy 6: Full Lifecycle
-
-Greenfield projects run the other five in sequence, one per session, each shifting strategy to match the work's nature: research swarm → epic parallel build → build-review-fix pipeline → sequential hardening (integration boundaries, security, races) → `dream` to consolidate. Parallel when possible, sequential when required.
-
----
-
-## Wave Mechanics
-
-Wave design applies to any fan-out, research or build:
-
-- **Collision analysis first.** Partition the wave by file overlap before writing briefs ("the next good wave has to avoid one giant ledger dogpile"). Lanes come from the dependency map, not task-list order.
-- **Calibrate before committing the fleet.** A small first wave validates method quality; worker-discovered corrections get baked into wave-2 briefs.
-- **The agent pool is managed state.** At the thread ceiling, harvest and close stale agents (final reports recover at close); close non-producers with a note saying what they did not produce.
-- **Failed worker output is idea-ore, not a merge candidate.** A budget-blown worker with an oversized diff gets salvaged for its concept and reimplemented smaller. Never merge the blob.
-
----
-
-## Background vs Foreground Decision
-
-The real axis is supervision plus integration, not agent type: attendance follows supervision need (someone must run the slow-vs-stuck ladder) and integration capability (does progress accumulate without you?).
-
-```dot
-digraph bg_fg {
-    "What is the agent producing?" [shape=diamond];
-
-    "Information (research, docs)" [shape=box];
-    "Code modifications" [shape=box];
-
-    "Does orchestrator need it NOW?" [shape=diamond];
-    "BACKGROUND" [shape=box style=filled fillcolor=lightgreen];
-    "FOREGROUND" [shape=box style=filled fillcolor=lightyellow];
-
-    "Isolated worktree + integration path?" [shape=diamond];
-    "Next task consumes its files?" [shape=diamond];
-    "BACKGROUND (harvest + integrate)" [shape=box style=filled fillcolor=lightgreen];
-    "FOREGROUND (sequential)" [shape=box style=filled fillcolor=lightyellow];
-    "FOREGROUND (parallel)" [shape=box style=filled fillcolor=lightyellow];
-
-    "What is the agent producing?" -> "Information (research, docs)";
-    "What is the agent producing?" -> "Code modifications";
-
-    "Information (research, docs)" -> "Does orchestrator need it NOW?";
-    "Does orchestrator need it NOW?" -> "FOREGROUND" [label="yes"];
-    "Does orchestrator need it NOW?" -> "BACKGROUND" [label="no - synthesize later"];
-
-    "Code modifications" -> "Isolated worktree + integration path?";
-    "Isolated worktree + integration path?" -> "BACKGROUND (harvest + integrate)" [label="yes - supervised"];
-    "Isolated worktree + integration path?" -> "Next task consumes its files?" [label="no"];
-    "Next task consumes its files?" -> "FOREGROUND (sequential)" [label="yes"];
-    "Next task consumes its files?" -> "FOREGROUND (parallel)" [label="no - different modules"];
-}
-```
-
-**Patterns observed across 597+ dispatches:**
-
-- Research agents with no immediate dependency → background (essentially always)
-- Code agents can run backgrounded when worktree isolation and an integration path (orchestrator review, cherry-pick, combined final gate) exist. That's what makes a build army work
-- Code agents must not run backgrounded when the next task consumes their files, or when nothing merges their output. An unattended loop without auto-merge makes parallel worktrees, not cumulative progress
-- Review/validation gates → foreground, since they block pipeline progress
-
----
-
-## Brief Anatomy
-
-The brief is where the orchestrator's context advantage transfers to the worker. Role, task, and report format are table stakes; these slots are the ones that earn their place:
-
-| Slot                 | What it does                                                                                 |
-| -------------------- | -------------------------------------------------------------------------------------------- |
-| Verbatim user ask    | Paraphrase inherits your misreadings; let the worker challenge your interpretation           |
-| Scope fence          | Own these files only; you are not alone in the codebase                                      |
-| Done-means block     | Checkable exit conditions plus a blocked-escape hatch; commit rights stated explicitly       |
-| CURRENT TRUTH        | Dated fact sheet so workers diff against pinned reality, not training-data guesses           |
-| Known traps          | Each with its failure mechanism, not just "be careful"                                       |
-| Settled decisions    | What not to re-litigate                                                                      |
-| Receipts already run | Exact commands and counts, so worker effort goes to residual risk                            |
-| Epistemic rules      | Evidence format, confidence floor, `[unverified]` labels, finding caps, skip nits            |
-| Capability grants    | Concrete verbs ("you can restart X", "read the db pod directly"), never "use your judgment"  |
-| Standing corrections | Every user veto from this session, verbatim. Conversation context decays over long spans     |
-
-Not every brief needs every slot: a research brief leans on CURRENT TRUTH and epistemic rules, a build brief on the scope fence and done-means block. Full copyable templates live in `references/dispatch-briefs.md`.
-
-**Deviations from brief.** Worker reports carry a required "Deviations from brief" section with per-item justification. At harvest, read deviations first. Briefs are hypotheses, and a justified deviation is a finding about your brief.
-
----
-
-## Context Injection: The Parallelism Enabler
-
-Parallel agents only work in parallel when the orchestrator front-loads context. Without it, every agent re-explores the codebase before doing useful work and the parallelism collapses into serialized discovery.
-
-**Worth injecting into most prompts:**
-
-- Absolute file paths, not relative (agents may run from unexpected cwds)
-- Existing patterns to follow ("follow pattern from `src/auth/jwt.py`")
-- Available infrastructure ("Redis at `app.state.redis`")
-- Design language and conventions ("SilkCircuit Neon palette")
-- Tool usage hints ("use WebSearch to find...")
-- Git instructions ("only stage YOUR files")
-
-**For parallel agents:**
-
-- Duplicate the shared context block into each prompt. Context isn't free, but redundant context beats serialized exploration
-- Add explicit exclusion notes ("agent 11-Sibyl handles X, don't touch it")
-- Describe shared utilities identically across prompts to prevent drift
-
----
-
-## Dispatch & Return Hygiene
-
-The worker doesn't share your reality, and its output can poison yours.
-
-- **Volatile context goes in the brief itself.** Worktree generation copies only tracked files. An untracked vision doc silently starves the worker. Distill live decisions and untracked docs into the prompt.
-- **Grep returned artifacts' citations.** Before handing a delegated document onward, check that its cited symbols actually exist.
-- **Quarantine confabulation.** A worker that returns output referencing decisions you never made gets discarded wholesale: verify it mutated nothing, keep only facts you can independently re-verify, redo the work directly.
-- **Route agent-to-agent findings through the orchestrator.** Workers can't always reach each other; tell them to surface undeliverable messages instead of dropping them.
-
----
-
-## Supervising the Fleet
-
-Launching is the easy half. The craft is distinguishing slow from stuck, holding watchers to receipts, and checking shape, not just correctness.
-
-### Slow vs stuck
-
-| Signal              | Move                                                                                                                                                                         |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Long job goes quiet | Escalate poll windows geometrically, then switch to independent progress signals (pgrep, artifact growth, diff-stat trajectory), never just more waiting on its own chatter  |
-| Suspected dead      | Killing needs evidence too. Check for a write midstream before terminating                                                                                                   |
-| Slow but alive      | Patience is a value ("guesses don't deploy apps"); queue latency is not a failure signal                                                                                     |
-
-### Watcher contract
-
-Arm every watcher with a named exit condition, a remediation rung, an iteration ceiling, and stale-fire no-op, declared at arm time. Smoke-test the watcher before trusting hours of its output; a broken awk regex once made every poll read "not ready" indefinitely. Kill only your own PIDs. Tear down watchers as the first act of any pivot, narrate on state change only, and surface user input between polls. A watch-buried session once went ~50 minutes deaf to the user.
-
-### Shape checkpoints
-
-Correctness gates don't measure scope; sprawl has shipped past green tests and passing cross-model reviews and died in seconds from the diffstat. At each wave boundary, run a shape check distinct from the verify gate:
-
-```bash
-git diff --name-only origin/${BASE:-main}...HEAD | awk -F/ '{print $1"/"$2}' | sort | uniq -c | sort -nr   # BASE = the PR's actual base ref
-```
-
-Classify the diff by top-level path against the mission and ask which pieces prove the MVP, not which pieces merely exist. When local gates are green and the pull is toward polishing validators, enumerate the remaining external-evidence tasks instead.
-
----
-
-## Terminal States
-
-An orchestrated run ends in one of two named states (never fake-done, never silent stop):
-
-- **Done, with receipts:** gates actually run, output shown.
-- **Blocked cleanly:** proof of current state (exact command → its output), a live-gate runbook (commands, evidence paths, pass criteria), and exactly one named human action ("type `! aws sso login` and I'll immediately run the plan, verify, and apply"). Pre-stage held irreversible actions so a one-word "go" executes instantly; optionally arm a watcher on the unblock artifact itself.
-
----
+The [Astra guidance](https://developers.openai.com/api/docs/guides/latest-model) recommends making delegation expectations explicit. Apply that within the actual host contract; API capabilities do not prove a particular CLI exposes them.
 
 ## Anti-Patterns
 
-| Anti-Pattern                                    | Fix                                                                     |
-| ----------------------------------------------- | ----------------------------------------------------------------------- |
-| Dispatch agents that touch the same files       | Partition by directory/module; one owner per scope                      |
-| Run independent research agents foreground      | Background research; synthesize after completion                        |
-| Send 50 agents with "fix everything" prompts    | Give each agent a specific scope, issue list, and done signal           |
-| Skip the scout phase for build sprints          | Explore first to map dependencies and file ownership                    |
-| Keep full review ceremony for every late task   | Apply the trust gradient after patterns prove stable                    |
-| Let agents run `git add .` or `git push`        | Explicit git hygiene in every build prompt                              |
-| Background an agent whose output nothing merges | Backgrounding code needs worktree isolation plus an integration path    |
-| Treat `index.lock` as fatal, or clean it blind | Lock-owner forensics: live owner → hand off; none → stale, clean and go  |
-| Ship the full fleet without a calibration wave  | Small first wave validates the method; corrections bake into wave 2     |
-| Let correctness gates stand in for shape checks | Shape checkpoint at every wave boundary; diffstat against the mission   |
-| Merge a failed worker's oversized blob          | Salvage the idea, reimplement smaller                                   |
-| Let read-only reviewers edit or checkout        | Sandbox the brief: read via `git show <ref>:<path>`, never mutate       |
-| Vote-count contradicting reviewers              | Adjudicate against ground truth (live state, a render, the spec)        |
+| Anti-pattern | Better move |
+| --- | --- |
+| Choose a fleet size before finding independent work | Name useful lanes and their integration path |
+| Assume different files imply isolation | Inspect shared runtime resources and generated outputs |
+| Treat an external reviewer as a policy bypass | Apply the same authority and permission boundaries |
+| Give partial review a forced binary verdict | Report INCOMPLETE with the missing coverage |
+| Vote-count findings | Verify mechanism and impact |
+| Let all shared-tree workers commit concurrently | Assign ownership of the index and commit operation |
+| Reduce review automatically over time | Match checks to current risk and changed evidence |
 
 ## References
 
-Full copyable templates (research brief, sweep brief, worker brief, read-only verifier brief, warm re-verify delta brief, verifier interrupt, watcher spec) live in `references/dispatch-briefs.md`.
-
-## Hyperskills Integration
-
-| Skill                | Use With             | When                                              |
-| -------------------- | -------------------- | ------------------------------------------------- |
-| `brainstorm`         | Full Lifecycle       | Before research when the direction is open        |
-| `research`           | Research Swarm       | Knowledge gathering before decisions              |
-| `plan`               | Epic Parallel Build  | Convert scope into dependency-safe waves          |
-| `implement`          | All build strategies | Execution loop and verification cadence           |
-| `cross-model-review` | All strategies       | Independent quality gate; security lens in audits |
-| `git`                | Epic Parallel Build  | Multi-agent staging, rebases, recovery            |
-| `dream`              | Full Lifecycle       | Capture durable learnings after large runs        |
+Read `references/dispatch-briefs.md` when composing worker, research, verification, or watcher instructions.
 
 ## What This Skill is NOT
 
-- Not permission to spawn agents when the host environment forbids it.
-- Not a replacement for planning; orchestration executes a task graph.
-- Not useful for tiny changes that one agent can finish faster directly.
-- Not a way around file ownership; overlapping edits still need sequencing.
+- Permission to ignore host delegation rules or user ownership.
+- A fixed pipeline, agent quota, or requirement to use multiple agents.
+- A substitute for integrated verification or the coordinator's judgment.
