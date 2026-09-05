@@ -1,6 +1,6 @@
 ---
 name: codex-imagegen
-description: Use this skill when an agent must generate or edit raster images through Codex, especially from Claude Code or another harness without native image generation. Activates on mentions of generate image with Codex, delegate image generation, Codex imagegen, make an image, edit this image, multiple images, batch image generation, image variant, visual asset, sprite, mockup, or banner.
+description: Use this skill when an agent must generate or edit raster images through Codex, especially from Claude Code or another harness without native image generation. Activates on mentions of generate image with Codex, delegate image generation, Codex imagegen, delegated image editing, or batch image handoff. Native image tools own ordinary generation when already available.
 ---
 
 # Codex Image Generation
@@ -8,10 +8,7 @@ description: Use this skill when an agent must generate or edit raster images th
 Delegate raster image generation and editing to Codex's built-in `$imagegen`
 capability, then return a verified workspace artifact to the leader harness.
 
-**Core insight:** instrument Codex, not the desktop window. An authenticated
-`codex exec` session can use built-in image generation headlessly. The desktop
-app does not need to be open, GUI automation adds no useful capability, and the
-shared filesystem is the artifact handoff.
+**Core insight:** instrument Codex, not the desktop window. When the configured `codex exec` environment exposes image generation, use it headlessly and hand off the resulting artifact through the shared filesystem. Authentication alone does not establish tool availability.
 
 As of Jul 2026, this path is verified with `codex-cli 0.144.6`. CLI and tool
 availability are volatile; the installed CLI and a live invocation outrank this
@@ -51,8 +48,8 @@ Resolve these inputs before launching Codex:
 | Invariants           | For edits, state what may change and what must remain unchanged.                                                                                      |
 | Avoid list           | Carry the user's negative constraints without adding invented brand, narrative, or stylistic requirements.                                            |
 
-Resolve relative paths against the leader's current workspace. Keep the final
-asset inside that workspace. Built-in generation may initially save under
+Resolve relative paths against the leader's current workspace. For a project asset with no user-specified destination, keep the final
+asset inside that workspace. Honor explicit destinations outside it when authorized. Keep the child's output in the workspace, then have the parent copy that exact verified artifact to the authorized external destination and verify the copy. A workspace-write child is not assumed to have external write access. Built-in generation may initially save under
 `$CODEX_HOME`; that location is staging, not a valid final destination for a
 project asset.
 
@@ -80,7 +77,7 @@ Asset purpose: <where and how the image will be used>
 Primary request: <the user's request, preserving their specificity>
 Input images:
 - Image 1: <edit target | content reference | style reference | compositing input>
-Destination: <workspace-relative or absolute workspace path>
+Destination: <workspace staging path, or final path when inside the workspace>
 Text (verbatim): "<exact text, or none>"
 Must preserve: <edit invariants, or none>
 Constraints: <required properties>
@@ -96,7 +93,7 @@ Execution requirements:
 - If one focused correction is clearly necessary, make that correction and
   inspect again. Do not wander through speculative variants.
 - Move or copy the selected final into Destination. Do not leave the only copy
-  under CODEX_HOME.
+  in a temporary generation directory.
 - Do not overwrite an existing destination unless the brief explicitly allows
   replacement.
 
@@ -143,10 +140,7 @@ constraints bleed between outputs.
 
 ### Parallel multi-image generation
 
-The built-in tool still performs one image-generation call per asset or variant.
-For true multi-image concurrency, fan out independent `codex exec` calls from
-the leader harness instead of asking one child session to manage an opaque
-batch.
+Inspect the current tool's batch and reference-image semantics. When assets are independent and the host permits delegation, fan out jobs with separate prompts and receipts. A tool's supported batch output may also be appropriate; verify each requested asset individually.
 
 Before launch, assign every job a deterministic destination such as
 `concept-01.png`, `concept-02.png`, and `concept-03.png`. Give each process its
@@ -178,15 +172,14 @@ unchanged" is the part that does the work, not decoration.
 
 Codex's receipt is a claim until the leader verifies the filesystem artifact.
 
-1. Confirm every reported final path exists inside the workspace.
+1. Confirm every reported final path exists at the agreed destination, resolving symlinks when checking workspace containment.
 2. Confirm each file is non-empty and `file <path>` identifies the requested
    raster format.
-3. Confirm no requested deliverable exists only under `$CODEX_HOME`.
+3. Confirm no requested deliverable exists only in a temporary generation directory.
 4. Inspect the asset in the leader harness when it has image-viewing support.
    Otherwise report that visual verification was performed by delegated Codex,
    not by the leader.
-5. Return the final path, final prompt, generation mode, and verification notes
-   to the user. Never reduce the handoff to "done."
+5. Present the image through the host's native image-return mechanism when available, and link the project artifact. Keep the full prompt and technical receipt for the parent harness; show details to the user when requested or needed to explain a limitation.
 
 `codex exec` may echo the final receipt twice in one output stream, once as
 streamed agent output and once as the final message. Duplicate receipt text is
@@ -251,6 +244,12 @@ new user decision.
 | Sending unrelated assets in one prompt              | Run one isolated delegation per asset.                                                 |
 | Serializing independent image jobs by default       | Fan out isolated `codex exec` calls through the leader's native parallel dispatch.     |
 | Starting another process because generation is slow | Poll the live process; duplicate generations waste quota and create ambiguous outputs. |
+
+## Current Tool Contract
+
+Checked on 2026-09-04 against [OpenAI image-generation documentation](https://developers.openai.com/api/docs/guides/tools-image-generation) and [Codex non-interactive guidance](https://developers.openai.com/codex/noninteractive). API capabilities do not prove that a particular Codex session exposes the same image tool. Follow the actual tool schema for references, output formats, and return mechanisms. CLI availability was not exercised in this audit environment; preserve that distinction from the historical snapshot above.
+
+For edits, inspect the target before dispatch and identify every reference image's role. Verify requested dimensions and transparency from the output itself, not its extension or the prompt. A visible checkerboard is not an alpha channel. Inspect exact text at delivery size. Keep successful batch siblings and correct only the failed constraint.
 
 ## What This Skill is NOT
 
