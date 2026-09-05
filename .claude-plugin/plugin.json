@@ -1,7 +1,7 @@
 {
   "name": "hyperskills",
-  "version": "3.11.1",
-  "description": "Focused skills for capable coding agents: design exploration, research, planning, implementation, multi-agent coordination, independent review, prose editing, memory, Git, Tilt, terminal UI, and delegated image generation.",
+  "version": "3.12.0",
+  "description": "Focused skills for capable coding agents: design exploration, research, planning, implementation, multi-agent coordination, independent review, prose editing, memory, Git, terminal UI, and delegated image generation.",
   "author": {
     "name": "Stefanie Jane",
     "url": "https://hyperbliss.tech"
@@ -20,10 +20,6 @@
     "multi-agent",
     "orchestration",
     "git",
-    "tilt",
-    "kubernetes",
-    "tiltfile",
-    "live-update",
     "ai-agents",
     "tui",
     "tui-design",

@@ -8,7 +8,7 @@
     {
       "name": "hyperskills",
       "source": "./",
-      "description": "Focused agent skills for design, research, implementation, review, prose, memory, Git, Tilt, terminal UI, and image delegation"
+      "description": "Focused agent skills for design, research, implementation, review, prose, memory, Git, terminal UI, and image delegation"
     }
   ]
 }

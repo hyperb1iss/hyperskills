@@ -34,9 +34,11 @@ hyperskills/
 │   │   └── tests/test_observable_review.py
 │   ├── hyper-pr-review/
 │   │   ├── SKILL.md
-│   │   └── references/{lenses,thermonuclear}.md
+│   │   └── references/{lenses,thermonuclear,report-examples}.md
 │   ├── codex-imagegen/SKILL.md
-│   ├── super-good-pr/SKILL.md
+│   ├── super-good-pr/
+│   │   ├── SKILL.md
+│   │   └── references/worked-examples.md
 │   ├── deslop/
 │   │   ├── SKILL.md
 │   │   ├── scripts/{slopscan.pl,selftest.sh}
@@ -45,9 +47,6 @@ hyperskills/
 │   │   ├── SKILL.md
 │   │   └── references/{conversation-formats,extraction-guide}.md
 │   ├── git/SKILL.md
-│   ├── tilt/
-│   │   ├── SKILL.md
-│   │   └── references/{api-reference,patterns}.md
 │   └── tui-design/
 │       ├── SKILL.md
 │       └── references/{visual-catalog,app-patterns}.md
@@ -74,18 +73,17 @@ The brace notation groups filenames; it is not a literal path.
 | `orchestrate`        | 1               | Coordinate independent work and integration  |
 | `implement`          | 2               | Implement and verify behavior                |
 | `cross-model-review` | 4               | Dispatch and consume independent reviews     |
-| `hyper-pr-review`    | 2               | Conduct evidence-based review                |
+| `hyper-pr-review`    | 3               | Conduct evidence-based review                |
 | `codex-imagegen`     | none            | Delegate raster asset generation             |
-| `super-good-pr`      | none            | Author and maintain PR descriptions          |
+| `super-good-pr`      | 1               | Author and maintain PR descriptions          |
 | `deslop`             | 4 plus fixtures | Edit prose without semantic or voice damage  |
 | `dream`              | 2               | Consolidate authorized conversation evidence |
 | `git`                | none            | Perform complex Git operations               |
-| `tilt`               | 2               | Diagnose build, sync, reload, and readiness  |
 | `tui-design`         | 2               | Design terminal behavior and presentation    |
 
 Process skills cover approaches to work: brainstorm, plan, research, orchestrate, implement, cross-model-review, hyper-pr-review, codex-imagegen, super-good-pr, deslop, and dream.
 
-Domain skills cover specialized operational knowledge: git, tilt, and tui-design. Ordinary package management, linting, and type checking use current tool help and official documentation; the former Astral skills are retired.
+Domain skills cover specialized operational knowledge: git and tui-design. Ordinary package management, linting, and type checking use current tool help and official documentation; the former Astral and Tilt skills are retired.
 
 ## Authoring
 
