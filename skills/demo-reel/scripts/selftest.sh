@@ -116,6 +116,11 @@ expect "repeated frames fail --min-unique" 1 "$SH" "$V" --min-unique 0.8 "$TMP/f
 contains "unique ratio is reported" 'unique_frames'
 expect "usage error" 2 "$SH" "$V" --expect-size huge "$TMP/good.mp4"
 expect "unreadable input" 4 "$SH" "$V" "$TMP/nope.mp4"
+printf 'not a video\n' >"$TMP/text.mp4"
+expect "non-video JSON keeps its exit code" 4 "$SH" "$V" --json "$TMP/text.mp4"
+sed -i.bak '/^verify-mp4:/d' "$TMP/last.out"
+valid_json "non-video input still prints one JSON document"
+contains "the failed check is named" '"name": "video_stream"'
 
 # ---- contact-sheet ----------------------------------------------------------
 C="$HERE/contact-sheet.sh"
@@ -130,62 +135,135 @@ contains "nine tiles in a 3x3 grid" '3x3 tiles'
 expect "bad time is a usage error" 2 "$SH" "$C" --at soon "$TMP/good.mp4" "$TMP/x.png"
 
 # ---- agent-take -------------------------------------------------------------
+# Every fixture is fake: a stand-in product called acme, fixture HOMEs, and
+# stand-in agents. Nothing here reads a real HOME, login, or credential.
 A="$HERE/agent-take.sh"
-mkdir -p "$TMP/home/.config/democtl" "$TMP/prod" "$TMP/skill/democtl"
-printf 'token=real\n' >"$TMP/home/.config/democtl/config"
-printf -- '---\nname: democtl\ndescription: Inspect the demo fleet with democtl.\n---\nRun democtl.\n' \
-  >"$TMP/skill/democtl/SKILL.md"
-cat >"$TMP/prod/democtl" <<'EOF'
+mkdir -p "$TMP/home" "$TMP/prod" "$TMP/skill/acme/docs" "$TMP/outside" "$TMP/login"
+printf 'not a real secret\n' >"$TMP/outside/gitconfig"
+printf -- '---\nname: acme\ndescription: Inspect the demo world with acme.\n---\nRun acme.\n' \
+  >"$TMP/skill/acme/SKILL.md"
+printf 'notes\n' >"$TMP/skill/acme/docs/notes.md"
+ln -s docs/notes.md "$TMP/skill/acme/notes.md"
+cat >"$TMP/prod/acme" <<'EOF'
 #!/bin/sh
-# Stand-in product: demo data under DEMO_FLEET=1, otherwise real config.
-if [ "${DEMO_FLEET:-}" = 1 ]; then echo "demo fleet: Neon Harbor"; exit 0; fi
-if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/democtl/config" ]; then echo "real config found"; exit 0; fi
-if [ -f "$HOME/.democtlrc" ]; then echo "real config found in HOME"; exit 0; fi
-echo "no config"; exit 3
+# Stand-in product: demo data under ACME_DEMO=1. Otherwise it looks for real
+# config, migrates a legacy dotfile into XDG config the way some CLIs do, and
+# prints colored output.
+if [ "${ACME_DEMO:-}" = 1 ]; then echo "demo world: Example Studio"; exit 0; fi
+if [ -f "$HOME/.acmerc" ]; then
+  /bin/mkdir -p "$XDG_CONFIG_HOME/acme" && /bin/cp "$HOME/.acmerc" "$XDG_CONFIG_HOME/acme/config"
+  echo "migrated legacy config"; exit 0
+fi
+printf '\033[31mno config\033[0m\001\n'; exit 3
 EOF
-chmod +x "$TMP/prod/democtl"
+cat >"$TMP/agent" <<'EOF'
+#!/usr/bin/env bash
+# Stand-in agent: an npm-style #!/usr/bin/env script. Records what it saw.
+[ -f .claude/settings.json ] && settings=yes || settings=no
+printf 'PATH=%s\nHOME=%s\nCONFIG=%s\nSETTINGS=%s\nARGS=%s\n' "$PATH" "$HOME" \
+  "${CLAUDE_CONFIG_DIR:-}" "$settings" "$*" >"$AGENT_REPORT"
+EOF
+cat >"$TMP/codex-no-sandbox" <<'EOF'
+#!/usr/bin/env bash
+# Stand-in Codex whose sandbox cannot start, as on a host without user namespaces.
+if [ "$1" = sandbox ]; then echo "bwrap: No permissions to create a new namespace" >&2; exit 1; fi
+echo started >"$AGENT_REPORT"
+EOF
+chmod +x "$TMP/prod/acme" "$TMP/agent" "$TMP/codex-no-sandbox"
 take() {
-  "$SH" "$A" --home "$TMP/home" --agent-bin /usr/bin/true --allow "$TMP/prod/democtl" \
-    --env DEMO_FLEET=1 "$@"
+  "$SH" "$A" --agent-bin "$TMP/agent" --agent-config "$TMP/login" --allow "$TMP/prod/acme" \
+    --env ACME_DEMO=1 "$@"
 }
 export DEMO_REEL_CANARY_OUTER=should-not-leak
-expect "dry run prints the command" 0 take --tool 'Bash(democtl:*)' --tool 'Skill(democtl)' \
-  --skill "$TMP/skill/democtl" --dry-run
+expect "dry run prints the command" 0 take --tool 'Bash(acme:*)' --tool 'Skill(acme)' \
+  --skill "$TMP/skill/acme" --dry-run
 contains "starts from an empty environment" 'env -i'
+contains "a script agent runs through its interpreter" 'runs through'
 contains "dontAsk permission mode" 'dontAsk'
+contains "settings are passed" '--settings'
 contains "setting sources" 'project\\,local'
 contains "strict MCP config" 'strict-mcp-config'
-contains "the demo variable reaches the take" 'DEMO_FLEET=1'
+contains "a throwaway HOME" 'HOME=.*temp.*dir.*/home'
+contains "a dedicated login dir" "CLAUDE_CONFIG_DIR=$TMP/login"
+contains "the demo variable reaches the take" 'ACME_DEMO=1'
+contains "reads outside the studio are blocked" '"blockReadsOutsideWorkingDirectories": true'
+contains "bypass mode is disabled" '"disableBypassPermissionsMode": "disable"'
+contains "auto mode is disabled" '"disableAutoMode": "disable"'
+contains "web tools are denied" '"deny": \["WebFetch", "WebSearch"\]'
 lacks "a parent variable does not" 'DEMO_REEL_CANARY_OUTER'
 lacks "never auto mode" 'permission-mode auto'
 lacks "never bypass" 'dangerously'
-ANTHROPIC_API_KEY=sk-selftest-secret expect "dry run JSON" 0 take --tool 'Bash(democtl:*)' --dry-run --json
+ANTHROPIC_API_KEY=sk-selftest-secret expect "dry run JSON" 0 take --tool 'Bash(acme:*)' --dry-run --json
 valid_json "dry run JSON parses"
 lacks "auth secrets are masked" 'sk-selftest-secret'
 expect "codex dry run" 0 take --agent codex --dry-run
 contains "codex read-only sandbox" 'read-only'
 contains "codex never asks" 'never'
-expect "prove holds" 0 take --tool 'Bash(democtl:*)' --skill "$TMP/skill/democtl" \
-  --dir "$TMP/studio-a" --prove --probe democtl --probe-expect '^no config'
+contains "codex signs in from its own dir" "CODEX_HOME=$TMP/login"
+
+# A take with the stand-in agent: it must run through its interpreter with
+# none on PATH, see the throwaway HOME, and leave no studio behind.
+studio="$TMP/Example Studio"
+AGENT_REPORT="$TMP/agent-report.txt" expect "a script agent launches" 0 take --tool 'Bash(acme:*)' \
+  --skill "$TMP/skill/acme" --dir "$studio" --pass AGENT_REPORT
+grep -q '^PATH=.*/bin$' "$TMP/agent-report.txt" 2>/dev/null && ok || bad "the agent saw only the sandbox PATH"
+grep -q '^HOME=.*studio-sandbox.*/home$' "$TMP/agent-report.txt" 2>/dev/null && ok || bad "the agent saw a throwaway HOME"
+grep -q "^CONFIG=$TMP/login$" "$TMP/agent-report.txt" 2>/dev/null && ok || bad "the agent saw its dedicated login dir"
+grep -q '^SETTINGS=yes$' "$TMP/agent-report.txt" 2>/dev/null && ok || bad "the studio holds .claude/settings.json"
+sandbox_dir=$(sed -n 's|^PATH=\(.*\)/bin$|\1|p' "$TMP/agent-report.txt")
+[ -n "$sandbox_dir" ] && [ ! -e "$sandbox_dir" ] && ok || bad "the sandbox is deleted on exit"
+[ ! -e "$studio" ] && ok || bad "the studio is deleted on exit"
+expect "a missing login dir stops the take" 3 take --tool 'Bash(acme:*)' --agent-config "$TMP/never-logged-in"
+
+expect "prove holds" 0 take --tool 'Bash(acme:*)' --skill "$TMP/skill/acme" --keep \
+  --prove --probe acme --probe-expect 'no config'
 contains "the probe saw no config" 'no config'
-proved=$(sed -n 's/^studio \([^,]*\), sandbox.*/\1/p' "$TMP/last.out")
-[ -f "$proved/.claude/skills/democtl/SKILL.md" ] && ok || bad "the skill is copied into the studio"
-[ ! -e "$TMP/studio-a" ] && ok || bad "a proof leaves --dir free for the take"
-printf 'secret\n' >"$TMP/home/.democtlrc"
-expect "prove catches a config read straight from HOME" 1 take --tool 'Bash(democtl:*)' \
-  --dir "$TMP/studio-b" --prove --json --probe democtl --probe-expect '^no config'
-valid_json "prove prints JSON"
-contains "the leak is shown" 'real config found in HOME'
-rm -f "$TMP/home/.democtlrc"
+contains "no symlinks in the studio" 'ok   links'
+kept=$(sed -n 's/^agent-take: kept studio \(.*\) and sandbox .*/\1/p' "$TMP/last.out")
+kept_sandbox=$(sed -n 's/^agent-take: kept studio .* and sandbox \(.*\)$/\1/p' "$TMP/last.out")
+[ -f "$kept/.claude/skills/acme/SKILL.md" ] && ok || bad "the skill is copied into the studio"
+[ -f "$kept/.claude/skills/acme/notes.md" ] && [ ! -L "$kept/.claude/skills/acme/notes.md" ] && ok ||
+  bad "an internal link is copied as a file"
+rm -rf "$kept" "$kept_sandbox"
+expect "prove JSON with colored, control-character output" 0 take --tool 'Bash(acme:*)' \
+  --prove --json --probe acme --probe-expect 'no config'
+valid_json "prove JSON stays valid"
+ln -s "$TMP/outside/gitconfig" "$TMP/skill/acme/.gitconfig"
+expect "a skill link leaving the skill is refused" 2 take --tool 'Bash(x)' --skill "$TMP/skill/acme" --dry-run
+rm -f "$TMP/skill/acme/.gitconfig"
+printf 'not a real secret\n' >"$TMP/home/.acmerc"
+expect "a probe that migrates config into XDG fails the proof" 1 env HOME="$TMP/home" "$SH" "$A" \
+  --real-home --agent-bin "$TMP/agent" --allow "$TMP/prod/acme" --tool 'Bash(acme:*)' --prove --probe acme
+contains "the write is named" 'xdg/config/acme/config'
+lacks "the written contents are not printed" 'not a real secret'
+expect "the throwaway HOME hides the dotfile" 0 env HOME="$TMP/home" "$SH" "$A" \
+  --agent-bin "$TMP/agent" --agent-config "$TMP/login" --allow "$TMP/prod/acme" --tool 'Bash(acme:*)' \
+  --prove --probe acme --probe-expect 'no config'
+rm -f "$TMP/home/.acmerc"
+expect "codex prove reports a sandbox that cannot start" 1 take --agent codex \
+  --agent-bin "$TMP/codex-no-sandbox" --prove
+contains "the sandbox failure is named" 'FAIL codex'
+AGENT_REPORT="$TMP/codex-report.txt" expect "codex take refuses to start without its sandbox" 3 \
+  take --agent codex --agent-bin "$TMP/codex-no-sandbox" --pass AGENT_REPORT
+[ ! -e "$TMP/codex-report.txt" ] && ok || bad "codex did not start without a sandbox"
 expect "Claude takes need a tool rule" 2 take
 expect "Codex takes refuse tool rules" 2 take --agent codex --tool 'Bash(x)'
 expect "the launcher owns PATH" 2 take --tool 'Bash(x)' --env PATH=/usr/bin
+expect "the launcher owns the login dir" 2 take --tool 'Bash(x)' --env CLAUDE_CONFIG_DIR=/tmp
 mkdir -p "$TMP/used" && : >"$TMP/used/notes.txt"
 expect "a used studio dir is refused" 4 take --tool 'Bash(x)' --dir "$TMP/used"
 expect "a missing agent binary" 3 "$SH" "$A" --agent-bin "$TMP/no-such-agent" --tool 'Bash(x)' --dry-run
+printf '#!/usr/bin/env no-such-interpreter\n' >"$TMP/stranded-agent"
+chmod +x "$TMP/stranded-agent"
+expect "an agent whose interpreter is missing" 3 "$SH" "$A" --agent-bin "$TMP/stranded-agent" \
+  --tool 'Bash(x)' --dry-run
 
 # ---- capture-web (browser) --------------------------------------------------
 W="$HERE/capture-web.mjs"
+if command -v node >/dev/null 2>&1; then
+  expect "a missing page is a usage error, before any Playwright lookup" 2 \
+    env DEMO_REEL_PLAYWRIGHT= node "$W" --url "$TMP/no-such-page.html" --out "$TMP/never.mp4"
+fi
 browser=0
 if command -v node >/dev/null 2>&1; then
   case $(node "$W" --probe 2>/dev/null) in *'"launch":"ok"'*) browser=1 ;; esac
@@ -241,9 +319,20 @@ EOF
   expect "capture to MP4" 0 node "$W" --url "$TMP/anim.html" --out "$TMP/web.mp4" --seconds 1 --fps 30 --scale 1
   expect "captured MP4 meets its contract" 0 "$SH" "$V" --expect-size 1920x1080 --expect-fps 30 \
     --expect-duration 1 --min-unique 0.9 "$TMP/web.mp4"
-  expect "title card still at 4K" 0 node "$W" --still "$TMP/card.png" --at 900 \
+  expect "title card still" 0 node "$W" --still "$TMP/card.png" --at 900 --scale 1 \
     --url "$SKILL/assets/card.html#kicker=selftest&title=Every%20shot%20is%20a%20test."
-  [ "$(size_of "$TMP/card.png")" = "3840x2160" ] && ok || bad "card renders at 3840x2160"
+  [ "$(size_of "$TMP/card.png")" = "1920x1080" ] && ok || bad "card renders at 1920x1080"
+  # An interrupted capture must leave nothing at the target path, not a short
+  # but valid MP4, and no partial beside it.
+  mkdir -p "$TMP/cut"
+  node "$W" --url "$TMP/anim.html" --out "$TMP/cut/take.mp4" --seconds 2.5 --fps 30 --scale 1 \
+    >"$TMP/last.out" 2>&1 &
+  capture=$!
+  sleep 1.5
+  kill -TERM "$capture" 2>/dev/null
+  wait "$capture"
+  [ $? -eq 143 ] && ok || bad "an interrupted capture exits 143"
+  [ -z "$(ls -A "$TMP/cut")" ] && ok || bad "an interrupted capture leaves no file ($(ls -A "$TMP/cut"))"
   expect "timer overlay frames" 0 node "$W" --transparent --fps 10 --seconds 1 --scale 0.5 \
     --url "$SKILL/assets/timer.html#map=0:0,1:20" --frames "$TMP/timer"
   [ -s "$TMP/timer/00009.png" ] && ok || bad "timer writes one PNG per frame"
