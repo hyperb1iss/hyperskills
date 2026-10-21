@@ -1,7 +1,7 @@
 # Hyperskills Plugin - Development Makefile
 # ─────────────────────────────────────────────
 
-.PHONY: all lint format check clean help stats install test test-validator test-deslop test-review-runner validate-structure validate-frontmatter
+.PHONY: all lint format check clean help stats install test test-validator test-deslop test-review-runner test-demo-reel validate-structure validate-frontmatter
 
 # Colors (SilkCircuit palette)
 PURPLE := \033[38;2;225;53;255m
@@ -99,7 +99,7 @@ sync-metadata:
 
 validate-structure validate-frontmatter: check
 
-test: test-validator test-deslop test-review-runner
+test: test-validator test-deslop test-review-runner test-demo-reel
 
 test-validator:
 	@uv run --python '>=3.11' --with 'pyyaml==6.0.3' python -m unittest discover -s tests -v
@@ -109,6 +109,9 @@ test-review-runner:
 
 test-deslop:
 	@bash skills/deslop/scripts/selftest.sh
+
+test-demo-reel:
+	@bash skills/demo-reel/scripts/selftest.sh
 
 #─────────────────────────────────────────────
 # Install — symlink skills into ~/.agents and ~/.claude
@@ -240,7 +243,7 @@ help:
 	@echo "  $(GREEN)format-check$(RESET)     Check if files are formatted"
 	@echo "  $(GREEN)check$(RESET)            Validate plugin structure"
 	@echo "  $(GREEN)sync-metadata$(RESET)    Regenerate the skill badge, inventory, and tree"
-	@echo "  $(GREEN)test$(RESET)             Run validator and prose scanner regressions"
+	@echo "  $(GREEN)test$(RESET)             Run validator, scanner, review-runner, and demo-reel regressions"
 	@echo "  $(GREEN)stats$(RESET)            Show plugin statistics"
 	@echo "  $(GREEN)test-local$(RESET)       Show command to test locally"
 	@echo "  $(GREEN)clean$(RESET)            Remove temp files"

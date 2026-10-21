@@ -23,4 +23,6 @@ jobs:
           version: "0.9.30"
           python-version: "3.11.14"
           enable-cache: false
+      - name: Install ffmpeg for the demo-reel selftest
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
       - run: make all
