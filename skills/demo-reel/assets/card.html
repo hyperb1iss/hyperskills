@@ -1,0 +1,150 @@
+<!doctype html>
+<!--
+  Title card or caption, rendered from HTML so text never needs ffmpeg's
+  drawtext. Copy this file into the project and restyle it: the variables at
+  the top of the style block hold the palette and fonts. Local font files
+  load offline through @font-face with a relative url().
+
+  A still card (open the reel on one: frame 0 is the preview on GitHub):
+    node scripts/capture-web.mjs --still card.png --at 1200 \
+      --url 'assets/card.html#kicker=acme&title=Your%20product.%20On%20camera.'
+  An animated card as video:
+    node scripts/capture-web.mjs --out card.mp4 --seconds 3 \
+      --url 'assets/card.html#title=Every%20light.&sub=One%20engine.'
+  A caption with a transparent background, for overlay:
+    node scripts/capture-web.mjs --still caption.png --at 900 --transparent \
+      --url 'assets/card.html#mode=caption&kicker=Agents&title=The%20agent%20finds%20the%20offline%20device'
+
+  Hash settings: mode=card|caption, kicker, title, sub, align=center|left,
+  enter=1 (rise-in animation, default on; 0 for a static frame).
+-->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Title card</title>
+    <style>
+      :root {
+        --bg: #0a0812;
+        --glow-a: rgba(225, 53, 255, 0.22);
+        --glow-b: rgba(128, 255, 234, 0.14);
+        --fg: #f5f3ff;
+        --dim: rgba(245, 243, 255, 0.66);
+        --kicker: #80ffea;
+        --caption-bg: rgba(10, 8, 18, 0.78);
+        --display: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        color: var(--fg);
+        font-family: var(--display);
+      }
+      body.card {
+        background:
+          radial-gradient(60% 70% at 18% 20%, var(--glow-a), transparent 70%),
+          radial-gradient(55% 60% at 85% 85%, var(--glow-b), transparent 70%),
+          var(--bg);
+      }
+      .stage {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0 160px;
+        gap: 22px;
+      }
+      .center .stage {
+        align-items: center;
+        text-align: center;
+      }
+      .kicker {
+        font: 600 28px/1 var(--mono);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--kicker);
+      }
+      .title {
+        font-size: 104px;
+        font-weight: 800;
+        line-height: 1.02;
+        letter-spacing: -0.02em;
+        max-width: 1500px;
+      }
+      .sub {
+        font-size: 40px;
+        font-weight: 500;
+        color: var(--dim);
+        max-width: 1400px;
+      }
+      body.caption .stage {
+        justify-content: flex-end;
+        padding: 0 120px 110px;
+      }
+      body.caption .box {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: 28px 40px;
+        border-radius: 22px;
+        background: var(--caption-bg);
+        max-width: 1500px;
+      }
+      body.caption .title {
+        font-size: 54px;
+        font-weight: 700;
+        line-height: 1.12;
+      }
+      body.caption .kicker {
+        font-size: 22px;
+      }
+      .enter .rise {
+        animation: rise 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+      }
+      .enter .rise:nth-child(2) {
+        animation-delay: 90ms;
+      }
+      .enter .rise:nth-child(3) {
+        animation-delay: 180ms;
+      }
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(28px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <div class="box">
+        <div class="kicker rise" id="kicker"></div>
+        <div class="title rise" id="title"></div>
+        <div class="sub rise" id="sub"></div>
+      </div>
+    </div>
+    <script>
+      const params = new URLSearchParams(location.hash.slice(1))
+      const mode = params.get("mode") === "caption" ? "caption" : "card"
+      document.body.classList.add(mode)
+      if ((params.get("align") || (mode === "card" ? "center" : "left")) === "center") {
+        document.documentElement.classList.add("center")
+      }
+      if (params.get("enter") !== "0") document.documentElement.classList.add("enter")
+      for (const id of ["kicker", "title", "sub"]) {
+        const element = document.getElementById(id)
+        const value = params.get(id)
+        if (value) element.textContent = value
+        else element.remove()
+      }
+    </script>
+  </body>
+</html>

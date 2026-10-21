@@ -1,0 +1,118 @@
+<!doctype html>
+<!--
+  Real-time timer for sped-up footage. Shows how much real time has passed
+  and the current speed, so a viewer never mistakes a 25x run for a fast one.
+
+  Render it to transparent PNG frames with the clip's length and frame rate:
+    node scripts/capture-web.mjs --transparent --fps 60 --seconds 16 \
+      --url 'assets/timer.html#map=0:0,1.5:1.5,6:46.5,10:146.5,16:152.5' \
+      --frames timer/
+  then overlay timer/%05d.png on the clip (see references/edit-render.md).
+
+  Hash settings, all optional:
+    map=F:R,F:R,...  film seconds to real seconds, piecewise linear. The slope
+                     of the current segment is the speed shown. Default 0:0,1:1.
+    corner=tr        tl, tr, bl or br (default tr)
+    size=34          font size in CSS px of a 1920x1080 viewport
+    label=elapsed    small text after the time; empty to hide
+  Film time is performance.now(), which capture-web.mjs drives frame by frame.
+-->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Real-time timer</title>
+    <style>
+      :root {
+        --fg: #f5f3ff;
+        --dim: rgba(245, 243, 255, 0.6);
+        --pill: rgba(10, 8, 18, 0.74);
+        --edge: rgba(128, 255, 234, 0.35);
+        --speed: #80ffea;
+        --font: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+      }
+      html,
+      body {
+        margin: 0;
+        background: transparent;
+      }
+      .pill {
+        position: absolute;
+        display: flex;
+        gap: 0.55em;
+        align-items: baseline;
+        padding: 0.42em 0.8em;
+        border-radius: 999px;
+        border: 1px solid var(--edge);
+        background: var(--pill);
+        color: var(--fg);
+        font: 600 34px/1 var(--font);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.02em;
+      }
+      .speed {
+        color: var(--speed);
+      }
+      .label {
+        color: var(--dim);
+        font-size: 0.62em;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="pill" id="pill">
+      <span id="time">0:00</span><span class="speed" id="speed"></span
+      ><span class="label" id="label"></span>
+    </div>
+    <script>
+      const params = new URLSearchParams(location.hash.slice(1))
+      const map = (params.get("map") || "0:0,1:1")
+        .split(",")
+        .map((pair) => pair.split(":").map(Number))
+        .filter((pair) => pair.length === 2 && pair.every(Number.isFinite))
+        .sort((a, b) => a[0] - b[0])
+      if (map.length === 1) map.push([map[0][0] + 1, map[0][1] + 1])
+      const pill = document.getElementById("pill")
+      const inset = "48px"
+      const corner = params.get("corner") || "tr"
+      pill.style[corner.includes("b") ? "bottom" : "top"] = inset
+      pill.style[corner.includes("l") ? "left" : "right"] = inset
+      pill.style.fontSize = `${Number(params.get("size")) || 34}px`
+      document.getElementById("label").textContent = params.has("label")
+        ? params.get("label")
+        : "elapsed"
+
+      function segmentAt(film) {
+        for (let i = 1; i < map.length; i++) if (film < map[i][0]) return i
+        return map.length - 1
+      }
+      function realAt(film) {
+        const i = segmentAt(film)
+        const [f0, r0] = map[i - 1]
+        const [f1, r1] = map[i]
+        return r0 + ((film - f0) * (r1 - r0)) / (f1 - f0)
+      }
+      function speedAt(film) {
+        const i = segmentAt(film)
+        return (map[i][1] - map[i - 1][1]) / (map[i][0] - map[i - 1][0])
+      }
+      function clock(seconds) {
+        const total = Math.max(0, Math.floor(seconds))
+        const h = Math.floor(total / 3600)
+        const m = Math.floor((total % 3600) / 60)
+        const s = String(total % 60).padStart(2, "0")
+        return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`
+      }
+      function draw() {
+        const film = performance.now() / 1000
+        const speed = speedAt(film)
+        document.getElementById("time").textContent = clock(realAt(film))
+        const rounded = speed >= 10 ? Math.round(speed) : Math.round(speed * 10) / 10
+        document.getElementById("speed").textContent =
+          Math.abs(speed - 1) < 0.05 ? "" : `${rounded}x`
+        requestAnimationFrame(draw)
+      }
+      requestAnimationFrame(draw)
+    </script>
+  </body>
+</html>

@@ -6,8 +6,15 @@
   <strong>Focused skills for things capable agents still need to learn</strong>
 </p>
 
+<!-- BEGIN GENERATED: skill-badge -->
+
 <p align="center">
-  <img src="https://img.shields.io/badge/Skills-13-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="13 Skills">
+  <img src="https://img.shields.io/badge/Skills-14-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="14 Skills">
+</p>
+
+<!-- END GENERATED: skill-badge -->
+
+<p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-ff6ac1?style=for-the-badge" alt="MIT License"></a>
 </p>
 
@@ -51,16 +58,17 @@ The installer links each skill into `~/.agents/skills` and `~/.claude/skills`. E
 
 Start where the uncertainty is. A clear bug can go straight to implementation; an open product question benefits from exploration before a plan. The combinations below are examples.
 
-| Situation                            | Useful combination                                          |
-| ------------------------------------ | ----------------------------------------------------------- |
-| Unresolved feature direction         | brainstorm, then research where facts decide the choice     |
-| Large change with known requirements | plan, implement, independent review                         |
-| Independent workstreams              | orchestrate with explicit ownership and integration         |
-| PR review                            | hyper-pr-review; cross-model-review for another perspective |
-| PR authoring                         | super-good-pr                                               |
-| Prose cleanup                        | deslop with the artifact's existing voice and format        |
-| Raster asset from another harness    | codex-imagegen                                              |
-| Durable lessons from past sessions   | dream                                                       |
+| Situation                              | Useful combination                                          |
+| -------------------------------------- | ----------------------------------------------------------- |
+| Unresolved feature direction           | brainstorm, then research where facts decide the choice     |
+| Large change with known requirements   | plan, implement, independent review                         |
+| Independent workstreams                | orchestrate with explicit ownership and integration         |
+| PR review                              | hyper-pr-review; cross-model-review for another perspective |
+| PR authoring                           | super-good-pr                                               |
+| Prose cleanup                          | deslop with the artifact's existing voice and format        |
+| Raster asset from another harness      | codex-imagegen                                              |
+| Durable lessons from past sessions     | dream                                                       |
+| A product video that tests the product | demo-reel; cross-model-review for its verifiers             |
 
 ## Process skills
 
@@ -152,6 +160,14 @@ Review authorized conversation history for decisions and recurring lessons that 
 /hyperskills:dream
 ```
 
+### `demo-reel`
+
+Make a demo reel that doubles as an acceptance test of the real product. Every shot in the list is a test, a failed take starts a fix lane with evidence, and the whole reel is reshot until it passes. Bundled scripts check the toolchain, capture web pages deterministically at 4K, film an agent with a throwaway HOME, a dedicated login, and an allowlist (brakes rather than isolation, with a proof that shows which ones hold), and verify rendered video. An agent handed the skill's URL can clone it and run them; ffmpeg is the only system dependency, and browser capture adds Node and Playwright.
+
+```text
+/hyperskills:demo-reel
+```
+
 ## Domain skills
 
 ### `git`
@@ -182,17 +198,20 @@ The [September 2026 review](docs/library-review-2026-09.md) records the substant
 
 ## Development
 
-The checks use `uv` (Python and isolated PyYAML), Bash, and Perl. Markdown linting and formatting use the tools named in the Makefile.
+The checks use `uv` (Python and isolated PyYAML), Bash, Perl, and ffmpeg (for the demo-reel selftest). Markdown linting and formatting use the tools named in the Makefile.
 
 ```bash
 make check      # Parse manifests, YAML frontmatter, and bundled references
-make test       # Run validator, scanner, and review-runner regressions
+make test       # Run validator, scanner, review-runner, and demo-reel regressions
 make all        # Run both checks and tests
 make lint       # Optional JSON, YAML, and Markdown lint tools
 make format     # Format tracked Markdown and JSON
+make sync-metadata # Regenerate the skill badge, inventory, and repository tree
 ```
 
 The validator checks concrete `references/`, `scripts/`, and `assets/` declarations in skill entrypoints. It does not execute examples, crawl external links, or grade agent behavior. Review reference contents and run relevant behavioral cases when changing a workflow.
+
+CI also checks derived metadata and release consistency. The [release workflow](docs/releases.md) prepares a single PR containing the version, changelog, and release notes, then publishes the exact merged commit after validation. Ordinary skill changes leave the version unchanged until release preparation.
 
 See [AGENTS.md](AGENTS.md) for contribution guidance. Licensed under [MIT](LICENSE).
 
