@@ -8,7 +8,7 @@
     {
       "name": "hyperskills",
       "source": "./",
-      "description": "Focused skills for capable coding agents: design exploration, research, planning, implementation, multi-agent coordination, independent review, prose editing, memory, Git, terminal UI, and delegated image generation."
+      "description": "Focused skills for capable coding agents: design exploration, research, planning, implementation, multi-agent coordination, independent review, prose editing, memory, Git, terminal UI, delegated image generation, and demo reels that test the product."
     }
   ]
 }
