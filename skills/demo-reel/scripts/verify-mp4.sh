@@ -48,6 +48,8 @@ json_str() {
   s=${s//$'\n'/\\n}
   s=${s//$'\r'/\\r}
   s=${s//$'\t'/\\t}
+  # Any other control character becomes a space so the JSON stays valid.
+  s=$(printf '%s' "$s" | LC_ALL=C tr '\001-\037' ' ')
   printf '"%s"' "$s"
 }
 
@@ -139,15 +141,24 @@ if [ "$max_black" != none ] && ! is_number "$max_black"; then
   exit 2
 fi
 
+# bail CODE CHECK MESSAGE: report a failure that stops verification. With
+# --json it is still one JSON document, so a loop parsing stdout never breaks.
+bail() {
+  printf 'verify-mp4: %s\n' "$3" >&2
+  if [ "$json" -eq 1 ]; then
+    printf '{"file": %s, "ok": false, "error": %s, "checks": [{"name": %s, "ok": false, "expected": "a readable video", "actual": %s}]}\n' \
+      "$(json_str "$file")" "$(json_str "$3")" "$(json_str "$2")" "$(json_str "$3")"
+  fi
+  exit "$1"
+}
+
 for tool in ffprobe ffmpeg; do
   if ! command -v "$tool" >/dev/null 2>&1; then
-    printf 'verify-mp4: %s not found; run doctor.sh for the install command\n' "$tool" >&2
-    exit 3
+    bail 3 dependencies "$tool not found; run doctor.sh for the install command"
   fi
 done
 if [ ! -r "$file" ] || [ -d "$file" ]; then
-  printf 'verify-mp4: cannot read %s\n' "$file" >&2
-  exit 4
+  bail 4 readable "cannot read $file"
 fi
 
 probe() {
@@ -160,8 +171,7 @@ field() {
 
 vinfo=$(probe v:0 stream=codec_name,profile,width,height,pix_fmt,r_frame_rate,avg_frame_rate,nb_frames,color_primaries,color_transfer,color_space,color_range,bit_rate)
 if [ -z "$(field "$vinfo" codec_name)" ]; then
-  printf 'verify-mp4: no video stream in %s\n' "$file" >&2
-  exit 4
+  bail 4 video_stream "no video stream in $file"
 fi
 finfo=$(ffprobe -v error -show_entries format=duration,bit_rate,size -of default=nw=1 "$file" 2>/dev/null)
 ainfo=$(probe a:0 stream=codec_name,sample_rate,channels)
@@ -197,8 +207,7 @@ detect=$(ffmpeg -nostdin -hide_banner -v info -i "$file" -an \
   -vf "blackdetect=d=0.05:pic_th=0.995:pix_th=0.10,freezedetect=n=-60dB:d=0.5" \
   -f null - 2>&1)
 if [ $? -ne 0 ]; then
-  printf 'verify-mp4: ffmpeg could not decode %s\n' "$file" >&2
-  exit 4
+  bail 4 decode "ffmpeg could not decode $file"
 fi
 black_list=$(printf '%s\n' "$detect" | sed -n 's/.*black_start:\([0-9.e+-]*\) black_end:\([0-9.e+-]*\) black_duration:\([0-9.e+-]*\).*/\1 \2 \3/p')
 freeze_list=$(printf '%s\n' "$detect" | awk -v total="${duration:-0}" '

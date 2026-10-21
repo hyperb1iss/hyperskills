@@ -56,16 +56,60 @@ Not driven by film time: <video> and <audio> playback, CSS or JS inside
 cross-origin iframes, and work scheduled inside Web Workers. Inside the page,
 performance.now() is film time in ms (0 at frame 0 when there is no warmup;
 the page loads one frame earlier) and requestAnimationFrame fires once per
-captured frame. Date.now() starts at --time; timers run on Playwright's
-paused clock.
+captured frame. Date.now() is --time plus film time, and timers run on
+Playwright's paused clock in step with it. Output goes to a hidden sibling
+file renamed onto the target only when the capture completes, so an
+interrupted run leaves nothing at the target path.
 
 Exit codes: 0 ok, 2 usage error, 3 missing dependency (Playwright,
 Chromium, ffmpeg), 4 page or capture failure, 5 encoder failure.`
 
+// What an interrupted or failed run must clean up: the partial output file
+// (renamed onto the target only after a complete encode), the encoder, and
+// the browser.
+const state = { partial: null, encoder: null, browser: null, exiting: false, signalCode: 0 }
+
+function removePartial() {
+  if (!state.partial) return
+  try { fs.rmSync(state.partial, { force: true }) } catch { /* already gone */ }
+  state.partial = null
+}
+
 function fail(code, message) {
+  removePartial()
+  if (state.encoder) state.encoder.child.kill('SIGKILL')
+  // Closing the browser on a signal makes in-flight page calls throw; that is
+  // the signal's exit, not a capture failure.
+  if (state.exiting) process.exit(state.signalCode)
   process.stderr.write(`capture-web: ${message}\n`)
   process.exit(code)
 }
+
+// A sibling path in the same directory, so the final rename is atomic and a
+// half-written file never sits at the target path.
+function partialFor(target) {
+  const resolved = path.resolve(target)
+  const ext = path.extname(resolved)
+  return path.join(path.dirname(resolved), `.${path.basename(resolved, ext)}.partial-${process.pid}${ext}`)
+}
+
+function onSignal(code, name) {
+  if (state.exiting) {
+    // A second signal: stop waiting on the browser and leave now.
+    removePartial()
+    process.exit(code)
+  }
+  state.exiting = true
+  state.signalCode = code
+  removePartial()
+  if (state.encoder) state.encoder.child.kill('SIGKILL')
+  process.stderr.write(`capture-web: ${name}, stopping; no output was written\n`)
+  const closing = state.browser ? state.browser.close().catch(() => {}) : Promise.resolve()
+  const timer = setTimeout(() => process.exit(code), 5000)
+  closing.then(() => { clearTimeout(timer); process.exit(code) })
+}
+process.on('SIGINT', () => onSignal(130, 'interrupted'))
+process.on('SIGTERM', () => onSignal(143, 'terminated'))
 
 function parseArgs(argv) {
   const opts = {
@@ -213,7 +257,7 @@ async function probe() {
   process.stdout.write(`${JSON.stringify({ playwright: pw.resolved, version: pw.version, launch })}\n`)
 }
 
-function startEncoder(opts) {
+function startEncoder(opts, target) {
   const vf = [
     'scale=out_color_matrix=bt709:out_range=tv',
     'format=yuv420p',
@@ -224,7 +268,7 @@ function startEncoder(opts) {
   const args = ['-nostdin', '-hide_banner', '-loglevel', 'error', '-y',
     '-f', 'image2pipe', '-c:v', 'png', '-framerate', String(opts.fps), '-i', 'pipe:0',
     '-vf', vf, '-c:v', 'libx264', '-preset', opts.preset, '-crf', String(opts.crf),
-    '-movflags', '+faststart', opts.out]
+    '-movflags', '+faststart', target]
   const child = spawn('ffmpeg', args, { stdio: ['pipe', 'ignore', 'pipe'] })
   let stderr = ''
   child.stderr.on('data', (chunk) => { stderr += chunk })
@@ -253,6 +297,9 @@ async function main() {
   }
   const startTime = new Date(opts.time)
   if (Number.isNaN(startTime.getTime())) fail(2, `--time is not a date: ${opts.time}`)
+  // Inputs before dependencies: a missing page is a usage error, not a
+  // missing Playwright.
+  const url = toUrl(opts.url)
 
   const pw = loadPlaywright()
   if (!pw) {
@@ -260,10 +307,14 @@ async function main() {
       + 'or set DEMO_REEL_PLAYWRIGHT to an installed playwright package, then run npx playwright install chromium')
   }
 
-  const url = toUrl(opts.url)
   let browser
   try {
-    browser = await pw.mod.chromium.launch({ headless: true, args: opts.browserArgs })
+    // Playwright's own signal handlers are off; onSignal closes the browser.
+    browser = await pw.mod.chromium.launch({
+      headless: true, args: opts.browserArgs,
+      handleSIGINT: false, handleSIGTERM: false, handleSIGHUP: false,
+    })
+    state.browser = browser
   } catch (error) {
     fail(3, `Chromium did not launch (${String(error.message).split('\n')[0]}). Run: npx playwright install chromium`)
   }
@@ -294,15 +345,18 @@ async function main() {
       gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4))
       return true
     })
-    await page.clock.install({ time: startTime })
-    // Registered after the clock so these rAF and performance.now() win.
     // Page load happens one frame before film zero: that frame is the
     // discarded pre-roll below, so frame i shows film time warmup + i/fps.
+    // The clock starts one pre-roll earlier too, so Date.now() is always
+    // --time plus film time.
     const preroll = Math.round(1000 / opts.fps)
+    const clockStart = new Date(startTime.getTime() - preroll)
+    await page.clock.install({ time: clockStart })
+    // Registered after the clock so these rAF and performance.now() win.
     await page.addInitScript(filmInit, { seed: opts.seed, origin: -preroll })
     // An installed clock still flows with real time; pause it so page load
     // speed cannot leak into JS-driven motion. Only runFor moves it now.
-    await page.clock.pauseAt(startTime)
+    await page.clock.pauseAt(clockStart)
     await page.goto(url, { waitUntil: 'load', timeout: opts.timeout })
     await page.evaluate(() => (document.fonts ? document.fonts.ready.then(() => true) : true))
 
@@ -339,7 +393,10 @@ async function main() {
       for (let i = 0; i <= index; i++) await advanceTo(i)
       const buffer = await shoot()
       fs.mkdirSync(path.dirname(path.resolve(opts.still)), { recursive: true })
-      fs.writeFileSync(opts.still, buffer)
+      state.partial = partialFor(opts.still)
+      fs.writeFileSync(state.partial, buffer)
+      fs.renameSync(state.partial, opts.still)
+      state.partial = null
       digest.update(buffer)
       frames = 1
     } else {
@@ -347,7 +404,9 @@ async function main() {
       if (opts.frames) fs.mkdirSync(opts.frames, { recursive: true })
       if (opts.out) {
         fs.mkdirSync(path.dirname(path.resolve(opts.out)), { recursive: true })
-        encoder = startEncoder(opts)
+        state.partial = partialFor(opts.out)
+        encoder = startEncoder(opts, state.partial)
+        state.encoder = encoder
       }
       for (let i = 0; i < total; i++) {
         await advanceTo(i)
@@ -377,6 +436,9 @@ async function main() {
       const hint = result.code === -1 ? ' (is ffmpeg on PATH?)' : ''
       fail(result.code === -1 ? 3 : 5, `ffmpeg failed${hint}: ${result.stderr.trim().slice(0, 400)}`)
     }
+    state.encoder = null
+    fs.renameSync(state.partial, opts.out)
+    state.partial = null
   }
 
   const summary = {
