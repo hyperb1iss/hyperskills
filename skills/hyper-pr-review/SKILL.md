@@ -44,10 +44,11 @@ Read the user's requirements and relevant acceptance criteria before judging beh
 | Feature or bug fix                                      | Trace changed behavior, real callers, error paths, and acceptance criteria |
 | Auth, payments, migrations, concurrency, infrastructure | Add relevant security, state-transition, rollout, and recovery checks      |
 | Explicit deep or thermonuclear audit                    | Cover the full named surface and examine structural alternatives           |
+| Foundation or platform layer in a stack                 | Run the necessity lens first, review the contract by its downstream consequences, and require each layer to be safe to enable alone |
 
 Use independent lenses when the concerns separate and delegation is available and authorized. A deep review needs deliberate coverage, not a particular agent count. A solo reviewer can apply the same lenses sequentially.
 
-For broad work, keep a compact inventory of changed invariants and affected consumers. Mark each checked, unresolved, or outside scope. An invariant should have an input or state transition that could falsify it. Use `references/lenses.md` for the relevant concern domains, and `references/thermonuclear.md` for a strict structural review.
+For broad work, keep a compact inventory of changed invariants and affected consumers. Mark each checked, unresolved, or outside scope. An invariant should have an input or state transition that could falsify it. Use `references/lenses.md` for the relevant concern domains (start with necessity and ownership for platform work, and add seams and test credibility whenever a change crosses a process or language boundary), and `references/thermonuclear.md` for a strict structural review.
 
 ## Turn Suspicions into Findings
 
@@ -134,6 +135,17 @@ Preserve useful strengths when they constrain the remedy, such as an authorizati
 
 See [worked report examples](references/report-examples.md) when calibrating the transition from raw review notes to a blocking finding, an incomplete review, or a nonblocking design choice. They illustrate evidence and hierarchy, not a required template.
 
+## Keep the Record Reviewable
+
+A review thread is evidence for the next reviewer and for the retrospective. Protect it.
+
+- Evidence a reviewer cannot open does not count: a path on a private machine, a digest of a local report, or a test count without the command and the head SHA. Ask for a run link, an artifact or a reproducible command pinned to the reviewed head.
+- A verdict without coverage is not a verdict. State files read, lanes run and anything skipped beside "no findings", and record what you tried to break and could not, so it is not re-reviewed.
+- Approve with an explicit scope of what the approval establishes ("this approves the boundary, not production durability").
+- When answering findings, quote the finding and pin the head SHA, and never edit a reply after someone has responded to it. Findings from an off-thread round (a verifier, a second model) are posted before their fixes, so the thread never becomes answers without questions. A disposition table per round (finding, decision, commit) is the durable ledger when tooling overwrites earlier reviews.
+- When a change is closed or replaced, the closing note names the successor and carries every open human thread to it.
+- Some changes keep a human approval whatever an automated review concludes: public semantics, durability promises, authorization or isolation boundaries, schema compatibility, provider requirements and the acceptance gates themselves. Say so in the verdict.
+
 ## Act Only Within the Requested Role
 
 A review-only request stays read-only. A request to implement findings permits a separate fix pass after adjudication. Changes then need verification of the updated artifact; the reviewer must not silently edit the evidence it is judging.
@@ -142,7 +154,7 @@ Posting comments, submitting approval, requesting changes on GitHub, or contacti
 
 ## Research Basis
 
-Reviewed on 2026-09-04. [Anthropic's evaluation guidance](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) distinguishes outcomes, traces, and grader limitations; use all three when assessing a review workflow. [OpenAI's GPT-6 Astra guidance](https://developers.openai.com/api/docs/guides/latest-model) warns that conflicting skill instructions can block work. The practical choice here is explicit scope and evidence requirements, with procedural defaults left adaptable.
+Reviewed on 2026-09-04, revised on 2026-10-21 after a retrospective over 38 agent-authored infrastructure pull requests; the necessity, seam, test-credibility and record guidance comes from the finding classes that recurred there. [Anthropic's evaluation guidance](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) distinguishes outcomes, traces, and grader limitations; use all three when assessing a review workflow. [OpenAI's GPT-6 Astra guidance](https://developers.openai.com/api/docs/guides/latest-model) warns that conflicting skill instructions can block work. The practical choice here is explicit scope and evidence requirements, with procedural defaults left adaptable.
 
 For report craft, [Google's reviewer comment guidance](https://google.github.io/eng-practices/review/reviewer/comments.html) supports explaining rationale and distinguishing required changes from suggestions. Its [review standard](https://google.github.io/eng-practices/review/reviewer/standard.html) favors code health and progress over personal perfection. These are practitioner guidelines, not measured guarantees for model output.
 
@@ -160,6 +172,9 @@ Benchmark results depend on the model, task set, harness, and grader. No publish
 | Calling every stale branch defective              | Establish a concrete integration or policy failure        |
 | Declaring a clean full audit after sampling       | State partial coverage or finish the named surface        |
 | Blocking on a hypothetical simpler design         | Show a feasible alternative and a material benefit        |
+| Reviewing the code as written without asking who consumes it | Name the caller or recommend deletion              |
+| Treating "not established" as a refutation        | Measure or trace before dismissing a scale finding        |
+| Accepting a fake-backed seam as covered           | Require one real-producer-into-real-consumer test         |
 
 ## What This Skill is NOT
 
