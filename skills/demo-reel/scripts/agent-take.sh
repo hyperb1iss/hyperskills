@@ -275,6 +275,15 @@ done
 
 [ -n "$agent_config" ] || agent_config="${XDG_STATE_HOME:-$HOME/.local/state}/demo-reel/$agent"
 case $agent_config in /*) ;; *) agent_config="$(pwd -P)/$agent_config" ;; esac
+# The login dir gets a trust entry written into its .claude.json, so it must
+# never be the operator's own config.
+real_cfg=$agent_config
+while [ "$real_cfg" != / ] && [ "${real_cfg%/}" != "$real_cfg" ]; do real_cfg=${real_cfg%/}; done
+[ -d "$real_cfg" ] && real_cfg=$(cd "$real_cfg" && pwd -P)
+real_home_dir=$(cd "$HOME" && pwd -P)
+for own in "$real_home_dir" "$real_home_dir/.claude" "$real_home_dir/.codex" /; do
+  [ "$real_cfg" = "$own" ] && die 2 "--agent-config $agent_config is the operator's own config; pick a dedicated dir"
+done
 config_var=CLAUDE_CONFIG_DIR
 [ "$agent" = codex ] && config_var=CODEX_HOME
 

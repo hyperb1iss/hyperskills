@@ -214,6 +214,12 @@ sandbox_dir=$(sed -n 's|^PATH=\(.*\)/bin$|\1|p' "$TMP/agent-report.txt")
 [ -n "$sandbox_dir" ] && [ ! -e "$sandbox_dir" ] && ok || bad "the sandbox is deleted on exit"
 [ ! -e "$studio" ] && ok || bad "the studio is deleted on exit"
 expect "a missing login dir stops the take" 3 take --tool 'Bash(acme:*)' --agent-config "$TMP/never-logged-in"
+mkdir -p "$TMP/fakehome/.claude"
+take_in_fakehome() { HOME="$TMP/fakehome" take "$@"; }
+expect "the operator's HOME is refused as a login dir" 2 take_in_fakehome --tool 'Bash(acme:*)' \
+  --agent-config "$TMP/fakehome/" --dry-run
+expect "the operator's ~/.claude is refused as a login dir" 2 take_in_fakehome --tool 'Bash(acme:*)' \
+  --agent-config "$TMP/fakehome/.claude" --dry-run
 
 expect "prove holds" 0 take --tool 'Bash(acme:*)' --skill "$TMP/skill/acme" --keep \
   --prove --probe acme --probe-expect 'no config'
