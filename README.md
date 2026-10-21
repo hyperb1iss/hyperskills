@@ -9,7 +9,7 @@
 <!-- BEGIN GENERATED: skill-badge -->
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Skills-13-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="13 Skills">
+  <img src="https://img.shields.io/badge/Skills-14-e135ff?style=for-the-badge&logo=anthropic&logoColor=white" alt="14 Skills">
 </p>
 
 <!-- END GENERATED: skill-badge -->

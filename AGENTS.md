@@ -62,6 +62,27 @@ hyperskills/
 │   │   │   └── run_claude_review.py
 │   │   └── tests/
 │   │       └── test_observable_review.py
+│   ├── demo-reel/
+│   │   ├── SKILL.md
+│   │   ├── assets/
+│   │   │   ├── card.html
+│   │   │   └── timer.html
+│   │   ├── references/
+│   │   │   ├── agent-on-camera.md
+│   │   │   ├── capture.md
+│   │   │   ├── demo-world.md
+│   │   │   ├── edit-render.md
+│   │   │   ├── examples.md
+│   │   │   ├── gotchas.md
+│   │   │   ├── method.md
+│   │   │   └── verify.md
+│   │   └── scripts/
+│   │       ├── agent-take.sh
+│   │       ├── capture-web.mjs
+│   │       ├── contact-sheet.sh
+│   │       ├── doctor.sh
+│   │       ├── selftest.sh
+│   │       └── verify-mp4.sh
 │   ├── deslop/
 │   │   ├── SKILL.md
 │   │   ├── references/
@@ -129,6 +150,7 @@ hyperskills/
 | [brainstorm](skills/brainstorm/SKILL.md)                 | 0               |
 | [codex-imagegen](skills/codex-imagegen/SKILL.md)         | 0               |
 | [cross-model-review](skills/cross-model-review/SKILL.md) | 4               |
+| [demo-reel](skills/demo-reel/SKILL.md)                   | 8               |
 | [deslop](skills/deslop/SKILL.md)                         | 7               |
 | [dream](skills/dream/SKILL.md)                           | 2               |
 | [git](skills/git/SKILL.md)                               | 0               |
