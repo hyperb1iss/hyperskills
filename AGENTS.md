@@ -166,7 +166,7 @@ hyperskills/
 
 Reference counts include every Git-visible file under `references/`, including fixtures.
 
-Process skills cover approaches to work: brainstorm, plan, research, orchestrate, implement, cross-model-review, hyper-pr-review, codex-imagegen, super-good-pr, deslop, and dream.
+Process skills cover approaches to work: brainstorm, plan, research, orchestrate, implement, cross-model-review, hyper-pr-review, codex-imagegen, super-good-pr, deslop, dream, and demo-reel.
 
 Domain skills cover specialized operational knowledge: git and tui-design. Ordinary package management, linting, and type checking use current tool help and official documentation; the former Astral and Tilt skills are retired.
 
@@ -193,7 +193,7 @@ Scripts belong in `scripts/` when deterministic execution improves reliability. 
 
 ## Validation and Evaluation
 
-Run `make check` for manifests, parsed YAML, required metadata, size limits, and concrete bundled references. The validator inspects all skill directories, including new untracked skills. Run `make test` for validator, scanner, and observable review runner regressions. The checks use uv to run isolated Python with PyYAML, plus Bash and Perl.
+Run `make check` for manifests, parsed YAML, required metadata, size limits, and concrete bundled references. The validator inspects all skill directories, including new untracked skills. Run `make test` for validator, scanner, observable review runner, and demo-reel regressions. The checks use uv to run isolated Python with PyYAML, plus Bash, Perl, and ffmpeg.
 
 For a workflow change, select realistic cases from [evals/README.md](evals/README.md) or add a case for a newly discovered failure. Evaluate the produced artifact and actions, not whether the response repeats a heading or phrase. Include a negative routing case when changing discovery metadata. A task requiring additional live access or publishing uses an isolated fixture or stops at a reviewable artifact.
 

@@ -1,7 +1,7 @@
 {
   "name": "hyperskills",
   "version": "3.12.0",
-  "description": "Focused skills for capable coding agents: design exploration, research, planning, implementation, multi-agent coordination, independent review, prose editing, memory, Git, terminal UI, and delegated image generation.",
+  "description": "Focused skills for capable coding agents: design exploration, research, planning, implementation, multi-agent coordination, independent review, prose editing, memory, Git, terminal UI, delegated image generation, and demo reels that test the product.",
   "author": {
     "name": "Stefanie Jane",
     "url": "https://hyperbliss.tech"
@@ -102,6 +102,20 @@
     "context-engineering",
     "observable-review",
     "review-progress",
-    "stream-json"
+    "stream-json",
+    "demo-reel",
+    "demo-video",
+    "product-video",
+    "promo-video",
+    "screen-recording",
+    "acceptance-testing",
+    "shot-list",
+    "deterministic-capture",
+    "playwright",
+    "ffmpeg",
+    "agent-on-camera",
+    "sandboxed-agent",
+    "contact-sheet",
+    "video-verification"
   ]
 }

@@ -58,16 +58,17 @@ The installer links each skill into `~/.agents/skills` and `~/.claude/skills`. E
 
 Start where the uncertainty is. A clear bug can go straight to implementation; an open product question benefits from exploration before a plan. The combinations below are examples.
 
-| Situation                            | Useful combination                                          |
-| ------------------------------------ | ----------------------------------------------------------- |
-| Unresolved feature direction         | brainstorm, then research where facts decide the choice     |
-| Large change with known requirements | plan, implement, independent review                         |
-| Independent workstreams              | orchestrate with explicit ownership and integration         |
-| PR review                            | hyper-pr-review; cross-model-review for another perspective |
-| PR authoring                         | super-good-pr                                               |
-| Prose cleanup                        | deslop with the artifact's existing voice and format        |
-| Raster asset from another harness    | codex-imagegen                                              |
-| Durable lessons from past sessions   | dream                                                       |
+| Situation                              | Useful combination                                          |
+| -------------------------------------- | ----------------------------------------------------------- |
+| Unresolved feature direction           | brainstorm, then research where facts decide the choice     |
+| Large change with known requirements   | plan, implement, independent review                         |
+| Independent workstreams                | orchestrate with explicit ownership and integration         |
+| PR review                              | hyper-pr-review; cross-model-review for another perspective |
+| PR authoring                           | super-good-pr                                               |
+| Prose cleanup                          | deslop with the artifact's existing voice and format        |
+| Raster asset from another harness      | codex-imagegen                                              |
+| Durable lessons from past sessions     | dream                                                       |
+| A product video that tests the product | demo-reel; cross-model-review for its verifiers             |
 
 ## Process skills
 
@@ -159,6 +160,14 @@ Review authorized conversation history for decisions and recurring lessons that 
 /hyperskills:dream
 ```
 
+### `demo-reel`
+
+Make a demo reel that doubles as an acceptance test of the real product. Every shot in the list is a test, a failed take starts a fix lane with evidence, and the whole reel is reshot until it passes. Bundled scripts check the toolchain, capture web pages deterministically at 4K, film an agent in a sandbox that cannot reach real configuration, and verify rendered video. An agent handed the skill's URL can clone it and run them; ffmpeg is the only system dependency, and browser capture adds Node and Playwright.
+
+```text
+/hyperskills:demo-reel
+```
+
 ## Domain skills
 
 ### `git`
@@ -189,11 +198,11 @@ The [September 2026 review](docs/library-review-2026-09.md) records the substant
 
 ## Development
 
-The checks use `uv` (Python and isolated PyYAML), Bash, and Perl. Markdown linting and formatting use the tools named in the Makefile.
+The checks use `uv` (Python and isolated PyYAML), Bash, Perl, and ffmpeg (for the demo-reel selftest). Markdown linting and formatting use the tools named in the Makefile.
 
 ```bash
 make check      # Parse manifests, YAML frontmatter, and bundled references
-make test       # Run validator, scanner, and review-runner regressions
+make test       # Run validator, scanner, review-runner, and demo-reel regressions
 make all        # Run both checks and tests
 make lint       # Optional JSON, YAML, and Markdown lint tools
 make format     # Format tracked Markdown and JSON
