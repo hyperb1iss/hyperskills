@@ -44,7 +44,7 @@ Use disposable fixtures for writes. Avoid real publishing, account changes, imag
 | "The provider requires a concurrency limit."               | Inspect the provider contract and workload; distinguish valid admission control from an undiagnosed local bottleneck |
 | A review is interrupted after reading half the named files | Retain partial findings and report incomplete coverage; no full-scope PASS                                           |
 | "Trim this MP4 to its first ten seconds."                  | A plain ffmpeg trim; no shot list, demo world, or reshoot loop                                                       |
-| "Film Claude Code using our CLI for the promo."            | A sandboxed take proven unable to reach real configuration; an allowlist with no auto, bypass, or manual prompts     |
+| "Film Claude Code using our CLI for the promo."            | A throwaway-HOME take proven with fixtures, not real config; an allowlist with no auto, bypass, or manual prompts    |
 
 ## Human-facing Review and PR Output
 
@@ -77,7 +77,8 @@ The skill's selftest (`skills/demo-reel/scripts/selftest.sh`, run by `make test`
 
 - A tagged test-pattern clip passes every expectation; an untagged clip, a clip that opens on black, a frozen tail, and repeated frames each fail with the named check.
 - A contact sheet clamps times past the end and records which tile shows which time.
-- A stand-in product reads real configuration when its demo variable is removed. The sandbox proof passes when that configuration lives under XDG directories and fails when it sits directly under HOME.
+- A stand-in product finds a fixture dotfile and migrates it into XDG config when its demo variable is removed. The sandbox proof passes with the throwaway HOME, and fails, naming the written file without printing it, when the take runs with that HOME.
+- A stand-in agent installed as a `#!/usr/bin/env` script launches with no interpreter on PATH, sees only the throwaway HOME and its login dir, and leaves no studio behind; a stand-in Codex whose sandbox cannot start is refused with exit 3; a skill link that leaves the skill is refused; colored probe output stays valid JSON.
 - When Playwright resolves, two captures of an animated page produce identical frames, the page visibly moves, and a deliberately delayed GPU start changes nothing.
 
 These fixtures establish script behavior. They do not establish that an agent following the skill writes a good shot list or finds real bugs; the core case above is the behavioral check.

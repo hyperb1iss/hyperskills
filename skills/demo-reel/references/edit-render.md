@@ -13,7 +13,7 @@ C='scale=out_color_matrix=bt709:out_range=tv,format=yuv420p,setparams=color_prim
 # 10-bit master: format=yuv420p10le in place of format=yuv420p
 ```
 
-The `scale` converts RGB sources (screenshots, PNG cards) with the BT.709 matrix instead of ffmpeg's BT.601 default. The `setparams` writes the color tags into the stream; in testing, the `-color_primaries` and `-color_trc` output options alone left primaries and transfer unset. Mixing an untagged BT.601 intermediate with a BT.709 one in a crossfade shifts the colors of one side, so tag intermediates too. Hypercolor's first 4K master shipped to its verifier without in-stream tags; the verifier failed it.
+The `scale` converts RGB sources (screenshots, PNG cards) with the BT.709 matrix instead of ffmpeg's BT.601 default. The `setparams` writes the color tags into the stream; in testing, the `-color_primaries` and `-color_trc` output options alone left primaries and transfer unset. Mixing an untagged BT.601 intermediate with a BT.709 one in a crossfade shifts the colors of one side, so tag intermediates too. A master without in-stream tags is a common reason for colors that look off in one player and fine in another.
 
 Intermediates below use `M='-c:v libx264 -preset veryfast -crf 12 -pix_fmt yuv420p'`: near-lossless, fast, the same size and frame rate for every piece so they join without surprises. Always pass `-nostdin`: ffmpeg otherwise reads standard input and eats the rest of a script or a `while read` loop.
 
@@ -75,14 +75,14 @@ ffmpeg -nostdin -ss 8 -t 4 -i take.mp4 -an \
   $M zoom.mp4
 ```
 
-For a still (a gallery screenshot), do the camera move in HTML: an `<img>` with a CSS transform animation, rendered by `capture-web.mjs`, moves by sub-pixels and is deterministic. Unifly's promo used the same idea (sub-pixel Ken Burns moves over 2800x1700 stills, rendered in code) for every TUI segment.
+For a still (a gallery screenshot), do the camera move in HTML: an `<img>` with a CSS transform animation, rendered by `capture-web.mjs`, moves by sub-pixels and is deterministic. The same idea works for every terminal segment: a slow push over a large still inside a rendered window frame.
 
 ## Titles and captions
 
 ```bash
 # A title card still, at 4K.
 node scripts/capture-web.mjs --still card.png --at 1200 \
-  --url 'assets/card.html#kicker=unifly&title=Your%20network.%20Your%20terminal.'
+  --url 'assets/card.html#kicker=acme&title=Your%20product.%20On%20camera.'
 ffmpeg -nostdin -loop 1 -framerate 60 -t 3 -i card.png -vf "$C" $M card.mp4
 
 # An animated card straight to video.
@@ -99,7 +99,7 @@ ffmpeg -nostdin -i clip-4k.mp4 -loop 1 -framerate 60 -t 4.5 -i cap.png -filter_c
 
 Render overlays at the edit's size: `capture-web.mjs` defaults to 3840x2160, so a 1080p edit needs `--scale 1`. A 4K caption laid over a 1080p clip lands entirely off the frame, and ffmpeg reports no error.
 
-Copy `assets/card.html` into the project and restyle it there: palette and fonts are CSS variables, and local font files load offline. Fonts carry the brand; hypercolor's first cut went back partly because "these fonts suck".
+Copy `assets/card.html` into the project and restyle it there: palette and fonts are CSS variables, and local font files load offline. Fonts carry the brand; a cut with the wrong fonts goes back however good the footage is.
 
 ## Final encodes
 
@@ -118,9 +118,9 @@ ffmpeg -nostdin -i reel-4k.mp4 -vf "scale=1920:1080:flags=lanczos,$C" -c:v libx2
   -crf 18 -c:a copy -movflags +faststart reel-1080p.mp4
 ```
 
-Hardware encoders (`hevc_videotoolbox`, `hevc_nvenc`) are much faster for drafts and masters alike; hypercolor's 60 s 4K master went through `hevc_nvenc` Main 10. Run `verify-mp4.sh` on every deliverable whatever the encoder.
+Hardware encoders (`hevc_videotoolbox`, `hevc_nvenc`) are much faster for drafts and masters alike, and 10-bit HEVC through them is a fine master. Run `verify-mp4.sh` on every deliverable whatever the encoder.
 
-Rendering offline frame by frame scales well: pipe frames straight into ffmpeg's standard input with no intermediate files (hypercolor rendered 3,600 4K frames in 203 s that way), and keep each frame a pure function of film time so a re-render is the same film.
+Rendering offline frame by frame scales well: pipe frames straight into ffmpeg's standard input with no intermediate files ([examples.md](examples.md) has a 60 s 4K60 reel rendered that way in under four minutes), and keep each frame a pure function of film time so a re-render is the same film.
 
 ## Audio
 
@@ -132,8 +132,8 @@ ffmpeg -nostdin -i score.wav -i cut.mp4 \
   -map 1:v -map "[a]" -c:v copy -c:a aac -b:a 320k -ar 48000 -shortest cut-audio.mp4
 ```
 
-Music drives the edit when there is a score: hypercolor's was synthesized from code at 128 BPM, its cue sheet set the edit's bar grid, and a test checked that a second synthesis was bit-identical. Use only music you have the rights to.
+Music drives the edit when there is a score: let its cue sheet set the edit's bar grid, and if the score is synthesized from code, test that a second synthesis is bit-identical. Use only music you have the rights to.
 
 ## Open on a picture
 
-GitHub, most players, and chat unfurls show frame 0 as the preview. Open on a composed title card, not a fade from black: unifly's first README cut faded in from black (frame 0 mean luma 18 of 255), and the fix composed the card from frame 0 (luma 32). `verify-mp4.sh` checks frame 0 by default. GitHub plays a README video only when the file was uploaded through its web editor (drag the MP4 into an issue or comment box and paste the resulting link).
+GitHub, most players, and chat unfurls show frame 0 as the preview. Open on a composed title card, not a fade from black: a cut that fades in has a black preview (a frame 0 mean luma near 18 of 255); composing the card from frame 0 fixes it. `verify-mp4.sh` checks frame 0 by default. GitHub plays a README video only when the file was uploaded through its web editor (drag the MP4 into an issue or comment box and paste the resulting link).

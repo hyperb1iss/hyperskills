@@ -1,20 +1,20 @@
 # Gotchas
 
-Traps the hypercolor and unifly reels paid for, plus the ones this skill's scripts were built around. Each names where it bit.
+Traps that real reels paid for, plus the ones this skill's scripts were built around.
 
 ## The machine
 
-- **Chromium renderer memory at 4K.** Hypercolor's first 4K master died at frame 1979: each frame was posted out of the page with `fetch`, the POST bodies stayed in renderer memory until garbage collection (about 33 MB a frame, 16.5 GB in all), and Chromium crashed. An orphaned renderer still held 16.6 GB and needed `SIGKILL`. Stream frames over a channel that does not retain them (screenshots or a WebSocket with one-at-a-time acknowledgement), and watch renderer memory on the first long render.
+- **Chromium renderer memory at 4K.** Posting each frame out of the page with `fetch` kept every POST body in renderer memory until garbage collection (about 33 MB a frame at 4K, 16 GB by frame 2000), and Chromium crashed; the orphaned renderer needed `SIGKILL`. Stream frames over a channel that does not retain them (screenshots or a WebSocket with one-at-a-time acknowledgement), and watch renderer memory on the first long render.
 - **Removed iframes keep GPU buffers.** The second master failed near frame 2100 when effect iframes, removed from the page, kept their GPU buffers and filled a 12 GB card. Release GPU resources explicitly when a shot ends, and sample GPU memory during the first full render.
 - **tmpfs makes fsync free,** so an A/B of anything that writes durably shows no difference there. Benchmark on the disk the product uses.
-- **RAM-backed `/tmp` loses deliverables and fills fast.** Unifly's verifier builds filled a 32 GB tmpfs until tool output failed with ENOSPC; deliverables were copied off it before the release. Keep takes, renders, and receipts on disk.
-- **Build caches fill the disk.** Hypercolor's shared incremental cache reached 391 GB and filled the disk mid-shoot; its fix (pruning idle entries) shipped as a PR. Check free space before a render (`doctor.sh` does) and after a day of parallel builds.
+- **RAM-backed `/tmp` loses deliverables and fills fast.** Parallel verifier builds can fill a 32 GB tmpfs until tool output fails with ENOSPC. Keep takes, renders, and receipts on disk.
+- **Build caches fill the disk.** A shared incremental build cache can grow to hundreds of GB over a shoot with parallel lanes. Check free space before a render (`doctor.sh` does) and after a day of parallel builds.
 - **Protect the live system.** Five parallel compile lanes pushed load to 60 on 28 cores and dropped the live daemon from 60 to 45 FPS during a rehearsal. Run builds and renders at `nice -n 19` when the product under test shares the machine.
-- **A shared build cache can link the wrong worktree's build,** producing a false test failure. Hypercolor saw it three times in one day.
+- **A shared build cache can link the wrong worktree's build,** producing a false test failure.
 
 ## Processes and shells
 
-- **`pgrep -f` and `pkill -f` match your own shell.** A memory trace in hypercolor hung forever because `pgrep -f` matched the agent's own command line; a `pkill -f` in unifly killed the agent's shell. Match on an exact PID file or a name that only the target has.
+- **`pgrep -f` and `pkill -f` match your own shell.** A watch loop can wait forever on its own command line, and a `pkill -f` can kill the shell that ran it. Match on an exact PID file or a name that only the target has.
 - **`exec` takes the window with it.** A take launched with `exec` closed the capture window and terminal instance when it exited.
 - **ffmpeg reads standard input.** Without `-nostdin` it consumes the rest of a script, a heredoc, or a `while read` loop.
 - **`-t` after `-i` limits the output.** In a speed change, it sped up the whole rest of the take.
@@ -42,12 +42,15 @@ Traps the hypercolor and unifly reels paid for, plus the ones this skill's scrip
 - **An allowlist rule does not cover shell expansions.** `Bash(echo:*)` did not allow `echo "$PATH"` in dontAsk mode.
 - **Demo variables are a convention, not a wall.** `env -u DEMO_VAR` removes them; make the real configuration unreachable instead.
 - **Take transcripts persist outside the studio.** Claude Code saves them under the real home; read them and delete any that captured something real.
-- **An agent's helper lanes can touch the real system too.** Unifly's ordering lane ran one read-only command against the real controller, unasked; lane briefs then said to use the demo world and mocked tests only.
+- **An agent's helper lanes can touch the real system too.** A fix lane may run one quick command against the real service to check its work. Brief every lane to use the demo world and mocked tests only.
+- **A proof can copy what it proves absent.** Pointing a probe at a real account lets a CLI migrate its legacy config, keys included, into the sandbox's XDG dir. Prove with fixtures and stand-in tools; `agent-take.sh --prove` fails on any write during probes, names files without printing them, and deletes its dirs.
+- **npm-installed agents are scripts.** `#!/usr/bin/env node` fails with exit 127 when node is not on the take's PATH. `agent-take.sh` runs the interpreter by absolute path instead of adding it to PATH.
+- **Codex's sandbox needs platform support.** On Linux, bubblewrap fails without unprivileged user namespaces ("No permissions to create a new namespace"). Preflight with `codex sandbox -- true` and stop; never fall back to full access. In 0.163.0, `codex sandbox -C DIR` also demands `--permission-profile`, and macOS has `/usr/bin/true` but no `/bin/true`.
 
 ## Edit and delivery
 
 - **Untagged intermediates shift color** when mixed with tagged ones; use one color chain everywhere.
 - **`-color_primaries` and `-color_trc` alone did not tag the stream** in testing; `setparams` does.
-- **A camera move stepped at 24 Hz on a 60 fps timeline judders,** and effects stepping mid-shutter read as glitches. Hypercolor's verifier caught both.
+- **A camera move stepped at 24 Hz on a 60 fps timeline judders,** and effects stepping mid-shutter read as glitches.
 - **GitHub's README video preview is frame 0,** and README videos play only when uploaded through GitHub's web editor.
-- **Browser cache can show the old README assets** when file names did not change; unifly's "old screenshots" alarm was cache.
+- **Browser cache can show the old README assets** when file names did not change; check in a private window before assuming an upload failed.

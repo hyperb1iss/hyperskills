@@ -162,7 +162,7 @@ Review authorized conversation history for decisions and recurring lessons that 
 
 ### `demo-reel`
 
-Make a demo reel that doubles as an acceptance test of the real product. Every shot in the list is a test, a failed take starts a fix lane with evidence, and the whole reel is reshot until it passes. Bundled scripts check the toolchain, capture web pages deterministically at 4K, film an agent in a sandbox that cannot reach real configuration, and verify rendered video. An agent handed the skill's URL can clone it and run them; ffmpeg is the only system dependency, and browser capture adds Node and Playwright.
+Make a demo reel that doubles as an acceptance test of the real product. Every shot in the list is a test, a failed take starts a fix lane with evidence, and the whole reel is reshot until it passes. Bundled scripts check the toolchain, capture web pages deterministically at 4K, film an agent with a throwaway HOME, a dedicated login, and an allowlist (brakes rather than isolation, with a proof that shows which ones hold), and verify rendered video. An agent handed the skill's URL can clone it and run them; ffmpeg is the only system dependency, and browser capture adds Node and Playwright.
 
 ```text
 /hyperskills:demo-reel

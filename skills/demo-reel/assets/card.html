@@ -7,13 +7,13 @@
 
   A still card (open the reel on one: frame 0 is the preview on GitHub):
     node scripts/capture-web.mjs --still card.png --at 1200 \
-      --url 'assets/card.html#kicker=unifly&title=Your%20network.%20Your%20terminal.'
+      --url 'assets/card.html#kicker=acme&title=Your%20product.%20On%20camera.'
   An animated card as video:
     node scripts/capture-web.mjs --out card.mp4 --seconds 3 \
       --url 'assets/card.html#title=Every%20light.&sub=One%20engine.'
   A caption with a transparent background, for overlay:
     node scripts/capture-web.mjs --still caption.png --at 900 --transparent \
-      --url 'assets/card.html#mode=caption&kicker=Agents&title=Claude%20Code%20diagnoses%20the%20studio%20network'
+      --url 'assets/card.html#mode=caption&kicker=Agents&title=The%20agent%20finds%20the%20offline%20device'
 
   Hash settings: mode=card|caption, kicker, title, sub, align=center|left,
   enter=1 (rise-in animation, default on; 0 for a static frame).

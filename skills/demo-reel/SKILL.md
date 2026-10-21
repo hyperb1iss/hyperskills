@@ -7,15 +7,15 @@ description: Use this skill when making a demo reel, demo video, product video, 
 
 Use the act of making a demo reel to test the product. A reel shows what a customer would see, shot by shot, on the real thing; shooting it end to end is an acceptance test a mock cannot pass. Every failed shot is a bug to chase, not noise to retry past. The finished reel is the evidence and the promo at once.
 
-Two open-source reels made this way are written up in [references/examples.md](references/examples.md): hypercolor's first dress rehearsal passed 0 of 8 shots, and the reel ended with nine merged PRs it found; unifly's demo world surfaced six real-controller bugs before a frame was shot, and its shoot and agent takes produced six fix PRs.
+[references/examples.md](references/examples.md) tells the story of two reels made this way and the fixes they found.
 
 ## Pointed here by URL?
 
-If this skill is not installed, fetch it; every script resolves its own paths.
+If this skill is not installed, fetch it; every script resolves its own paths. The skill lives on the repository's `main` branch.
 
 ```bash
 DR="$(mktemp -d)/hyperskills"
-git clone --depth 1 https://github.com/hyperb1iss/hyperskills "$DR"
+git clone --depth 1 --branch main https://github.com/hyperb1iss/hyperskills "$DR"
 DR="$DR/skills/demo-reel"
 bash "$DR/scripts/doctor.sh"        # every failure prints its fix
 bash "$DR/scripts/selftest.sh"      # offline proof the toolkit works here
@@ -79,18 +79,21 @@ node scripts/capture-web.mjs --still card.png --at 1200 --url 'assets/card.html#
 node scripts/capture-web.mjs --transparent --frames timer/ --seconds 16 \
   --url 'assets/timer.html#map=0:0,1.5:1.5,6:46.5,16:56.5'
 
-# An agent on camera, sandboxed. Prove first, dry-run to see the command, then shoot.
-scripts/agent-take.sh --prove --dir ~/neon-harbor --allow unifly --env UNIFI_DEMO_FLEET=1 \
-  --tool 'Bash(unifly:*)' --probe 'unifly config show' --probe-expect 'No profiles'
-scripts/agent-take.sh --dry-run ...   # same options; prints env and argv
-scripts/agent-take.sh ...             # launches in this terminal
+# An agent on camera, sandboxed. Sign in once, prove with fixtures, dry-run, then shoot.
+scripts/agent-take.sh --login                     # once: a login dir just for takes
+scripts/agent-take.sh --prove --allow acme --env ACME_DEMO=1 --skill path/to/skills/acme \
+  --tool 'Bash(acme:*)' --tool 'Skill(acme)' --probe 'acme config show' --probe-expect 'no config'
+scripts/agent-take.sh --dry-run ...   # same options; prints env, argv and settings
+scripts/agent-take.sh --dir ~/example-studio ...  # launches in this terminal
 
 # Review and verify.
 scripts/contact-sheet.sh --at 0,2,10.4,15 reel.mp4 review/cuts.png
-scripts/verify-mp4.sh --expect-size 3840x2160 --expect-fps 60 --expect-duration 60 reel.mp4
+scripts/verify-mp4.sh --expect-size 3840x2160 --expect-fps 60 --expect-duration 60 --max-freeze 6 reel.mp4
 ```
 
-Every script takes `--help`, prints JSON with `--json` where an agent loops on it, and uses stable exit codes: 0 ok, 1 a check failed, 2 usage, 3 a dependency is missing, 4 bad input or a failed step (`capture-web.mjs` adds 5 for an encoder failure). `scripts/agent-take.sh` uses only flags checked against Claude Code 2.1.306 and Codex 0.163.0 `--help`; rerun `--help` on the installed versions before trusting new flags.
+`acme` stands for the user's product: its CLI, its demo variable, its skill. Prove the sandbox with fixtures and stand-in tools, never by pointing a probe at a real login or real configuration. A maximum freeze longer than the longest deliberate hold catches a reel that stalls.
+
+Every script takes `--help`, prints JSON with `--json` where an agent loops on it, and uses stable exit codes: 0 ok, 1 a check failed, 2 usage, 3 a dependency is missing, 4 bad input or a failed step (`capture-web.mjs` adds 5 for an encoder failure). `scripts/agent-take.sh` uses only flags checked against Claude Code 2.1.306 and Codex 0.163.0 `--help`, and settings keys checked against the Claude Code binary's settings schema; recheck on newer versions.
 
 ## House taste
 
@@ -113,8 +116,8 @@ Every script takes `--help`, prints JSON with `--json` where an agent loops on i
 | [references/agent-on-camera.md](references/agent-on-camera.md) | Filming an agent: the sandbox, the flags, the proof, shooting and cutting the take           |
 | [references/edit-render.md](references/edit-render.md)         | Tested ffmpeg recipes: color chain, cuts, speed with a timer, fades, zooms, cards, encodes   |
 | [references/verify.md](references/verify.md)                   | File contracts, stills review, true claims, checking what a pass measured, second opinions   |
-| [references/gotchas.md](references/gotchas.md)                 | Traps both reels paid for, by area                                                           |
-| [references/examples.md](references/examples.md)               | Hypercolor and unifly as case studies with links to their PRs                                |
+| [references/gotchas.md](references/gotchas.md)                 | Traps worth knowing before the first take, by area                                           |
+| [references/examples.md](references/examples.md)               | Two real reels as stories: what each caught, with links to the PRs                           |
 
 ## What This Skill is NOT
 

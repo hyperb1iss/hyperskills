@@ -27,7 +27,7 @@ digraph reel_loop {
 3. **A shot fails.** A failed take is a finding, not noise to retry past. Record it in the failure ledger before doing anything else, with the footage and the numbers.
 4. **A fix lane.** One agent owns one failure until the cause is proven. Lanes run in parallel in their own worktrees; a lane that touches shared state (a database, a device, a build cache) names that resource and gets it to itself.
 5. **The fix, with evidence.** Footage and commands a reviewer can rerun: the failing take, the passing take, the measurement before and after, and the test that fails without the fix.
-6. **Reshoot.** The whole reel again, not only the fixed shot, until a full take passes. Fixes ripple: hypercolor's beat-threshold fix changed what the first drop looked like (stray beats fell from 8.7 to 1.1 a second), and unifly's fourth agent take reported it could not inspect switch ports until the demo world learned to answer for them.
+6. **Reshoot.** The whole reel again, not only the fixed shot, until a full take passes. Fixes ripple: a changed default can alter how a later shot looks, and a demo world that learns to answer one command changes what an agent finds in the next take. [examples.md](examples.md) has both.
 
 ## The shot list
 
@@ -41,9 +41,9 @@ Write it before any capture code. One row per shot.
 
 Rules for the pass column:
 
-- **Budget every shot in the product's own units:** frame time against the configured FPS, ack latency, time to first paint, a correct answer. Hypercolor's show runner judged each shot against the configured 60 FPS, and its first dress rehearsal passed 0 of 8 shots.
+- **Budget every shot in the product's own units:** frame time against the configured FPS, ack latency, time to first paint, a correct answer. A runner that judges each shot against the configured FPS makes the first dress rehearsal honest; expect it to fail most shots.
 - **Say what the pass measures and when.** "Page loaded" measured before data arrived is not a pass. See "check what the pass measured" in [verify.md](verify.md).
-- **Every claim that appears on screen is a row.** A caption is a claim; it needs a measurement like any other. Hypercolor's "EVERY BRAND." failed this check (three brands were unsupported), became "12 BRANDS.", and finally became a list without a number because the count keeps growing.
+- **Every claim that appears on screen is a row.** A caption is a claim; it needs a measurement like any other. "Every brand" fails the moment one brand is unsupported, and an exact count goes stale as support grows; a list of names without a number stays true.
 
 ## The failure ledger
 
@@ -61,15 +61,15 @@ One entry per failed take, written when the take fails. Keep it in the project's
 | Reshoot  | The full take that passed with the fix, by file name                      |
 | Status   | open, in lane, fixed, reshot (or parked, with the reason and who decided) |
 
-Log a finding that does not block any shot as a side quest instead of a ledger row, and keep shooting. A ledger row that is really the harness (the camera, the runner, the measurement) is still a row: hypercolor's runner spent nine review rounds on clock heuristics before the fix moved to the product's wire protocol as a monotonic timestamp, which then shipped as its own PR.
+Log a finding that does not block any shot as a side quest instead of a ledger row, and keep shooting. A ledger row that is really the harness (the camera, the runner, the measurement) is still a row. When a harness keeps guessing around the product's behavior, such as reconciling two clocks with heuristics, the fix often belongs in the product, such as a monotonic timestamp on its messages.
 
 ## A fix lane's definition of done
 
 A lane is done when all of these hold:
 
-1. **The cause is proven, not plausible.** A reproduction outside the reel shows the failure; the fix removes it; reverting the fix brings it back. Unifly's lanes reverted each fix to watch the new test fail, then restored it.
-2. **The evidence is rerunnable.** The commit or PR lists the commands, the before and after numbers, and the take files. Hypercolor's control-path PR carried an isolated A/B: a named-scene change went from 16.0 ms to 4.4 ms, and a 60 Hz stream held 4.5 ms at the median.
-3. **The measurement measured the fix.** The A/B ran where the effect can show (hypercolor's first commit-cost A/B ran on tmpfs, where fsync is free, and showed nothing).
+1. **The cause is proven, not plausible.** A reproduction outside the reel shows the failure; the fix removes it; reverting the fix brings it back. Revert each fix once to watch the new test fail, then restore it.
+2. **The evidence is rerunnable.** The commit or PR lists the commands, the before and after numbers, and the take files, ideally from an A/B on an isolated instance.
+3. **The measurement measured the fix.** The A/B ran where the effect can show; on tmpfs, where fsync is free, a durable-write fix shows nothing.
 4. **Someone else checked it.** An independent verifier read the change against the original failure; see [verify.md](verify.md).
 5. **The ledger says so,** and the next full reshoot includes the shot.
 
@@ -86,5 +86,5 @@ A lane that finds the failure is out of scope (an upstream bug, a hardware limit
 ## Brakes and the human bar
 
 - **A sandbox for any agent on camera** ([agent-on-camera.md](agent-on-camera.md)). An agent that can reach real configuration will, eventually, on camera.
-- **Protect the live system.** Run builds and renders under `nice` on a shared machine; parallel compile lanes once dropped hypercolor's live daemon from 60 to 45 FPS mid-rehearsal.
-- **A human says when it is good.** Pipelines can certify size, frame rate, and color tags. Only a person can say "it did okay but I'm not wild about the result", which is what sent hypercolor's first finished cut back for a rebuild at 4K. Show them stills and a draft early; their taste is part of the acceptance test.
+- **Protect the live system.** Run builds and renders under `nice` on a shared machine, one heavy job at a time; parallel compile lanes can drop a live product's frame rate mid-rehearsal and make the reel measure the build instead.
+- **A human says when it is good.** Pipelines can certify size, frame rate, and color tags. Only a person can say "it did okay but I'm not wild about the result", and that verdict can send a finished cut back for a rebuild. Show them stills and a draft early; their taste is part of the acceptance test.
