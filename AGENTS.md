@@ -36,6 +36,7 @@ hyperskills/
 ├── README.md
 ├── docs/
 │   ├── library-review-2026-09.md
+│   ├── library-review-2026-10.md
 │   └── releases.md
 ├── evals/
 │   └── README.md
