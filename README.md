@@ -74,7 +74,7 @@ Start where the uncertainty is. A clear bug can go straight to implementation; a
 
 ### `brainstorm`
 
-Explore the problem and alternatives before committing to a design. Uses the Double Diamond as a flexible frame, separates requirements from assumptions, and identifies the experiment that would change the recommendation. Clear implementation requests do not need a brainstorming detour.
+Explore the problem and alternatives before committing to a design. Treats the user's hunch as a hypothesis, separates explicit requirements from inferred preferences, and identifies the experiment that would change the recommendation. Clear implementation requests do not need a brainstorming detour.
 
 ```text
 /hyperskills:brainstorm

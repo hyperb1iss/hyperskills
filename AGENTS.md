@@ -47,13 +47,18 @@ hyperskills/
 │   └── validate_skills.py
 ├── skills/
 │   ├── brainstorm/
-│   │   └── SKILL.md
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── evidence.md
 │   ├── codex-imagegen/
-│   │   └── SKILL.md
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── evidence.md
 │   ├── cross-model-review/
 │   │   ├── SKILL.md
 │   │   ├── references/
 │   │   │   ├── cli-flags.md
+│   │   │   ├── evidence.md
 │   │   │   ├── failure-recovery.md
 │   │   │   ├── observable-reviews.md
 │   │   │   └── prompts.md
@@ -107,6 +112,7 @@ hyperskills/
 │   ├── hyper-pr-review/
 │   │   ├── SKILL.md
 │   │   └── references/
+│   │       ├── evidence.md
 │   │       ├── lenses.md
 │   │       ├── report-examples.md
 │   │       └── thermonuclear.md
@@ -114,15 +120,21 @@ hyperskills/
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │       ├── benchmarks.md
+│   │       ├── evidence.md
 │   │       └── recovery.md
 │   ├── orchestrate/
 │   │   ├── SKILL.md
 │   │   └── references/
-│   │       └── dispatch-briefs.md
+│   │       ├── dispatch-briefs.md
+│   │       └── evidence.md
 │   ├── plan/
-│   │   └── SKILL.md
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── evidence.md
 │   ├── research/
-│   │   └── SKILL.md
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── evidence.md
 │   ├── super-good-pr/
 │   │   ├── SKILL.md
 │   │   └── references/
@@ -131,6 +143,7 @@ hyperskills/
 │       ├── SKILL.md
 │       └── references/
 │           ├── app-patterns.md
+│           ├── evidence.md
 │           └── visual-catalog.md
 └── tests/
     ├── test_open_release_pr.py
@@ -147,20 +160,20 @@ hyperskills/
 
 | Skill                                                    | Reference files |
 | -------------------------------------------------------- | --------------- |
-| [brainstorm](skills/brainstorm/SKILL.md)                 | 0               |
-| [codex-imagegen](skills/codex-imagegen/SKILL.md)         | 0               |
-| [cross-model-review](skills/cross-model-review/SKILL.md) | 4               |
+| [brainstorm](skills/brainstorm/SKILL.md)                 | 1               |
+| [codex-imagegen](skills/codex-imagegen/SKILL.md)         | 1               |
+| [cross-model-review](skills/cross-model-review/SKILL.md) | 5               |
 | [demo-reel](skills/demo-reel/SKILL.md)                   | 8               |
 | [deslop](skills/deslop/SKILL.md)                         | 7               |
 | [dream](skills/dream/SKILL.md)                           | 2               |
 | [git](skills/git/SKILL.md)                               | 0               |
-| [hyper-pr-review](skills/hyper-pr-review/SKILL.md)       | 3               |
-| [implement](skills/implement/SKILL.md)                   | 2               |
-| [orchestrate](skills/orchestrate/SKILL.md)               | 1               |
-| [plan](skills/plan/SKILL.md)                             | 0               |
-| [research](skills/research/SKILL.md)                     | 0               |
+| [hyper-pr-review](skills/hyper-pr-review/SKILL.md)       | 4               |
+| [implement](skills/implement/SKILL.md)                   | 3               |
+| [orchestrate](skills/orchestrate/SKILL.md)               | 2               |
+| [plan](skills/plan/SKILL.md)                             | 1               |
+| [research](skills/research/SKILL.md)                     | 1               |
 | [super-good-pr](skills/super-good-pr/SKILL.md)           | 1               |
-| [tui-design](skills/tui-design/SKILL.md)                 | 2               |
+| [tui-design](skills/tui-design/SKILL.md)                 | 3               |
 
 <!-- END GENERATED: skill-inventory -->
 
@@ -187,7 +200,7 @@ Keep the entrypoint as short as the task permits. Under 5,000 words is the repos
 
 Write imperative guidance for the non-obvious moves. Use tables for comparisons and decisions, prose for connected reasoning, and examples for fragile mechanics. Include relevant anti-patterns and a clear scope boundary, conventionally titled "What This Skill is NOT". Graphviz `dot` is the default for internal workflow diagrams; choose a diagram only when it explains something prose cannot efficiently show.
 
-Label local conventions, observed incidents, and external evidence distinctly. A research claim needs a source, date or version where relevant, and limits. Do not generalize one model's benchmark into a permanent agent-count, token, confidence, or review-round quota. If a new model makes a workaround unnecessary, retire it after checking the behavior it protected.
+Label local conventions, observed incidents, and external evidence distinctly. A research claim needs a source, date or version where relevant, and limits. Dated sources and their limits live in the skill's `references/evidence.md`; the entrypoint keeps one line pointing there, so citations never load at invocation. Do not generalize one model's benchmark into a permanent agent-count, token, confidence, or review-round quota. If a new model makes a workaround unnecessary, retire it after checking the behavior it protected.
 
 Scripts belong in `scripts/` when deterministic execution improves reliability. Explain dependencies and side effects. Never present generated files or a model's self-report as proof without inspecting the actual output.
 
