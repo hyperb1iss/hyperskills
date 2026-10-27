@@ -19,7 +19,7 @@ Name the question, target system, time or version, and consequence of being wron
 | A broad landscape                        | Map distinct directions, then investigate gaps that could alter the answer     |
 | A codebase question                      | Trace the implementation and consumers before searching externally             |
 
-No minimum agent count, source count, wave count, or document size applies.
+No minimum or maximum agent count, source count, wave count, or document size applies; independent questions fan out in parallel.
 
 ## Match the Evidence to the Claim
 
@@ -64,7 +64,7 @@ Distinguish best-of-many success from reliable first-attempt behavior, and compa
 
 ## Parallelize Independent Questions
 
-Delegate only questions whose answers change the result, and give each worker the decision, scope, date or version, required source quality, and return format. Verify decisive source claims yourself. Agreement among agents can expose a shared source or shared mistake; it is not a confidence multiplier.
+Fan independent questions out to workers in parallel, and give each worker the decision, scope, date or version, required source quality, and return format. Verify decisive source claims yourself. Agreement among agents can expose a shared source or shared mistake; it is not a confidence multiplier.
 
 ## Stop on Decision Coverage
 
