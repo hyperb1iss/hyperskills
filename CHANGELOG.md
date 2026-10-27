@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.13.2
+
+- Fan out by default: orchestrate and research now treat parallel subagents as the normal path for independent work and limit by shared resources rather than agent count.
+
 ## 3.13.1
 
 - Compress the five process skills (brainstorm, plan, research, implement, orchestrate) to the guidance that still changes a decision for current models, keeping every table, worked example, and gotcha.

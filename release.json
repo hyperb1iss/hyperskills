@@ -1,7 +1,7 @@
 {
-  "version": "3.13.1",
-  "previous_version": "3.13.0",
-  "source_commit": "bf6f91770d7d70367873b5a894971a29a3a9721f",
-  "notes": "- Compress the five process skills (brainstorm, plan, research, implement, orchestrate) to the guidance that still changes a decision for current models, keeping every table, worked example, and gotcha.\n- Move dated citations out of every entrypoint into references/evidence.md so they stop loading at invocation; the contributor guide names the convention.\n- Trigger independent verification by consequence and run length instead of by file count, make one review pass the default, and sharpen the verifier brief: the code may be clean, residual risk on PASS, smallest fix on FAIL.\n- Add a hyper-pr-review lens for agent-authored pull requests and count repeat passes and distinct lenses as review diversity in cross-model-review.\n- Record the October 2026 library review in docs.\n",
+  "version": "3.13.2",
+  "previous_version": "3.13.1",
+  "source_commit": "d3b1f20807ac5841e8ce1e8d9cf6a422ac690178",
+  "notes": "- Fan out by default: orchestrate and research now treat parallel subagents as the normal path for independent work and limit by shared resources rather than agent count.\n",
   "bump": "patch"
 }
