@@ -7,7 +7,7 @@ description: Use this skill when designing terminal user interfaces, creating TU
 
 Design around the user's repeated action, the data they must keep in view, and the terminal capabilities actually available. Keep input responsive under slow I/O and make selection, focus, and operation state explicit.
 
-**Primary documentation checked: 2026-09-04.** Framework APIs change; use the project's versions. Follow the project's visual identity (SilkCircuit Neon for Bliss's personal tools) rather than treating an example palette as a universal theme.
+**Primary documentation checked: 2026-09-04.** Framework APIs change; use the project's versions. Follow the project's visual identity (SilkCircuit Neon for the maintainer's personal tools) rather than treating an example palette as a universal theme.
 
 ## Choose the Layout from the Work
 
