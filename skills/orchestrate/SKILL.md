@@ -24,7 +24,7 @@ Inspect the actual tools and current schemas instead of inferring capabilities f
 | Consequential review                    | Independent read-only reviewers with distinct risk lenses |
 | Small, tightly coupled change           | Direct execution                                          |
 
-Agent count follows named useful lanes, not historical fleet sizes. Check the critical path: a branch waiting on one shared interface gains nothing from more agents. Delegate when the work splits across independent surfaces and keep working while workers run; unless a verification trigger below applies, do not use a worker to double-check a small change you can verify yourself in a handful of tool calls.
+Fan out by default: anything that splits across independent surfaces runs in parallel, and the coordinator keeps working while workers run. The limits are resources, not agent count: one owner per shared mutable surface, one committer per index, and a sequential chain stays sequential. Check the critical path, since a branch waiting on one shared interface gains nothing from more agents. Do not cap a fleet to look frugal or serialize work to look careful; name the contended resource or don't restrict. A worker that double-checks a small change rarely pays; the verification triggers below say when it does.
 
 ## Establish Ownership and Integration
 
@@ -88,6 +88,7 @@ Reviewed 2026-09-04 and 2026-10-27; sources and their limits are in `references/
 | Anti-pattern                                        | Better move                                            |
 | --------------------------------------------------- | ------------------------------------------------------ |
 | Choose a fleet size before finding independent work | Name useful lanes and their integration path           |
+| Serialize parallelizable work to look careful       | Fan out; limit by shared resources, not agent count    |
 | Assume different files imply isolation              | Inspect shared runtime resources and generated outputs |
 | Let all shared-tree workers commit concurrently     | Assign ownership of the index and commit operation     |
 | Vote-count findings                                 | Verify mechanism and impact                            |
