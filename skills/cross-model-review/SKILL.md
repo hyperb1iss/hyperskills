@@ -81,9 +81,9 @@ Fix verified issues and inspect the fix for new regressions. Preserve reviewer i
 
 ## Converge on Evidence
 
-Keep a compact findings ledger when several rounds are needed. Each entry has an identity, evidence, disposition, and verification status. Subsequent briefs carry the prior finding verbatim and the changed artifact so the reviewer checks closure rather than rediscovering the conversation.
+One pass is the default. Run a second only to close a blocking finding whose fix is itself non-trivial; for a small fix, the coordinator verifies closure by reading the diff. Keep a compact findings ledger when a second round is needed. Each entry has an identity, evidence, disposition, and verification status. Subsequent briefs carry the prior finding verbatim and the changed artifact so the reviewer checks closure rather than rediscovering the conversation.
 
-Continue while rounds produce new confirmed defects or verify fixes. If the same objection returns without new evidence, settle the underlying contract or report the remaining disagreement. Avoid open-ended loops driven by a nonzero suggestion count. Nonblocking preferences do not expand an authorized fix into a redesign.
+A second pass asks only for closure of the carried findings. If the same objection returns without new evidence, settle the underlying contract or report the remaining disagreement. Avoid open-ended loops driven by a nonzero suggestion count. Nonblocking preferences do not expand an authorized fix into a redesign.
 
 | Verdict       | Meaning                                                                                                   |
 | ------------- | --------------------------------------------------------------------------------------------------------- |
