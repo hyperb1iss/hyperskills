@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.13.1
+
+- Compress the five process skills (brainstorm, plan, research, implement, orchestrate) to the guidance that still changes a decision for current models, keeping every table, worked example, and gotcha.
+- Move dated citations out of every entrypoint into references/evidence.md so they stop loading at invocation; the contributor guide names the convention.
+- Trigger independent verification by consequence and run length instead of by file count, make one review pass the default, and sharpen the verifier brief: the code may be clean, residual risk on PASS, smallest fix on FAIL.
+- Add a hyper-pr-review lens for agent-authored pull requests and count repeat passes and distinct lenses as review diversity in cross-model-review.
+- Record the October 2026 library review in docs.
+
 ## 3.13.0
 
 - Add demo-reel, a skill that films the real product end to end and treats the reel as its acceptance test. The shot list doubles as the test plan, and every failed take becomes a fix before the whole reel is reshot. Bundled scripts handle deterministic 4K browser capture, sandboxed agent takes, contact sheets, and MP4 verification.
