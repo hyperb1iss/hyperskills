@@ -25,7 +25,7 @@ Gather the original requirement, final behavior, decisive files, and checks that
 
 Name the behavior or design decision in the title. A reader scanning the PR list should distinguish this change from other work in the same subsystem. Prefer "Keep export retries attached to the original request" to "Improve export reliability." Follow the repository's title convention, including a Conventional Commit prefix when required; avoid packing internal symbols into the title at the expense of meaning.
 
-Open with the situation that makes the change necessary and what the reader can expect afterward. Connect the mechanism to that result when it helps explain the fix. For a refactor, name the engineering constraint it removes and the behavior it preserves; do not invent a user-facing defect. These are relationships to explain, not three mandatory sentences or headings.
+Open with the situation that makes the change necessary and what the reader can expect afterward. For a fix, say how it was found and what it affects. Connect the mechanism to that result when it helps explain the fix. For a refactor, name the engineering constraint it removes and the behavior it preserves; do not invent a user-facing defect. These are relationships to explain, not three mandatory sentences or headings.
 
 Keep the causal chain intact: trigger, consequence, changed behavior, reason the mechanism works. A list of edited files cannot supply that chain. Keep internal identifiers out of the opening until the reader knows what they represent.
 
@@ -140,7 +140,7 @@ Read the draft as a reviewer returning cold: can the title and opening explain t
 
 Use a small navigation block naming the current layer, its base, and adjacent PRs. The body says what this layer contributes and what belongs to later layers. Confirm status before marking a predecessor merged or claiming a rebase onto the current base.
 
-Split by coherent review and verification boundaries. A description should clarify the chosen stack, not prescribe universal PR-size limits or force an unrelated branch restructuring. Stack mechanics belong to `git` and `plan`.
+Default to one PR; split only when review domains differ (a correctness fix that should land without waiting on a surface review) or when the repository keeps one migration per PR. Split by coherent review and verification boundaries. A description should clarify the chosen stack, not prescribe universal PR-size limits or force an unrelated branch restructuring. Stack mechanics belong to `git` and `plan`.
 
 ## Anti-Patterns
 

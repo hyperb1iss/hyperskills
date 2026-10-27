@@ -38,13 +38,13 @@ Read the user's requirements and relevant acceptance criteria before judging beh
 
 ## Choose Coverage by Risk
 
-| Change                                                  | Useful review shape                                                        |
-| ------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Narrow, low-impact edit                                 | Direct check of the requested behavior and affected references             |
-| Feature or bug fix                                      | Trace changed behavior, real callers, error paths, and acceptance criteria |
-| Auth, payments, migrations, concurrency, infrastructure | Add relevant security, state-transition, rollout, and recovery checks      |
-| Explicit deep or thermonuclear audit                    | Cover the full named surface and examine structural alternatives           |
-| Foundation or platform layer in a stack                 | Run the necessity lens first, review the contract by its downstream consequences, and require each layer to be safe to enable alone |
+| Change                                                  | Useful review shape                                                                                                                                                       |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Narrow, low-impact edit                                 | Direct check of the requested behavior and affected references                                                                                                            |
+| Feature or bug fix                                      | Trace changed behavior, real callers, error paths, and acceptance criteria                                                                                                |
+| Auth, payments, migrations, concurrency, infrastructure | Add relevant security, state-transition, rollout, and recovery checks                                                                                                     |
+| Explicit deep or thermonuclear audit                    | Cover the full named surface and examine structural alternatives                                                                                                          |
+| Foundation or platform layer in a stack                 | Run the necessity lens first, review the contract by its downstream consequences, and require each layer to be safe to enable alone                                       |
 | Agent-authored change                                   | Add the agent-PR lens: CI weakening, duplicated helpers, one traced critical path with a failing-first test for changed behavior, untrusted input reaching workflow steps |
 
 Use independent lenses when the concerns separate and delegation is available and authorized. A deep review needs deliberate coverage, not a particular agent count. A solo reviewer can apply the same lenses sequentially.
@@ -53,7 +53,7 @@ For broad work, keep a compact inventory of changed invariants and affected cons
 
 ## Turn Suspicions into Findings
 
-First establish relevance. Drop unsupported style preferences and speculative scenarios without a reachable trigger. Record pre-existing issues separately unless the change worsens them or newly depends on them. A missing test is material when it leaves a specific changed behavior vulnerable to regression. When delegating a review, say the code may be clean; a supported clean result that names the checks run is a complete answer.
+First establish relevance. Drop unsupported style preferences and speculative scenarios without a reachable trigger. Record pre-existing issues separately unless the change worsens them or newly depends on them. When the same finding class recurs across review rounds, recommend restructuring or cutting the mechanism rather than another patch. A missing test is material when it leaves a specific changed behavior vulnerable to regression. When delegating a review, say the code may be clean; a supported clean result that names the checks run is a complete answer.
 
 Run available linters and typecheckers when appropriate. Deduplicate their output, but do not suppress a real build failure because CI should catch it. Check whether the gate actually ran against this artifact. Required-check failure belongs in the verdict.
 
@@ -159,17 +159,17 @@ Reviewed 2026-09-04 and 2026-10-27; sources and their limits are in `references/
 
 ## Anti-Patterns
 
-| Anti-pattern                                      | Correction                                                |
-| ------------------------------------------------- | --------------------------------------------------------- |
-| Assuming a bug must exist                         | Look for a counterexample; allow a supported clean result |
-| Suppressing failures because CI should catch them | Check the actual gate and report remaining impact         |
-| Ignoring requirements to avoid anchoring          | Read intent, independently trace behavior, compare both   |
-| Calling every stale branch defective              | Establish a concrete integration or policy failure        |
-| Declaring a clean full audit after sampling       | State partial coverage or finish the named surface        |
-| Blocking on a hypothetical simpler design         | Show a feasible alternative and a material benefit        |
-| Reviewing the code as written without asking who consumes it | Name the caller or recommend deletion              |
-| Treating "not established" as a refutation        | Measure or trace before dismissing a scale finding        |
-| Accepting a fake-backed seam as covered           | Require one real-producer-into-real-consumer test         |
+| Anti-pattern                                                 | Correction                                                |
+| ------------------------------------------------------------ | --------------------------------------------------------- |
+| Assuming a bug must exist                                    | Look for a counterexample; allow a supported clean result |
+| Suppressing failures because CI should catch them            | Check the actual gate and report remaining impact         |
+| Ignoring requirements to avoid anchoring                     | Read intent, independently trace behavior, compare both   |
+| Calling every stale branch defective                         | Establish a concrete integration or policy failure        |
+| Declaring a clean full audit after sampling                  | State partial coverage or finish the named surface        |
+| Blocking on a hypothetical simpler design                    | Show a feasible alternative and a material benefit        |
+| Reviewing the code as written without asking who consumes it | Name the caller or recommend deletion                     |
+| Treating "not established" as a refutation                   | Measure or trace before dismissing a scale finding        |
+| Accepting a fake-backed seam as covered                      | Require one real-producer-into-real-consumer test         |
 
 ## What This Skill is NOT
 

@@ -59,7 +59,7 @@ Let workers challenge a premise. A first independent review gets the raw change 
 
 Harvest dependency-ready results as they arrive. Silence alone does not prove an agent is stuck; check its artifacts before interrupting. Polling must respect the host's limits. When requirements change, tell the affected workers.
 
-A watcher needs a completion condition, failure detection, an expiry, and a stale-state check, with its signal tested on a known state. Cancel only processes this run owns.
+A watcher needs a completion condition, failure detection, an expiry, and a stale-state check, with its signal tested on a known state. Cancel only processes this run owns. A watch loop checks for new user messages between polls and yields to them.
 
 ## Harvest, Integrate, Verify
 

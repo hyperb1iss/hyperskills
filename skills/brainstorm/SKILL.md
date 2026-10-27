@@ -21,9 +21,9 @@ The user's instructions take precedence over this skill; carry existing authoriz
 
 ## Ground the Question
 
-Recall prior decisions through the installed Sibyl skill when configured (`sibyl context "<decision>" --intent plan`), and recheck any volatile claim it returns.
+Recall prior decisions through the installed Sibyl skill when configured (`sibyl context "<decision>" --intent plan`), and recheck any volatile claim it returns. Find the nearest existing instance and the prior work before generating alternatives.
 
-Translate taste into examples and observations. For "smooth," identify the interaction and visible delay. For "gorgeous," inspect the reference and name the composition, motion, or typography worth preserving. Quantification helps where a metric represents the experience; a proxy metric does not replace the experience itself.
+Translate taste into examples and observations. For "smooth," identify the interaction and visible delay. For "gorgeous," inspect the reference and name the composition, motion, or typography worth preserving. Quantification helps where a metric represents the experience; a proxy metric does not replace the experience itself. A reference the user supplies is the specification: match it before reinterpreting it, and when a concept could move, show it moving.
 
 Treat the user's hunch as a hypothesis: a decisive check can confirm part of it and reject the rest, so report both. Do not downgrade an explicit "use X" to a preference because it was written casually; if it conflicts with feasibility, say so before designing around it.
 
