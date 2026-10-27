@@ -116,7 +116,7 @@ When replies are authorized, give each substantive finding a clear disposition: 
 
 Explain what changed and why it addresses the concern. Credit useful catches. Take valid nits when they fit the request, but inspect automated suggestions instead of accepting them mechanically. Answer the thread and leave resolution to the reviewer unless the user or repository explicitly authorizes resolving it.
 
-Use the project voice and required attribution. Under the Bliss/Nova contract, final PR comment replies end on their own final line with:
+Use the project voice and required attribution. Under the Nova contract, final PR comment replies end on their own final line with:
 
 ```text
 ~ via nova ⚡

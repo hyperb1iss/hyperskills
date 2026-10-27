@@ -73,15 +73,17 @@ A finding is a claim until its cited path and trigger survive a disproof attempt
 | Follow-up   | A verified issue outside the change's causal scope                                   |
 | Unresolved  | The missing environment, fact, or decision and the check that would settle it        |
 
-Two reviewers agreeing increases investigation priority; it does not promote a candidate to confirmed. A missing grep match does not establish absence. Compare base and head when claiming the change introduced a defect. Static tracing can confirm a deterministic error if the complete path is established; report the actual evidence tier without pretending execution occurred.
+Repeat passes of one model and distinct review lenses add coverage of their own: in one exploratory vulnerability study, four passes of a single model found about as many issues as one pass from each of four families. Treat them as diversity alongside a second family, not as substitutes for it. Agreement among any of them increases investigation priority; it does not promote a candidate to confirmed.
+
+A missing grep match does not establish absence. Compare base and head when claiming the change introduced a defect. Static tracing can confirm a deterministic error if the complete path is established; report the actual evidence tier without pretending execution occurred.
 
 Fix verified issues and inspect the fix for new regressions. Preserve reviewer independence: switch explicitly from review to implementation when the user authorized both. Do not let a read-only reviewer silently edit the artifact it is judging.
 
 ## Converge on Evidence
 
-Keep a compact findings ledger when several rounds are needed. Each entry has an identity, evidence, disposition, and verification status. Subsequent briefs carry the prior finding verbatim and the changed artifact so the reviewer checks closure rather than rediscovering the conversation.
+One pass is the default. Run a second only to close a blocking finding whose fix is itself non-trivial; for a small fix, the coordinator verifies closure by reading the diff. Keep a compact findings ledger when a second round is needed. Each entry has an identity, evidence, disposition, and verification status. Subsequent briefs carry the prior finding verbatim and the changed artifact so the reviewer checks closure rather than rediscovering the conversation.
 
-Continue while rounds produce new confirmed defects or verify fixes. If the same objection returns without new evidence, settle the underlying contract or report the remaining disagreement. Avoid open-ended loops driven by a nonzero suggestion count. Nonblocking preferences do not expand an authorized fix into a redesign.
+A second pass asks only for closure of the carried findings. If the same objection returns without new evidence, settle the underlying contract or report the remaining disagreement. Avoid open-ended loops driven by a nonzero suggestion count. Nonblocking preferences do not expand an authorized fix into a redesign.
 
 | Verdict       | Meaning                                                                                                   |
 | ------------- | --------------------------------------------------------------------------------------------------------- |
@@ -93,9 +95,7 @@ An interrupted review cannot grant PASS over unread material. Process exit zero 
 
 ## Evidence and Maintenance
 
-As checked on 2026-09-04, [Claude's CLI reference](https://code.claude.com/docs/en/cli-reference) distinguishes available tools from preapproved tools. [OpenAI's non-interactive documentation](https://developers.openai.com/codex/noninteractive) documents captured execution outputs. Verify both against the installed versions before dispatch.
-
-The recommendation to examine outcomes and traces separately follows [Anthropic's agent evaluation guidance](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents). Cross-family diversity is a useful review strategy, not a measured guarantee for this library. No universal false-positive rate or accuracy improvement is claimed here.
+Reviewed 2026-09-04 and 2026-10-27; sources and their limits are in `references/evidence.md`.
 
 ## Anti-Patterns
 

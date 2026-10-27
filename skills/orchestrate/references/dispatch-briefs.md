@@ -94,8 +94,10 @@ resources and report required checks you cannot safely run.
 
 For each supported finding, report location, violated behavior,
 mechanism, impact, and a reproduction or evidence. Separate inferred
-risks from observed failures. No minimum finding count applies.
-Do not treat reviewer agreement or an empty trace grep as proof.
+risks from observed failures. No minimum finding count applies. The
+code may be clean. Do not manufacture findings; a supported clean
+verdict that names the checks you ran is a complete answer. Do not
+treat reviewer agreement or an empty trace grep as proof.
 
 Verdict:
 
@@ -103,11 +105,16 @@ Verdict:
 - FAIL: supported blocking defect, with evidence.
 - INCOMPLETE: missing coverage, unavailable check, or interrupted review.
 
+On PASS, state the residual risk you could not rule out and why. On
+FAIL, give the smallest fix that closes the finding, not a redesign.
+
 Return the exact revision, covered surfaces, actual checks/results,
 limitations, and findings. No full PASS on partial coverage.
 ```
 
 A text instruction is not a sandbox. Restrict tools or isolate the verification environment when the host supports it. A reviewer allowed to run tests needs explicit scratch-write boundaries; "read only" cannot truthfully mean that every test leaves the entire filesystem untouched.
+
+Present the work as someone else's and hand over the specification and any executable acceptance check the implementer cannot alter; tests the implementer wrote are receipts, not acceptance. A verdict has to arrive as a separate message because a model rarely corrects an error that sits in its own reasoning.
 
 ## Follow-Up Verification
 

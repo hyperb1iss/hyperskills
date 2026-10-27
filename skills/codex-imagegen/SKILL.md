@@ -247,9 +247,9 @@ new user decision.
 
 ## Current Tool Contract
 
-Checked on 2026-09-04 against [OpenAI image-generation documentation](https://developers.openai.com/api/docs/guides/tools-image-generation) and [Codex non-interactive guidance](https://developers.openai.com/codex/noninteractive). API capabilities do not prove that a particular Codex session exposes the same image tool. Follow the actual tool schema for references, output formats, and return mechanisms. CLI availability was not exercised in this audit environment; preserve that distinction from the historical snapshot above.
+Reviewed 2026-09-04 and 2026-10-27; sources and their limits are in `references/evidence.md`.
 
-For edits, inspect the target before dispatch and identify every reference image's role. Verify requested dimensions and transparency from the output itself, not its extension or the prompt. A visible checkerboard is not an alpha channel. Inspect exact text at delivery size. Keep successful batch siblings and correct only the failed constraint.
+Follow the actual tool schema for references, output formats, and return mechanisms. For edits, inspect the target before dispatch and identify every reference image's role. Verify requested dimensions and transparency from the output itself, not its extension or the prompt. A visible checkerboard is not an alpha channel. Inspect exact text at delivery size. Keep successful batch siblings and correct only the failed constraint.
 
 ## What This Skill is NOT
 

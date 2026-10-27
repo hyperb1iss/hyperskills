@@ -117,7 +117,7 @@ A passing check that disagrees with an observed failure is itself a finding. Dia
 backup=backup/pre-rebase-$(date +%Y%m%d-%H%M%S)
 git branch "$backup" && old_base=$(git merge-base HEAD origin/main)   # persist both to a scratch file
 git rebase origin/main
-git range-diff "$old_base".."$backup" origin/main..HEAD   # explicit ranges — the three-dot shorthand can include main's new commits
+git range-diff "$old_base".."$backup" origin/main..HEAD   # explicit ranges: the three-dot shorthand can include main's new commits
 ```
 
 **Clean ≠ correct.** Zero conflicts prove nothing about semantics. After any rewrite, run the semantic drift audit: full gates on the rebased SHA, range-diff read as a bug detector (it catches resolutions rolling back newer main), symbol greps across HEAD vs `origin/main` vs the backup ref, syntax checks on every resolved file. Files new on your branch merge "cleanly" while still importing what upstream deleted. Typecheck catches it, the merge doesn't.
@@ -201,7 +201,7 @@ Agent hosts have no tty:
 
 ## Sources and Applicability
 
-Checked on 2026-09-04 against the official [push](https://git-scm.com/docs/git-push), [fetch](https://git-scm.com/docs/git-fetch), [commit](https://git-scm.com/docs/git-commit), and [range-diff](https://git-scm.com/docs/git-range-diff) manuals. Explicit leases protect an inspected remote expectation. Range-diff helps compare patch series; it is not a semantic-equivalence proof or a reliable replacement for tree comparison after squashing. Local branch ownership, worktree layout, and publishing authorization remain repository policy.
+Reviewed 2026-09-04 and 2026-10-27; sources and their limits are in `references/evidence.md`.
 
 ## What This Skill is NOT
 
