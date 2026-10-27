@@ -109,7 +109,9 @@ hyperskills/
 │   │       ├── conversation-formats.md
 │   │       └── extraction-guide.md
 │   ├── git/
-│   │   └── SKILL.md
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── evidence.md
 │   ├── hyper-pr-review/
 │   │   ├── SKILL.md
 │   │   └── references/
@@ -167,7 +169,7 @@ hyperskills/
 | [demo-reel](skills/demo-reel/SKILL.md)                   | 8               |
 | [deslop](skills/deslop/SKILL.md)                         | 7               |
 | [dream](skills/dream/SKILL.md)                           | 2               |
-| [git](skills/git/SKILL.md)                               | 0               |
+| [git](skills/git/SKILL.md)                               | 1               |
 | [hyper-pr-review](skills/hyper-pr-review/SKILL.md)       | 4               |
 | [implement](skills/implement/SKILL.md)                   | 3               |
 | [orchestrate](skills/orchestrate/SKILL.md)               | 2               |

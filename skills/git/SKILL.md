@@ -201,7 +201,7 @@ Agent hosts have no tty:
 
 ## Sources and Applicability
 
-Checked on 2026-09-04 against the official [push](https://git-scm.com/docs/git-push), [fetch](https://git-scm.com/docs/git-fetch), [commit](https://git-scm.com/docs/git-commit), and [range-diff](https://git-scm.com/docs/git-range-diff) manuals. Explicit leases protect an inspected remote expectation. Range-diff helps compare patch series; it is not a semantic-equivalence proof or a reliable replacement for tree comparison after squashing. Local branch ownership, worktree layout, and publishing authorization remain repository policy.
+Reviewed 2026-09-04 and 2026-10-27; sources and their limits are in `references/evidence.md`.
 
 ## What This Skill is NOT
 
