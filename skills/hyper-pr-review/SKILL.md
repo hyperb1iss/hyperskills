@@ -45,7 +45,7 @@ Read the user's requirements and relevant acceptance criteria before judging beh
 | Auth, payments, migrations, concurrency, infrastructure | Add relevant security, state-transition, rollout, and recovery checks      |
 | Explicit deep or thermonuclear audit                    | Cover the full named surface and examine structural alternatives           |
 | Foundation or platform layer in a stack                 | Run the necessity lens first, review the contract by its downstream consequences, and require each layer to be safe to enable alone |
-| Agent-authored change                                   | Add the agent-PR lens: CI weakening, duplicated helpers, one traced critical path with a test that fails on the old code, untrusted input reaching workflow steps |
+| Agent-authored change                                   | Add the agent-PR lens: CI weakening, duplicated helpers, one traced critical path with a failing-first test for changed behavior, untrusted input reaching workflow steps |
 
 Use independent lenses when the concerns separate and delegation is available and authorized. A deep review needs deliberate coverage, not a particular agent count. A solo reviewer can apply the same lenses sequentially.
 

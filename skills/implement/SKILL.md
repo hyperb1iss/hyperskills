@@ -50,7 +50,7 @@ For a scale problem, identify the contended resource and fix isolation, indexing
 | Build/package validation      | The artifact can be produced                 | Does not prove it can be installed or used    |
 | Consumer check                | The artifact serves its intended consumer    | Limited to the observed environment and cases |
 
-Preserve exit codes and raw failure logs; a pipeline into `tail` can hide a failed command. A filter selecting zero intended tests does not verify the change. Cached results are legitimate when their inputs match, but disclose them. A useful receipt names the command, revision or working-tree state, environment, exit status, and what actually ran.
+Preserve exit codes and raw failure logs; a pipeline into `tail` can hide a failed command, and do not impose arbitrary timeouts on a check to make it finish. A filter selecting zero intended tests does not verify the change. Cached results are legitimate when their inputs match, but disclose them. A useful receipt names the command, revision or working-tree state, environment, exit status, and what actually ran.
 
 ### Check the Consumption Boundary
 
