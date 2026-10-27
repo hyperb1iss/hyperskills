@@ -32,7 +32,7 @@ Treat an inherited plan as a hypothesis: recheck consequential claims against th
 
 ## Choose a Useful Slice
 
-Prefer a vertical slice that carries a real input through the uncertain boundary to the consumer that needs it. Sequence migrations by compatibility and deployment; source-file order does not determine safe rollout order.
+Prefer a vertical slice that carries a real input through the uncertain boundary to the consumer that needs it. Simplification must preserve the requested result: do not replace a difficult product goal with a convenient demonstration of plumbing. Sequence migrations by compatibility and deployment; source-file order does not determine safe rollout order.
 
 Keep implementation and its behavioral verification in the same accountable task. A title containing "and" is not evidence that the task should split; split at independently reviewable outcomes, distinct owners, or real dependency boundaries.
 

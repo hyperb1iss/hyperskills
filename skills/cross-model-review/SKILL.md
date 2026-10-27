@@ -73,7 +73,7 @@ A finding is a claim until its cited path and trigger survive a disproof attempt
 | Follow-up   | A verified issue outside the change's causal scope                                   |
 | Unresolved  | The missing environment, fact, or decision and the check that would settle it        |
 
-A single model's run-to-run variance is worth about as much as switching model families, so repeat passes and distinct review lenses count as diversity alongside a second family. Agreement among any of them increases investigation priority; it does not promote a candidate to confirmed.
+Repeat passes of one model and distinct review lenses add coverage of their own: in one exploratory vulnerability study, four passes of a single model found about as many issues as one pass from each of four families. Treat them as diversity alongside a second family, not as substitutes for it. Agreement among any of them increases investigation priority; it does not promote a candidate to confirmed.
 
 A missing grep match does not establish absence. Compare base and head when claiming the change introduced a defect. Static tracing can confirm a deterministic error if the complete path is established; report the actual evidence tier without pretending execution occurred.
 

@@ -139,7 +139,7 @@ Compare the claimed result with the artifact after tracing behavior. Apply the s
 
 Run this lens whenever an agent authored the change. It applies [GitHub's guidance for reviewing agent pull requests](https://github.blog/ai-and-ml/generative-ai/agent-pull-requests-are-everywhere-heres-how-to-review-them/) (May 2026) and composes with [Intent Drift](#8-intent-drift), which covers claims the diff does not support.
 
-- **CI weakening blocks the merge.** Any change that weakens CI, skips a required check, or loosens a gate blocks the merge, whatever the rest of the diff does. Read workflow files, required-check configuration, and test selection, not only the code.
+- **CI weakening blocks the merge.** A change that weakens CI, skips a required check, or loosens a gate without a stated reason and preserved coverage blocks the merge, whatever the rest of the diff does. An explicitly requested removal of an obsolete gate is a design decision to confirm, not a finding. Read workflow files, required-check configuration, and test selection, not only the code.
 - **Duplicated helpers.** A new helper that duplicates one the repository already has is a finding. Search for the existing implementation before accepting the new one, and name both locations.
-- **One critical path traced by hand.** Code can pass tests and still be wrong. Trace one critical path by hand and require a test that fails on the old code.
+- **One critical path traced by hand.** Code can pass tests and still be wrong. Trace one critical path by hand, and for changed behavior require a test that fails on the old code; a behavior-preserving refactor needs the existing tests to still exercise the path instead.
 - **Untrusted input reaching workflow steps.** PR text, issue bodies, and external data that reach workflow or script steps are an injection path. Trace each such value to where it is interpolated or executed; [Security](#3-security) owns the wider injection posture.

@@ -60,7 +60,7 @@ Before accepting a benchmark headline, check comparability:
 - Possible training/test overlap, leaked solutions, or benchmark-specific tuning.
 - Released artifacts and how well the workload matches the target use case.
 
-Distinguish best-of-many success from reliable first-attempt behavior, and compare cost and latency at the achieved quality level.
+Distinguish best-of-many success from reliable first-attempt behavior, and compare cost and latency at the achieved quality level. Maintenance activity helps assess operational risk, but stars and commit counts do not predict future support on their own.
 
 ## Parallelize Independent Questions
 

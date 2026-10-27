@@ -9,7 +9,7 @@ The user's instructions take precedence over this skill; carry existing authoriz
 
 ## Orient to the Change
 
-Before editing, inspect status and existing diffs on touched files; the checkout is shared space. Trace behavior through actual callers and consumers. Search by syntax for structure and by text for names. Recheck volatile API and dependency claims against current primary evidence. "Why does this happen?" calls for a confirmed cause first, then a check that distinguishes broken from intended behavior.
+Before editing, inspect status and existing diffs on touched files; the checkout is shared space, so never run autofix across other agents' work. Trace behavior through actual callers and consumers. Search by syntax for structure and by text for names. Recheck volatile API and dependency claims against current primary evidence. "Why does this happen?" calls for a confirmed cause first, then a check that distinguishes broken from intended behavior.
 
 ## Select a Verifiable Slice
 
@@ -65,7 +65,7 @@ Preserve exit codes and raw failure logs; a pipeline into `tail` can hide a fail
 
 Check the invariant, not merely that the command succeeded. A valid selector can match nothing, a package can build without files the importer needs, and a merged fix can leave the deployed artifact unchanged.
 
-Detectors and guards need positive and negative evidence. Performance changes need a baseline. For a surface you cannot observe or a live check you may not run, give the human a discriminating procedure and expected result; do not invent a screenshot or verdict.
+Detectors and guards need positive and negative evidence. Performance changes need a baseline, a representative workload, and the relevant resource measurements. For a surface you cannot observe or a live check you may not run, give the human a discriminating procedure and expected result; do not invent a screenshot or verdict.
 
 ## Recover by Updating the Hypothesis
 
@@ -77,7 +77,7 @@ A failure on the base can show that a symptom predates the change; missing chang
 
 Follow the project's commit policy and commit verified logical chunks. Stage explicit owned paths or hunks and inspect the staged patch. At a commit checkpoint, compare the total diff to the task; green tests can coexist with unnecessary scope. Push and merge authority comes from the user, not this skill. The `git` skill covers shared-index handling.
 
-Obtain independent verification when consequence or run length justifies it (shared or production state, an unattended run past a checkpoint, an acceptance check the implementer cannot read or write) or when the project contract requires it. Do not spawn a verifier to double-check a small change you can verify in a handful of tool calls. The verdict must arrive from a separate dispatch, because a model rarely corrects an error sitting in its own reasoning. Use `cross-model-review` when available; a different model exposes blind spots but does not eliminate correlated errors. Tie the verdict to the reviewed state, and report incomplete review as incomplete.
+Obtain independent verification when consequence or run length justifies it (shared or production state, an unattended run past a checkpoint, an acceptance check the implementer cannot alter) or when the project contract requires it. When none of those triggers applies, do not spawn a verifier to double-check a small change you can verify in a handful of tool calls. The verdict must arrive from a separate dispatch, because a model rarely corrects an error sitting in its own reasoning. Use `cross-model-review` when available; a different model exposes blind spots but does not eliminate correlated errors. Tie the verdict to the reviewed state, and report incomplete review as incomplete.
 
 ## Preserve the State and Finish
 

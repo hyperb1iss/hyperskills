@@ -14,4 +14,4 @@ The recommendation to examine outcomes and traces separately follows [Anthropic'
 
 [arXiv 2506.07962](https://arxiv.org/abs/2506.07962) (ICML 2025): when two models both answer wrong, they agree about 60% of the time, more often within one provider.
 
-Application here: run-to-run variance from one model is worth about as much as a family switch, so repeat passes and distinct lenses count as review diversity alongside a second family. Correlated wrong answers mean agreement among reviewers raises investigation priority without confirming a finding.
+Application here: within that one exploratory study, repeat passes of a single model and a multi-family pass found similar totals, so repeat passes and distinct lenses count as review diversity alongside a second family. The result is scoped to vulnerability finding and does not establish equivalence for specifications, diagnoses, or fact checks. Correlated wrong answers mean agreement among reviewers raises investigation priority without confirming a finding.

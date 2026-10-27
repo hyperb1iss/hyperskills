@@ -24,7 +24,7 @@ Inspect the actual tools and current schemas instead of inferring capabilities f
 | Consequential review                    | Independent read-only reviewers with distinct risk lenses |
 | Small, tightly coupled change           | Direct execution                                          |
 
-Agent count follows named useful lanes, not historical fleet sizes. Check the critical path: a branch waiting on one shared interface gains nothing from more agents. Delegate when the work splits across independent surfaces and keep working while workers run; do not use a worker to double-check a small change you can verify yourself in a handful of tool calls.
+Agent count follows named useful lanes, not historical fleet sizes. Check the critical path: a branch waiting on one shared interface gains nothing from more agents. Delegate when the work splits across independent surfaces and keep working while workers run; unless a verification trigger below applies, do not use a worker to double-check a small change you can verify yourself in a handful of tool calls.
 
 ## Establish Ownership and Integration
 
@@ -36,7 +36,7 @@ Map shared resources as well as files: generated artifacts, schemas, lockfiles, 
 | Separate worktrees          | Independent branches or build state | Known base, branch, merge order, and integration owner |
 | Read-only revision          | Review or research                  | Fixed revision or diff plus permitted scratch outputs  |
 
-Worktrees isolate tracked files and the index, not ports or databases. Never overwrite a human's or sibling's edits to clear a conflict. In a shared tree, workers report patches while one coordinator stages and commits. Investigate a lock's actual owner before removing it.
+Worktrees isolate tracked files and the index, not ports or databases. Never overwrite a human's or sibling's edits to clear a conflict. In a shared tree, workers report patches while one coordinator stages and commits. Investigate a lock's actual owner before removing it; an inconclusive process listing does not establish that a lock is safe to remove.
 
 Before dispatch, define how partial progress becomes integrated progress: the artifact each consumer expects and when it is ready.
 
@@ -65,7 +65,7 @@ A watcher needs a completion condition, failure detection, an expiry, and a stal
 
 A worker's summary is a claim; inspect the actual diffs. Integrate at a stable checkpoint and run checks covering the combined behavior.
 
-The implementer cannot certify an independent PASS. Tie each verdict to a revision or recorded snapshot.
+Independent verification is required when consequence or run length justifies it (shared or production state, an unattended run past a checkpoint, an acceptance check the implementer cannot alter) or when the project contract requires it. The implementer cannot certify an independent PASS. Tie each verdict to a revision or recorded snapshot.
 
 | Verdict    | Meaning                                                         |
 | ---------- | --------------------------------------------------------------- |
