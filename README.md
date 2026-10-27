@@ -82,7 +82,7 @@ Explore the problem and alternatives before committing to a design. Treats the u
 
 ### `research`
 
-Gather evidence for a question, from a targeted lookup to independent research lanes. Tracks source lineage, contradictions, and benchmark comparability. Synthesize as evidence arrives; deepen the investigation when an unresolved fact could change the answer.
+Gather evidence for a question, from a targeted lookup to independent research lanes. Tracks source lineage, contradictions, and benchmark comparability. Stops when the remaining uncertainty would not change the action, and makes the call plainly when the evidence supports one.
 
 ```text
 /hyperskills:research
