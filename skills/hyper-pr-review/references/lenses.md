@@ -134,3 +134,12 @@ Compare the claimed result with the artifact after tracing behavior. Apply the s
 - **Deleting a test is a change to what it covered.** When a guard or module leaves, find where its property went; a deleted skew test, peer-selector test or replay fixture is a finding until the protection is relocated.
 - **Runtime-specific semantics are tested under the shipped runtime.** File descriptors, uid, `/proc`, symlink refusal and cgroup behavior differ under a sandboxed kernel; native green is not evidence, and a test that would also pass against the old implementation is not a regression test.
 - **Tests must actually run.** A test file no config selects, no tsconfig typechecks, or that mocks a path that does not exist, is green by absence. Check discovery, not just the suite summary.
+
+## 10. Agent-Authored Pull Requests
+
+Run this lens whenever an agent authored the change. It applies [GitHub's guidance for reviewing agent pull requests](https://github.blog/ai-and-ml/generative-ai/agent-pull-requests-are-everywhere-heres-how-to-review-them/) (May 2026) and composes with [Intent Drift](#8-intent-drift), which covers claims the diff does not support.
+
+- **CI weakening blocks the merge.** Any change that weakens CI, skips a required check, or loosens a gate blocks the merge, whatever the rest of the diff does. Read workflow files, required-check configuration, and test selection, not only the code.
+- **Duplicated helpers.** A new helper that duplicates one the repository already has is a finding. Search for the existing implementation before accepting the new one, and name both locations.
+- **One critical path traced by hand.** Code can pass tests and still be wrong. Trace one critical path by hand and require a test that fails on the old code.
+- **Untrusted input reaching workflow steps.** PR text, issue bodies, and external data that reach workflow or script steps are an injection path. Trace each such value to where it is interpolated or executed; [Security](#3-security) owns the wider injection posture.

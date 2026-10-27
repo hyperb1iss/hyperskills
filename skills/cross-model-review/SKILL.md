@@ -73,7 +73,9 @@ A finding is a claim until its cited path and trigger survive a disproof attempt
 | Follow-up   | A verified issue outside the change's causal scope                                   |
 | Unresolved  | The missing environment, fact, or decision and the check that would settle it        |
 
-Two reviewers agreeing increases investigation priority; it does not promote a candidate to confirmed. A missing grep match does not establish absence. Compare base and head when claiming the change introduced a defect. Static tracing can confirm a deterministic error if the complete path is established; report the actual evidence tier without pretending execution occurred.
+A single model's run-to-run variance is worth about as much as switching model families, so repeat passes and distinct review lenses count as diversity alongside a second family. Agreement among any of them increases investigation priority; it does not promote a candidate to confirmed.
+
+A missing grep match does not establish absence. Compare base and head when claiming the change introduced a defect. Static tracing can confirm a deterministic error if the complete path is established; report the actual evidence tier without pretending execution occurred.
 
 Fix verified issues and inspect the fix for new regressions. Preserve reviewer independence: switch explicitly from review to implementation when the user authorized both. Do not let a read-only reviewer silently edit the artifact it is judging.
 
@@ -93,9 +95,7 @@ An interrupted review cannot grant PASS over unread material. Process exit zero 
 
 ## Evidence and Maintenance
 
-As checked on 2026-09-04, [Claude's CLI reference](https://code.claude.com/docs/en/cli-reference) distinguishes available tools from preapproved tools. [OpenAI's non-interactive documentation](https://developers.openai.com/codex/noninteractive) documents captured execution outputs. Verify both against the installed versions before dispatch.
-
-The recommendation to examine outcomes and traces separately follows [Anthropic's agent evaluation guidance](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents). Cross-family diversity is a useful review strategy, not a measured guarantee for this library. No universal false-positive rate or accuracy improvement is claimed here.
+Reviewed 2026-09-04 and 2026-10-27; sources and their limits are in `references/evidence.md`.
 
 ## Anti-Patterns
 

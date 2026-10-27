@@ -45,6 +45,7 @@ Read the user's requirements and relevant acceptance criteria before judging beh
 | Auth, payments, migrations, concurrency, infrastructure | Add relevant security, state-transition, rollout, and recovery checks      |
 | Explicit deep or thermonuclear audit                    | Cover the full named surface and examine structural alternatives           |
 | Foundation or platform layer in a stack                 | Run the necessity lens first, review the contract by its downstream consequences, and require each layer to be safe to enable alone |
+| Agent-authored change                                   | Add the agent-PR lens: CI weakening, duplicated helpers, one traced critical path with a test that fails on the old code, untrusted input reaching workflow steps |
 
 Use independent lenses when the concerns separate and delegation is available and authorized. A deep review needs deliberate coverage, not a particular agent count. A solo reviewer can apply the same lenses sequentially.
 
@@ -52,7 +53,7 @@ For broad work, keep a compact inventory of changed invariants and affected cons
 
 ## Turn Suspicions into Findings
 
-First establish relevance. Drop unsupported style preferences and speculative scenarios without a reachable trigger. Record pre-existing issues separately unless the change worsens them or newly depends on them. A missing test is material when it leaves a specific changed behavior vulnerable to regression.
+First establish relevance. Drop unsupported style preferences and speculative scenarios without a reachable trigger. Record pre-existing issues separately unless the change worsens them or newly depends on them. A missing test is material when it leaves a specific changed behavior vulnerable to regression. When delegating a review, say the code may be clean; a supported clean result that names the checks run is a complete answer.
 
 Run available linters and typecheckers when appropriate. Deduplicate their output, but do not suppress a real build failure because CI should catch it. Check whether the gate actually ran against this artifact. Required-check failure belongs in the verdict.
 
@@ -154,13 +155,7 @@ Posting comments, submitting approval, requesting changes on GitHub, or contacti
 
 ## Research Basis
 
-Reviewed on 2026-09-04, revised on 2026-10-21 after a retrospective over 38 agent-authored infrastructure pull requests; the necessity, seam, test-credibility and record guidance comes from the finding classes that recurred there. [Anthropic's evaluation guidance](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) distinguishes outcomes, traces, and grader limitations; use all three when assessing a review workflow. [OpenAI's GPT-6 Astra guidance](https://developers.openai.com/api/docs/guides/latest-model) warns that conflicting skill instructions can block work. The practical choice here is explicit scope and evidence requirements, with procedural defaults left adaptable.
-
-For report craft, [Google's reviewer comment guidance](https://google.github.io/eng-practices/review/reviewer/comments.html) supports explaining rationale and distinguishing required changes from suggestions. Its [review standard](https://google.github.io/eng-practices/review/reviewer/standard.html) favors code health and progress over personal perfection. These are practitioner guidelines, not measured guarantees for model output.
-
-The Microsoft field study [Expectations, Outcomes, and Challenges of Modern Code Review](https://www.microsoft.com/en-us/research/publication/expectations-outcomes-and-challenges-of-modern-code-review/) (Bacchelli and Bird, ICSE 2013) identifies understanding and knowledge transfer alongside defect finding. Its human-team setting does not establish agent-review effectiveness; the application here is to preserve the explanation that makes a finding useful. [GitHub's review documentation](https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/reviewing-proposed-changes-in-a-pull-request) defines the distinct comment, approve, and request-changes actions. These sources were checked on 2026-09-04.
-
-Benchmark results depend on the model, task set, harness, and grader. No published recall percentage establishes a universal ceiling for this skill, and no fixed rejection rate is a target for candidate findings.
+Reviewed 2026-09-04 and 2026-10-27; sources and their limits are in `references/evidence.md`.
 
 ## Anti-Patterns
 
