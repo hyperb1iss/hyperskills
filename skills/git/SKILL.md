@@ -147,7 +147,7 @@ Atomic while working; collapse only when the history itself stops serving the re
 
 ### Commit bodies
 
-Compose multi-line bodies via `git commit -F -` with a single-quoted heredoc (`<<'EOF'`) or a message file. Stacked `-m` flags keep each paragraph as one unwrapped line and burn amend cycles. The quoting is the protection: an unquoted heredoc executes backticks and `$()` inside the message before Git sees it. Wrap at 76 characters; length checks are backstops, not the mechanism. Verify the recorded message after any shell-composed body (`git log -1 --format=%B`).
+Compose multi-line bodies via `git commit -F -` with a single-quoted heredoc (`<<'EOF'`) or a message file. Stacked `-m` flags keep each paragraph as one unwrapped line and burn amend cycles. The quoting is the protection: an unquoted heredoc executes backticks and `$()` inside the message before Git sees it. Wrap at 76 characters; length checks are backstops, not the mechanism. Verify the recorded message after any shell-composed body (`git log -1 --format=%B`). Receipts, ticket ids, and issue links belong in commit bodies, not in code comments or error strings, where they read as unfinished work.
 
 ## Shared-Repo Coexistence
 

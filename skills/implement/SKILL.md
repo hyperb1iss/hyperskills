@@ -9,7 +9,7 @@ The user's instructions take precedence over this skill; carry existing authoriz
 
 ## Orient to the Change
 
-Before editing, inspect status and existing diffs on touched files; the checkout is shared space, so never run autofix across other agents' work. Trace behavior through actual callers and consumers. Search by syntax for structure and by text for names. Recheck volatile API and dependency claims against current primary evidence. "Why does this happen?" calls for a confirmed cause first, then a check that distinguishes broken from intended behavior.
+Before editing, inspect status and existing diffs on touched files; the checkout is shared space, so never run autofix across other agents' work. Trace behavior through actual callers and consumers. Find the nearest existing instance of the pattern in the repository, and any prior work in project memory, before building new structure; name it. Search by syntax for structure and by text for names. Recheck volatile API and dependency claims against current primary evidence. "Why does this happen?" calls for a confirmed cause first, then a check that distinguishes broken from intended behavior.
 
 ## Select a Verifiable Slice
 
@@ -26,15 +26,17 @@ Keep implementation and verification together. File count and edit count are not
 
 ## Keep the Design Accountable
 
-| Pressure                                 | Decision                                                                       |
-| ---------------------------------------- | ------------------------------------------------------------------------------ |
-| New modes or configuration appear        | Tie each to a requested behavior or demonstrated variation                     |
-| The same decision repeats across callers | Give that decision one owner                                                   |
-| A wrapper only forwards calls            | Check whether it enforces an API, policy, or test boundary before removing it  |
-| A cast conceals incompatible data        | Fix or validate the contract at its actual boundary                            |
-| A fallback hides an error                | Preserve the failure cause and make the intended recovery explicit             |
-| Compatibility code grows                 | Check shipped consumers and rollout requirements before keeping or deleting it |
-| Complexity keeps increasing              | Re-examine ownership and data flow before adding another special case          |
+| Pressure                                                                 | Decision                                                                                                                                                        |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| New modes or configuration appear                                        | Tie each to a requested behavior or demonstrated variation                                                                                                      |
+| The same decision repeats across callers                                 | Give that decision one owner                                                                                                                                    |
+| A wrapper only forwards calls                                            | Check whether it enforces an API, policy, or test boundary before removing it                                                                                   |
+| A cast conceals incompatible data                                        | Fix or validate the contract at its actual boundary                                                                                                             |
+| A fallback hides an error                                                | Preserve the failure cause and make the intended recovery explicit                                                                                              |
+| Compatibility code grows                                                 | Check shipped consumers and rollout requirements before keeping or deleting it                                                                                  |
+| A flag, legacy mode, fallback, or staged gate appears                    | Name the ship state (pre-launch, single consumer, production with users) and the exact failure it prevents; pre-launch and single-consumer code deletes instead |
+| A value enumerates today's instances, or a tool knows its author's setup | Derive the value from a rule, or move it to configuration                                                                                                       |
+| Complexity keeps increasing                                              | Re-examine ownership and data flow before adding another special case                                                                                           |
 
 Judge the concepts and contracts, not line count: an abstraction can earn its place before a second caller when it enforces a real boundary. Remove imports and dead branches your own change creates. Route unrelated findings to the sidequest or issue workflow; do not absorb them silently.
 
@@ -69,7 +71,7 @@ Detectors and guards need positive and negative evidence. Performance changes ne
 
 ## Recover by Updating the Hypothesis
 
-Classify a failure before editing again (environment, stale artifact, invocation, shared-output race, runtime defect). Preserve the original error and find the first failing dependency instead of fixing downstream symptoms. Repeating variations without new evidence is the signal to reframe, regardless of attempt count.
+Classify a failure before editing again (environment, stale artifact, invocation, shared-output race, runtime defect). Preserve the original error and find the first failing dependency instead of fixing downstream symptoms. Repeating variations without new evidence is the signal to reframe, regardless of attempt count. The same applies to review rounds: when findings keep landing in one class, restructure or cut the mechanism rather than patch it again, keep the larger head on a backup ref, and file the hardening separately.
 
 A failure on the base can show that a symptom predates the change; missing changed filenames in a trace cannot. A successful rerun does not establish harmless flakiness. Detailed procedures live in `references/recovery.md`.
 
@@ -81,7 +83,7 @@ Obtain independent verification when consequence or run length justifies it (sha
 
 ## Preserve the State and Finish
 
-At handoff or compaction, preserve the original outcome, user corrections, changed paths, revision, checks run, unresolved findings, and next step. Reinspect status on resumption.
+At handoff or compaction, preserve the original outcome, user corrections, changed paths, revision, checks run, unresolved findings, and next step. Sweep for processes this session started before reporting done. Reinspect status on resumption.
 
 ## Evidence and References
 

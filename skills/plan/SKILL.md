@@ -24,9 +24,10 @@ Inspect repository status and relevant diffs, and locate the real verification c
 
 - The observable user or system outcome.
 - The baseline revision or environment inspected.
+- The ship state (pre-launch, single consumer, or production with users), which decides how much migration machinery the plan may carry.
 - Affected interfaces, ownership, and compatibility obligations.
 - Uncertainty that could invalidate the work.
-- Explicit constraints, non-goals, and user corrections.
+- Explicit constraints, non-goals, and user corrections, with requirements ("must") kept distinct from preferences stated casually.
 
 Treat an inherited plan as a hypothesis: recheck consequential claims against the current tree before executing them. When a premise fails, update the plan itself, because a detached comment leaves the executor on stale instructions.
 
