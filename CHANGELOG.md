@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.13.3
+
+- Encode recurring maintainer corrections across seven skills: implement names the ship state before adding a flag or fallback and finds the nearest existing pattern first; plan records ship state and keeps requirements distinct from preferences; super-good-pr defaults to one PR split only by review domain; brainstorm treats a supplied reference as the specification; git keeps ticket references out of code; orchestrate watch loops yield to user messages; hyper-pr-review recommends restructuring when a finding class recurs.
+
 ## 3.13.2
 
 - Fan out by default: orchestrate and research now treat parallel subagents as the normal path for independent work and limit by shared resources rather than agent count.
