@@ -77,7 +77,7 @@ A failure on the base can show that a symptom predates the change; missing chang
 
 ## Self-Review Before Requesting Review
 
-A careful reviewer's first round lands in a few recurring classes. Each is a self-check that costs minutes before review and a round after it.
+A careful reviewer's first round often lands in a few recurring classes. For each class the diff touches, the check costs minutes before review and a round after it.
 
 | Reviewer finding                                     | Self-check before review                                                                                                                                        |
 | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -89,9 +89,8 @@ A careful reviewer's first round lands in a few recurring classes. Each is a sel
 | Safety rests on a code comment                       | Check the live state (consumers in service, schema versions, environments) and record the table where the claim is made                                         |
 | A map, array, or retention set grows without bound   | Prune on every exit path, or scope the set to items with evidence                                                                                               |
 | A number, label, or message is wrong at an edge      | Fixture the edge rows: an empty field, a gap in the data, an overlapping window, a truncated list, a stale value after a failed refetch                         |
-| Old and new halves run at once during deploy         | Say what the old reader does with the new write, and the reverse, before the body claims the order is safe                                                      |
 
-Most of these end as code changes once a reviewer raises them, so they belong before the review request, not in the description. Answer every inline thread before merge, with a reason when the answer is no change. The deploy questions a reviewer asks of the body are in `super-good-pr`.
+Most of these end as code changes once a reviewer raises them, so they belong before the review request, not in the description. Answer every inline thread before merge, with a reason when the answer is no change. Mixed-version behavior during deploy and the other questions a reviewer asks of the body are in `super-good-pr`.
 
 ## Review and Commit Coherent Work
 

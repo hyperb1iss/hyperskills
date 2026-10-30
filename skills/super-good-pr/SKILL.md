@@ -58,24 +58,24 @@ Use review guidance to connect a question to its evidence: "Start with the trans
 
 ## Answer the deploy questions in the body
 
-A reviewer who operates the system asks the same four questions on every round, reads the body fresh each time, and does not count an answer left in a comment thread. Put the answers in the rollout section, in this shape, and refresh them on every push.
+When the change deploys behavior that someone must watch or be able to reverse, reviewers who operate the system tend to ask the same four questions, and a reviewer who rereads the body each round, as review agents do, does not see an answer left in a comment thread. Put the answers in the rollout section, in this shape, and refresh them when a push changes them. A change with nothing to roll back or watch says so in one line.
 
-| Question           | What the body states                                                                                                                                                                        |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The way back       | The flag or revert that undoes the change, and what a revert does not undo: a recorded marker that breaks replay, a volume that cannot shrink, a restart that would run again, a role reset |
-| The signal         | The named metric, alert, log line, or dashboard that shows the new behavior misbehaving after deploy, and the value that means trouble                                                      |
-| The owner and when | Who confirms the signal, on which environment first, before which next step, and whether on-call is warned when a quiet alert can fire at merge                                             |
-| The order          | Deploy order across parts that ship separately, and what the old half does until the new half lands                                                                                         |
+| Question           | What the body states                                                                                                                                                                          |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The way back       | The flag or revert that undoes the change, and what a revert does not undo: persisted state the old code cannot read, storage that cannot shrink, a one-time side effect that would run again |
+| The signal         | The named metric, alert, log line, or dashboard that shows the new behavior misbehaving after deploy, and the value that means trouble                                                        |
+| The owner and when | Who confirms the signal, on which environment first, before which next step, and whether on-call is warned when a quiet alert can fire at merge                                               |
+| The order          | Deploy order across parts that ship separately, and what the old half does until the new half lands                                                                                           |
 
-When the honest answer is "no flag" or "nothing alerts on that yet", write it as a decision: why that is acceptable, the follow-up that closes it, and the number that would change the call. The same sentence in a reply thread is asked again next round; in the body with its reason it is accepted.
+When the honest answer is "no flag" or "nothing alerts on that yet", write it as a decision: why that is acceptable, the follow-up that closes it, and the number that would change the call. The same sentence left only in a reply thread is likely to be asked again; in the body with its reason, it is the answer the next round can find.
 
-The questions climb a ladder. A named signal leads to whether it ships in the same release, then whether it is confirmed live on the first environment, then who checks it before the next step. Answering one rung moves the question to the next round, so answer the whole ladder at once.
+Once the signal is named, follow-ups tend to climb: does it ship in the same release, is it confirmed live on the first environment, who checks it before the next step. When a reviewer asks the next rung, answer the rest of the ladder in the same edit.
 
-A gate that depends on a human step, such as an alert that must be live on staging before a worker skips work in production, or a backfill that must finish before a rollback target is complete, gets a checklist line in the body with an owner and an evidence slot, ticked with the receipt when it happens. Where the step can be mechanical (a stacked PR, a deploy-step job, a startup check), make it mechanical instead.
+A gate that depends on a human step, such as an alert that must be live on staging before a dependent change reaches production, or a backfill that must finish before a rollback path is complete, gets a checklist line in the body with an owner and an evidence slot, ticked with the receipt when it happens. Where the step can be mechanical (a stacked PR, a deploy-step job, a startup check), make it mechanical instead.
 
-Say what already exists in the new shape: rows an earlier run wrote, files already re-encrypted, records with no stored row on first read, and whether a backfill is a deploy step or a note.
+Say what already exists in the old shape: data an earlier run wrote, records with no stored row on first read, and whether a backfill is a deploy step or a note.
 
-A deliberate choice a reviewer could read as a bug, such as a one-request lag on a demotion or a refresh window chosen against a token lifetime, is stated as a choice with its reason. "Is that on purpose? If so, say so in the PR" is a round spent on one sentence.
+A deliberate choice a reviewer could read as a bug, such as a short propagation lag or a timeout chosen against another limit, is stated as a choice with its reason. "Is that on purpose? If so, say so in the PR" is a round spent on one sentence.
 
 ## Validation evidence
 
@@ -83,7 +83,7 @@ Record the command or named CI job, outcome, and what it establishes. "Tests pas
 
 For a regression fix, a failing-before and passing-after reproduction can be the decisive evidence. For a deployed migration, show the relevant compatibility or state transition when available. Prefer the narrow check that exercises the changed behavior to a long inventory of unrelated green suites.
 
-For a regression test, name the mutation that turns it red: "with the consistency check removed, the split-pin case fails" says more than a pass count. A test that stays green when the guard it covers is deleted is the most common test finding a careful reviewer raises; run that deletion before asking for review. A claim about live state, such as no consumer older than a given version remaining or every environment carrying a schema column, is checked live and recorded as a table where the claim is made; a claim that rests on a code comment is a question, not evidence.
+For a regression test, name the mutation that turns it red in Validation: "with the guard removed, the new case fails" says more than a pass count. The self-check that produces it lives in `implement`. When safety depends on live state, record the live check's result in the body rather than citing a code comment.
 
 Keep receipts tied to the tested revision and relevant environment. A changed SHA requires checking what changed; it does not automatically invalidate every result:
 

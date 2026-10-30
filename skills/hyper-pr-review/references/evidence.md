@@ -22,4 +22,4 @@ Benchmark results depend on the model, task set, harness, and grader. No publish
 
 ## 2026-10-30 review corpus
 
-Observed: in one week of review traffic from a platform reviewer on 53 pull requests, 88 of 98 review summaries carried the same four deploy questions, 35% of question instances re-asked a type already raised on that pull request, and the ones without a body answer naming an owner and a moment were re-asked for up to nine rounds. The operator's-four-questions item in `lenses.md` section 7 encodes that rubric. One reviewer, one repository; the rubric is a useful lens, not a measured defect-detection rate.
+Observed: in about a week of review traffic from a single reviewer on roughly fifty pull requests, 88 of 98 review summaries carried deploy questions, and 35% of question instances re-asked a type already raised on that pull request; on four pull requests the same question returned for six to nine rounds. The Rollback and After deploy items in `lenses.md` section 7 encode that rubric. One reviewer, one repository; the rubric is a useful lens, not a measured defect-detection rate.
