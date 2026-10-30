@@ -141,6 +141,7 @@ hyperskills/
 │   ├── super-good-pr/
 │   │   ├── SKILL.md
 │   │   └── references/
+│   │       ├── evidence.md
 │   │       └── worked-examples.md
 │   └── tui-design/
 │       ├── SKILL.md
@@ -175,7 +176,7 @@ hyperskills/
 | [orchestrate](skills/orchestrate/SKILL.md)               | 2               |
 | [plan](skills/plan/SKILL.md)                             | 1               |
 | [research](skills/research/SKILL.md)                     | 1               |
-| [super-good-pr](skills/super-good-pr/SKILL.md)           | 1               |
+| [super-good-pr](skills/super-good-pr/SKILL.md)           | 2               |
 | [tui-design](skills/tui-design/SKILL.md)                 | 3               |
 
 <!-- END GENERATED: skill-inventory -->

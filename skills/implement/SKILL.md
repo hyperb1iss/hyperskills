@@ -75,6 +75,24 @@ Classify a failure before editing again (environment, stale artifact, invocation
 
 A failure on the base can show that a symptom predates the change; missing changed filenames in a trace cannot. A successful rerun does not establish harmless flakiness. Detailed procedures live in `references/recovery.md`.
 
+## Self-Review Before Requesting Review
+
+A careful reviewer's first round lands in a few recurring classes. Each is a self-check that costs minutes before review and a round after it.
+
+| Reviewer finding                                     | Self-check before review                                                                                                                                        |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The test stays green if the fix is removed           | Delete the guard and expect red; a mock that returns what was stored, a loop the bad input never enters, and a value that is both default and floor cannot fail |
+| A dropped error, report, or fallback leaves no trace | Log it with a reason, or record a status enum where a dashboard can count it                                                                                    |
+| One bad item stops the whole batch                   | Read items separately; one failure logs and skips so the rest still land                                                                                        |
+| A bad config value fails open                        | Fail at startup on an invalid value or treat it as on; a warn that silently disables a protection until restart is a finding                                    |
+| A condition, string, or block appears more than once | Derive it once and test the derivation; copies that already differ are the proof                                                                                |
+| Safety rests on a code comment                       | Check the live state (consumers in service, schema versions, environments) and record the table where the claim is made                                         |
+| A map, array, or retention set grows without bound   | Prune on every exit path, or scope the set to items with evidence                                                                                               |
+| A number, label, or message is wrong at an edge      | Fixture the edge rows: an empty field, a gap in the data, an overlapping window, a truncated list, a stale value after a failed refetch                         |
+| Old and new halves run at once during deploy         | Say what the old reader does with the new write, and the reverse, before the body claims the order is safe                                                      |
+
+Most of these end as code changes once a reviewer raises them, so they belong before the review request, not in the description. Answer every inline thread before merge, with a reason when the answer is no change. The deploy questions a reviewer asks of the body are in `super-good-pr`.
+
 ## Review and Commit Coherent Work
 
 Follow the project's commit policy and commit verified logical chunks. Stage explicit owned paths or hunks and inspect the staged patch. At a commit checkpoint, compare the total diff to the task; green tests can coexist with unnecessary scope. Push and merge authority comes from the user, not this skill. The `git` skill covers shared-index handling.
