@@ -56,11 +56,34 @@ Give the body a reading path: the opening explains the change; the visible secti
 
 Use review guidance to connect a question to its evidence: "Start with the transaction in `accept_delivery`; its commit must precede the acknowledgment." Link the decisive code when a stable link is available. Omit inventories of every touched file and requests to "review carefully" without a concrete concern. Put a limitation next to the claim it qualifies, even when fuller receipts live in Validation.
 
+## Answer the deploy questions in the body
+
+When the change deploys behavior that someone must watch or be able to reverse, reviewers who operate the system tend to ask the same four questions, and a reviewer who rereads the body each round, as review agents do, does not see an answer left in a comment thread. Put the answers in the rollout section, in this shape, and refresh them when a push changes them. A change with nothing to roll back or watch says so in one line.
+
+| Question           | What the body states                                                                                                                                                                          |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The way back       | The flag or revert that undoes the change, and what a revert does not undo: persisted state the old code cannot read, storage that cannot shrink, a one-time side effect that would run again |
+| The signal         | The named metric, alert, log line, or dashboard that shows the new behavior misbehaving after deploy, and the value that means trouble                                                        |
+| The owner and when | Who confirms the signal, on which environment first, before which next step, and whether on-call is warned when a quiet alert can fire at merge                                               |
+| The order          | Deploy order across parts that ship separately, and what the old half does until the new half lands                                                                                           |
+
+When the honest answer is "no flag" or "nothing alerts on that yet", write it as a decision: why that is acceptable, the follow-up that closes it, and the number that would change the call. The same sentence left only in a reply thread is likely to be asked again; in the body with its reason, it is the answer the next round can find.
+
+Once the signal is named, follow-ups tend to climb: does it ship in the same release, is it confirmed live on the first environment, who checks it before the next step. When a reviewer asks the next rung, answer the rest of the ladder in the same edit.
+
+A gate that depends on a human step, such as an alert that must be live on staging before a dependent change reaches production, or a backfill that must finish before a rollback path is complete, gets a checklist line in the body with an owner and an evidence slot, ticked with the receipt when it happens. Where the step can be mechanical (a stacked PR, a deploy-step job, a startup check), make it mechanical instead.
+
+Say what already exists in the old shape: data an earlier run wrote, records with no stored row on first read, and whether a backfill is a deploy step or a note.
+
+A deliberate choice a reviewer could read as a bug, such as a short propagation lag or a timeout chosen against another limit, is stated as a choice with its reason. "Is that on purpose? If so, say so in the PR" is a round spent on one sentence.
+
 ## Validation evidence
 
 Record the command or named CI job, outcome, and what it establishes. "Tests pass" leaves the reader guessing whether the changed path ran. "The retry regression passes with a simulated lost acknowledgment; delivery to the live provider was not exercised" identifies both the evidence and its limit. Use counts when the tool reports meaningful counts. A linter's successful exit does not need an invented test count. Identify skipped tests and a failing prerequisite when either limits the claim.
 
 For a regression fix, a failing-before and passing-after reproduction can be the decisive evidence. For a deployed migration, show the relevant compatibility or state transition when available. Prefer the narrow check that exercises the changed behavior to a long inventory of unrelated green suites.
+
+For a regression test, name the mutation that turns it red in Validation: "with the guard removed, the new case fails" says more than a pass count. The self-check that produces it lives in `implement`. When safety depends on live state, record the live check's result in the body rather than citing a code comment.
 
 Keep receipts tied to the tested revision and relevant environment. A changed SHA requires checking what changed; it does not automatically invalidate every result:
 
@@ -72,7 +95,7 @@ Keep receipts tied to the tested revision and relevant environment. A changed SH
 | Squash with an identical final tree                                | Preserve applicable content evidence; rerun checks dependent on history or the new head            |
 | Live external behavior is the claim                                | Recheck when external state may have changed                                                       |
 
-Do not claim CI passed for a new head because an earlier run passed. GitHub's merge requirements and repository rules still govern. A content-equivalence check can justify reusing local evidence; it cannot waive required checks.
+Do not claim CI passed for a new head because an earlier run passed. GitHub's merge requirements and repository rules still govern. A content-equivalence check can justify reusing local evidence; it cannot waive required checks. When a CI lane is the only end-to-end proof, name its result for the current head SHA. A reviewer who sees a green result quoted for an older SHA under a newer head asks again on every round until the body carries the new result, so re-request review after the lane finishes rather than before.
 
 After a push that changes the described behavior, refresh an agent-owned body within the authorized scope. Update claims that actually changed. If the user froze the description, put factual drift in the session handoff and wait for authorization to edit the frozen artifact.
 
@@ -126,6 +149,8 @@ A generated-by footer in a PR body can stay; do not remove attribution as part o
 
 Put the disposition first, then the causal reason and supporting check. For an unresolved design choice, state the recommendation and the trade-off the reviewer is deciding. A reply should answer the original concern without requiring the reviewer to infer the answer from a commit link or an unrelated green suite.
 
+A deploy question that returns after you replied means the body lacks the who, when, or where, not the what. Move the answer into the body's rollout section and say so in the reply. An inline thread closes on a receipt: the commit, the deletion that turned the new test red, the live check with its table. Lead with that, and take a reviewer's "push back if you disagree" literally when the evidence is on your side; a counterexample with a measurement closes a thread in one round.
+
 ## Voice and prose cleanup
 
 Use plain, complete sentences. Lead with the English noun before a path or SHA, keep the subject near its verb, and explain consequences in the order the reader needs them. Preserve calibrated uncertainty; remove empty hedges and inflated significance.
@@ -144,21 +169,24 @@ Default to one PR; split only when review domains differ (a correctness fix that
 
 ## Anti-Patterns
 
-| Mistake                                           | Correction                                                      |
-| ------------------------------------------------- | --------------------------------------------------------------- |
-| Paste a changelog as the explanation              | Explain the problem, behavior, and design                       |
-| Fill every heading for a small fix                | Keep only sections that help review                             |
-| Repeat old green CI against a new head            | Check which evidence remains applicable and run required checks |
-| Assume the base is `main`                         | Read the PR's actual base                                       |
-| Overwrite a human's latest edit                   | Re-read and merge only authorized changes                       |
-| Turn a limitation into unsolicited implementation | Complete authorized requirements and state real boundaries      |
-| Publish because drafting finished                 | Check the action is authorized                                  |
+| Mistake                                           | Correction                                                       |
+| ------------------------------------------------- | ---------------------------------------------------------------- |
+| Paste a changelog as the explanation              | Explain the problem, behavior, and design                        |
+| Fill every heading for a small fix                | Keep only sections that help review                              |
+| Repeat old green CI against a new head            | Check which evidence remains applicable and run required checks  |
+| Assume the base is `main`                         | Read the PR's actual base                                        |
+| Overwrite a human's latest edit                   | Re-read and merge only authorized changes                        |
+| Turn a limitation into unsolicited implementation | Complete authorized requirements and state real boundaries       |
+| Publish because drafting finished                 | Check the action is authorized                                   |
+| Answer a deploy question in a reply thread        | Put it in the body's rollout section and refresh it on each push |
 
 ## Worked examples and basis
 
 Consult [worked examples](references/worked-examples.md) when choosing the shape of a small fix, explaining an asynchronous correctness boundary, or making a scoped template edit. Each example starts with its complete factual packet; the output cannot claim more than that packet establishes.
 
 The examples also link the primary guidance behind these choices. Google and GitHub describe useful engineering practices and supported formatting, not a measured universal optimum for PR length, heading count, or model output quality.
+
+The observed review corpus and public sources behind the deploy questions and the test-mutation line are in `references/evidence.md`.
 
 ## What This Skill is NOT
 
