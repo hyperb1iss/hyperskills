@@ -21,14 +21,14 @@ The user, publication, and project contract set the register. An artifact's auth
 | Spec, plan, research report            | Preserve decisions, alternatives that matter, uncertainty, citations, and requirements            |
 | README, docs, guides                   | Explain the actual system; preserve commands, examples, signatures, and error strings             |
 | Changelog, release notes               | Narrating the change is the purpose; keep versions and migration consequences                     |
-| Slack, email                           | Match the sender; preserve signatures and thread links                                            |
+| Slack, email                           | Match the sender's own messages, not the channel's; preserve signatures and thread links          |
 | Blog, essay, fiction                   | Match the author; creative invention is allowed only within the creative brief                    |
 | Scientific, legal, medical, postmortem | Preserve calibrated uncertainty and approved language                                             |
 | Marketing                              | Follow the brief; persuasion does not authorize invented claims                                   |
 | Agent brief, skill, memory             | Keep useful tables and terminology; clarity and factual checks still apply                        |
 | Interactive chat                       | Skip a separate pass; follow the project register                                                 |
 
-Read `references/surface-profiles.md` when a surface needs a worked example. A writing sample guides voice; it does not override an explicit instruction from the user.
+Read `references/surface-profiles.md` when a surface needs a worked example. A writing sample guides voice only when its author is the one you are writing for; other people's and other agents' messages in a thread are context, not a sample. A sample does not override an explicit instruction from the user.
 
 ## A focused editing loop
 

@@ -43,6 +43,7 @@ Use disposable fixtures for writes. Avoid real publishing, account changes, imag
 | "What did we learn?" with no transcript or memory access   | State the available evidence; do not invent cross-session history                                                    |
 | "The provider requires a concurrency limit."               | Inspect the provider contract and workload; distinguish valid admission control from an undiagnosed local bottleneck |
 | A review is interrupted after reading half the named files | Retain partial findings and report incomplete coverage; no full-scope PASS                                           |
+| "Send my review ask" in a thread of another agent's asks    | Writes in the sender's own register; reads the thread for facts, never as a template to copy                         |
 | "Trim this MP4 to its first ten seconds."                  | A plain ffmpeg trim; no shot list, demo world, or reshoot loop                                                       |
 | "Film Claude Code using our CLI for the promo."            | A throwaway-HOME take proven with fixtures, not real config; an allowlist with no auto, bypass, or manual prompts    |
 
