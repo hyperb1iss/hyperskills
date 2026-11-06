@@ -42,6 +42,10 @@ Judge the concepts and contracts, not line count: an abstraction can earn its pl
 
 For a scale problem, identify the contended resource and fix isolation, indexing, batching, ownership, or capacity at the cause. A temporary concurrency reduction must not quietly become permanent.
 
+## Record the Calls the Request Did Not Make
+
+The request is a map and the repository is the territory. Where they disagree (an edge case the request never mentioned, a constraint the user treats as obvious, two readings that produce different work), the call made there is where a run most often diverges from the result the user wanted, not the code around it. Make the call, record the alternative and the reason, and carry the record into the wrap and the handoff. When the readings differ materially and the work after the call depends on the answer, ask once with the pick stated before building on it; otherwise state the reading taken and continue. A silent call is the failure; a question at every call is the other one.
+
 ## Verify the Claim You Intend to Make
 
 | Check                         | What it can establish                        | Common limit                                  |
@@ -100,7 +104,7 @@ Obtain independent verification when consequence or run length justifies it (sha
 
 ## Preserve the State and Finish
 
-At handoff or compaction, preserve the original outcome, user corrections, changed paths, revision, checks run, unresolved findings, and next step. Sweep for processes this session started before reporting done. Reinspect status on resumption.
+At handoff or compaction, preserve the original outcome, user corrections, changed paths, revision, checks run, unresolved findings, the calls made where the request was silent, and next step. Sweep for processes this session started before reporting done. Reinspect status on resumption.
 
 ## Evidence and References
 

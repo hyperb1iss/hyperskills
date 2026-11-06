@@ -20,3 +20,9 @@ Limits: one reviewer, one repository, one week. The four-part shape is that revi
 ## Public sources
 
 [cursor/plugins, pstack](https://github.com/cursor/plugins/tree/main/pstack) (read at origin/main 4dd1d058, 2026-10-29): its `blast-radius` skill ranks evidence from "you said so" through "you pointed at the line", "you showed the bad case cannot happen", "you ran it", to "you reproduced it in the running app", and its `opening-a-pr` playbook asks a body for scope, blast radius, and verification as real run paths. The ladder is consistent with a reviewer treating a claim that rests on a code comment as a question. These are a vendor's practitioner guidelines, not measured outcomes.
+
+## 2026-11-06 review
+
+Thariq Shihipar (Claude Code, Anthropic), [Unhobbling Claude: the difficulties and processes of building agents](https://www.youtube.com/watch?v=FlHfhwQaAFM), a talk at a Browserbase event published 2026-09-25, read from the auto-generated transcript on 2026-11-06: in eval transcripts the model finds an edge case the prompt did not cover and makes a judgment call there, and surfacing that call is what lets a human correct it. The sentence on declaring such calls in the body follows that; the review-side half is the agent-PR lens in hyper-pr-review.
+
+Limits: one engineer's account of the Claude Code harness and of eval transcripts, with no numbers and no controlled comparison. His observation that the Claude 5 models want smaller context and no examples concerns tool descriptions in that harness, not skill prose.

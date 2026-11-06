@@ -28,6 +28,7 @@ Inspect repository status and relevant diffs, and locate the real verification c
 - Affected interfaces, ownership, and compatibility obligations.
 - Uncertainty that could invalidate the work.
 - Explicit constraints, non-goals, and user corrections, with requirements ("must") kept distinct from preferences stated casually.
+- Constraints the user treats as obvious and left unsaid: a convention, a taste, an integration they assume. Where two readings produce materially different work, ask once with the pick stated; otherwise record the reading taken.
 
 Treat an inherited plan as a hypothesis: recheck consequential claims against the current tree before executing them. When a premise fails, update the plan itself, because a detached comment leaves the executor on stale instructions.
 
@@ -69,13 +70,13 @@ File separation does not prove independence: two modules can share a schema, gen
 
 ## Make the Plan Resumable
 
-Select one authoritative plan and link it from the project's tracker rather than duplicating it across chat, repository files, and memory. Do not create or commit planning documents merely because work spans sessions.
+Select one authoritative plan and link it from the project's tracker rather than duplicating it across chat, repository files, and memory. Do not create or commit planning documents merely because work spans sessions. A plan is read by a human and a future session, not by the model that wrote it: keep it to the decisions, contracts, and open calls, and when the host renders rich artifacts, put each open question beside the diagram or snippet it concerns.
 
 A checkpoint records the current revision, completed outcomes and evidence, active ownership, pending decisions, and the exact next step. On resumption, re-read the checkpoint and inspect live state; notes describe a past state.
 
 ## Replan Without Losing the Goal
 
-When implementation exposes a new constraint, carry the correction through tables and acceptance criteria, not just the edited paragraph. At integration boundaries, compare the accumulated diff with the intended outcome; tests can pass while scope drifts.
+When implementation exposes a new constraint, carry the correction through tables and acceptance criteria, not just the edited paragraph. A case the plan did not cover gets its call recorded beside the task it affects, with the alternative rejected; a call that lives only in the code is lost at the next checkpoint. At integration boundaries, compare the accumulated diff with the intended outcome; tests can pass while scope drifts.
 
 Report an unavailable external gate separately from completed local checks, with its blocker and next action.
 

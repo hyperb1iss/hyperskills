@@ -23,3 +23,9 @@ Benchmark results depend on the model, task set, harness, and grader. No publish
 ## 2026-10-30 review corpus
 
 Observed: in about a week of review traffic from a single reviewer on roughly fifty pull requests, 88 of 98 review summaries carried deploy questions, and 35% of question instances re-asked a type already raised on that pull request; on four pull requests the same question returned for six to nine rounds. The Rollback and After deploy items in `lenses.md` section 7 encode that rubric. One reviewer, one repository; the rubric is a useful lens, not a measured defect-detection rate.
+
+## 2026-11-06 review
+
+Thariq Shihipar (Claude Code, Anthropic), [Unhobbling Claude: the difficulties and processes of building agents](https://www.youtube.com/watch?v=FlHfhwQaAFM), a talk at a Browserbase event published 2026-09-25, read from the auto-generated transcript on 2026-11-06: in eval transcripts the model finds an edge case the prompt did not cover and makes a judgment call there. The agent-PR lens bullet on undeclared calls follows that; the body-side half is in super-good-pr.
+
+Limits: one engineer's account of the Claude Code harness and of eval transcripts, with no numbers and no controlled comparison. His observation that the Claude 5 models want smaller context and no examples concerns tool descriptions in that harness, not skill prose.

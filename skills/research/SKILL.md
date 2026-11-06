@@ -11,13 +11,14 @@ The user's instructions take precedence over this skill; carry existing authoriz
 
 Name the question, target system, time or version, and consequence of being wrong. Confirm the named artifact exists. Memory is a lead, not proof. For an existing system, run an internal investigation alongside external research, since an installed version or deployment constraint can rule out an attractive option.
 
-| Question shape                           | Useful approach                                                                |
-| ---------------------------------------- | ------------------------------------------------------------------------------ |
-| A current version or specific capability | Inspect the authoritative registry, release, docs, or local interface          |
-| A choice between technologies            | Compare capabilities, operating cost, failure modes, and adoption or exit cost |
-| An uncertain performance claim           | Examine methodology, then benchmark representative work if feasible            |
-| A broad landscape                        | Map distinct directions, then investigate gaps that could alter the answer     |
-| A codebase question                      | Trace the implementation and consumers before searching externally             |
+| Question shape                           | Useful approach                                                                                                               |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| A current version or specific capability | Inspect the authoritative registry, release, docs, or local interface                                                         |
+| A choice between technologies            | Compare capabilities, operating cost, failure modes, and adoption or exit cost                                                |
+| An uncertain performance claim           | Examine methodology, then benchmark representative work if feasible                                                           |
+| A broad landscape                        | Map distinct directions, then investigate gaps that could alter the answer                                                    |
+| A codebase question                      | Trace the implementation and consumers before searching externally                                                            |
+| A domain the user says they do not know  | Map the questions they did not ask (failure modes, constraints, conventions) by consequence before answering the one they did |
 
 No minimum or maximum agent count, source count, wave count, or document size applies; independent questions fan out in parallel.
 
