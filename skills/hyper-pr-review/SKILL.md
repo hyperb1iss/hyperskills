@@ -55,7 +55,7 @@ For broad work, keep a compact inventory of changed invariants and affected cons
 
 First establish relevance. Drop unsupported style preferences and speculative scenarios without a reachable trigger. Record pre-existing issues separately unless the change worsens them or newly depends on them. When the same finding class recurs across review rounds, recommend restructuring or cutting the mechanism rather than another patch. A missing test is material when it leaves a specific changed behavior vulnerable to regression. When delegating a review, say the code may be clean; a supported clean result that names the checks run is a complete answer.
 
-Run available linters and typecheckers when appropriate. Deduplicate their output, but do not suppress a real build failure because CI should catch it. Check whether the gate actually ran against this artifact. Required-check failure belongs in the verdict.
+Run available linters and typecheckers when appropriate, and deduplicate their output. A failure no required check enforces is a finding; check whether the gate actually ran against this artifact before assuming CI covers it. A red required check is not a finding: branch protection already blocks the merge, so check status never sets the verdict or requests changes by itself. When you traced a failure to its cause, hand the author that diagnosis in one line and judge the diff on what CI cannot catch. Weakening CI itself still blocks, per the agent-PR lens.
 
 For each candidate, choose the quickest decisive check:
 
@@ -118,7 +118,7 @@ Use the repository's severity vocabulary when defined. Otherwise, say whether ac
 
 | Kind of feedback                                        | Treatment                                                                                                |
 | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Confirmed contract violation or required-check failure  | Explain what must change before merge and why                                                            |
+| Confirmed contract violation                            | Explain what must change before merge and why                                                            |
 | Feasible improvement with no current contract violation | Mark nonblocking; state the benefit and respect equally valid designs                                    |
 | Missing fact that could change the merge decision       | Name the exact question and evidence needed; keep the review inconclusive if no blocker is yet confirmed |
 | Personal preference or mechanical lint noise            | Omit unless requested or needed to satisfy a project rule; consolidate repeated tool output              |
