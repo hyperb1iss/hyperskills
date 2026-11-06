@@ -39,11 +39,41 @@ hyperskills/
 │   ├── library-review-2026-10.md
 │   └── releases.md
 ├── evals/
-│   └── README.md
+│   ├── PROTOCOL.md
+│   ├── README.md
+│   ├── RUNNING.md
+│   ├── cases/
+│   │   ├── README.md
+│   │   ├── atomic-export/
+│   │   │   ├── fixture/
+│   │   │   │   ├── exporter.py
+│   │   │   │   └── notes.txt
+│   │   │   └── prompt.md
+│   │   ├── atomic_worker.py
+│   │   ├── grade.py
+│   │   ├── oracle_adapter.py
+│   │   ├── prose-preservation/
+│   │   │   ├── fixture/
+│   │   │   │   └── draft.md
+│   │   │   └── prompt.md
+│   │   ├── research-release/
+│   │   │   ├── fixture/
+│   │   │   │   ├── news.md
+│   │   │   │   └── releases.json
+│   │   │   └── prompt.md
+│   │   ├── review-boundary/
+│   │   │   ├── fixture/
+│   │   │   │   ├── cache.py
+│   │   │   │   └── unique.py
+│   │   │   └── prompt.md
+│   │   └── test_graders.py
+│   └── pilot.json
 ├── release.json
 ├── scripts/
+│   ├── eval_claude.py
 │   ├── open_release_pr.py
 │   ├── release.py
+│   ├── skill_eval.py
 │   ├── sync_metadata.py
 │   └── validate_skills.py
 ├── skills/
@@ -150,8 +180,10 @@ hyperskills/
 │           ├── evidence.md
 │           └── visual-catalog.md
 └── tests/
+    ├── test_eval_claude.py
     ├── test_open_release_pr.py
     ├── test_release.py
+    ├── test_skill_eval.py
     ├── test_sync_metadata.py
     └── test_validate_skills.py
 ```

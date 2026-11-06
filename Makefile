@@ -99,7 +99,7 @@ sync-metadata:
 
 validate-structure validate-frontmatter: check
 
-test: test-validator test-deslop test-review-runner test-demo-reel
+test: test-validator test-deslop test-review-runner test-demo-reel test-eval-cases
 
 test-validator:
 	@uv run --python '>=3.11' --with 'pyyaml==6.0.3' python -m unittest discover -s tests -v
@@ -249,3 +249,7 @@ help:
 	@echo "  $(GREEN)clean$(RESET)            Remove temp files"
 	@echo "  $(GREEN)help$(RESET)             Show this help"
 	@echo ""
+
+.PHONY: test-eval-cases
+test-eval-cases:
+	@python3 evals/cases/test_graders.py

@@ -1,5 +1,9 @@
 # Skill Behavior Cases
 
+The executable evaluation workflow is documented in [RUNNING.md](RUNNING.md).
+The experiment and improvement contract is in [PROTOCOL.md](PROTOCOL.md).
+The cases below remain a broader backlog of behavioral coverage.
+
 Use these cases to test whether a skill improves the task, preserves scope, and avoids unnecessary process. They are reviewable scenarios, not an automated benchmark or a claim of improved model accuracy.
 
 ## Run a Case

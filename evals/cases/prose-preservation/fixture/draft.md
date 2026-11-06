@@ -1,0 +1,1 @@
+The export pilot, which was conducted with the intent of evaluating the export pilot, processed 240 files. It is important to note that 7 failed. The estimated recovery time is 2-4 hours, not a guarantee. "Keep the original until verification finishes." The pilot is a pilot and is not a production rollout. Command: `exportctl retry --limit 7`.

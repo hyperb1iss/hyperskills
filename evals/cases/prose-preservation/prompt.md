@@ -1,0 +1,1 @@
+Edit draft.md into edited.md for a teammate. Remove repetition and awkward phrasing. Preserve all facts, the distinction between an estimate and a guarantee, the pilot scope, the quotation verbatim, and the command verbatim. Do not alter draft.md. A separate blind reviewer will judge clarity; merely retaining required strings is not sufficient evidence of good writing.
