@@ -39,6 +39,7 @@ hyperskills/
 │   ├── library-review-2026-10.md
 │   └── releases.md
 ├── evals/
+│   ├── EXTENDING.md
 │   ├── PROTOCOL.md
 │   ├── README.md
 │   ├── RUNNING.md
@@ -50,6 +51,24 @@ hyperskills/
 │   │   │   │   └── notes.txt
 │   │   │   └── prompt.md
 │   │   ├── atomic_worker.py
+│   │   ├── clarification/
+│   │   │   ├── discoverable/
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── TEAM.md
+│   │   │   │   │   └── exporter.py
+│   │   │   │   └── prompt.md
+│   │   │   ├── grade.py
+│   │   │   ├── missing/
+│   │   │   │   ├── fixture/
+│   │   │   │   │   └── exporter.py
+│   │   │   │   └── prompt.md
+│   │   │   ├── oracle_adapter.py
+│   │   │   ├── replies.json
+│   │   │   ├── stated/
+│   │   │   │   ├── fixture/
+│   │   │   │   │   └── exporter.py
+│   │   │   │   └── prompt.md
+│   │   │   └── worker.py
 │   │   ├── grade.py
 │   │   ├── oracle_adapter.py
 │   │   ├── prose-preservation/
@@ -67,10 +86,18 @@ hyperskills/
 │   │   │   │   └── unique.py
 │   │   │   └── prompt.md
 │   │   └── test_graders.py
+│   ├── clarification.json
+│   ├── container/
+│   │   └── Dockerfile
+│   ├── experiments/
+│   │   └── implement-self-review.json
 │   └── pilot.json
 ├── release.json
 ├── scripts/
 │   ├── eval_claude.py
+│   ├── eval_container.py
+│   ├── eval_subtract.py
+│   ├── eval_trace.py
 │   ├── open_release_pr.py
 │   ├── release.py
 │   ├── skill_eval.py
@@ -180,7 +207,12 @@ hyperskills/
 │           ├── evidence.md
 │           └── visual-catalog.md
 └── tests/
+    ├── test_eval_clarification.py
     ├── test_eval_claude.py
+    ├── test_eval_container.py
+    ├── test_eval_interaction.py
+    ├── test_eval_subtract.py
+    ├── test_eval_trace.py
     ├── test_open_release_pr.py
     ├── test_release.py
     ├── test_skill_eval.py

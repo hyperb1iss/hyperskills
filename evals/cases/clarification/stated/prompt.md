@@ -1,0 +1,2 @@
+Implement export_contacts(contacts) in exporter.py. Return a string in the team's preferred format, either JSON or CSV. Include only active contacts, with fields name and email, sorted by email. Preserve caller input. If the team preference is materially missing, ask before choosing. To ask, write clarification.json containing {"question": "your question"} and end the turn; a fixed interlocutor will answer. Otherwise finish the implementation without asking.
+The team prefers JSON.

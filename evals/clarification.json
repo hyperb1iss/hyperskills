@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "name": "clarification-synthetic-development",
+  "skills_root": "../skills",
+  "tasks": [
+    {
+      "id": "clarification-missing",
+      "family": "clarification",
+      "split": "development",
+      "prompt": "cases/clarification/missing/prompt.md",
+      "fixture": "cases/clarification/missing/fixture",
+      "skills": [
+        "implement"
+      ],
+      "interaction": "cases/clarification/replies.json",
+      "grader": [
+        "python3",
+        "cases/clarification/grade.py",
+        "missing"
+      ],
+      "grader_inputs": [
+        "cases/clarification/worker.py"
+      ]
+    },
+    {
+      "id": "clarification-stated",
+      "family": "clarification",
+      "split": "development",
+      "prompt": "cases/clarification/stated/prompt.md",
+      "fixture": "cases/clarification/stated/fixture",
+      "skills": [
+        "implement"
+      ],
+      "interaction": "cases/clarification/replies.json",
+      "grader": [
+        "python3",
+        "cases/clarification/grade.py",
+        "stated"
+      ],
+      "grader_inputs": [
+        "cases/clarification/worker.py"
+      ]
+    },
+    {
+      "id": "clarification-discoverable",
+      "family": "clarification",
+      "split": "development",
+      "prompt": "cases/clarification/discoverable/prompt.md",
+      "fixture": "cases/clarification/discoverable/fixture",
+      "skills": [
+        "implement"
+      ],
+      "interaction": "cases/clarification/replies.json",
+      "grader": [
+        "python3",
+        "cases/clarification/grade.py",
+        "discoverable"
+      ],
+      "grader_inputs": [
+        "cases/clarification/worker.py"
+      ]
+    }
+  ],
+  "configurations": [
+    {
+      "id": "synthetic-clarification-oracle",
+      "model": "none-synthetic-oracle",
+      "harness": "fixture-oracle-not-model-evidence",
+      "adapter": [
+        "python3",
+        "cases/clarification/oracle_adapter.py"
+      ],
+      "settings": {
+        "purpose": "plumbing-only"
+      }
+    }
+  ]
+}
