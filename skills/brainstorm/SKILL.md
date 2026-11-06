@@ -11,13 +11,15 @@ The user's instructions take precedence over this skill; carry existing authoriz
 
 ## Choose the Work Shape
 
-| Situation                                  | Useful output                                            |
-| ------------------------------------------ | -------------------------------------------------------- |
-| The user wants open exploration            | Distinct directions, concrete tradeoffs, open questions  |
-| The problem is clear, the mechanism is not | A recommendation and the evidence that would overturn it |
-| One assumption determines feasibility      | A small test of that assumption before any design        |
-| Approach chosen, implementation authorized | Continue into implementation                             |
-| The user asks why something happens        | Diagnose the cause before designing a fix                |
+| Situation                                       | Useful output                                                     |
+| ----------------------------------------------- | ----------------------------------------------------------------- |
+| The user wants open exploration                 | Distinct directions, concrete tradeoffs, open questions           |
+| The user holds a picture they cannot articulate | An interview, or rendered directions with their styles named      |
+| The user says they do not know the domain       | A blind-spot pass: the questions they did not ask, by consequence |
+| The problem is clear, the mechanism is not      | A recommendation and the evidence that would overturn it          |
+| One assumption determines feasibility           | A small test of that assumption before any design                 |
+| Approach chosen, implementation authorized      | Continue into implementation                                      |
+| The user asks why something happens             | Diagnose the cause before designing a fix                         |
 
 ## Ground the Question
 
@@ -26,6 +28,8 @@ Recall prior decisions through the installed Sibyl skill when configured (`sibyl
 Translate taste into examples and observations. For "smooth," identify the interaction and visible delay. For "gorgeous," inspect the reference and name the composition, motion, or typography worth preserving. Quantification helps where a metric represents the experience; a proxy metric does not replace the experience itself. A reference the user supplies is the specification: match it before reinterpreting it, and when a concept could move, show it moving.
 
 Treat the user's hunch as a hypothesis: a decisive check can confirm part of it and reject the rest, so report both. Do not downgrade an explicit "use X" to a preference because it was written casually; if it conflicts with feasibility, say so before designing around it.
+
+Elicit what the user knows but did not write. A prompt is a map of the problem, and the user holds constraints, taste, and context they treat as obvious; a wrong guess at those costs a rebuilt slice. When the user signals ambiguity or a picture they cannot describe, interview them: a chain of specific, answerable questions through the host's question tool, or a rendered artifact that puts each question beside the diagram, snippet, or option it concerns. Stop when answers stop changing the design. For taste-driven work, distinct rendered directions are the interview: name the style of each so the user gains the vocabulary to steer, and treat the first pass as a probe. When the user says they do not know the domain, open with the questions they did not ask, ranked by consequence, before any recommendation.
 
 ## Compare the Alternatives That Matter
 

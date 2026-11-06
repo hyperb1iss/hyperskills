@@ -75,7 +75,7 @@ A gate that depends on a human step, such as an alert that must be live on stagi
 
 Say what already exists in the old shape: data an earlier run wrote, records with no stored row on first read, and whether a backfill is a deploy step or a note.
 
-A deliberate choice a reviewer could read as a bug, such as a short propagation lag or a timeout chosen against another limit, is stated as a choice with its reason. "Is that on purpose? If so, say so in the PR" is a round spent on one sentence.
+A deliberate choice a reviewer could read as a bug, such as a short propagation lag or a timeout chosen against another limit, is stated as a choice with its reason. "Is that on purpose? If so, say so in the PR" is a round spent on one sentence. A call made where the request was silent gets the same treatment: the reading taken and the alternative, so the reviewer judges the call instead of rediscovering it.
 
 ## Validation evidence
 

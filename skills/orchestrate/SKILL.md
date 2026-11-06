@@ -44,14 +44,14 @@ Before dispatch, define how partial progress becomes integrated progress: the ar
 
 Give each worker the original request plus facts absent from their checkout, such as user corrections and untracked decisions.
 
-| Brief element     | Purpose                                                               |
-| ----------------- | --------------------------------------------------------------------- |
-| Outcome and scope | Result needed, owned surfaces, exclusions                             |
-| Current evidence  | Code, versions, interfaces, verified premises                         |
-| Dependencies      | What is ready, what is promised, who owns it                          |
-| Authority         | Permitted mutations, commit rights, external actions                  |
-| Verification      | Checks and acceptance conditions                                      |
-| Return            | Changed artifacts or findings, evidence, limits, justified deviations |
+| Brief element     | Purpose                                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------------------------ |
+| Outcome and scope | Result needed, owned surfaces, exclusions                                                                    |
+| Current evidence  | Code, versions, interfaces, verified premises                                                                |
+| Dependencies      | What is ready, what is promised, who owns it                                                                 |
+| Authority         | Permitted mutations, commit rights, external actions                                                         |
+| Verification      | Checks and acceptance conditions                                                                             |
+| Return            | Changed artifacts or findings, evidence, limits, justified deviations, calls made where the brief was silent |
 
 Let workers challenge a premise. A first independent review gets the raw change without coaching; a follow-up verification gets the finding and the fix claim so it can test closure. Templates are in `references/dispatch-briefs.md`.
 

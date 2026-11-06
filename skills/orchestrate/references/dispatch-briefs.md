@@ -52,7 +52,8 @@ Known checks already run: [command, revision, result; not a ban on needed
 reproduction].
 
 Return the outcome, changed files, exact commands/results, remaining
-limits, and any justified deviation from the brief. Report needed scope
+limits, any justified deviation from the brief, and each call made where
+the brief was silent, with the alternative rejected. Report needed scope
 expansion before editing outside ownership. Continue useful in-scope work
 when an independent dependency is blocked.
 ```
@@ -83,7 +84,8 @@ Original request:
 > [user's relevant words]
 
 Inspect: [base-to-head diff and relevant consumers].
-Priority questions: [risks tied to the actual task].
+Priority questions: [risks tied to the actual task, and the calls the
+implementer reported making where the request was silent].
 Evidence already available: [raw artifacts, not a desired conclusion].
 
 Do not edit tracked source, checkout/switch branches, commit, or mutate

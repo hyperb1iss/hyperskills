@@ -61,3 +61,6 @@ skills/*/references/canonical-prs.md
 
 # Python validation artifacts
 __pycache__/
+
+# Private evaluation plans, traces, artifacts, and results
+/evals/runs/

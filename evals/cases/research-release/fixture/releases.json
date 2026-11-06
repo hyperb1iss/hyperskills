@@ -1,0 +1,21 @@
+{
+  "captured_at": "2026-10-15",
+  "source": "https://packages.example.invalid/widget/releases",
+  "releases": [
+    {
+      "version": "2.4.0",
+      "channel": "stable",
+      "published": "2026-09-20"
+    },
+    {
+      "version": "2.5.0-rc.1",
+      "channel": "prerelease",
+      "published": "2026-10-10"
+    },
+    {
+      "version": "2.3.4",
+      "channel": "stable",
+      "published": "2026-10-14"
+    }
+  ]
+}

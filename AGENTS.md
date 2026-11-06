@@ -39,11 +39,41 @@ hyperskills/
 │   ├── library-review-2026-10.md
 │   └── releases.md
 ├── evals/
-│   └── README.md
+│   ├── PROTOCOL.md
+│   ├── README.md
+│   ├── RUNNING.md
+│   ├── cases/
+│   │   ├── README.md
+│   │   ├── atomic-export/
+│   │   │   ├── fixture/
+│   │   │   │   ├── exporter.py
+│   │   │   │   └── notes.txt
+│   │   │   └── prompt.md
+│   │   ├── atomic_worker.py
+│   │   ├── grade.py
+│   │   ├── oracle_adapter.py
+│   │   ├── prose-preservation/
+│   │   │   ├── fixture/
+│   │   │   │   └── draft.md
+│   │   │   └── prompt.md
+│   │   ├── research-release/
+│   │   │   ├── fixture/
+│   │   │   │   ├── news.md
+│   │   │   │   └── releases.json
+│   │   │   └── prompt.md
+│   │   ├── review-boundary/
+│   │   │   ├── fixture/
+│   │   │   │   ├── cache.py
+│   │   │   │   └── unique.py
+│   │   │   └── prompt.md
+│   │   └── test_graders.py
+│   └── pilot.json
 ├── release.json
 ├── scripts/
+│   ├── eval_claude.py
 │   ├── open_release_pr.py
 │   ├── release.py
+│   ├── skill_eval.py
 │   ├── sync_metadata.py
 │   └── validate_skills.py
 ├── skills/
@@ -150,8 +180,10 @@ hyperskills/
 │           ├── evidence.md
 │           └── visual-catalog.md
 └── tests/
+    ├── test_eval_claude.py
     ├── test_open_release_pr.py
     ├── test_release.py
+    ├── test_skill_eval.py
     ├── test_sync_metadata.py
     └── test_validate_skills.py
 ```
@@ -204,7 +236,7 @@ Keep the entrypoint as short as the task permits. Under 5,000 words is the repos
 
 Write imperative guidance for the non-obvious moves. Use tables for comparisons and decisions, prose for connected reasoning, and examples for fragile mechanics. Include relevant anti-patterns and a clear scope boundary, conventionally titled "What This Skill is NOT". Graphviz `dot` is the default for internal workflow diagrams; choose a diagram only when it explains something prose cannot efficiently show.
 
-Label local conventions, observed incidents, and external evidence distinctly. A research claim needs a source, date or version where relevant, and limits. Dated sources and their limits live in the skill's `references/evidence.md`; the entrypoint keeps one line pointing there, so citations never load at invocation. Do not generalize one model's benchmark into a permanent agent-count, token, confidence, or review-round quota. If a new model makes a workaround unnecessary, retire it after checking the behavior it protected.
+Label local conventions, observed incidents, and external evidence distinctly. A research claim needs a source, date or version where relevant, and limits. Dated sources and their limits live in the skill's `references/evidence.md`; the entrypoint keeps one line pointing there, so citations never load at invocation. Do not generalize one model's benchmark into a permanent agent-count, token, confidence, or review-round quota. If a new model makes a workaround unnecessary, retire it after checking the behavior it protected. A rule phrased as a prohibition is usually a constraint written for an older model; its current form is the criterion the model applies, such as matching the surrounding comment style rather than never writing a multi-line comment. An example earns its place when it teaches a mechanic the model gets wrong (a quoting trap, an exact flag); an example of an answer's shape is a constraint the model copies. When a line exists because an older model misbehaved, the test for keeping it is whether the current model still fails without it.
 
 Scripts belong in `scripts/` when deterministic execution improves reliability. Explain dependencies and side effects. Never present generated files or a model's self-report as proof without inspecting the actual output.
 

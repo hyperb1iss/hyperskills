@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "name": "synthetic-development-smoke",
+  "skills_root": "../skills",
+  "tasks": [
+    {
+      "id": "atomic-export",
+      "family": "implementation",
+      "split": "development",
+      "prompt": "cases/atomic-export/prompt.md",
+      "fixture": "cases/atomic-export/fixture",
+      "skills": [
+        "implement"
+      ],
+      "grader": [
+        "python3",
+        "cases/grade.py",
+        "atomic-export"
+      ],
+      "grader_inputs": [
+        "cases/atomic_worker.py"
+      ]
+    },
+    {
+      "id": "review-boundary",
+      "family": "review",
+      "split": "development",
+      "prompt": "cases/review-boundary/prompt.md",
+      "fixture": "cases/review-boundary/fixture",
+      "skills": [
+        "hyper-pr-review"
+      ],
+      "grader": [
+        "python3",
+        "cases/grade.py",
+        "review-boundary"
+      ]
+    },
+    {
+      "id": "prose-preservation",
+      "family": "prose",
+      "split": "development",
+      "prompt": "cases/prose-preservation/prompt.md",
+      "fixture": "cases/prose-preservation/fixture",
+      "skills": [
+        "deslop"
+      ],
+      "grader": [
+        "python3",
+        "cases/grade.py",
+        "prose-preservation"
+      ]
+    },
+    {
+      "id": "research-release",
+      "family": "research",
+      "split": "development",
+      "prompt": "cases/research-release/prompt.md",
+      "fixture": "cases/research-release/fixture",
+      "skills": [
+        "research"
+      ],
+      "grader": [
+        "python3",
+        "cases/grade.py",
+        "research-release"
+      ]
+    }
+  ],
+  "configurations": [
+    {
+      "id": "synthetic-oracle",
+      "model": "none-synthetic-oracle",
+      "harness": "fixture-oracle-not-model-evidence",
+      "adapter": [
+        "python3",
+        "cases/oracle_adapter.py"
+      ],
+      "settings": {
+        "purpose": "plumbing-only"
+      }
+    }
+  ]
+}
