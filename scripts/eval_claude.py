@@ -29,9 +29,9 @@ def build_prompt(request: dict, shell=False) -> str:
     prompt = Path(request['prompt']).read_text()
     root = Path(request['skills'])
     capability = 'File and Bash tools are available in the isolated trial container.' if shell else 'File tools are available; shell, network, and delegation are unavailable.'
-    parts = ['Complete the task in the working directory. ' + capability, prompt]
+    parts = ['Complete the task in the working directory. It holds the whole project; do not search its parent directories. ' + capability, prompt]
     if request.get('interactive'):
-        parts.append('If you need clarification, write clarification.json in the working directory containing {"question": "your question"}, then end your turn. The host will deliver the user reply. Otherwise complete the task without asking.')
+        parts.append('If you need clarification, write clarification.json in the working directory containing {"question": "your question"}, then end your turn. The host will deliver the user reply and removes clarification.json when it does; do not recreate, empty, or delete that file yourself. Otherwise complete the task without asking.')
     if request['arm'] == 'explicit':
         for entry in sorted(root.glob('*/SKILL.md')):
             parts.append(f'Relevant skill ({entry}):\n{entry.read_text()}')
