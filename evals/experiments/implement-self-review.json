@@ -1,0 +1,10 @@
+{
+  "skill": "implement",
+  "section": "Self-Review Before Requesting Review",
+  "hypothesis": "On small bounded coding tasks, removing the broad self-review checklist may reduce unnecessary work without reducing behavioral correctness or preservation of unrelated edits.",
+  "scope": "Small bounded coding tasks only. Do not generalize to production, security-sensitive, or broad interface changes.",
+  "primary_outcomes": ["behavioral correctness", "unrelated edit preservation"],
+  "secondary_outcomes": ["total cost", "elapsed time", "unnecessary clarification questions"],
+  "comparison": "Reuse matched baseline and candidate suites with identical tasks, graders, prompts, model, harness, settings, and repeat count. Change only skills_root to the prepared candidate. Use the existing comparison report.",
+  "decision": "This is a falsifiable development hypothesis, not a claim of improvement. Inspect failures, then confirm promising changes on fresh held-out tasks before changing the shipped skill."
+}

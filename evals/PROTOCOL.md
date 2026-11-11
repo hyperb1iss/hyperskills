@@ -47,6 +47,6 @@ Primary methodological references: [SkillsBench](https://arxiv.org/html/2602.126
 
 ## Execution boundary
 
-The supplied Claude adapter is a controlled file-task harness. It uses safe mode and restricted file tools, exposes an explicit catalog for discovery, and cannot run shell commands, network requests, or delegated agents. Its results describe that harness only. They cannot establish the benefit of native skill routing or a full coding workflow. A later native CLI/container adapter must prove equivalent tool availability and isolation across conditions before those broader claims are made.
+The supplied Claude adapter is a controlled file-task harness. It uses safe mode and restricted file tools, exposes an explicit catalog for discovery, and cannot run shell commands, network requests, or delegated agents. Its results describe that harness only. They cannot establish the benefit of native skill routing or a full coding workflow. The Docker adapter adds shell tools and isolated grading. Verify equivalent tool availability and isolation in the actual runtime before making broader coding claims. Scripted clarification and subtraction experiments are described in [EXTENDING.md](EXTENDING.md).
 
 Grading may execute candidate code. Run model trials and graders inside disposable environments without personal credentials or production access; keeping a grader outside the workspace does not make executing candidate code safe. The bundled synthetic oracle is trusted test code and exercises no model.

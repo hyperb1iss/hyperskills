@@ -13,6 +13,7 @@ import statistics
 import subprocess
 import sys
 import time
+import uuid
 
 ARMS = ('baseline', 'explicit', 'discovery')
 
@@ -85,10 +86,24 @@ def suite(path):
         task['grader_inputs'] = [str((base / x).absolute()) for x in dependencies]
         if any(not Path(x).exists() for x in task['grader_inputs']):
             raise ValueError('grader_inputs must exist')
+        if 'interaction' in task:
+            if not isinstance(task['interaction'], str):
+                raise ValueError('interaction must be a JSON file path')
+            packet_path = (base / task['interaction']).absolute()
+            packet = read(packet_path)
+            if not isinstance(packet, dict) or type(packet.get('max_turns')) is not int or packet['max_turns'] < 1 or not isinstance(packet.get('response'), str) or not packet['response']:
+                raise ValueError('interaction needs positive max_turns and nonempty response')
+            task['interaction'] = str(packet_path)
     for config in data['configurations']:
         if not config.get('model') or not config.get('harness'):
             raise ValueError('configuration needs pinned model and harness identities')
         config['adapter'] = command(config['adapter'], base)
+        dependencies = config.get('adapter_inputs', [])
+        if not isinstance(dependencies, list) or any(not isinstance(x, str) for x in dependencies):
+            raise ValueError('adapter_inputs must be a list of paths')
+        config['adapter_inputs'] = [str((base / x).absolute()) for x in dependencies]
+        if any(not Path(x).is_file() for x in config['adapter_inputs']):
+            raise ValueError('adapter_inputs must be individual existing files')
     return data
 
 
@@ -97,9 +112,12 @@ def inputs(data):
     for task in data['tasks']:
         paths.update([task['prompt'], task['fixture']])
         paths.update(task.get('grader_inputs', []))
+        if 'interaction' in task:
+            paths.add(task['interaction'])
         paths.update(x for x in task['grader'] if Path(x).is_file())
     for config in data['configurations']:
         paths.update(x for x in config['adapter'] if Path(x).is_file())
+        paths.update(config.get('adapter_inputs', []))
     return {x: digest(x) for x in sorted(paths)}
 
 
@@ -149,19 +167,19 @@ def run(path, output):
     for trial in frozen['trials']:
         directory = output / trial['id']
         directory.mkdir()
-        try:
-            unchanged = inputs(frozen['suite']) == frozen['hashes']
-        except (OSError, ValueError):
-            unchanged = False
-        if not unchanged:
+        def unchanged():
+            try:
+                return inputs(frozen['suite']) == frozen['hashes']
+            except (OSError, ValueError):
+                return False
+        if not unchanged():
             write(directory / 'result.json', {**trial, 'status': 'input_changed', 'passed': None, 'cost_usd': None, 'tokens': None})
             break
         workspace = directory / 'workspace'
         task, config = tasks[trial['task']], configs[trial['configuration']]
         shutil.copytree(task['fixture'], workspace)
-        home = directory / 'home'
+        home, skills = directory / 'home', directory / 'skills'
         home.mkdir()
-        skills = directory / 'skills'
         skills.mkdir()
         root = Path(frozen['suite']['skills_root'])
         selected = [] if trial['arm'] == 'baseline' else task['skills']
@@ -169,44 +187,115 @@ def run(path, output):
             selected = [x.name for x in root.iterdir() if (x / 'SKILL.md').is_file()]
         for name in selected:
             shutil.copytree(root / name, skills / name)
-        prompt = directory / 'prompt.txt'
-        prompt.write_text(Path(task['prompt']).read_text())
-        request = {'version': 1, **trial, 'workspace': str(workspace), 'home': str(home), 'skills': str(skills), 'prompt': str(prompt), 'configuration': config, 'metrics': str(directory / 'metrics.json'), 'exposure': 'preload' if trial['arm'] == 'explicit' else 'discover', 'isolation': 'Adapter must enforce external sandbox and disable ambient skills/config/memory; cwd and HOME alone are not isolation.'}
-        write(directory / 'request.json', request)
-        env = dict(os.environ, HOME=str(home), XDG_CONFIG_HOME=str(home / '.config'), XDG_CACHE_HOME=str(home / '.cache'))
-        result = {**trial, 'adapter': invoke(config['adapter'] + [str(directory / 'request.json')], workspace, env, directory / 'adapter'), 'status': 'adapter_error', 'passed': None, 'cost_usd': None, 'tokens': None}
-        if result['adapter']['exit_code'] == 0:
-            result['grader'] = invoke(task['grader'] + [str(workspace)], directory, os.environ.copy(), directory / 'grader')
+        interaction = read(task['interaction']) if task.get('interaction') else None
+        budget = interaction['max_turns'] if interaction else 1
+        current_prompt = Path(task['prompt']).read_text()
+        session_id = str(uuid.uuid4())
+        transcript = {'turns': [], 'exhausted': False}
+        original_files = {str(p.relative_to(workspace)): (b'<symlink>' if p.is_symlink() else p.read_bytes()) for p in workspace.rglob('*') if p.is_symlink() or p.is_file()}
+        result = {**trial, 'status': 'adapter_error', 'passed': None, 'cost_usd': None, 'tokens': None, 'attempts': []}
+        env = dict(os.environ, HOME=str(home), CLAUDE_CONFIG_DIR=str(home / '.claude'), XDG_CONFIG_HOME=str(home / '.config'), XDG_CACHE_HOME=str(home / '.cache'))
+        protocol_error = None
+        for turn in range(budget):
+            turn_dir = directory if turn == 0 else directory / f'turn-{turn:03d}'
+            turn_dir.mkdir(exist_ok=True)
+            prompt = turn_dir / 'prompt.txt'
+            prompt.write_text(current_prompt)
+            request = {'version': 1, **trial, 'workspace': str(workspace), 'home': str(home), 'skills': str(skills), 'prompt': str(prompt), 'configuration': config, 'metrics': str(turn_dir / 'metrics.json'), 'exposure': 'preload' if trial['arm'] == 'explicit' else 'discover', 'session_id': session_id, 'turn': turn, 'interactive': interaction is not None, 'isolation': 'Adapter must enforce external sandbox and disable ambient skills/config/memory; cwd and HOME alone are not isolation.'}
+            write(turn_dir / 'request.json', request)
+            if not unchanged():
+                result['status'] = 'input_changed'
+                break
+            attempt = invoke(config['adapter'] + [str(turn_dir / 'request.json')], workspace, env, turn_dir / 'adapter')
+            if (turn_dir / 'metrics.json').exists():
+                try:
+                    metrics = read(turn_dir / 'metrics.json')
+                    if not isinstance(metrics, dict):
+                        raise ValueError('metrics must be an object')
+                    attempt['reported_metrics'] = metrics
+                except (ValueError, OSError) as exc:
+                    attempt['metrics_error'] = str(exc)
+                    result['metrics_error'] = str(exc)
+            result['attempts'].append(attempt)
+            result['adapter'] = {**attempt, 'elapsed_seconds': sum(a['elapsed_seconds'] for a in result['attempts'])}
+            if not unchanged():
+                result['status'] = 'input_changed'
+                break
+            if attempt['exit_code'] != 0:
+                break
+            question_path = workspace / 'clarification.json'
+            if not interaction or not question_path.exists():
+                result['status'] = 'ready_to_grade'
+                break
+            try:
+                if question_path.is_symlink():
+                    raise ValueError('clarification.json must not be a symlink')
+                question = read(question_path)
+                if not isinstance(question, dict) or not isinstance(question.get('question'), str) or not question['question'].strip():
+                    raise ValueError('clarification.json requires a nonempty question')
+                now = {str(p.relative_to(workspace)): (b'<symlink>' if p.is_symlink() else p.read_bytes()) for p in workspace.rglob('*') if p != question_path and (p.is_symlink() or p.is_file())}
+                changed = sorted(k for k in original_files.keys() | now.keys() if original_files.get(k) != now.get(k))
+                exhausted = turn + 1 == budget
+                transcript['turns'].append({'question': question['question'], 'reply': None if exhausted else interaction['response'], 'workspace_changes': changed})
+                transcript['exhausted'] = exhausted
+                write(turn_dir / 'clarification.json', question)
+                question_path.unlink()
+                if exhausted:
+                    protocol_error = 'clarification turn budget exhausted'
+                    result['status'] = 'ready_to_grade'
+                    break
+                current_prompt = interaction['response']
+            except (OSError, ValueError) as exc:
+                protocol_error = str(exc)
+                result['status'] = 'ready_to_grade'
+                break
+        if interaction:
+            write(directory / 'interactions.json', transcript)
+        if result['status'] == 'ready_to_grade':
+            grade_env = os.environ.copy()
+            if interaction:
+                grade_env['EVAL_INTERACTION_LOG'] = str(directory / 'interactions.json')
+            argv = task['grader'] + [str(workspace)]
+            if config.get('settings', {}).get('container_image'):
+                grade_request = {'container_image': config['settings']['container_image'], 'workspace': str(workspace), 'grader': task['grader'], 'grader_inputs': task.get('grader_inputs', [])}
+                write(directory / 'grader-request.json', grade_request)
+                argv = [sys.executable, str(Path(__file__).with_name('eval_container.py')), '--grade', str(directory / 'grader-request.json')]
+            result['grader'] = invoke(argv, directory, grade_env, directory / 'grader')
             try:
                 grade = read(directory / 'grader.stdout')
                 if result['grader']['exit_code'] != 0 or not isinstance(grade, dict) or type(grade.get('passed')) is not bool:
                     raise ValueError('grader must exit zero and emit boolean passed')
-                result['grade'] = grade
-                result['passed'] = grade['passed']
-                result['status'] = 'valid'
+                if protocol_error:
+                    grade['passed'] = False
+                    grade['interaction_error'] = protocol_error
+                result.update(grade=grade, passed=grade['passed'], status='valid')
             except (ValueError, OSError) as exc:
-                result['grading_error'] = str(exc)
-                result['status'] = 'grading_error'
-        if (directory / 'metrics.json').exists():
-            try:
-                metrics = read(directory / 'metrics.json')
-                if not isinstance(metrics, dict):
-                    raise ValueError('metrics must be an object')
-                result['reported_metrics'] = metrics
-                for key in ('cost_usd', 'tokens'):
-                    value = metrics.get(key)
-                    if isinstance(value, (int, float)) and not isinstance(value, bool) and value >= 0 and value < float('inf'):
-                        result[key] = value
-            except (ValueError, OSError) as exc:
-                result['metrics_error'] = str(exc)
-        try:
-            unchanged = inputs(frozen['suite']) == frozen['hashes']
-        except (OSError, ValueError):
-            unchanged = False
-        if not unchanged:
-            result['status'], result['passed'] = 'input_changed', None
+                result.update(grading_error=str(exc), status='grading_error')
+        metrics_rows = [a.get('reported_metrics', {}) for a in result['attempts']]
+        if metrics_rows:
+            result['reported_metrics'] = metrics_rows[-1]
+            for key in ('skills_loaded', 'skills_preloaded'):
+                observations = [m.get(key) for m in metrics_rows]
+                if all(isinstance(v, list) and all(isinstance(s, str) for s in v) for v in observations):
+                    result[key] = sorted({s for values in observations for s in values})
+            for key in ('cost_usd', 'tokens'):
+                values = [m.get(key) for m in metrics_rows]
+                valid = all(isinstance(v, (int, float)) and not isinstance(v, bool) and 0 <= v < float('inf') for v in values)
+                # A resumed CLI may report cumulative usage. Retain raw receipts until calibrated.
+                if valid and len(values) == 1:
+                    result[key] = values[0]
+                elif valid and key == 'cost_usd' and all(m.get('cost_scope') == 'session_cumulative' and m.get('session_id') == session_id for m in metrics_rows):
+                    result[key] = values[-1]
+                elif valid and key == 'tokens' and all(m.get('tokens_scope') == 'turn' for m in metrics_rows):
+                    result[key] = sum(values)
+                elif valid and all(m.get('usage_scope') == 'invocation' for m in metrics_rows):
+                    result[key] = sum(values)
+            if len(metrics_rows) > 1:
+                result['usage_note'] = 'Per-turn receipts retained; costs use final cumulative session estimate, tokens sum declared turn usage; unspecified scopes stay unknown.'
+        if not unchanged():
+            result.update(status='input_changed', passed=None)
         write(directory / 'result.json', result)
-        if not unchanged:
+        if result['status'] == 'input_changed':
             break
 
 
