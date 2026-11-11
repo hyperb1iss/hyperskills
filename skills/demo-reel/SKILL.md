@@ -93,7 +93,7 @@ scripts/verify-mp4.sh --expect-size 3840x2160 --expect-fps 60 --expect-duration 
 
 `acme` stands for the user's product: its CLI, its demo variable, its skill. Prove the sandbox with fixtures and stand-in tools, never by pointing a probe at a real login or real configuration. A maximum freeze longer than the longest deliberate hold catches a reel that stalls.
 
-Every script takes `--help`, prints JSON with `--json` where an agent loops on it, and uses stable exit codes: 0 ok, 1 a check failed, 2 usage, 3 a dependency is missing, 4 bad input or a failed step (`capture-web.mjs` adds 5 for an encoder failure). `scripts/agent-take.sh` uses only flags checked against Claude Code 2.1.306 and Codex 0.163.0 `--help`, and settings keys checked against the Claude Code binary's settings schema; recheck on newer versions.
+Every script takes `--help`, prints JSON with `--json` where an agent loops on it, and uses stable exit codes: 0 ok, 1 a check failed, 2 usage, 3 a dependency is missing, 4 bad input or a failed step (`capture-web.mjs` adds 5 for an encoder failure, and `doctor.sh` reports a missing requirement as a failed check, exit 1). `scripts/agent-take.sh` uses only flags checked against Claude Code 2.1.306 and Codex 0.163.0 `--help`, and settings keys checked against the Claude Code binary's settings schema; recheck on newer versions.
 
 ## House taste
 

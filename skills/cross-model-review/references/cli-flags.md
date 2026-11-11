@@ -1,6 +1,6 @@
 # Reviewer CLI Mechanics
 
-Checked on 2026-09-04 against Claude Code 2.1.261 help and the official CLI references. Codex was not installed in that audit environment; its examples are documentation-grounded and need local `--help` verification.
+Every flag below was found in the installed `--help` of Claude Code 2.1.322 and codex-cli 0.167.0 on 2026-11-11, and the Claude flags were checked against the official CLI references on 2026-09-04. Help output shows that a flag exists, not how it behaves; run `--help` when the installed version differs.
 
 ## Codex
 

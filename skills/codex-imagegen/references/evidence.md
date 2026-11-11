@@ -9,3 +9,5 @@ Checked on 2026-09-04 against [OpenAI image-generation documentation](https://de
 ## 2026-10-27 review
 
 The library audit kept this skill's guidance as written and moved these citations out of the entrypoint. It added no new source.
+
+The headless `codex exec` image path was last exercised in July 2026 with `codex-cli 0.144.6`. Later CLI versions were not re-exercised for image generation; the entrypoint tells the agent to trust the installed CLI and a live invocation over this record.

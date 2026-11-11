@@ -67,4 +67,4 @@ The reviewer receives only Read, Glob, and Grep, with noninteractive permission 
 
 The helper's deterministic tests use a fake Claude executable. They verify lifecycle and protocol handling, not a model's review quality. For a live check, observe activity before completion, reap the original process, inspect terminal status, and compare the saved prompt and final artifact with the intended request.
 
-The [Claude CLI reference](https://code.claude.com/docs/en/cli-reference) and [programmatic usage guide](https://code.claude.com/docs/en/headless) document the streaming and permission surfaces. Flags were checked against local Claude Code 2.1.261 on 2026-09-04; inspect current help when the installed CLI differs.
+The [Claude CLI reference](https://code.claude.com/docs/en/cli-reference) and [programmatic usage guide](https://code.claude.com/docs/en/headless) document the streaming and permission surfaces. Flags were found in local Claude Code 2.1.322 `--help` on 2026-11-11; inspect current help when the installed CLI differs.

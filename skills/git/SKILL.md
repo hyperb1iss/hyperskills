@@ -102,7 +102,7 @@ Regenerating or rebasing is not the same as verifying the result. In a concurren
 ```bash
 git worktree list
 # Choose an unused path under the repository's worktree convention.
-check_tree="$HOME/dev/worktrees/<project>/nova/lockcheck-<unique>"
+check_tree="<worktree-root>/lockcheck-<unique>"
 git worktree add --detach "$check_tree" HEAD
 (cd "$check_tree" && pnpm install --frozen-lockfile)
 # Inspect the result and status before removing the worktree you created.
@@ -192,7 +192,7 @@ Agent hosts have no tty:
 | Plain rebase over a squash-merged base                | `git rebase --onto <new-base> <old-base-sha>`: only your commits replay                                                                 |
 | Merge gymnastics to dodge a force-push on a PR branch | Proper rebase + pinned-lease push. Ancestry poisoning triggers review dragnets                                                          |
 | Rebasing a genuinely shared branch                    | Merge, or create a new branch                                                                                                           |
-| Using `--force`                                       | Pinned `--force-with-lease` only when approved                                                                                          |
+| Using `--force`                                       | Pinned `--force-with-lease` on a branch you own; a genuinely shared branch needs its owner's go-ahead first                             |
 | Stacked `-m` flags for multi-line commit bodies       | `git commit -F -` heredoc or a message file                                                                                             |
 | Running recovery commands by habit                    | Inspect `status`, `log`, and `reflog` first                                                                                             |
 | Staging unrelated work                                | Stage owned paths or hunks, inspect the complete index, then commit without path arguments; coordinate if someone else owns staged work |

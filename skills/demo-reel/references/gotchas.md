@@ -41,7 +41,7 @@ Traps that real reels paid for, plus the ones this skill's scripts were built ar
 - **Manual permission prompts stall the take** and read badly on camera.
 - **An allowlist rule does not cover shell expansions.** `Bash(echo:*)` did not allow `echo "$PATH"` in dontAsk mode.
 - **Demo variables are a convention, not a wall.** `env -u DEMO_VAR` removes them; make the real configuration unreachable instead.
-- **Take transcripts persist outside the studio.** Claude Code saves them under the real home; read them and delete any that captured something real.
+- **Take transcripts persist outside the studio.** The agent saves them in its take login dir (the real home only under `--real-home`); read them and delete any that captured something real.
 - **An agent's helper lanes can touch the real system too.** A fix lane may run one quick command against the real service to check its work. Brief every lane to use the demo world and mocked tests only.
 - **A proof can copy what it proves absent.** Pointing a probe at a real account lets a CLI migrate its legacy config, keys included, into the sandbox's XDG dir. Prove with fixtures and stand-in tools; `agent-take.sh --prove` fails on any write during probes, names files without printing them, and deletes its dirs.
 - **npm-installed agents are scripts.** `#!/usr/bin/env node` fails with exit 127 when node is not on the take's PATH. `agent-take.sh` runs the interpreter by absolute path instead of adding it to PATH.
