@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "name": "failure-class-screen",
+  "skills_root": "../skills",
+  "configurations": [
+    {
+      "id": "claude-file-tools-fable",
+      "model": "claude-fable-5-2",
+      "harness": "Claude Code 2.1.322; controlled-file-tools-catalog",
+      "adapter": ["python3", "../scripts/eval_claude.py"],
+      "adapter_inputs": ["../scripts/eval_trace.py"],
+      "settings": {
+        "effort": "high",
+        "claude_version": "2.1.322 (Claude Code)",
+        "expected_served_models": ["claude-fable-5-2"]
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "id": "screen-batch-isolation",
+      "family": "screen",
+      "split": "development",
+      "prompt": "cases/screen/batch-isolation/prompt.md",
+      "fixture": "cases/screen/batch-isolation/fixture",
+      "skills": ["implement"],
+      "grader": ["python3", "cases/screen/grade.py", "batch-isolation"],
+      "grader_inputs": ["cases/screen/worker.py", "cases/screen/regression-test/fixture/pricing.py"]
+    },
+    {
+      "id": "screen-silent-drop",
+      "family": "screen",
+      "split": "development",
+      "prompt": "cases/screen/silent-drop/prompt.md",
+      "fixture": "cases/screen/silent-drop/fixture",
+      "skills": ["implement"],
+      "grader": ["python3", "cases/screen/grade.py", "silent-drop"],
+      "grader_inputs": ["cases/screen/worker.py", "cases/screen/regression-test/fixture/pricing.py"]
+    },
+    {
+      "id": "screen-config-fail-open",
+      "family": "screen",
+      "split": "development",
+      "prompt": "cases/screen/config-fail-open/prompt.md",
+      "fixture": "cases/screen/config-fail-open/fixture",
+      "skills": ["implement"],
+      "grader": ["python3", "cases/screen/grade.py", "config-fail-open"],
+      "grader_inputs": ["cases/screen/worker.py", "cases/screen/regression-test/fixture/pricing.py"]
+    },
+    {
+      "id": "screen-regression-test",
+      "family": "screen",
+      "split": "development",
+      "prompt": "cases/screen/regression-test/prompt.md",
+      "fixture": "cases/screen/regression-test/fixture",
+      "skills": ["implement"],
+      "grader": ["python3", "cases/screen/grade.py", "regression-test"],
+      "grader_inputs": ["cases/screen/worker.py", "cases/screen/regression-test/fixture/pricing.py"]
+    },
+    {
+      "id": "screen-unbounded-growth",
+      "family": "screen",
+      "split": "development",
+      "prompt": "cases/screen/unbounded-growth/prompt.md",
+      "fixture": "cases/screen/unbounded-growth/fixture",
+      "skills": ["implement"],
+      "grader": ["python3", "cases/screen/grade.py", "unbounded-growth"],
+      "grader_inputs": ["cases/screen/worker.py", "cases/screen/regression-test/fixture/pricing.py"]
+    },
+    {
+      "id": "screen-overflow-label",
+      "family": "screen",
+      "split": "development",
+      "prompt": "cases/screen/overflow-label/prompt.md",
+      "fixture": "cases/screen/overflow-label/fixture",
+      "skills": ["implement"],
+      "grader": ["python3", "cases/screen/grade.py", "overflow-label"],
+      "grader_inputs": ["cases/screen/worker.py", "cases/screen/regression-test/fixture/pricing.py"]
+    },
+    {
+      "id": "screen-summary-edge",
+      "family": "screen",
+      "split": "development",
+      "prompt": "cases/screen/summary-edge/prompt.md",
+      "fixture": "cases/screen/summary-edge/fixture",
+      "skills": ["implement"],
+      "grader": ["python3", "cases/screen/grade.py", "summary-edge"],
+      "grader_inputs": ["cases/screen/worker.py", "cases/screen/regression-test/fixture/pricing.py"]
+    },
+    {
+      "id": "screen-silent-call",
+      "family": "screen",
+      "split": "development",
+      "prompt": "cases/screen/silent-call/prompt.md",
+      "fixture": "cases/screen/silent-call/fixture",
+      "skills": ["implement"],
+      "grader": ["python3", "cases/screen/grade.py", "silent-call"],
+      "grader_inputs": ["cases/screen/worker.py", "cases/screen/regression-test/fixture/pricing.py"]
+    }
+  ]
+}
