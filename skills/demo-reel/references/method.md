@@ -25,7 +25,7 @@ digraph reel_loop {
 1. **Write the shot list.** What a customer would see, shot by shot. Each shot names its claim, its pass condition, and how the pass is measured. A shot without a measurable pass is a wish.
 2. **Shoot it on the real thing.** The whole product, end to end, nothing mocked: the real daemon driving real hardware, the real CLI against its real demo world, the real web app on a real browser. Composed elements (titles, a score, a 3D render of real layout data) are allowed and are labeled as composed.
 3. **A shot fails.** A failed take is a finding, not noise to retry past. Record it in the failure ledger before doing anything else, with the footage and the numbers.
-4. **A fix lane.** One agent owns one failure until the cause is proven. Lanes run in parallel in their own worktrees; a lane that touches shared state (a database, a device, a build cache) names that resource and gets it to itself.
+4. **A fix lane.** Each failure has one owner until the cause is proven. Independent failures run as parallel lanes in their own worktrees, and a single failure is fixed inline; a lane that touches shared state (a database, a device, a build cache) names that resource and gets it to itself.
 5. **The fix, with evidence.** Footage and commands a reviewer can rerun: the failing take, the passing take, the measurement before and after, and the test that fails without the fix.
 6. **Reshoot.** The whole reel again, not only the fixed shot, until a full take passes. Fixes ripple: a changed default can alter how a later shot looks, and a demo world that learns to answer one command changes what an agent finds in the next take. [examples.md](examples.md) has both.
 

@@ -66,6 +66,6 @@ Every pass states what it measured and when. Then make sure the check could have
 
 ## A second opinion
 
-The implementer cannot certify its own work. For the pipeline, each fix lane, and the finished reel, hand an independent verifier the original request, the shot list, the changed files, the deliverables, and the receipts, and ask it to try to fail them. Use a different model family where available (see the `cross-model-review` skill). Expect real defects (missing color tags, upscaled shots, a camera shake stepping at 24 Hz on a 60 fps timeline), and stop a render in progress rather than deliver one the verifier failed. [examples.md](examples.md) has a pipeline that failed its first verification on exactly those three.
+The implementer cannot certify its own work. Before delivery, hand an independent verifier the original request, the shot list, the changed files, the deliverables, and the receipts, and ask it to try to fail them. The pipeline or a fix lane gets a verifier of its own when its change touches shared state or its acceptance check is one the lane wrote. Use a different model family where available (see the `cross-model-review` skill). Expect real defects (missing color tags, upscaled shots, a camera shake stepping at 24 Hz on a 60 fps timeline), and stop a render in progress rather than deliver one the verifier failed. [examples.md](examples.md) has a pipeline that failed its first verification on exactly those three.
 
 Then show a human. They are the final acceptance test.

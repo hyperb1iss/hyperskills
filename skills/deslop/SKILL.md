@@ -113,7 +113,7 @@ Default to embedded when another skill invokes this one. An audit request does n
 
 ## Research boundary
 
-Studies show differences between particular model outputs and human corpora. They do not establish universal forbidden constructions or predict Astra's writing on a new task. Technical prose, fiction, and biomedical abstracts have different requirements. Use research to challenge folklore and identify candidates, then judge the actual text. Verified sources, limits, and maintenance guidance live in `references/evidence.md`.
+Studies show differences between particular model outputs and human corpora. They do not establish universal forbidden constructions or predict a current model's writing on a new task. Technical prose, fiction, and biomedical abstracts have different requirements. Use research to challenge folklore and identify candidates, then judge the actual text. Verified sources, limits, and maintenance guidance live in `references/evidence.md`.
 
 ## Anti-patterns
 

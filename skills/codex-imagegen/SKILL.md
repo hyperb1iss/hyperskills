@@ -10,9 +10,8 @@ capability, then return a verified workspace artifact to the leader harness.
 
 **Core insight:** instrument Codex, not the desktop window. When the configured `codex exec` environment exposes image generation, use it headlessly and hand off the resulting artifact through the shared filesystem. Authentication alone does not establish tool availability.
 
-As of Jul 2026, this path is verified with `codex-cli 0.144.6`. CLI and tool
-availability are volatile; the installed CLI and a live invocation outrank this
-snapshot.
+CLI and tool availability are volatile; the installed CLI and a live invocation
+outrank any recorded version.
 
 ## Select the Execution Route
 
