@@ -20,8 +20,8 @@ def grade(case, overlay):
 
 
 class ScreenGraderTests(unittest.TestCase):
-    def test_eight_cases(self):
-        self.assertEqual(len(CASES), 8)
+    def test_nine_cases(self):
+        self.assertEqual(len(CASES), 9)
 
     def test_reference_solutions_pass(self):
         for case in CASES:

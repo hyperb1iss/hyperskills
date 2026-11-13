@@ -103,6 +103,16 @@ hyperskills/
 │   │   │   │   ├── oracle/
 │   │   │   │   │   └── settings.py
 │   │   │   │   └── prompt.md
+│   │   │   ├── discard-trace/
+│   │   │   │   ├── fixture/
+│   │   │   │   │   └── sensors/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── clean.py
+│   │   │   │   │       └── stale.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── sensors/
+│   │   │   │   │       └── clean.py
+│   │   │   │   └── prompt.md
 │   │   │   ├── grade.py
 │   │   │   ├── overflow-label/
 │   │   │   │   ├── fixture/
