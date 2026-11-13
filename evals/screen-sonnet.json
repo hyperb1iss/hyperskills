@@ -96,6 +96,16 @@
       "skills": ["implement"],
       "grader": ["python3", "cases/screen/grade.py", "silent-call"],
       "grader_inputs": ["cases/screen/worker.py", "cases/screen/regression-test/fixture/pricing.py"]
+    },
+    {
+      "id": "screen-discard-trace",
+      "family": "screen",
+      "split": "holdout",
+      "prompt": "cases/screen/discard-trace/prompt.md",
+      "fixture": "cases/screen/discard-trace/fixture",
+      "skills": ["implement"],
+      "grader": ["python3", "cases/screen/grade.py", "discard-trace"],
+      "grader_inputs": ["cases/screen/worker.py", "cases/screen/regression-test/fixture/pricing.py"]
     }
   ]
 }

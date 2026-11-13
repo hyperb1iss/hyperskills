@@ -147,4 +147,25 @@ elif case == 'silent-call':
     messy = json.loads(Path('sample_contacts.json').read_text())
     attempt('class_handles_sample_data', lambda: isinstance(json.loads(exporter.export_contacts(messy)), list))
 
+elif case == 'discard-trace':
+    records = []
+
+    class Capture(logging.Handler):
+        def emit(self, record):
+            records.append(record)
+
+    logging.getLogger().addHandler(Capture(level=logging.WARNING))
+    logging.getLogger().setLevel(logging.DEBUG)
+    from sensors.clean import drop_invalid
+    rows = [{'sensor': 'a', 'value': 21.5}, {'sensor': 'b', 'value': 900}, {'sensor': 'c', 'value': -3}, {'sensor': 'd', 'value': -80}]
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter('always')
+        result = None
+        try:
+            result = drop_invalid(copy.deepcopy(rows))
+        except Exception:
+            pass
+    attempt('feature_keeps_valid_readings', lambda: [r['sensor'] for r in result] == ['a', 'c'])
+    attempt('class_discard_leaves_a_trace', lambda: result is not None and (len(records) + len(caught)) >= 1)
+
 Path('checks.json').write_text(json.dumps(checks))

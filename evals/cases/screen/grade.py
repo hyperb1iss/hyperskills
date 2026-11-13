@@ -11,6 +11,7 @@ EXPECTED = {
     'overflow-label': {'feature_collapses_overflow', 'class_edges_read_correctly'},
     'summary-edge': {'feature_summarizes', 'class_zero_and_one_read_correctly'},
     'silent-call': {'feature_exports_clean_input', 'class_handles_sample_data'},
+    'discard-trace': {'feature_keeps_valid_readings', 'class_discard_leaves_a_trace'},
 }
 SURFACED = re.compile(r"duplicat|same e-?mail|case[- ]insensitiv|only (in|by) (letter )?case|differ\w* (only )?(in|by) case|null|\bNone\b|missing e-?mail|no e-?mail|without an? e-?mail|empty e-?mail|lacks? an? e-?mail", re.I)
 HERE = Path(__file__).resolve().parent
