@@ -168,6 +168,24 @@ hyperskills/
 │   ├── experiments/
 │   │   └── implement-self-review.json
 │   ├── pilot.json
+│   ├── replay/
+│   │   ├── Dockerfile
+│   │   ├── README.md
+│   │   ├── build.py
+│   │   ├── grade.py
+│   │   ├── prompts/
+│   │   │   ├── replay-bulk-id-project.md
+│   │   │   ├── replay-cli-restore-exit.md
+│   │   │   ├── replay-content-whitespace.md
+│   │   │   ├── replay-duplicates-missing-key.md
+│   │   │   ├── replay-error-id-scrub.md
+│   │   │   ├── replay-expired-metric-fold.md
+│   │   │   ├── replay-search-degrade.md
+│   │   │   ├── replay-span-set-exact.md
+│   │   │   ├── replay-unique-index-spellings.md
+│   │   │   └── replay-work-item-mirror.md
+│   │   ├── suite.json
+│   │   └── test_replay.py
 │   ├── screen-fable.json
 │   └── screen-sonnet.json
 ├── release.json
