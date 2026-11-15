@@ -58,5 +58,30 @@ class GradeTest(unittest.TestCase):
         self.assertEqual(sorted(set(after) - set(before)), ['app/tests/test_b.py'])
 
 
+    def test_own_tests_are_sorted_by_how_they_fared_before_the_fix(self):
+        after = {'t::regression': 'passed', 't::always_green': 'passed', 't::needs_new_symbol': 'passed',
+                 't::setup_broke': 'passed', 't::still_red': 'failed'}
+        before = {'t::regression': 'failed', 't::always_green': 'passed', 't::setup_broke': 'error', 't::still_red': 'failed'}
+        self.assertEqual(grade.own_test_verdict(before, after), {
+            'ran': 5, 'fail_before_pass_after': ['t::regression'], 'pass_before': 1,
+            'not_runnable_before': ['t::needs_new_symbol', 't::setup_broke'], 'not_passing_after': ['t::still_red']})
+
+    def test_no_own_tests_ships_no_regression_test(self):
+        self.assertEqual(grade.own_test_verdict({}, {})['fail_before_pass_after'], [])
+
+    def test_only_the_submissions_test_files_reach_the_unfixed_tree(self):
+        with tempfile.TemporaryDirectory() as root:
+            work, tree = Path(root, 'work'), Path(root, 'tree')
+            for path, text in (('p/tests/test_a.py', 'new'), ('p/tests/conftest.py', 'helper'), ('p/src/m.py', 'fixed')):
+                (work / path).parent.mkdir(parents=True, exist_ok=True)
+                (work / path).write_text(text)
+            (tree / 'p/src').mkdir(parents=True)
+            (tree / 'p/src/m.py').write_text('broken')
+            grade.lay_over(work, tree, ['p/tests/test_a.py', 'p/tests/conftest.py'])
+            self.assertEqual((tree / 'p/tests/test_a.py').read_text(), 'new')
+            self.assertEqual((tree / 'p/tests/conftest.py').read_text(), 'helper')
+            self.assertEqual((tree / 'p/src/m.py').read_text(), 'broken')
+
+
 if __name__ == '__main__':
     unittest.main()

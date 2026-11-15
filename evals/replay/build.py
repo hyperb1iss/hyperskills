@@ -129,7 +129,7 @@ def materialize(args):
                       'prompt': str(suite_path.parent / 'prompts' / f"{entry['id']}.md"), 'fixture': str(fixture),
                       'skills': suite['skills'],
                       'grader': ['python3', str(HERE / 'grade.py'), str(private / 'case.json')],
-                      'grader_inputs': [str(private / 'hidden')]})
+                      'grader_inputs': [str(private / 'hidden'), str(fixture)]})
     configurations = json.loads(Path(args.configurations).read_text())
     manifest = {'version': 1, 'name': args.name, 'skills_root': str(Path(args.skills).resolve()),
                 'configurations': configurations, 'tasks': tasks}

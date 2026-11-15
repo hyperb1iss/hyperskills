@@ -39,7 +39,10 @@ To add cases, run `build.py validate --image <id> --output <file> <sha>...` and 
 
 ## What the grader reports
 
-A trial passes when every `fail_to_pass` and `pass_to_pass` test is green on the submitted tree with the fix commit's test files laid over it. The grader also reports `submission_changed_tests`: the test files the submission added or edited. That field is an observation and does not affect the verdict.
+A trial passes when every `fail_to_pass` and `pass_to_pass` test is green on the submitted tree with the fix commit's test files laid over it. The grader also reports two observations that do not affect the verdict:
+
+- `submission_changed_tests` lists the test files the submission added or edited.
+- `ships_regression_test` says whether any of those tests is a regression test for the fix. The grader runs the submission's test files on the submitted tree, then on the pre-fix tree with only the submission's test files laid over it. A test that fails before and passes after counts. `own_tests` carries the detail, including tests that could not be collected before the fix, which are kept apart because an import error is weaker evidence than a failed assertion.
 
 ## Pilot, 2026-11-13
 
