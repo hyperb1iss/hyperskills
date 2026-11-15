@@ -102,6 +102,13 @@ class EvaluationTests(unittest.TestCase):
         self.assertTrue(all(r['invalid_pairs'] == 1 for r in report['excluded_pairs']))
         self.assertTrue(all(r['status_counts']['adapter_error'] == 1 for r in report['resources']))
 
+    def test_plan_can_be_limited_to_named_arms(self):
+        frozen = eval.plan(self.suite, self.plan, repeats=2, arms=('explicit',))
+        self.assertEqual({t['arm'] for t in frozen['trials']}, {'explicit'})
+        self.assertEqual(len(frozen['trials']), 2 * len(frozen['suite']['tasks']) * len(frozen['suite']['configurations']))
+        with self.assertRaises(ValueError):
+            eval.plan(self.suite, self.root / 'other.json', arms=('control',))
+
     def test_midrun_input_mutation_stops_with_receipt(self):
         with (self.root / 'adapter.py').open('a') as stream:
             stream.write(f'Path({str(self.root / "prompt.txt")!r}).write_text("mutated")\n')

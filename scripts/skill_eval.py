@@ -121,9 +121,11 @@ def inputs(data):
     return {x: digest(x) for x in sorted(paths)}
 
 
-def plan(path, output, repeats=3, seed=0, split='development'):
+def plan(path, output, repeats=3, seed=0, split='development', arms=ARMS):
     if repeats < 1:
         raise ValueError('repeats must be positive')
+    if not arms or set(arms) - set(ARMS):
+        raise ValueError(f'arms must be drawn from {ARMS}')
     data = suite(path)
     if not data['configurations']:
         raise ValueError('configure at least one adapter before planning')
@@ -134,7 +136,7 @@ def plan(path, output, repeats=3, seed=0, split='development'):
     for config in data['configurations']:
         for task in tasks:
             for repeat in range(repeats):
-                for arm in ARMS:
+                for arm in [a for a in ARMS if a in arms]:
                     trials.append({'configuration': config['id'], 'task': task['id'], 'repeat': repeat, 'arm': arm})
     random.Random(seed).shuffle(trials)
     for index, trial in enumerate(trials):
@@ -414,6 +416,7 @@ def main():
     create.add_argument('--repeats', type=int, default=3)
     create.add_argument('--seed', type=int, default=0)
     create.add_argument('--split', choices=['development', 'holdout'], default='development')
+    create.add_argument('--arms', nargs='+', choices=ARMS, default=ARMS, help='plan only these arms; two skill revisions compare on the explicit arm alone')
     execute = sub.add_parser('run')
     execute.add_argument('plan')
     execute.add_argument('--output', required=True)
@@ -428,7 +431,7 @@ def main():
             suite(args.suite)
             print('Suite valid')
         elif args.action == 'plan':
-            plan(args.suite, args.output, args.repeats, args.seed, args.split)
+            plan(args.suite, args.output, args.repeats, args.seed, args.split, args.arms)
         elif args.action == 'run':
             run(args.plan, args.output)
         elif args.action == 'compare':
