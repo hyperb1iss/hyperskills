@@ -13,14 +13,16 @@ Before editing, inspect status and existing diffs on touched files; the checkout
 
 ## Select a Verifiable Slice
 
-| Situation                                       | Next move                                                      |
-| ----------------------------------------------- | -------------------------------------------------------------- |
-| Clear, low-impact edit                          | Edit, then run the relevant structural or behavioral check     |
-| Bug with an observable failure                  | Reproduce it, isolate the cause, then verify the correction    |
-| New behavior across boundaries                  | Implement a representative end-to-end slice with its tests     |
-| Shared interface or schema change               | Trace consumers and compatibility before changing the contract |
-| Large uncertain change                          | Use `plan` for dependencies and acceptance criteria            |
-| Independent work with a useful integration path | Use authorized delegation and explicit ownership               |
+| Situation                                       | Next move                                                                                  |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Clear, low-impact edit                          | Edit, then run the relevant structural or behavioral check                                 |
+| Bug with an observable failure                  | Reproduce it in a test that fails, isolate the cause, then fix it and watch that test pass |
+| New behavior across boundaries                  | Implement a representative end-to-end slice with its tests                                 |
+| Shared interface or schema change               | Trace consumers and compatibility before changing the contract                             |
+| Large uncertain change                          | Use `plan` for dependencies and acceptance criteria                                        |
+| Independent work with a useful integration path | Use authorized delegation and explicit ownership                                           |
+
+A bug fix ships its regression test: one that fails on the unfixed code and passes on the fix, written at the entry point the bug was observed through and placed with the project's existing tests. Leave it out only when the project has no tests or the user asked for the fix alone.
 
 Keep implementation and verification together. File count and edit count are not cadence rules. Run the cheapest check that can expose the next likely failure before building on it.
 
