@@ -175,14 +175,24 @@ hyperskills/
 │   │   ├── grade.py
 │   │   ├── prompts/
 │   │   │   ├── replay-bulk-id-project.md
+│   │   │   ├── replay-capture-owner-fields.md
 │   │   │   ├── replay-cli-restore-exit.md
 │   │   │   ├── replay-content-whitespace.md
+│   │   │   ├── replay-dream-stale-write.md
 │   │   │   ├── replay-duplicates-missing-key.md
 │   │   │   ├── replay-error-id-scrub.md
 │   │   │   ├── replay-expired-metric-fold.md
+│   │   │   ├── replay-mixed-window-runs.md
+│   │   │   ├── replay-named-project-membership.md
+│   │   │   ├── replay-note-project-channel.md
+│   │   │   ├── replay-passage-consolidation.md
+│   │   │   ├── replay-restore-scope-key-owner.md
 │   │   │   ├── replay-search-degrade.md
+│   │   │   ├── replay-self-feeding-sources.md
 │   │   │   ├── replay-span-set-exact.md
+│   │   │   ├── replay-subgraph-hidden-edge.md
 │   │   │   ├── replay-unique-index-spellings.md
+│   │   │   ├── replay-unscoped-write-owner.md
 │   │   │   └── replay-work-item-mirror.md
 │   │   ├── suite.json
 │   │   └── test_replay.py

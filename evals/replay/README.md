@@ -8,7 +8,7 @@ The suite in `suite.json` targets [Sibyl](https://github.com/hyperb1iss/sibyl), 
 
 A commit qualifies when it is a `fix` that touches only Python, changes at most three source files and 80 source lines, and ships at least one test. `build.py validate` then runs the commit's test files twice inside the pinned image with networking disabled: once on the parent tree with the fix's tests laid over it, and once on the fix. Tests that go from not passing to passing are the case's `fail_to_pass` set. Tests that pass both times are `pass_to_pass`. A commit with no test that changes state, or with a test that is not green after the fix, is rejected.
 
-Of 63 candidates from a 120-day window, 54 validated. The ten cases here were chosen by hand from those, preferring tests that check behavior through existing entry points. A test that names a symbol the fix introduced would fail any correct fix that chose another name.
+Of 63 candidates from a 120-day window, 54 validated. The ten development cases and ten holdout cases here were chosen by hand from those, preferring tests that check behavior through existing entry points. A test that names a symbol the fix introduced would fail any correct fix that chose another name.
 
 Each prompt in `prompts/` describes the symptom and the required behavior. It does not name the file or function.
 
@@ -61,11 +61,28 @@ No trial was invalid. The Sonnet run cost $5.33 and the Fable run $17.26.
 
 Correctness is saturated for both models, so these cases cannot show a skill making a fix more often right. The arms differ in whether a test ships with the fix. Every source commit shipped one. Without a skill Sonnet almost never did, and preloading implement raised that to about a third. Fable usually wrote one unprompted.
 
+## Holdout comparison, 2026-11-15
+
+The pilot suggested one edit to `implement`: say plainly that a bug fix ships a regression test. The edit was written before any holdout case ran. Ten holdout cases then compared the skill as it stood against the edited copy, on the arm that preloads the skill, with Sonnet 5.5 at low effort.
+
+| Arm                         | Passed   | Shipped a regression test |
+| --------------------------- | -------- | ------------------------- |
+| no skill (one repeat)       | 10 of 10 | 1 of 10                   |
+| implement as it stood       | 19 of 20 | 5 of 20                   |
+| implement with the new line | 20 of 20 | 14 of 20                  |
+
+"Shipped a regression test" is the stronger check: a test of the submission's own that fails on the pre-fix tree and passes on the fix. With the new line, seven of the ten cases shipped one in both repeats and three shipped none in either. In those three the final report said no test was added. The three runs cost $0.64, $1.71, and $1.77, so the line did not raise cost.
+
+Regrading the pilot's saved trials with the same check found a real regression test in 39 of the 40 trials that had changed a test file. The exception was the single no-skill Sonnet trial, so that row of the pilot table is 0 of 30 under the stronger check.
+
+To compare two revisions of a skill, materialize once, copy the manifest with only `skills_root` changed, plan both with `--split holdout --arms explicit`, and run `skill_eval.py compare` on the two run directories.
+
 ## Limits
 
 - The prompts were written from the fix commits' messages, so they hand over the diagnosis. A report that gave only the symptom would be harder and might leave correctness headroom.
 - `pass_to_pass` covers only the test files the fix touched. A regression elsewhere in the project goes unseen.
-- The test-writing count says a test file changed. It does not say the test fails without the fix.
+- The pilot table counts changed test files. The holdout table uses the stronger check, which sees only tests under the case's own project.
+- The holdout comparison is two repeats per case on one model. Fable 5.2 was not run on the holdouts.
 - No catalog-arm trial opened the skill file, so its test-writing counts are not a skill effect.
-- The ten cases were picked by hand from one repository. The other 44 validated commits are unused and can serve as holdouts.
+- All twenty cases were picked by hand from one repository. The other 34 validated commits are unused.
 - The Fable column is one repeat per case.
