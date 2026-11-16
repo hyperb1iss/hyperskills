@@ -253,3 +253,4 @@ help:
 .PHONY: test-eval-cases
 test-eval-cases:
 	@python3 evals/cases/test_graders.py
+	@python3 evals/cases/screen/test_screen.py

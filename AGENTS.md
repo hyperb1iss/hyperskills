@@ -85,13 +85,91 @@ hyperskills/
 │   │   │   │   ├── cache.py
 │   │   │   │   └── unique.py
 │   │   │   └── prompt.md
+│   │   ├── screen/
+│   │   │   ├── README.md
+│   │   │   ├── batch-isolation/
+│   │   │   │   ├── fixture/
+│   │   │   │   │   └── jobs/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── accounts.py
+│   │   │   │   │       └── invoices.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── jobs/
+│   │   │   │   │       └── invoices.py
+│   │   │   │   └── prompt.md
+│   │   │   ├── config-fail-open/
+│   │   │   │   ├── fixture/
+│   │   │   │   │   └── settings.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── settings.py
+│   │   │   │   └── prompt.md
+│   │   │   ├── discard-trace/
+│   │   │   │   ├── fixture/
+│   │   │   │   │   └── sensors/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── clean.py
+│   │   │   │   │       └── stale.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── sensors/
+│   │   │   │   │       └── clean.py
+│   │   │   │   └── prompt.md
+│   │   │   ├── grade.py
+│   │   │   ├── overflow-label/
+│   │   │   │   ├── fixture/
+│   │   │   │   │   └── labels.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── labels.py
+│   │   │   │   └── prompt.md
+│   │   │   ├── regression-test/
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── pricing.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       └── test_pricing.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   ├── pricing.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       └── test_pricing.py
+│   │   │   │   └── prompt.md
+│   │   │   ├── silent-call/
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── exporter.py
+│   │   │   │   │   └── sample_contacts.json
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── exporter.py
+│   │   │   │   └── prompt.md
+│   │   │   ├── silent-drop/
+│   │   │   │   ├── fixture/
+│   │   │   │   │   └── ingest/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── orders.py
+│   │   │   │   │       └── refunds.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── ingest/
+│   │   │   │   │       └── refunds.py
+│   │   │   │   └── prompt.md
+│   │   │   ├── summary-edge/
+│   │   │   │   ├── fixture/
+│   │   │   │   │   └── report.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── report.py
+│   │   │   │   └── prompt.md
+│   │   │   ├── test_screen.py
+│   │   │   ├── unbounded-growth/
+│   │   │   │   ├── fixture/
+│   │   │   │   │   └── limits.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── limits.py
+│   │   │   │   └── prompt.md
+│   │   │   └── worker.py
 │   │   └── test_graders.py
 │   ├── clarification.json
 │   ├── container/
 │   │   └── Dockerfile
 │   ├── experiments/
 │   │   └── implement-self-review.json
-│   └── pilot.json
+│   ├── pilot.json
+│   ├── screen-fable.json
+│   └── screen-sonnet.json
 ├── release.json
 ├── scripts/
 │   ├── eval_claude.py
