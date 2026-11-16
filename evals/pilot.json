@@ -18,7 +18,8 @@
         "atomic-export"
       ],
       "grader_inputs": [
-        "cases/atomic_worker.py"
+        "cases/atomic_worker.py",
+        "cases/atomic-export/fixture"
       ]
     },
     {
@@ -34,6 +35,9 @@
         "python3",
         "cases/grade.py",
         "review-boundary"
+      ],
+      "grader_inputs": [
+        "cases/review-boundary/fixture"
       ]
     },
     {
@@ -49,6 +53,9 @@
         "python3",
         "cases/grade.py",
         "prose-preservation"
+      ],
+      "grader_inputs": [
+        "cases/prose-preservation/fixture"
       ]
     },
     {
@@ -64,6 +71,9 @@
         "python3",
         "cases/grade.py",
         "research-release"
+      ],
+      "grader_inputs": [
+        "cases/research-release/fixture"
       ]
     }
   ],

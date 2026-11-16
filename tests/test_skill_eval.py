@@ -148,6 +148,20 @@ class EvaluationTests(unittest.TestCase):
         self.assertTrue(all(r['pending_human_review'] == 1 for r in report['resources']))
         self.assertTrue(all(r['family'] == 'code' for r in report['comparisons']))
 
+    def test_adapter_helpers_and_interaction_are_frozen(self):
+        helper, replies = self.root / 'adapter-helper.py', self.root / 'replies.json'
+        helper.write_text('helper')
+        replies.write_text('{"max_turns": 3, "response": "user answer"}')
+        self.data['configurations'][0]['adapter_inputs'] = ['adapter-helper.py']
+        self.data['tasks'][0]['interaction'] = 'replies.json'
+        self.save()
+        frozen = eval.plan(self.suite, self.plan)
+        self.assertIn(str(helper.resolve()), frozen['hashes'])
+        self.assertIn(str(replies.resolve()), frozen['hashes'])
+        helper.write_text('changed')
+        with self.assertRaisesRegex(ValueError, 'inputs changed'):
+            eval.run(self.plan, self.run)
+
     def test_validation_and_holdout_selection(self):
         self.data['tasks'][0]['skills'] = ['../example']
         self.save()

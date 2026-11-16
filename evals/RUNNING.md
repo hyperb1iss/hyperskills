@@ -1,6 +1,7 @@
 # Running skill evaluations
 
-Start with the [experimental protocol](PROTOCOL.md). The bundled pilot is a synthetic plumbing test, not an efficacy benchmark. Its oracle supplies known answers without calling a model.
+Start with the [experimental protocol](PROTOCOL.md).
+For shell execution, action traces, scripted turns, and subtraction experiments, see [EXTENDING.md](EXTENDING.md). The bundled pilot is a synthetic plumbing test, not an efficacy benchmark. Its oracle supplies known answers without calling a model.
 
 ## Verify the runner
 
@@ -22,7 +23,7 @@ Run `make test` for runner, adapter, grader, and existing repository regressions
 
 ## Configure an experiment
 
-Copy the suite manifest into a private experiment directory and resolve its fixture, prompt, skill, adapter, and grader paths relative to that manifest. Use absolute paths when moving a manifest out of `evals/`. Each task declares its family, development or holdout split, relevant skills, raw prompt, fixture directory, and grader argv. Declare helper files imported by a grader in `grader_inputs` so their content is frozen too. Each configuration declares its model, harness, adapter argv, and settings. Commands are argument arrays, never shell templates.
+Copy the suite manifest into a private experiment directory and resolve its fixture, prompt, skill, adapter, and grader paths relative to that manifest. Use absolute paths when moving a manifest out of `evals/`. Each task declares its family, development or holdout split, relevant skills, raw prompt, fixture directory, and grader argv. Declare helper files imported by a grader in `grader_inputs` so their content is frozen too. Each configuration declares its model, harness, adapter argv, and settings. Declare imported adapter helpers in `adapter_inputs` so changing them invalidates a frozen plan. Commands are argument arrays, never shell templates.
 
 The runner calls an adapter with an absolute request JSON path appended to its argv. The request identifies the workspace, private HOME, prompt file, exposed skill directory, arm, configuration, and optional metrics output path. The adapter owns session isolation, provider configuration, and enforcement of the declared tools. It writes artifacts into the workspace. A nonzero adapter exit remains an invalid infrastructure attempt with logs, excluded from outcome differences and counted separately.
 
@@ -30,7 +31,7 @@ The grader receives the workspace path as its final argument and emits JSON with
 
 Metrics may contain `cost_usd`, `tokens`, and `skills_loaded`. Leave unavailable measurements absent. A self-reported read is weaker evidence than an observed tool event.
 
-For real runs, replace the synthetic adapter with an audited provider adapter. The included `scripts/eval_claude.py` supports controlled file tasks; consult its module documentation and configuration checks. Its custom discovery catalog does not reproduce native plugin discovery. Freeze the chosen CLI version and model with the run. Execute untrusted model output and its graders in a disposable environment.
+For real runs, replace the synthetic adapter with an audited provider adapter. The included `scripts/eval_claude.py` supports controlled file tasks; `scripts/eval_container.py` adds shell execution in a pinned Docker image. Consult the extension guide for configuration. Its custom discovery catalog does not reproduce native plugin discovery. Freeze the chosen CLI version and model with the run. Execute untrusted model output and its graders in a disposable environment.
 
 ## Improve a skill
 
@@ -61,6 +62,7 @@ For the controlled Claude adapter, replace the synthetic configuration with:
   "model": "<pinned model id>",
   "harness": "Claude Code <pinned version>; controlled-file-tools-catalog",
   "adapter": ["python3", "../scripts/eval_claude.py"],
+  "adapter_inputs": ["../scripts/eval_trace.py"],
   "settings": {
     "effort": "high",
     "claude_version": "<exact claude --version output>",

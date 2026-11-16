@@ -3,7 +3,11 @@ import importlib.util
 import json
 from pathlib import Path
 import tempfile
+import sys
+
+sys.path.insert(0, str(Path(__file__).parents[1] / "scripts"))
 import unittest
+from unittest.mock import patch
 
 SPEC = importlib.util.spec_from_file_location('eval_claude', Path(__file__).parents[1] / 'scripts/eval_claude.py')
 MOD = importlib.util.module_from_spec(SPEC)
@@ -31,7 +35,7 @@ class ClaudeAdapterTests(unittest.TestCase):
 
     def fake(self, response, exit_code=0):
         binary = self.root / 'claude'
-        binary.write_text('#!/usr/bin/env python3\nimport json,sys\nfrom pathlib import Path\nif "--version" in sys.argv:\n print("fake-version"); sys.exit(0)\nassert "--restricted" in sys.argv and "--safe-mode" in sys.argv\nassert "Bash" not in sys.argv\nassert "bypassPermissions" not in sys.argv\nPath("artifact.txt").write_text("done")\nprint(' + repr(json.dumps(response)) + ')\nsys.exit(' + str(exit_code) + ')\n')
+        binary.write_text('#!/usr/bin/env python3\nimport json,sys\nfrom pathlib import Path\nif "--version" in sys.argv:\n print("fake-version"); sys.exit(0)\nassert "--restricted" in sys.argv and "--safe-mode" in sys.argv\nassert "Bash" not in sys.argv\nassert "bypassPermissions" not in sys.argv\nPath("argv.json").write_text(json.dumps(sys.argv))\nPath("artifact.txt").write_text("done")\nprint(' + repr('\n'.join(json.dumps(event) for event in response) if isinstance(response, list) else json.dumps(response)) + ')\nsys.exit(' + str(exit_code) + ')\n')
         binary.chmod(0o755)
         self.request['configuration']['settings']['claude_bin'] = str(binary)
         path = self.root / 'request.json'
@@ -43,10 +47,61 @@ class ClaudeAdapterTests(unittest.TestCase):
         self.assertEqual(MOD.run(path), 0)
         metrics = json.loads((self.root / 'metrics.json').read_text())
         self.assertIsNone(metrics['tokens'])
-        self.assertIsNone(metrics['skills_loaded'])
+        self.assertEqual(metrics['skills_loaded'], [])
         self.assertIsNone(metrics['cost_usd'])
         self.assertTrue((self.root / 'work' / 'artifact.txt').exists())
         self.assertTrue((self.root / 'effective-prompt.txt').exists())
+
+    def test_stream_records_successful_skill_read_and_hides_thinking(self):
+        self.request['arm'] = 'discovery'
+        path = str(self.root / 'skills' / 'example' / 'SKILL.md')
+        events = [
+            {'type': 'assistant', 'message': {'content': [{'type': 'thinking', 'thinking': 'PRIVATE'}, {'type': 'tool_use', 'id': 'r', 'name': 'Read', 'input': {'file_path': path}}]}},
+            {'type': 'user', 'message': {'content': [{'type': 'tool_result', 'tool_use_id': 'r', 'content': 'skill text'}]}},
+            {'type': 'result', 'is_error': False, 'result': 'done', 'modelUsage': {'pinned-model': {}}}
+        ]
+        self.assertEqual(MOD.run(self.fake(events)), 0)
+        self.assertEqual(json.loads((self.root / 'metrics.json').read_text())['skills_loaded'], ['example'])
+        self.assertNotIn('PRIVATE', (self.root / 'actions-0.json').read_text())
+        self.assertIn('PRIVATE', (self.root / 'claude-events-0.jsonl').read_text())
+
+    def test_interaction_resumes_same_session_and_sends_only_reply(self):
+        self.request.update(interactive=True, session_id='a496e781-2a62-4e1e-9c4c-657d78d67c3e', turn=0)
+        response = {'type': 'result', 'is_error': False, 'result': 'done', 'modelUsage': {'pinned-model': {}}, 'session_id': self.request['session_id']}
+        MOD.run(self.fake(response))
+        argv = json.loads((self.root / 'work' / 'argv.json').read_text())
+        self.assertIn('--session-id', argv)
+        self.assertNotIn('--no-session-persistence', argv)
+        self.request['turn'] = 1
+        (self.root / 'prompt').write_text('Keep the first occurrence.')
+        MOD.run(self.fake(response))
+        argv = json.loads((self.root / 'work' / 'argv.json').read_text())
+        self.assertIn('--resume', argv)
+        self.assertEqual((self.root / 'effective-prompt-1.txt').read_text(), 'Keep the first occurrence.')
+        self.assertTrue((self.root / 'claude-events-0.jsonl').exists())
+        self.assertTrue((self.root / 'claude-events-1.jsonl').exists())
+
+    def test_shell_setting_cannot_enable_local_shell(self):
+        self.request['configuration']['settings']['profile'] = 'shell'
+        with self.assertRaisesRegex(ValueError, 'Docker transport'):
+            MOD.run(self.fake({}))
+        self.assertFalse((self.root / 'work' / 'artifact.txt').exists())
+
+    def test_session_mismatch_preserves_observed_identity_and_cost(self):
+        self.request.update(interactive=True, session_id='a496e781-2a62-4e1e-9c4c-657d78d67c3e', turn=1)
+        response = {'type': 'result', 'is_error': False, 'result': 'done',
+                    'modelUsage': {'pinned-model': {}}, 'session_id': 'unexpected-session',
+                    'total_cost_usd': 0.4}
+        with self.assertRaisesRegex(ValueError, 'session identity'):
+            MOD.run(self.fake(response))
+        metrics = json.loads((self.root / 'metrics.json').read_text())
+        self.assertEqual(metrics['session_id'], 'unexpected-session')
+        self.assertEqual(metrics['cost_usd'], 0.4)
+
+    def test_container_shell_rejects_missing_marker(self):
+        with patch.object(MOD.Path, 'is_file', return_value=False):
+            with self.assertRaisesRegex(ValueError, 'Docker transport'):
+                MOD.verify_container(self.request)
 
     def test_version_mismatch_prevents_provider_invocation(self):
         self.request['configuration']['settings']['claude_version'] = 'another-version'
