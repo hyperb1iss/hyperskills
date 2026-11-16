@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.13.4
+
+- implement now says a bug fix ships its regression test: one that fails on the unfixed code and passes on the fix. On ten held-out replays of real fix commits, the share of trials shipping such a test rose from 5 of 20 to 14 of 20 with correctness unchanged. Its self-review table also names a record the request says to skip, so a deliberate skip still leaves a trace.
+- Skills surface judgment calls and ask for unsaid constraints, answer deploy questions before requesting review, and self-review first. Reviews no longer request changes for red CI alone.
+- Correct stale facts and scope two rules after an audit against Claude Fable 5.2: the pinned-lease force push in git, demo-reel's verifier requirement, and several outdated paths, exit codes, and version stamps.
+- Add an eval harness for measuring whether a skill changes outcomes: container trials with the network off, a failure-class screen, and replays of real fix commits graded by the tests those commits shipped. The READMEs record each result with its limits, including the runs that showed no effect.
+
 ## 3.13.3
 
 - Encode recurring maintainer corrections across seven skills: implement names the ship state before adding a flag or fallback and finds the nearest existing pattern first; plan records ship state and keeps requirements distinct from preferences; super-good-pr defaults to one PR split only by review domain; brainstorm treats a supplied reference as the specification; git keeps ticket references out of code; orchestrate watch loops yield to user messages; hyper-pr-review recommends restructuring when a finding class recurs.
