@@ -1,0 +1,3 @@
+The dream reflection job finishes each source by writing bookkeeping metadata back to the raw memory: it marks the source reflected, marks it processed, or archives an exception candidate. Each write saves the snapshot the cycle read at its start. If someone corrects the memory while the cycle runs, the bookkeeping write replaces the corrected content, lifecycle metadata, and revision with the stale snapshot.
+
+Make all three bookkeeping writes conditional on the revision the cycle read. A concurrent correction must make the write fail with the store's existing revision conflict error and leave the corrected row untouched. With no concurrent change the writes must behave as before.

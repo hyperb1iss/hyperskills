@@ -1,0 +1,3 @@
+An operational experience capture carries a free-form metadata bag and its own `scope_key`, and only its `project_id` is verified on the way in. The entities projected from the capture, and the notes distilled from it, inherit the bag and the scope key verbatim. A capture can therefore plant rows that carry another user's `principal_id` under a private `memory_scope`.
+
+Drop the owner fields (`memory_scope`, `principal_id`, `scope_key`) that arrive in the capture's metadata bag, for both the projected entities and the distilled notes. Take `scope_key` from the capture's verified `project_id` when it has one, never from the capture's own `scope_key`. Do not add a memory scope to these rows.
