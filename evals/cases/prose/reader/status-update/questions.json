@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What does the chosen cutover plan involve?",
+      "options": [
+        "Rebuild the new index from a nightly snapshot and switch every tenant at once",
+        "Keep the old cluster for tenants above 1M documents and move everyone else",
+        "Write every change to both indexes and move reads over one tenant at a time",
+        "Pause indexing for a weekend and switch all reads in one step",
+        "The text does not say"
+      ],
+      "answer": 2
+    },
+    {
+      "id": "q2",
+      "question": "What problem did the earlier fix solve?",
+      "options": [
+        "Deleted articles kept showing up in results from the new index",
+        "Some tenants got duplicate results because both indexes served their reads",
+        "New articles took hours to appear in the new index",
+        "The two indexes ranked the same article differently",
+        "The text does not say"
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q3",
+      "question": "What is the 3% gap that is still open?",
+      "options": [
+        "About 3% of documents are missing from the new index",
+        "The new index returns about 3% fewer results for exact-phrase queries",
+        "About 3% of queries to the new index time out",
+        "Search on the new index is about 3% slower",
+        "The text does not say"
+      ],
+      "answer": 1
+    },
+    {
+      "id": "q4",
+      "question": "What is in the queue the reader is asked to clear?",
+      "options": [
+        "Search-quality ratings waiting for review",
+        "Support tickets about missing search results",
+        "Tenant migration requests waiting for a routing change",
+        "Documents that failed to index in the new index, mostly attachments over 20 MB",
+        "The text does not say"
+      ],
+      "answer": 3
+    },
+    {
+      "id": "q5",
+      "question": "What happens at the Monday cutoff?",
+      "options": [
+        "The old cluster is shut down and its data deleted",
+        "Every tenant under 50,000 articles moves to the new index",
+        "The old cluster stops accepting new tenants, and new tenants start on the new index",
+        "The old cluster becomes read-only for all tenants",
+        "The text does not say"
+      ],
+      "answer": 2
+    },
+    {
+      "id": "q6",
+      "question": "What does the alias that must not be touched yet control?",
+      "options": [
+        "Which tenants are in the canary cohort",
+        "Which index serves search reads for most tenants",
+        "How often the new index is refreshed",
+        "Which version of the search page customers see",
+        "The text does not say"
+      ],
+      "answer": 1
+    },
+    {
+      "id": "q7",
+      "question": "Which tenants are in the canary cohort?",
+      "options": [
+        "The 40 internal tenants plus 12 customer tenants who volunteered",
+        "Every tenant with fewer than 50,000 articles",
+        "A random 5% of customer tenants",
+        "The 12 largest customer tenants",
+        "The text does not say"
+      ],
+      "answer": 0
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+Edit draft.md into edited.md. The draft is my end-of-day handoff report for Dagny, an engineer from another team who takes over this work tomorrow and has not followed it. Dagny has not seen notes.md, my working log; it will not be sent, only edited.md will. Preserve every fact in the draft. Do not alter draft.md or notes.md.

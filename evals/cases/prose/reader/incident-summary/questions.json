@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What change set off the outage?",
+      "options": [
+        "A labelsmith release that switched every label to a larger font",
+        "A labelsmith release that added a new barcode font pack",
+        "A labelsmith release that changed the barcode format the carriers scan",
+        "A labelsmith release that moved font rendering onto the older hosts",
+        "The text does not say"
+      ],
+      "answer": 1
+    },
+    {
+      "id": "q2",
+      "question": "Which suspected cause was checked and ruled out?",
+      "options": [
+        "A network outage at the central warehouse",
+        "A change to the carrier's pickup system",
+        "Full disks on the render hosts",
+        "A printer firmware update scheduled for the same day",
+        "The text does not say"
+      ],
+      "answer": 3
+    },
+    {
+      "id": "q3",
+      "question": "Why did rolling back not fix the central warehouse?",
+      "options": [
+        "Central's older render hosts kept the new version's font cache after the rollback",
+        "The rollback to the previous version failed to deploy at central",
+        "Central's label printers needed a manual restart after the rollback",
+        "Central's hosts were rolled back to the wrong version",
+        "The text does not say"
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q4",
+      "question": "What was the underlying cause of the render failures?",
+      "options": [
+        "The new release's glyph table was too large for the render hosts' memory",
+        "The new release's glyph table lacked the barcode characters the carriers scan",
+        "The new release referenced a glyph table that only exists on hosts provisioned after September",
+        "The new release overwrote the glyph table on hosts provisioned after September",
+        "The text does not say"
+      ],
+      "answer": 2
+    },
+    {
+      "id": "q5",
+      "question": "Which customers get a credit, and what is it?",
+      "options": [
+        "Customers with next-day service on the delayed parcels get a full shipping refund",
+        "All customers with delayed parcels get a 50% shipping refund",
+        "Customers whose parcels shipped from central get a fixed credit per parcel",
+        "Customers with standard service on the delayed parcels get a full shipping refund",
+        "The text does not say"
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q6",
+      "question": "What has to ship before labelsmith can again be deployed to all regions at once?",
+      "options": [
+        "An automatic rollback when label render errors pass a threshold",
+        "A runbook for moving a warehouse to the paper fallback",
+        "A second daily carrier pickup",
+        "A deploy-pipeline check that prints a test label on one host of each host generation before rollout",
+        "The text does not say"
+      ],
+      "answer": 3
+    },
+    {
+      "id": "q7",
+      "question": "How was the central warehouse working while its labels were down?",
+      "options": [
+        "Printing labels on plain paper from office printers, at normal throughput",
+        "Using pre-printed paper labels from stock, at about half of normal throughput",
+        "Writing shipping manifests by hand, at roughly a third of normal throughput",
+        "Holding parcels with paper tags and shipping none until labels recovered",
+        "The text does not say"
+      ],
+      "answer": 2
+    }
+  ]
+}
