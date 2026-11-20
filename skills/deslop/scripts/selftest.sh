@@ -40,6 +40,41 @@ grep_check() {
   fi
 }
 
+# compare_check NAME EXPECTED_EXIT ORIGINAL REVISED [SURFACE]
+compare_check() {
+  local name="$1" want="$2" orig="$3" rev="$4" surface="${5:-house}"
+  perl "$SCAN" --compare "$orig" "$rev" --surface "$surface" >/dev/null 2>&1
+  local got=$?
+  if [ "$got" = "$want" ]; then
+    pass=$((pass + 1))
+  else
+    fail=$((fail + 1))
+    printf '  FAIL  %-46s want %s, got %s\n' "$name" "$want" "$got"
+  fi
+}
+
+# compare_grep NAME PATTERN ORIGINAL REVISED [SURFACE] -- output must mention PATTERN
+compare_grep() {
+  local name="$1" pat="$2" orig="$3" rev="$4" surface="${5:-house}"
+  if perl "$SCAN" --compare "$orig" "$rev" --surface "$surface" 2>&1 | grep -qF -- "$pat"; then
+    pass=$((pass + 1))
+  else
+    fail=$((fail + 1))
+    printf '  FAIL  %-46s expected output to mention %s\n' "$name" "$pat"
+  fi
+}
+
+# absent_check NAME PATTERN FILE -- the scan output must not mention PATTERN
+absent_check() {
+  local name="$1" pat="$2" file="$3"
+  if perl "$SCAN" "$file" 2>&1 | grep -qF -- "$pat"; then
+    fail=$((fail + 1))
+    printf '  FAIL  %-46s output unexpectedly mentions %s\n' "$name" "$pat"
+  else
+    pass=$((pass + 1))
+  fi
+}
+
 # suppressed_check NAME FILE -- the advisory must fire, so an over-mask is visible
 suppressed_check() {
   local name="$1" file="$2"
@@ -317,6 +352,139 @@ check "unpaired tick runs do not span paragraphs" 20 "$TMP/tickpair.md"
 grep_check "the dash between them is reported"  'em or en dash:3' "$TMP/tickpair.md"
 printf 'prose `code \342\200\224\nstill code` after\n' > "$TMP/softwrap.md"
 check "span across a soft break still masks"     0 "$TMP/softwrap.md"
+
+# ---- new candidates: importance, tradeoff, contrast, arrows ----------------
+grep_check "slop fixture has an importance flag"   'importance flag:20' "$FIX/slop.md"
+grep_check "slop fixture has a tradeoff denial"    'tradeoff denial:20' "$FIX/slop.md"
+grep_check "slop fixture has a corrective contrast" 'corrective contrast:22' "$FIX/slop.md"
+grep_check "slop fixture has a shorthand arrow"    'shorthand arrow:22' "$FIX/slop.md"
+
+printf 'This matters.\n' > "$TMP/imp-bare.md"
+check "bare sentence-initial This matters"      10 "$TMP/imp-bare.md"
+printf "Here's why it matters for builds.\n" > "$TMP/imp-why.md"
+check "why it matters fires"                    10 "$TMP/imp-why.md"
+printf 'What matters is the key. The key matters most.\n' > "$TMP/imp-plain.md"
+check "plain matters stays clean"                0 "$TMP/imp-plain.md"
+printf 'It fails because\nthis matters to the cache.\n' > "$TMP/imp-wrap.md"
+check "wrapped lowercase this matters is clean"  0 "$TMP/imp-wrap.md"
+
+printf 'It runs faster without compromising accuracy.\n' > "$TMP/trade.md"
+check "without compromising fires"              10 "$TMP/trade.md"
+printf 'It runs without a cache.\n' > "$TMP/trade-ok.md"
+check "plain without stays clean"                0 "$TMP/trade-ok.md"
+printf 'Replan without losing the goal.\n' > "$TMP/trade-kept.md"
+check "without losing a named thing is clean"    0 "$TMP/trade-kept.md"
+
+# ---- padding phrases from older and open-weight model output ---------------
+printf 'Certainly! Here is a comprehensive overview of the migration.\n\nAs we delve into the details, it is important to note that the team made progress, a true testament to collaboration.\n\nWe are not just moving queues, we'"'"'re building a platform.\n\nIn conclusion, the future of messaging is bright.\n\nI hope this helps! Let me know if you'"'"'d like me to expand on any section.\n' > "$TMP/padded.md"
+check "padded chat text yields candidates"      10 "$TMP/padded.md" sample
+grep_check "opener is a chatbot artifact"        'chatbot artifact:1' "$TMP/padded.md"
+grep_check "closer is a chatbot artifact"        'chatbot artifact:9' "$TMP/padded.md"
+grep_check "filler phrase is named"              'filler phrase:3' "$TMP/padded.md"
+grep_check "inflated significance is named"      'inflated significance:3' "$TMP/padded.md"
+grep_check "stock vocabulary is named"           'stock vocabulary:3' "$TMP/padded.md"
+grep_check "dash-free not-just reframe is named" 'negative parallelism:5' "$TMP/padded.md"
+grep_check "generic close is named"              'generic close:7' "$TMP/padded.md"
+printf 'Of course the cache can miss, so the caller retries. It certainly helps to note the limit. The logs that were not only large but unsorted went first. Let me know if you have any questions.\n' > "$TMP/padded-ok.md"
+absent_check "mid-sentence of course is clean"   'chatbot artifact' "$TMP/padded-ok.md"
+absent_check "plain note and closer are clean"   'filler phrase' "$TMP/padded-ok.md"
+printf 'Ultimately, the build passed. The world of work changed.\n' > "$TMP/padded-ok2.md"
+check "ordinary transitions stay clean"          0 "$TMP/padded-ok2.md"
+
+printf 'Retry the request rather than simply failing.\n' > "$TMP/contrast.md"
+check "rather than simply fires"                10 "$TMP/contrast.md"
+printf 'They are more than a list; they are the contract.\n' > "$TMP/morethan.md"
+check "are more than a X, they fires"           10 "$TMP/morethan.md"
+printf 'Retry the request rather than failing.\n' > "$TMP/contrast-ok.md"
+check "bare rather than stays clean"             0 "$TMP/contrast-ok.md"
+printf 'There are more than a dozen tests.\n' > "$TMP/morethan-ok.md"
+check "more than a dozen without it is clean"    0 "$TMP/morethan-ok.md"
+
+printf 'parse -> validate -> store\n' > "$TMP/arrow.md"
+check "ascii arrow between words fires"         10 "$TMP/arrow.md"
+printf 'ingest \xe2\x86\x92 index\n' > "$TMP/arrow-uni.md"
+check "unicode arrow between words fires"       10 "$TMP/arrow-uni.md"
+printf '(input) => output\n' > "$TMP/arrow-paren.md"
+check "arrow after a parenthesis fires"         10 "$TMP/arrow-paren.md"
+printf '`make check` -> passes\n\n`make test` \xe2\x86\x92 89 passed\n\nsee `a` -> `b`\n' > "$TMP/arrow-receipt.md"
+check "arrow after a code span is a receipt"     0 "$TMP/arrow-receipt.md"
+printf '| step | parse -> store |\n| ---- | -------------- |\n| a    | b -> c         |\n' > "$TMP/arrow-table.md"
+check "arrow in a table row stays clean"         0 "$TMP/arrow-table.md"
+printf 'retries went 3 -> 5 and x >= 2\n' > "$TMP/arrow-digits.md"
+check "arrow between digits stays clean"         0 "$TMP/arrow-digits.md"
+
+# ---- density diagnostics: descriptive, never gating -------------------------
+perl -e 'print join(" ", ("alpha") x 50), ".\n"' > "$TMP/longsent.md"
+check "a long sentence does not gate"            0 "$TMP/longsent.md"
+grep_check "long sentence is named with line and size" 'line 1 (50 words)' "$TMP/longsent.md"
+perl -e 'print "- ", join(" ", ("beta") x 4), "\n" for 1 .. 20' > "$TMP/bullets.md"
+absent_check "unpunctuated bullets are not one sentence" 'long sentences' "$TMP/bullets.md"
+printf 'One two three four five; six seven eight nine ten.\n' > "$TMP/semis.md"
+semis_json=$(perl "$SCAN" --json "$TMP/semis.md" 2>/dev/null)
+if [[ "$semis_json" == *'"semicolons_per_1000_words": 100'* \
+   && "$semis_json" == *'"longest_paragraph": {'* \
+   && "$semis_json" == *'"long_sentences": []'* ]]; then
+  pass=$((pass + 1))
+else
+  fail=$((fail + 1)); printf '  FAIL  density diagnostics missing from JSON\n'
+fi
+grep_check "density line reports semicolons" 'semicolons per 1,000 words' "$TMP/semis.md"
+
+# ---- compare mode -----------------------------------------------------------
+CO="$FIX/compare-original.md"
+CR="$FIX/compare-revised.md"
+compare_check "identical files compare clean"      0 "$CO" "$CO"
+compare_check "fixture revision fails"            20 "$CO" "$CR"
+compare_grep "altered inline code is hard" 'protected inline code altered: `--nodes 4` now `--nodes 8` (original line 11' "$CO" "$CR"
+compare_grep "altered fenced code is hard" 'protected fenced code altered:' "$CO" "$CR"
+compare_grep "dropped range keeps its unit" 'dropped number: 2-4 node (original line 9)' "$CO" "$CR"
+compare_grep "introduced number is named"   'introduced number: 3x (revised line 9)' "$CO" "$CR"
+compare_grep "dropped author-year citation" 'dropped citation: Smith et al., 2024' "$CO" "$CR"
+compare_grep "dropped bracket citation"     'dropped citation: [3]' "$CO" "$CR"
+compare_grep "dropped bare URL"             'dropped url: https://x.test/metrics' "$CO" "$CR"
+compare_grep "fallen hedge is counted"      'hedge or limiter fell: may 1 to 0' "$CO" "$CR"
+compare_grep "risen certainty is counted"   'certainty word rose: always 0 to 1' "$CO" "$CR"
+compare_grep "introduced pattern is named"  'revision introduced: participial tail 0 to 1' "$CO" "$CR"
+compare_grep "size is reported"             'size: 51 words to 43 words, ratio 0.84' "$CO" "$CR"
+
+# reflowed quotes, a code block moved out of a list, renumbered steps, and a
+# thousands separator are all the same content
+printf '> a quoted line that\n> wraps here.\n\n- item\n\n  ```sh\n  make x\n  ```\n\n1. first step\n2. second step\n\nIt costs 1,000 units.\n' > "$TMP/c-same-o.md"
+printf 'item\n\n> a quoted line that wraps here.\n\n```sh\nmake x\n```\n\n- first step\n- second step\n\nIt costs 1000 units.\n' > "$TMP/c-same-r.md"
+compare_check "layout-only edits compare clean"    0 "$TMP/c-same-o.md" "$TMP/c-same-r.md"
+
+# a deleted span plus an unrelated new one is missing plus new, not altered
+printf 'Use `A` then `B` then `C`.\n' > "$TMP/c-span-o.md"
+printf 'Use `A` then `C` then `D`.\n' > "$TMP/c-span-r.md"
+compare_check "deleted protected span is hard"     20 "$TMP/c-span-o.md" "$TMP/c-span-r.md"
+compare_grep "deleted span is called missing" 'protected inline code missing: `B` (original line 1)' "$TMP/c-span-o.md" "$TMP/c-span-r.md"
+compare_grep "unrelated span is called new"   'protected inline code new: `D` (revised line 1)' "$TMP/c-span-o.md" "$TMP/c-span-r.md"
+printf 'Use `A` then `B` then `C`, or `E`.\n' > "$TMP/c-span-o-plus.md"
+compare_check "a new protected span is a candidate" 10 "$TMP/c-span-o.md" "$TMP/c-span-o-plus.md"
+
+printf "The job may take about 10 minutes. It doesn't retry.\n" > "$TMP/c-hedge-o.md"
+printf 'The job takes 10 minutes. It retries.\n' > "$TMP/c-hedge-r.md"
+compare_check "lost hedges are candidates only"    10 "$TMP/c-hedge-o.md" "$TMP/c-hedge-r.md"
+compare_grep "contracted negation counts as not" 'hedge or limiter fell: not 1 to 0' "$TMP/c-hedge-o.md" "$TMP/c-hedge-r.md"
+
+printf 'The job takes ten minutes.\n' > "$TMP/c-dash-o.md"
+printf 'The job takes ten minutes \xe2\x80\x94 usually.\n' > "$TMP/c-dash-r.md"
+compare_check "house typography still hard in compare" 20 "$TMP/c-dash-o.md" "$TMP/c-dash-r.md"
+compare_check "published typography is a candidate"    10 "$TMP/c-dash-o.md" "$TMP/c-dash-r.md" published
+compare_grep "published dash reads as introduced" 'revision introduced: em or en dash 0 to 1' "$TMP/c-dash-o.md" "$TMP/c-dash-r.md" published
+
+compare_check "unreadable compare input"           30 "$CO" "$TMP/does-not-exist.md"
+perl "$SCAN" --compare "$CO" >/dev/null 2>&1
+if [ $? -eq 2 ]; then pass=$((pass + 1)); else
+  fail=$((fail + 1)); printf '  FAIL  %-46s one-file compare was not a usage error\n' "compare arity validated"
+fi
+cmp_json=$(perl "$SCAN" --compare --json "$CO" "$CR" 2>/dev/null)
+if [[ "$cmp_json" == *'"mode": "compare"'* && "$cmp_json" == *'"ratio": 0.84'* \
+   && "$cmp_json" == *'"hard": 2'* ]]; then
+  pass=$((pass + 1))
+else
+  fail=$((fail + 1)); printf '  FAIL  compare JSON lacks mode, size, or counts\n'
+fi
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

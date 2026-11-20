@@ -16,3 +16,7 @@ The resolver plays a crucial role in shaping the pipeline, ensuring reliability 
 Let me be blunt: epistemic status moderate, I hold this loosely. The load-bearing insight is the binding constraint here, in service of the reader.
 
 Each entry a thread in the tapestry of the system. See turn12search4 and [cite: 7] for details, plus https://x.test/a?utm_source=chatgpt.com and 【source】.
+
+This distinction matters: the cache stays fast without sacrificing accuracy.
+
+Request -> hash -> output. It is more than just a cache; it is a ledger.

@@ -3,39 +3,73 @@
 #
 # Masks everything the preservation contract forbids editing (frontmatter,
 # fenced code in every form, indented code, inline code spans, blockquoted
-# material, link targets) before any check runs, so a scan never reports a
-# hit inside code or inside a quoted example.
+# material, HTML comments, link targets) before any check runs, so a scan
+# never reports a hit inside code or inside a quoted example.
 #
-# Usage:   slopscan.pl [--surface NAME] [--json] FILE...
+# Usage:   slopscan.pl [--surface NAME] [--json] [--show-masked] FILE...
+#          slopscan.pl --compare ORIGINAL REVISED [--surface NAME] [--json]
 # Surface: house (default) | published | agent | sample
 #
-# Exit 0 clean, 10 candidates only, 20 hard failures, 30 unreadable input.
+# Scan mode reports hard findings and candidates per file, then descriptive
+# rhythm that never gates: sentence and paragraph spread, semicolons per
+# 1,000 words, the longest paragraph, and up to three sentences of 45 or more
+# words as places to inspect.
+#
+# Compare mode reports what an edit did.
+#   Hard: a protected region of ORIGINAL (code, blockquote, link target,
+#     reference definition, autolink, frontmatter, HTML comment) missing or
+#     altered in REVISED, and every hard finding of a normal scan of REVISED.
+#   Candidates: a protected region new in REVISED; a number, citation, or
+#     bare URL dropped or introduced; a hedge or limiter whose count fell; a
+#     certainty word whose count rose; a candidate label whose hit count rose.
+#   Size: visible word counts and their ratio, descriptive and never a finding.
+# Dropped, missing, and altered items cite ORIGINAL lines; everything else
+# cites REVISED lines.
+#
+# Exit 0 clean, 10 candidates only, 20 hard failures, 30 unreadable input,
+# 2 usage error. Both modes take --json for the same report as one object.
 
 use strict;
 use warnings;
 use Encode qw(decode FB_CROAK);
 use IO::Handle ();
+use JSON::PP ();
 
 binmode STDOUT, ':encoding(UTF-8)';
 binmode STDERR, ':encoding(UTF-8)';
 
+# Modality words for compare mode. "never" sits in both lists on purpose: a
+# drop loses a limiter and a rise adds certainty.
+my @HEDGE   = qw(may might could likely approximately about estimated roughly
+                 not no never only unless);
+my @CERTAIN = qw(always never guarantees proves causes definitely certainly);
+my $LONG_SENTENCE = 45;
+
 my $surface     = 'house';
 my $json        = 0;
 my $show_masked = 0;
+my $compare     = 0;
 my @files;
 while (@ARGV) {
-    my $a = shift @ARGV;
-    if    ($a eq '--surface')     { $surface = shift @ARGV // 'house' }
-    elsif ($a eq '--json')        { $json    = 1 }
-    elsif ($a eq '--show-masked') { $show_masked = 1 }
-    elsif ($a =~ /^-/)        { die "unknown flag: $a\n" }
-    else                      { push @files, $a }
+    my $arg = shift @ARGV;
+    if    ($arg eq '--surface')     { $surface = shift @ARGV // 'house' }
+    elsif ($arg eq '--json')        { $json    = 1 }
+    elsif ($arg eq '--show-masked') { $show_masked = 1 }
+    elsif ($arg eq '--compare')     { $compare = 1 }
+    elsif ($arg =~ /^-/)            { usage_error("unknown flag: $arg\n") }
+    else                            { push @files, $arg }
 }
-die "usage: slopscan.pl [--surface house|published|agent|sample] [--json] [--show-masked] FILE...\n"
-    unless @files;
+my $usage = "usage: slopscan.pl [--surface house|published|agent|sample] [--json] [--show-masked] FILE...\n"
+          . "       slopscan.pl --compare ORIGINAL REVISED [--surface NAME] [--json]\n";
+usage_error($usage) unless @files;
+usage_error($usage) if $compare && @files != 2;
 my %VALID = map { $_ => 1 } qw(house published agent sample);
-die "unknown surface '$surface' (house|published|agent|sample)\n"
+usage_error("unknown surface '$surface' (house|published|agent|sample)\n")
     unless $VALID{$surface};
+
+my $JSON = JSON::PP->new->canonical->indent->indent_length(2)->space_after;
+
+exit run_compare(@files) if $compare;
 
 # Dashes are a house rule rather than evidence of authorship.
 # They are hard failures on our own files, house and agent alike, because the
@@ -45,34 +79,11 @@ my ($hard_total, $cand_total, $io_errors) = (0, 0, 0);
 my @report;
 
 for my $file (@files) {
-    unless (-f $file) {
-        warn "not a regular input file: $file\n";
-        $io_errors++;
-        next;
-    }
-    open my $fh, '<:raw', $file
-        or do { warn "cannot read $file: $!\n"; $io_errors++; next };
-    $! = 0;
-    my $bytes = do { local $/; <$fh> };
-    my $read_error = $fh->error ? ($! ? "$!" : 'input error') : '';
-    close $fh or $read_error ||= "$!";
-    if ($read_error) {
-        warn "cannot read $file: $read_error\n";
-        $io_errors++;
-        next;
-    }
-    my $raw = eval { decode('UTF-8', $bytes // '', FB_CROAK) };
-    if ($@) {
-        warn "invalid UTF-8 input: $file\n";
-        $io_errors++;
-        next;
-    }
-
-    $raw =~ s/\A\x{FEFF}//;  # a byte-order mark otherwise hides the frontmatter
-    $raw =~ s/\r\n?/\n/g;   # normalize CRLF and CR before anything else
+    my $raw = read_input($file);
+    unless (defined $raw) { $io_errors++; next }
     my $prose = mask($raw);
 
-    my ($hard, $cand) = checks($prose, $surface);
+    my ($hard, $cand) = checks($prose, $surface, $raw);
 
     # Masking is a heuristic, not a CommonMark parser, so run the same checks on
     # the raw text. Anything present there and absent here was suppressed by
@@ -91,24 +102,36 @@ for my $file (@files) {
     # ---- rhythm diagnostics (never gate on these) --------------------------
     my @sent  = sentences($prose);
     my @paras = paragraphs($prose);
-    my $srhy  = spread('sentence', \@sent);
-    my $prhy  = spread('paragraph', \@paras);
+    my $srhy  = spread('sentence',  [ map { $_->[0] } @sent ]);
+    my $prhy  = spread('paragraph', [ map { $_->[0] } @paras ]);
+    my $dens  = density($prose, \@sent, \@paras);
 
     $hard_total += scalar @hard;
     $cand_total += scalar @cand;
 
     push @report, { file => $file, hard => \@hard, cand => \@cand,
                     suppressed => \@suppressed,
-                    sent => $srhy, para => $prhy };
+                    sent => $srhy, para => $prhy, density => $dens };
 }
 
 # ---- output ---------------------------------------------------------------
 if ($json) {
-    print "{\n";
-    print qq(  "surface": "$surface",\n);
-    print qq(  "hard": $hard_total,\n  "candidates": $cand_total,\n);
-    print qq(  "io_errors": $io_errors\n);
-    print "}\n";
+    print $JSON->encode({
+        mode       => 'scan',
+        surface    => $surface,
+        hard       => 0 + $hard_total,
+        candidates => 0 + $cand_total,
+        io_errors  => 0 + $io_errors,
+        files      => [ map { +{
+            file               => $_->{file},
+            hard_findings      => $_->{hard},
+            candidate_findings => $_->{cand},
+            suppressed         => 0 + @{ $_->{suppressed} },
+            rhythm             => { sentence  => $_->{sent},
+                                    paragraph => $_->{para},
+                                    %{ $_->{density} } },
+        } } @report ],
+    });
 } else {
     for my $r (@report) {
         print "\n$r->{file} (surface: $surface)\n";
@@ -129,6 +152,7 @@ if ($json) {
         }
         print "  rhythm: $r->{sent}\n";
         print "          $r->{para}\n";
+        print "          $_\n" for density_lines($r->{density});
         print "  clean\n" if !@{ $r->{hard} } && !@{ $r->{cand} };
     }
     print "\nsurface=$surface hard=$hard_total candidates=$cand_total\n";
@@ -139,9 +163,43 @@ exit 20 if $hard_total;
 exit 10 if $cand_total;
 exit 0;
 
+# A fixed status, because die exits with whatever errno holds and could
+# collide with a finding code.
+sub usage_error { print STDERR $_[0]; exit 2 }
+
+# Reads, decodes, and normalizes one input. Returns undef after a warning
+# when the file cannot be used, so the caller can count it as an I/O error.
+sub read_input {
+    my ($file) = @_;
+    unless (-f $file) {
+        warn "not a regular input file: $file\n";
+        return undef;
+    }
+    open my $fh, '<:raw', $file
+        or do { warn "cannot read $file: $!\n"; return undef };
+    $! = 0;
+    my $bytes = do { local $/; <$fh> };
+    my $read_error = $fh->error ? ($! ? "$!" : 'input error') : '';
+    close $fh or $read_error ||= "$!";
+    if ($read_error) {
+        warn "cannot read $file: $read_error\n";
+        return undef;
+    }
+    my $raw = eval { decode('UTF-8', $bytes // '', FB_CROAK) };
+    if ($@) {
+        warn "invalid UTF-8 input: $file\n";
+        return undef;
+    }
+    $raw =~ s/\A\x{FEFF}//;  # a byte-order mark otherwise hides the frontmatter
+    $raw =~ s/\r\n?/\n/g;   # normalize CRLF and CR before anything else
+    return $raw;
+}
+
 # Every content check, so the same set can run against masked and raw text.
+# RAW, when given, lets a check see what a masked span next to a hit was.
 sub checks {
-    my ($prose, $surf) = @_;
+    my ($prose, $surf, $raw) = @_;
+    $raw //= $prose;
     my $dash_hard = ($surf eq 'house' || $surf eq 'agent');
     my (@hard, @cand);
 
@@ -181,7 +239,7 @@ sub checks {
         push @cand, hits($prose, qr/^\s*[-*+]\s+\*\*[^*]+:\*\*/m, 'bold-lead bullet');
         push @cand, heading_case($prose);
     }
-    push @cand, hits($prose, qr/\bnot (?:just|only|merely|simply)\b[^.!?]{0,60}\b(?:it'?s|it is|but)\b/i,
+    push @cand, hits($prose, qr/\bnot (?:just|only|merely|simply)\b[^.!?]{0,60}\b(?:it['\x{2019}]?s|it is|we['\x{2019}]re|they['\x{2019}]re|that['\x{2019}]s|but)\b/i,
                      'negative parallelism');
     push @cand, hits($prose, qr/,\s+(?:highlighting|underscoring|emphasizing|ensuring|reflecting|symbolizing|showcasing|fostering|contributing|cultivating|encompassing|demonstrating|solidifying|cementing|signaling|positioning|paving)\s/i,
                      'participial tail');
@@ -203,6 +261,33 @@ sub checks {
                      'unfalsifiable claim');
     push @cand, hits($prose, qr/^\s*(?:The result\?|Why does this matter\?|So what changed\?|The catch\?)/mi,
                      'rhetorical-question transition');
+    # Sentence-initial "This matters" is case-sensitive so a wrapped line that
+    # merely continues "...because this matters" stays quiet.
+    push @cand, hits($prose, qr/\b(?:this|that)\s+(?:distinction|difference|point|detail|nuance)\s+matters\b|\bwhy\s+(?:this|that|it)\s+matters\b|(?-i:(?:^\s*(?:[-*+]\s+|\d+[.)]\s+)?|[.!?]["')]?\s+)This\s+matters\b)/i,
+                     'importance flag');
+    # "without losing" and "without giving up" usually name a real thing kept,
+    # so only the verbs that assert a free lunch are flagged.
+    push @cand, hits($prose, qr/\bwithout\s+(?:sacrificing|compromising|trading\s+off)\b/i,
+                     'tradeoff denial');
+    # Bare "rather than" is ordinary English; only the corrective intensifier
+    # and the "more than a X ... it" reframe are flagged.
+    push @cand, hits($prose, qr/\brather\s+than\s+(?:simply|merely|just)\b|\b(?:is|are|['\x{2019}]s|['\x{2019}]re)\s+more\s+than\s+(?:just\s+)?an?\s+[\w-]+\b[^.!?]*?\b(?:it|they)\b/i,
+                     'corrective contrast');
+    push @cand, arrows($prose, $raw);
+
+    # Padding phrases, most common in older and open-weight model output and in
+    # chat text pasted into a document. Each has legitimate uses, so each is a
+    # candidate. Line-initial forms are case-sensitive on purpose.
+    push @cand, hits($prose, qr/^\s*(?:Certainly|Absolutely|Of course|Sure thing|Great question)[!,.]|(?i:\bhope this (?:helps|(?:email|message) finds you)\b|\blet me know if you(?:['\x{2019}]d| would) like(?: me)? to\b|\bfeel free to (?:reach out|ask)\b|\bas an AI\b|\bhere(?:['\x{2019}]s| is) an? (?:comprehensive|detailed|quick|brief) (?:overview|breakdown|summary|guide)\b)/m,
+                     'chatbot artifact');
+    push @cand, hits($prose, qr/\bit(?:['\x{2019}]s| is) (?:important|worth|crucial|essential) to (?:note|mention|remember|understand|recognize)\b|\bit(?:['\x{2019}]s| is) worth (?:noting|mentioning|emphasizing|highlighting)\b|\bin today['\x{2019}]s (?:fast-paced|ever-evolving|digital|modern)\b|\bneedless to say\b/i,
+                     'filler phrase');
+    push @cand, hits($prose, qr/\ban? (?:true |real )?testament to\b|\bpivotal (?:moment|role|step|point)\b|\bmarks? an? (?:significant|pivotal|major|new) (?:milestone|step|shift|chapter|moment)\b|\bgame[- ]chang(?:er|ing)\b|\bthe future (?:of [\w ]{1,30} )?(?:is|looks) bright\b/i,
+                     'inflated significance');
+    push @cand, hits($prose, qr/\bdelv(?:e|es|ed|ing)\b|\btapestry\b|\b(?:ever-evolving|ever-changing|fast-paced) (?:\w+ )?(?:landscape|world)\b|\bin the realm of\b|\bnavigat(?:e|es|ing) the complexit(?:y|ies)\b/i,
+                     'stock vocabulary');
+    push @cand, hits($prose, qr/^\s*(?:In conclusion|To sum up|All in all),/m,
+                     'generic close');
 
     return (\@hard, \@cand);
 }
@@ -219,9 +304,29 @@ sub checks {
 # from three up, zero to three spaces of indent, closer tail whitespace-only),
 # indented code blocks, blockquotes including lazy continuation, inline code
 # spans including multiline ones, and link, reference, and autolink targets.
+#
+# With REGIONS, every masked region is also recorded, in document order, as
+# { kind, line, text } with its original text. Bare URLs are recorded with
+# kind 'url' because they are prose content rather than markup.
 sub mask {
-    my ($t) = @_;
+    my ($t, $regions) = @_;
     my @lines = split /\n/, $t, -1;
+    my @orig  = @lines;
+
+    # Block regions: a new region opens when asked, or when the previous
+    # recorded line belongs to a different kind or is not adjacent.
+    my ($cur, $cur_kind, $cur_last) = (undef, '', -2);
+    my $rec = sub {
+        my ($kind, $i, $new) = @_;
+        return unless $regions;
+        if ($new || !defined $cur || $cur_kind ne $kind || $cur_last != $i - 1) {
+            push @$regions, { kind => $kind, line => $i + 1, text => $orig[$i] };
+            $cur = $regions->[-1];
+        } else {
+            $cur->{text} .= "\n" . $orig[$i];
+        }
+        ($cur_kind, $cur_last) = ($kind, $i);
+    };
 
     my $in_front = (@lines && $lines[0] eq '---') ? 1 : 0;
     my ($fence_char, $fence_len, $in_quote, $in_code, $prev_blank) = ('', 0, 0, 0, 1);
@@ -233,6 +338,7 @@ sub mask {
         if ($in_front) {
             my $end = ($i > 0 && $line =~ /^(?:---|\.\.\.)\s*$/);
             $lines[$i] = blank($line);
+            $rec->('frontmatter', $i, $i == 0);
             $in_front = 0 if $end;
             $prev_blank = $blank;
             next;
@@ -244,6 +350,7 @@ sub mask {
                       . '{' . $fence_len . ',}\s*$';
             $fence_len = 0 if $line =~ /$close/;
             $lines[$i] = blank($line);
+            $rec->('fenced code', $i, 0);
             $prev_blank = $blank;
             next;
         }
@@ -256,6 +363,7 @@ sub mask {
             $fence_char = substr($1, 0, 1);
             $fence_len  = length $1;
             $lines[$i]  = blank($line);
+            $rec->('fenced code', $i, 1);
             $prev_blank = 0;
             next;
         }
@@ -271,6 +379,7 @@ sub mask {
         }
         if ($in_quote) {
             $lines[$i] = blank($line);
+            $rec->('blockquote', $i, 0);
             $prev_blank = $blank;
             next;
         }
@@ -280,6 +389,7 @@ sub mask {
         if ($in_code) {
             if ($blank || $line =~ /^(?: {4,}|\t)/) {
                 $lines[$i] = blank($line);
+                $rec->('indented code', $i, 0);
                 $prev_blank = $blank;
                 next;
             }
@@ -288,6 +398,7 @@ sub mask {
         if (!$blank && $prev_blank && $line =~ /^(?: {4,}|\t)\S/) {
             $in_code    = 1;
             $lines[$i]  = blank($line);
+            $rec->('indented code', $i, 1);
             $prev_blank = 0;
             next;
         }
@@ -297,14 +408,6 @@ sub mask {
 
     my $out = join "\n", @lines;
 
-    # Inline code spans, including spans that wrap across a soft line break. The
-    # opening run must not be escaped, the closing run must be exactly the same
-    # length (a two-tick opener is not closed by a three-tick run), and the span
-    # may never cross a blank line, because the paragraph ends there. Without
-    # that stop, one unpaired backtick run in prose pairs with another far away
-    # and blanks every line between them, which is how the contributor guide's
-    # own inventory table went invisible on the first dogfood scan.
-    $out =~ s/(?<!\\)(?<!`)(`+)(?!`)((?:(?!(?<!`)\1(?!`))(?!\n[ \t]*\n).)*?)(?<!`)\1(?!`)/blank($&)/gse;
     # Link and image markup: angle-bracket destination, bare destination with
     # balanced parentheses, optional title in any of the three quote forms,
     # reference definitions, and autolinks. The whole destination-and-title run
@@ -312,28 +415,56 @@ sub mask {
     my $title = qr/(?:\s+(?:"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\((?:[^)\\]|\\.)*\)))?/;
     my $bare  = qr/(?:[^()\s\\]|\\.|\((?:[^()\\]|\\.|\((?:[^()]|\\.)*\))*\))+/;
     my $label = qr/(?<!\\)\[(?:[^\[\]\\]|\\.|\[[^\]]*\])*(?<!\\)\]/;
-    $out =~ s/$label\(\s*<[^>\n]*>$title\s*\)/blank_tail($&)/ge;
-    $out =~ s/$label\(\s*$bare$title\s*\)/blank_tail($&)/ge;
-    # reference definitions, but never a footnote definition, whose body is prose
-    $out =~ s/^ {0,3}\[(?!\^)[^\]]+\]:\s*(?:<[^>\n]*>|\S+)$title/blank($&)/gme;
-    $out =~ s/<(?:https?|ftp|mailto):[^>\s]*>/blank($&)/ge;
-    # HTML comments never reach a reader, and a bare URL is not prose
-    $out =~ s/<!--.*?-->/blank($&)/gse;
-    $out =~ s{(?<![\w/])(?:https?|ftp)://[^\s<>()\[\]"']+}{blank($&)}ge;
+
+    # Inline passes run in order, each over the output of the one before, so a
+    # link inside a code span is never seen as a link. A pass flagged as a
+    # tail masks from the closing bracket onward and leaves the label visible.
+    my @passes = (
+        # Inline code spans, including spans that wrap across a soft line
+        # break. The opening run must not be escaped, the closing run must be
+        # exactly the same length (a two-tick opener is not closed by a
+        # three-tick run), and the span may never cross a blank line, because
+        # the paragraph ends there. Without that stop, one unpaired backtick
+        # run in prose pairs with another far away and blanks every line
+        # between them, which is how the contributor guide's own inventory
+        # table went invisible on the first dogfood scan.
+        [ 'inline code', 0,
+          qr/(?<!\\)(?<!`)(`+)(?!`)((?:(?!(?<!`)\1(?!`))(?!\n[ \t]*\n).)*?)(?<!`)\1(?!`)/s ],
+        [ 'link target', 1, qr/$label\(\s*<[^>\n]*>$title\s*\)/ ],
+        [ 'link target', 1, qr/$label\(\s*$bare$title\s*\)/ ],
+        # reference definitions, but never a footnote definition, whose body is prose
+        [ 'reference definition', 0, qr/^ {0,3}\[(?!\^)[^\]]+\]:\s*(?:<[^>\n]*>|\S+)$title/m ],
+        [ 'autolink', 0, qr/<(?:https?|ftp|mailto):[^>\s]*>/ ],
+        # HTML comments never reach a reader, and a bare URL is not prose
+        [ 'HTML comment', 0, qr/<!--.*?-->/s ],
+        [ 'url', 0, qr{(?<![\w/])(?:https?|ftp)://[^\s<>()\[\]"']+} ],
+    );
+    for my $pass (@passes) {
+        my ($kind, $tail, $re) = @$pass;
+        my @m;
+        push @m, [ $-[0], $+[0] ] while $out =~ /$re/g;
+        my ($pos, $lineno) = (0, 1);
+        for my $m (@m) {
+            my ($s, $e) = @$m;
+            my $text = substr($out, $s, $e - $s);
+            my $cut  = $tail ? rindex($text, '](') : -1;
+            my $from = $cut < 0 ? 0 : $cut;
+            substr($out, $s + $from, $e - $s - $from) = blank(substr($text, $from));
+            next unless $regions;
+            $lineno += (substr($out, $pos, $s - $pos) =~ tr/\n//);
+            $pos = $s;
+            push @$regions, { kind => $kind, line => $lineno,
+                              col  => $s - (rindex($out, "\n", $s - 1) + 1),
+                              text => $cut < 0 ? $text : substr($text, $cut + 1) };
+        }
+    }
+    @$regions = sort { $a->{line} <=> $b->{line} || ($a->{col} // -1) <=> ($b->{col} // -1) }
+                @$regions if $regions;
 
     return $out;
 }
 
 sub blank { my ($s) = @_; $s =~ s/[^\n]/ /g; return $s }
-
-# For link markup, the label is visible prose and the destination is not, so mask
-# from the closing bracket onward and leave the label text scannable.
-sub blank_tail {
-    my ($s) = @_;
-    my $i = rindex($s, '](');
-    return blank($s) if $i < 0;
-    return substr($s, 0, $i) . blank(substr($s, $i));
-}
 
 # Title case is a style choice rather than a tell; the tell is a file that
 # mixes heading cases, which is how an inserted section betrays a second
@@ -380,9 +511,31 @@ sub heading_case {
                @$minor;
 }
 
+# Prose blocks shared by the frame and rhythm checks: paragraphs split at
+# blank lines, with each list item its own block so separate bullets cannot
+# pool. Heading, table, and thematic-break lines end a block and are dropped;
+# list markers are stripped. Returns [first_line, text] pairs.
+sub blocks {
+    my ($text) = @_;
+    my (@out, @buf, $start);
+    my $flush = sub { push @out, [ $start, join("\n", @buf) ] if @buf; @buf = () };
+    my @lines = split /\n/, $text, -1;
+    for my $i (0 .. $#lines) {
+        my $line = $lines[$i];
+        if ($line =~ /^\s*$/ || $line =~ /^\s*[|#]/ || $line =~ /^\s*(?:[-*_=]\s*){3,}$/) {
+            $flush->();
+            next;
+        }
+        $flush->() if $line =~ s/^\s*(?:[-*+]|\d+[.)])\s+//;
+        $start = $i + 1 unless @buf;
+        push @buf, $line;
+    }
+    $flush->();
+    return @out;
+}
+
 # Stacked rhetorical frames (catalog N19). Three distinct families generate a
-# candidate, not a quality judgment or model fingerprint. List items count as
-# their own paragraphs so separate bullets cannot pool into a false hit.
+# candidate, not a quality judgment or model fingerprint.
 sub stacked_frames {
     my ($text) = @_;
     my @fams = (
@@ -393,24 +546,36 @@ sub stacked_frames {
         [ negation    => qr/,\s+not\s+(?:a|an|the)?\s*[a-z]/ ],
     );
     my @out;
-    my @lines = split /\n/, $text, -1;
-    my ($start, $para) = (0, '');
-    my $flush = sub {
-        return if $para eq '';
+    for my $blk (blocks($text)) {
+        my ($start, $para) = @$blk;
         my @hit = grep { $para =~ $_->[1] } @fams;
         push @out, sprintf('stacked frames (%s):%d',
-                           join('+', map { $_->[0] } @hit), $start + 1)
+                           join('+', map { $_->[0] } @hit), $start)
             if @hit >= 3;
-        $para = '';
-    };
-    for my $i (0 .. $#lines) {
-        my $line = $lines[$i];
-        if ($line =~ /^\s*$/ || $line =~ /^\s*[|#]/) { $flush->(); next }
-        $flush->() if $line =~ /^\s*(?:[-*+]|\d+[.)])\s/;
-        $start = $i if $para eq '';
-        $para .= ($para eq '' ? '' : "\n") . $line;
     }
-    $flush->();
+    return @out;
+}
+
+# Shorthand arrows joining prose words. The neighbors are read from the raw
+# line, where a masked code span is still code rather than blank space, so a
+# receipt such as `make check` -> passes stays quiet. Table rows are skipped.
+sub arrows {
+    my ($prose, $raw) = @_;
+    my @p = split /\n/, $prose, -1;
+    my @r = split /\n/, $raw,   -1;
+    my @out;
+    for my $i (0 .. $#p) {
+        my $line = $p[$i];
+        next if $line =~ /^\s*\|/ || ($line =~ tr/|//) >= 2;
+        my $src = $r[$i] // $line;
+        while ($line =~ /->|=>|[\x{2192}\x{21D2}\x{27F6}]/g) {
+            my ($s, $e) = ($-[0], $+[0]);
+            next unless substr($src, 0, $s) =~ /[[:alpha:])][ \t]*\z/
+                     && substr($src, $e)    =~ /\A[ \t]*[[:alpha:]]/;
+            push @out, snippet('shorthand arrow', $i, $line);
+            last;
+        }
+    }
     return @out;
 }
 
@@ -422,41 +587,90 @@ sub hits {
         # table delimiter rows and horizontal rules carry no prose
         next if $lines[$i] =~ /^\s*\|?[\s:|+-]{3,}\|?\s*$/;
         next unless $lines[$i] =~ /$re/;
-        my $snip = $lines[$i];
-        $snip =~ s/^\s+|\s+$//g;
-        $snip = substr($snip, 0, 90) . '...' if length($snip) > 90;
-        push @out, sprintf('%s:%d  %s', $label, $i + 1, $snip);
+        push @out, snippet($label, $i, $lines[$i]);
     }
     return @out;
 }
 
-# Sentence word counts. Splits only on a terminator followed by whitespace
-# and an opening character, so v1.2.3, e.g., Node.js, and file paths stay
-# inside one sentence. Skips headings, tables, and list markers.
+sub snippet {
+    my ($label, $i, $line) = @_;
+    $line =~ s/^\s+|\s+$//g;
+    $line = substr($line, 0, 90) . '...' if length($line) > 90;
+    return sprintf('%s:%d  %s', $label, $i + 1, $line);
+}
+
+# Sentences as [word_count, line]. Splits only on a terminator followed by
+# whitespace and an opening character, so v1.2.3, e.g., Node.js, and file
+# paths stay inside one sentence. A sentence never crosses a block boundary,
+# so a run of unpunctuated bullets does not read as one long sentence.
 sub sentences {
     my ($t) = @_;
-    my @keep;
-    for my $line (split /\n/, $t) {
-        next if $line =~ /^\s*[|#]/;
-        $line =~ s/^\s*(?:[-*+]|\d+\.)\s+//;
-        push @keep, $line;
-    }
-    my $prose = join "\n", @keep;
     my @out;
-    for my $s (split /(?<=[.!?])\s+(?=["(\x{2018}\x{201C}]?[A-Z]|\z)/, $prose) {
-        my @w = grep { length } split /\s+/, $s;
-        push @out, scalar @w if @w > 1;
+    for my $blk (blocks($t)) {
+        my ($line, $text) = @$blk;
+        my @parts = split /((?<=[.!?])\s+(?=["(\x{2018}\x{201C}]?[A-Z]|\z))/, $text;
+        while (@parts) {
+            my $s   = shift @parts;
+            my $sep = shift @parts // '';
+            my @w = grep { length } split /\s+/, $s;
+            # a sentence's line is where its first word sits
+            my ($lead) = $s =~ /\A(\s*)/;
+            push @out, [ scalar @w, $line + ($lead =~ tr/\n//) ] if @w > 1;
+            $line += ($s =~ tr/\n//) + ($sep =~ tr/\n//);
+        }
     }
     return @out;
 }
 
+# Paragraphs as [word_count, first_line], over the same blocks.
 sub paragraphs {
     my ($t) = @_;
     my @out;
-    for my $p (split /\n\s*\n/, $t) {
-        next if $p =~ /^\s*[|#]/;
-        my @w = grep { length } split /\s+/, $p;
-        push @out, scalar @w if @w > 3;
+    for my $blk (blocks($t)) {
+        my @w = grep { length } split /\s+/, $blk->[1];
+        push @out, [ scalar @w, $blk->[0] ] if @w > 3;
+    }
+    return @out;
+}
+
+# Density: semicolons per 1,000 words, the longest paragraph, and the longest
+# sentences at or over the threshold. Descriptive only; a dense paragraph can
+# be exactly right for its reader.
+sub density {
+    my ($prose, $sent, $paras) = @_;
+    my ($words, $semis) = (0, 0);
+    for my $blk (blocks($prose)) {
+        $words += () = $blk->[1] =~ /\S+/g;
+        $semis += () = $blk->[1] =~ /;/g;
+    }
+    my @long = sort { $b->[0] <=> $a->[0] || $a->[1] <=> $b->[1] }
+               grep { $_->[0] >= $LONG_SENTENCE } @$sent;
+    my ($top) = sort { $b->[0] <=> $a->[0] || $a->[1] <=> $b->[1] } @$paras;
+    my @shown = @long > 3 ? @long[0 .. 2] : @long;
+    return {
+        words                     => 0 + $words,
+        semicolons_per_1000_words => $words ? 0 + sprintf('%.1f', 1000 * $semis / $words) : 0,
+        long_sentence_threshold   => 0 + $LONG_SENTENCE,
+        long_sentence_count       => 0 + @long,
+        long_sentences            => [ map { +{ line => 0 + $_->[1], words => 0 + $_->[0] } } @shown ],
+        longest_paragraph         => $top ? { line => 0 + $top->[1], words => 0 + $top->[0] } : undef,
+    };
+}
+
+sub density_lines {
+    my ($d) = @_;
+    return ('density: too few words to measure') unless $d->{words};
+    my @out = (sprintf('density: %.1f semicolons per 1,000 words, longest paragraph %s',
+                       $d->{semicolons_per_1000_words},
+                       $d->{longest_paragraph}
+                           ? sprintf('%d words (line %d)', @{ $d->{longest_paragraph} }{qw(words line)})
+                           : 'n/a'));
+    if (@{ $d->{long_sentences} }) {
+        my $list = join ', ', map { sprintf('line %d (%d words)', $_->{line}, $_->{words}) }
+                                  @{ $d->{long_sentences} };
+        $list .= sprintf('; %d in all', $d->{long_sentence_count})
+            if $d->{long_sentence_count} > @{ $d->{long_sentences} };
+        push @out, "long sentences to inspect ($d->{long_sentence_threshold}+ words): $list";
     }
     return @out;
 }
@@ -480,4 +694,341 @@ sub spread {
     my @s = sort { $a <=> $b } @$vals;
     return sprintf('%s spread: n=%d min=%d median=%d max=%d mean=%.1f cv=%.2f',
                    $kind, scalar @s, $s[0], $s[int(@s / 2)], $s[-1], $m, $cv);
+}
+
+# ---- compare mode -----------------------------------------------------------
+
+sub run_compare {
+    my ($ofile, $rfile) = @_;
+    my $oraw = read_input($ofile);
+    my $rraw = read_input($rfile);
+    my $io = (defined $oraw ? 0 : 1) + (defined $rraw ? 0 : 1);
+    my (@hard, @cand, %size);
+
+    if (!$io) {
+        my (@oreg, @rreg);
+        my $oprose = mask($oraw, \@oreg);
+        my $rprose = mask($rraw, \@rreg);
+
+        my ($ph, $pc) = compare_regions([ grep { $_->{kind} ne 'url' } @oreg ],
+                                        [ grep { $_->{kind} ne 'url' } @rreg ]);
+        push @hard, @$ph;
+        push @cand, @$pc;
+
+        my ($rhard, $rcand) = checks($rprose, $surface, $rraw);
+        my (undef,  $ocand) = checks($oprose, $surface, $oraw);
+        push @hard, map { "revised: $_" } @$rhard;
+
+        my $oinv = inventory($oprose, \@oreg);
+        my $rinv = inventory($rprose, \@rreg);
+        for my $kind (qw(number citation url)) {
+            push @cand, inventory_diff($kind, $oinv->{$kind}, $rinv->{$kind});
+        }
+        push @cand, modality_diff(modality($oprose), modality($rprose));
+        push @cand, introduced($ocand, $rcand);
+
+        my ($ow, $rw) = (visible_words($oprose), visible_words($rprose));
+        %size = (original_words => 0 + $ow, revised_words => 0 + $rw,
+                 ratio => $ow ? 0 + sprintf('%.2f', $rw / $ow) : undef);
+    }
+
+    if ($json) {
+        print $JSON->encode({
+            mode               => 'compare',
+            surface            => $surface,
+            original           => $ofile,
+            revised            => $rfile,
+            hard               => 0 + @hard,
+            candidates         => 0 + @cand,
+            io_errors          => 0 + $io,
+            hard_findings      => \@hard,
+            candidate_findings => \@cand,
+            size               => %size ? \%size : undef,
+        });
+    } else {
+        print "\ncompare $ofile to $rfile (surface: $surface)\n";
+        if (@hard) {
+            print "  HARD FAIL\n";
+            print "    $_\n" for @hard;
+        }
+        if (@cand) {
+            print "  CANDIDATES (judge, do not auto-fix)\n";
+            print "    $_\n" for @cand;
+        }
+        if (%size) {
+            printf "  size: %d words to %d words, ratio %s (descriptive only)\n",
+                $size{original_words}, $size{revised_words},
+                defined $size{ratio} ? sprintf('%.2f', $size{ratio}) : 'n/a';
+            print "  clean\n" if !@hard && !@cand;
+        }
+        printf "\nsurface=%s hard=%d candidates=%d\n", $surface, scalar @hard, scalar @cand;
+    }
+
+    return 30 if $io;
+    return 20 if @hard;
+    return 10 if @cand;
+    return 0;
+}
+
+# Normalized comparison text for a protected region. Code keeps its interior
+# whitespace but not trailing spaces or a uniform indent, so a block moved
+# into or out of a list item still matches. Inline code tolerates a soft
+# wrap. Quotes and link markup tolerate reflowing.
+sub region_norm {
+    my ($r) = @_;
+    my ($kind, $t) = ($r->{kind}, $r->{text});
+    if ($kind eq 'fenced code' || $kind eq 'indented code' || $kind eq 'frontmatter') {
+        my @l = map { my $x = $_; $x =~ s/\s+\z//; $x } split /\n/, $t, -1;
+        shift @l while @l && $l[0] eq '';
+        pop @l   while @l && $l[-1] eq '';
+        my $min;
+        for (grep { length } @l) {
+            my $n = length((/^([ \t]*)/)[0]);
+            $min = $n if !defined $min || $n < $min;
+        }
+        $min //= 0;
+        return join "\n", map { length($_) >= $min ? substr($_, $min) : $_ } @l;
+    }
+    if ($kind eq 'inline code') {
+        $t =~ s/[ \t]*\n[ \t]*/ /g;
+        return $t;
+    }
+    if ($kind eq 'blockquote') {
+        $t =~ s/^[ \t]*(?:>[ \t]*)*//mg;
+    }
+    $t =~ s/\s+/ /g;
+    $t =~ s/^ | $//g;
+    return $t;
+}
+
+sub region_show {
+    my ($text, $max) = @_;
+    my $s = join ' / ', grep { length } map { my $x = $_; $x =~ s/^\s+|\s+$//g; $x } split /\n/, $text;
+    $s = substr($s, 0, $max) . '...' if length($s) > $max;
+    return $s;
+}
+
+# Exact matches first, as multisets, so a moved region is still preserved.
+# A leftover original pairs with a leftover revised region of the same kind
+# only when both sit after the same number of matched regions; that pair is
+# reported as altered, and every other leftover as missing or new.
+sub compare_regions {
+    my ($o, $r) = @_;
+    my (@hard, @cand);
+    my %pool;
+    for my $j (0 .. $#$r) {
+        $r->[$j]{key} = $r->[$j]{kind} . "\0" . region_norm($r->[$j]);
+        push @{ $pool{ $r->[$j]{key} } }, $j;
+    }
+    my (%omatch, %rmatch);
+    for my $i (0 .. $#$o) {
+        $o->[$i]{key} = $o->[$i]{kind} . "\0" . region_norm($o->[$i]);
+        my $q = $pool{ $o->[$i]{key} };
+        next unless $q && @$q;
+        $omatch{$i} = 1;
+        $rmatch{ shift @$q } = 1;
+    }
+    my $anchor = sub {
+        my ($list, $matched) = @_;
+        my ($n, @at) = (0);
+        for my $k (0 .. $#$list) { push @at, $n; $n++ if $matched->{$k} }
+        return @at;
+    };
+    my @oa = $anchor->($o, \%omatch);
+    my @ra = $anchor->($r, \%rmatch);
+    my %taken;
+    for my $i (grep { !$omatch{$_} } 0 .. $#$o) {
+        my $or = $o->[$i];
+        my ($j) = grep { !$rmatch{$_} && !$taken{$_}
+                         && $r->[$_]{kind} eq $or->{kind} && $ra[$_] == $oa[$i] } 0 .. $#$r;
+        if (defined $j) {
+            $taken{$j} = 1;
+            my ($was, $now) = first_difference(region_norm($or), region_norm($r->[$j]));
+            my $q = $or->{kind} eq 'inline code' ? '' : '"';
+            push @hard, sprintf('protected %s altered: %s%s%s now %s%s%s (original line %d, revised line %d)',
+                                $or->{kind}, $q, region_show($was, 50), $q, $q, region_show($now, 50), $q,
+                                $or->{line}, $r->[$j]{line});
+        } else {
+            push @hard, sprintf('protected %s missing: %s (original line %d)',
+                                $or->{kind}, region_show($or->{text}, 70), $or->{line});
+        }
+    }
+    for my $j (grep { !$rmatch{$_} && !$taken{$_} } 0 .. $#$r) {
+        push @cand, sprintf('protected %s new: %s (revised line %d)',
+                            $r->[$j]{kind}, region_show($r->[$j]{text}, 70), $r->[$j]{line});
+    }
+    return (\@hard, \@cand);
+}
+
+sub first_difference {
+    my ($x, $y) = @_;
+    my @x = split /\n/, $x, -1;
+    my @y = split /\n/, $y, -1;
+    for my $k (0 .. ($#x > $#y ? $#x : $#y)) {
+        my ($p, $q) = ($x[$k] // '(nothing)', $y[$k] // '(nothing)');
+        return ($p, $q) if $p ne $q;
+    }
+    return ($x, $y);
+}
+
+# Tracked tokens in visible prose: numbers, citation-like tokens, and bare
+# URLs, each as key => { n, show, lines }. Citations are blanked before the
+# number pass so a year or reference numeral is not counted twice.
+sub inventory {
+    my ($prose, $regions) = @_;
+    my %inv = (number => {}, citation => {}, url => {});
+    my $add = sub {
+        my ($kind, $key, $show, $line) = @_;
+        my $e = $inv{$kind}{$key} //= { n => 0, show => $show, lines => [] };
+        $e->{n}++;
+        push @{ $e->{lines} }, $line;
+    };
+    for my $r (grep { $_->{kind} eq 'url' } @$regions) {
+        (my $u = $r->{text}) =~ s/[.,;:!?]+\z//;
+        $add->('url', $u, $u, $r->{line});
+    }
+
+    my $name = qr/[[:upper:]][\p{L}'\x{2019}-]+/;
+    my $year = qr/(?:1[89]|20)\d{2}[a-z]?/;
+    # The parenthesized form runs before "et al." so "(Smith et al. 2024)"
+    # is taken whole rather than leaving its opening parenthesis behind.
+    my @cite = (
+        qr/\[\^[^\]\s]+\]/,
+        qr/\[\d+(?:\s*[,\x{2013}-]\s*\d+)*\]/,
+        qr/\((?:see\s+)?$name(?:\s+(?:and|&)\s+$name|\s+et\s+al\.?)?,?\s+$year\)/,
+        qr/\b$name\s+et\s+al\.?,?\s+\(?$year\)?/,
+        qr/\b$name(?:\s+(?:and|&)\s+$name)?\s+\($year\)/,
+        qr/\barXiv:\s?\d{4}\.\d{4,5}(?:v\d+)?/i,
+        qr/\b(?:doi:\s?)?10\.\d{4,9}\/[^\s"<>]+/i,
+    );
+    my %stop = map { $_ => 1 } qw(a an and are as at be by for from in is it
+                                  of on or per than that the to was were with);
+    my @lines = split /\n/, $prose, -1;
+    for my $i (0 .. $#lines) {
+        my $l = $lines[$i];
+        next if $l =~ /^\s*\|?[\s:|+-]{3,}\|?\s*$/;
+        $l =~ s/^(\s*)(\d+[.)])(?=\s)/$1 . (' ' x length $2)/e;   # ordered list marker
+        for my $re (@cite) {
+            $l =~ s{$re}{
+                my $m   = $&;
+                my $key = lc $m;
+                if ($key =~ /^(?:\[|arxiv|doi|10\.)/) {
+                    $key =~ s/[.,;:)\]]+\z// if $key =~ /^(?:doi|10\.)/;
+                    $key =~ s/^doi://;
+                    $key =~ s/\s+//g;
+                } else {
+                    $key =~ s/^\(?see\s+//;
+                    $key =~ tr/(),.;//d;
+                    $key =~ s/\s+/ /g;
+                }
+                $add->('citation', $key, $m, $i + 1);
+                ' ' x length $m;
+            }ge;
+        }
+        while ($l =~ /(?<![\w.\/\\-])(v?)(\d+(?:[.,:\/\x{2013}-]\d+)*)(%?)(?:([ \t]?)([[:alpha:]]+))?/g) {
+            my ($v, $num, $pct, $gap, $unit) = ($1, $2, $3, $4 // '', $5);
+            my $key = $num;
+            $key =~ tr/\x{2013}/-/;
+            $key =~ tr/,//d if $key =~ /^\d{1,3}(?:,\d{3})+(?:\.\d+)?$/;
+            $key .= '%' if $pct || (defined $unit && lc $unit eq 'percent');
+            my $show = "$v$num$pct";
+            $show .= "$gap$unit" if defined $unit && !$stop{ lc $unit };
+            $add->('number', $key, $show, $i + 1);
+        }
+    }
+    return \%inv;
+}
+
+sub inventory_diff {
+    my ($kind, $o, $r) = @_;
+    my @out;
+    for my $k (sort { $o->{$a}{lines}[0] <=> $o->{$b}{lines}[0] || $a cmp $b } keys %$o) {
+        my ($n0, $n1) = ($o->{$k}{n}, $r->{$k} ? $r->{$k}{n} : 0);
+        next unless $n1 < $n0;
+        push @out, sprintf('dropped %s: %s (%soriginal %s)', $kind, $o->{$k}{show},
+                           ($n0 > 1 ? "count $n0 to $n1; " : ''), line_list($o->{$k}{lines}));
+    }
+    for my $k (sort { $r->{$a}{lines}[0] <=> $r->{$b}{lines}[0] || $a cmp $b } keys %$r) {
+        my ($n0, $n1) = ($o->{$k} ? $o->{$k}{n} : 0, $r->{$k}{n});
+        next unless $n1 > $n0;
+        push @out, sprintf('introduced %s: %s (%srevised %s)', $kind, $r->{$k}{show},
+                           ($n1 > 1 ? "count $n0 to $n1; " : ''), line_list($r->{$k}{lines}));
+    }
+    return @out;
+}
+
+sub line_list {
+    my ($lines) = @_;
+    my %seen;
+    my @u = grep { !$seen{$_}++ } @$lines;
+    my $more = @u > 10 ? ', ...' : '';
+    @u = @u[0 .. 9] if @u > 10;
+    return (@u == 1 ? 'line ' : 'lines ') . join(', ', @u) . $more;
+}
+
+# Per-word counts and lines for the modality lists. "not" also counts the
+# contracted and fused negations, because "doesn't" to "does" flips a claim.
+sub modality {
+    my ($prose) = @_;
+    my %seen;
+    my %re = map {
+        $_ => ($_ eq 'not' ? qr/\bnot\b|\bcannot\b|n['\x{2019}]t\b/i : qr/\b\Q$_\E\b/i)
+    } grep { !$seen{$_}++ } @HEDGE, @CERTAIN;
+    my %count = map { $_ => { n => 0, lines => [] } } keys %re;
+    my @lines = split /\n/, $prose, -1;
+    for my $i (0 .. $#lines) {
+        for my $w (keys %re) {
+            my $n = () = $lines[$i] =~ /$re{$w}/g;
+            next unless $n;
+            $count{$w}{n} += $n;
+            push @{ $count{$w}{lines} }, $i + 1;
+        }
+    }
+    return \%count;
+}
+
+sub modality_diff {
+    my ($o, $r) = @_;
+    my @out;
+    for my $w (@HEDGE) {
+        next unless $r->{$w}{n} < $o->{$w}{n};
+        push @out, sprintf('hedge or limiter fell: %s %d to %d (original %s)',
+                           $w, $o->{$w}{n}, $r->{$w}{n}, line_list($o->{$w}{lines}));
+    }
+    for my $w (@CERTAIN) {
+        next unless $r->{$w}{n} > $o->{$w}{n};
+        push @out, sprintf('certainty word rose: %s %d to %d (revised %s)',
+                           $w, $o->{$w}{n}, $r->{$w}{n}, line_list($r->{$w}{lines}));
+    }
+    return @out;
+}
+
+# Candidate labels whose hit count rose, in order of first revised line.
+sub introduced {
+    my ($ocand, $rcand) = @_;
+    my $tally = sub {
+        my %t;
+        for (@{ $_[0] }) {
+            next unless /^(.+?):(\d+)(?:\s|\z)/;
+            my ($label, $line) = ($1, $2);
+            $label =~ s/^stacked frames \(.*\)\z/stacked frames/;
+            push @{ $t{$label} }, $line;
+        }
+        return \%t;
+    };
+    my ($o, $r) = ($tally->($ocand), $tally->($rcand));
+    my @out;
+    for my $label (sort { $r->{$a}[0] <=> $r->{$b}[0] || $a cmp $b } keys %$r) {
+        my ($n0, $n1) = (scalar @{ $o->{$label} // [] }, scalar @{ $r->{$label} });
+        next unless $n1 > $n0;
+        push @out, sprintf('revision introduced: %s %d to %d (revised %s)',
+                           $label, $n0, $n1, line_list($r->{$label}));
+    }
+    return @out;
+}
+
+sub visible_words {
+    my ($prose) = @_;
+    $prose =~ s/^\s*(?:[-*+]|\d+[.)])\s+//mg;
+    return scalar grep { /[\p{L}\p{N}]/ } split ' ', $prose;
 }
