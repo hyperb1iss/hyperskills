@@ -1,0 +1,29 @@
+{
+  "trap": "citation-trap",
+  "split": "holdout",
+  "surface": "grant proposal section",
+  "protected": [
+    "Halvorsen 2018",
+    "Ibarra 2020",
+    "Seppala 2017",
+    "Okonkwo-Reyes 2021",
+    "Marchetti 2022",
+    ["Figure 2", "Fig. 2"],
+    "Table 1",
+    "Callow Point",
+    "14 weeks",
+    "2025",
+    ["23%", "23 percent"],
+    ["brackish-water", "brackish water"],
+    ["40-site", "40 sites"],
+    ["60 parts per billion", "60 ppb"]
+  ],
+  "require_change": true,
+  "wrong_must_fail": [
+    "protected:Seppala 2017",
+    "protected:Okonkwo-Reyes 2021",
+    "protected:Marchetti 2022",
+    "protected:Table 1",
+    "protected:40-site"
+  ]
+}

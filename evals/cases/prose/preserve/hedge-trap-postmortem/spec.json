@@ -1,0 +1,110 @@
+{
+  "trap": "hedge-trap",
+  "split": "development",
+  "surface": "incident postmortem section",
+  "protected": [
+    "March 4",
+    "p99",
+    ["connection-pool", "connection pool"],
+    "build 4127",
+    ["from 64 to 16", "64 to 16"],
+    "retry storm",
+    ["load-balancer logs", "load balancer logs"],
+    ["6 minutes", "six minutes"],
+    ["two regions", "2 regions", "two drained regions", "2 drained regions"]
+  ],
+  "calibrations": [
+    {
+      "label": "associated with",
+      "patterns": [
+        "associated with",
+        "correlated with",
+        "coincided with",
+        "linked to",
+        "\\btracked\\b",
+        "lined up with",
+        "corresponded with",
+        "co-occurred with"
+      ]
+    },
+    {
+      "label": "may have",
+      "patterns": ["\\b(?:may|might|could)(?: also)? have\\b", "\\bpossibly\\b", "\\bperhaps\\b"]
+    },
+    {
+      "label": "roughly 20 minutes",
+      "patterns": [
+        "\\b(?:roughly|about|approximately|around|an estimated|an approximate)\\s+20\\b",
+        "~\\s?20\\b"
+      ]
+    },
+    {
+      "label": "did not measure",
+      "patterns": [
+        "(?:did not|didn't) (?:directly )?measure",
+        "(?:was|were) not (?:directly )?measured",
+        "(?:wasn't|weren't) (?:directly )?measured",
+        "not directly measured",
+        "no direct measurement",
+        "unmeasured"
+      ]
+    },
+    {
+      "label": "regions we sampled",
+      "patterns": [
+        "regions we sampled",
+        "sampled regions",
+        "regions (?:that )?we (?:checked|tested|looked at)",
+        "\\bthree regions\\b",
+        "\\b3 regions\\b"
+      ]
+    },
+    {
+      "label": "not yet tested",
+      "patterns": [
+        "not (?:yet )?(?:been )?tested",
+        "(?:haven't|hasn't) (?:yet )?(?:been )?tested",
+        "\\buntested\\b",
+        "(?:haven't|hasn't|have not|has not) (?:yet )?(?:checked|verified|confirmed)",
+        "not yet (?:checked|verified|confirmed)"
+      ]
+    }
+  ],
+  "certainty_terms": [
+    "causes",
+    "caused",
+    "prove",
+    "proves",
+    "proved",
+    "proven",
+    "demonstrate",
+    "demonstrates",
+    "demonstrated",
+    "confirm",
+    "confirms",
+    "confirmed",
+    "establishes",
+    "established",
+    "guarantees",
+    "guaranteed",
+    "always",
+    "definitively",
+    "definitely",
+    "certainly",
+    "conclusively",
+    "clearly",
+    "undoubtedly",
+    "ensures",
+    "eliminates",
+    "eliminated"
+  ],
+  "require_change": true,
+  "wrong_must_fail": [
+    "calibration:associated with",
+    "calibration:may have",
+    "calibration:did not measure",
+    "calibration:regions we sampled",
+    "calibration:not yet tested",
+    "no_certainty_upgrade"
+  ]
+}

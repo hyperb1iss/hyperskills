@@ -1,0 +1,3 @@
+## Results
+
+In this sample of 412 seedlings across 9 plots at the Harrow Ridge site, mulching with chipped alder was associated with higher 120-day survival (71% versus 58% in unmulched plots). The difference may reflect reduced frost heave rather than added nutrients, but we did not measure soil temperature or nitrogen, so the mechanism remains unresolved. On north-facing plots the gain was smaller and not statistically distinguishable from zero (95% CI, -4 to 11 percentage points). These results suggest, but do not establish, that mulching could improve establishment on similar exposed slopes.

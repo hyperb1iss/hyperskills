@@ -1,0 +1,54 @@
+{
+  "trap": "padded-slop",
+  "split": "holdout",
+  "surface": "customer help article",
+  "protected": [
+    "4.2",
+    "4.1",
+    ["512 MB", "512MB"],
+    ["8 MB", "8MB"],
+    "June 30",
+    "read-only",
+    "corvane self-update --channel stable",
+    "tray app",
+    "Pause any sync that is mid-transfer before you upgrade",
+    "local index",
+    ["50,000", "50000"],
+    ["10 to 20 minutes", "10-20 minutes", "10 and 20 minutes"],
+    "network drives"
+  ],
+  "calibrations": [
+    {
+      "label": "typically",
+      "patterns": [
+        "\\btypically\\b",
+        "\\busually\\b",
+        "\\bgenerally\\b",
+        "\\bin most cases\\b",
+        "\\btends? to\\b",
+        "\\boften\\b"
+      ]
+    },
+    {
+      "label": "only an estimate",
+      "patterns": ["\\bestimat", "not a guarantee", "no guarantee", "not guaranteed"]
+    },
+    {
+      "label": "can run longer",
+      "patterns": [
+        "\\b(?:can|may|might|could)\\b(?:\\s+\\w+){0,2}\\s+(?:run|take|be)\\s+longer",
+        "\\b(?:more time|longer)\\b[^.]{0,40}\\bslower\\b",
+        "\\bslower\\b[^.]{0,60}\\blonger\\b"
+      ]
+    }
+  ],
+  "no_new_numbers": true,
+  "shorter_than_draft": true,
+  "wrong_must_fail": [
+    "no_new_numbers",
+    "protected:10 to 20 minutes",
+    "calibration:typically",
+    "calibration:only an estimate",
+    "calibration:can run longer"
+  ]
+}

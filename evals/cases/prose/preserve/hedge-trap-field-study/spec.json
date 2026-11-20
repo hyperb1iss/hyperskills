@@ -1,0 +1,124 @@
+{
+  "trap": "hedge-trap",
+  "split": "holdout",
+  "surface": "scientific results paragraph",
+  "protected": [
+    "412",
+    ["9 plots", "nine plots"],
+    "Harrow Ridge",
+    "chipped alder",
+    ["120-day", "120 days"],
+    "71%",
+    "58%",
+    "frost heave",
+    "soil temperature",
+    "nitrogen",
+    "north-facing",
+    "95% CI",
+    "-4 to 11"
+  ],
+  "calibrations": [
+    {
+      "label": "in this sample",
+      "patterns": ["\\bin (?:this|our|the) sample\\b", "\\b(?:this|our) sample\\b", "\\bsampled\\b"]
+    },
+    {
+      "label": "associated with",
+      "patterns": [
+        "associated with",
+        "correlated with",
+        "coincided with",
+        "linked to",
+        "\\btracked\\b",
+        "lined up with",
+        "corresponded with",
+        "co-occurred with"
+      ]
+    },
+    {
+      "label": "may reflect",
+      "patterns": [
+        "\\b(?:may|might|could)\\s+(?:reflect|be due to|come from|stem from|result from|be explained by|arise from|indicate)\\b",
+        "\\bpossibly\\b",
+        "\\bperhaps\\b"
+      ]
+    },
+    {
+      "label": "did not measure",
+      "patterns": [
+        "(?:did not|didn't) (?:directly )?measure",
+        "(?:was|were) not (?:directly )?measured",
+        "(?:wasn't|weren't) (?:directly )?measured",
+        "not directly measured",
+        "no direct measurement",
+        "unmeasured"
+      ]
+    },
+    {
+      "label": "not statistically distinguishable",
+      "patterns": [
+        "not statistically distinguishable",
+        "not distinguishable from zero",
+        "indistinguishable from zero",
+        "not statistically significant",
+        "not significant",
+        "no (?:statistically )?(?:significant|detectable)"
+      ]
+    },
+    {
+      "label": "suggest, not establish",
+      "patterns": [
+        "\\bsuggests?\\b",
+        "(?:do|does|did) not establish",
+        "(?:don't|doesn't) establish",
+        "\\bconsistent with\\b"
+      ]
+    },
+    {
+      "label": "similar slopes",
+      "patterns": [
+        "similar (?:exposed )?slopes",
+        "similar sites",
+        "comparable (?:exposed )?slopes",
+        "comparable sites"
+      ]
+    }
+  ],
+  "certainty_terms": [
+    "causes",
+    "caused",
+    "prove",
+    "proves",
+    "proved",
+    "proven",
+    "demonstrate",
+    "demonstrates",
+    "demonstrated",
+    "confirm",
+    "confirms",
+    "confirmed",
+    "establishes",
+    "established",
+    "guarantees",
+    "guaranteed",
+    "always",
+    "definitively",
+    "definitely",
+    "certainly",
+    "conclusively",
+    "clearly",
+    "undoubtedly",
+    "ensures",
+    "eliminates",
+    "eliminated"
+  ],
+  "require_change": true,
+  "wrong_must_fail": [
+    "calibration:in this sample",
+    "calibration:associated with",
+    "calibration:may reflect",
+    "calibration:did not measure",
+    "calibration:not statistically distinguishable",
+    "no_certainty_upgrade"
+  ]
+}

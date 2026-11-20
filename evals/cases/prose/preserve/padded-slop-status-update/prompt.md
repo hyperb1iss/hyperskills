@@ -1,0 +1,1 @@
+This status update for the platform channel reads like a chatbot wrote it. Edit draft.md into edited.md so the engineers who own the remaining queues can read it quickly. Keep the facts, the command, and the quote intact. Leave draft.md as it is.
