@@ -3,7 +3,7 @@
   "findings": [
     {
       "file": "gridmeter/importer.py",
-      "line": 26,
+      "line": 29,
       "blocking": true,
       "title": "One bad row silently drops every row after it",
       "trigger": "A drop whose second row has value 'n/a' followed by thousands of good rows.",

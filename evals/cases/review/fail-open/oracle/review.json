@@ -3,7 +3,7 @@
   "findings": [
     {
       "file": "hookline/signatures.py",
-      "line": 48,
+      "line": 50,
       "blocking": true,
       "title": "A signature header with no v1 value skips verification",
       "trigger": "POST /hooks/kestrel with the header 'Kestrel-Signature: t=<current time>' and any body.",

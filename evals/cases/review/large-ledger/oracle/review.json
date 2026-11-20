@@ -1,0 +1,29 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "ledger/fx.py",
+      "line": 39,
+      "blocking": true,
+      "title": "A rate does not apply on its own effective date",
+      "trigger": "Posting dated on the day a new EUR rate takes effect, for example 2026-02-01 with rates dated 2026-01-01 and 2026-02-01.",
+      "impact": "bisect_left finds the matching date's own slot, so minus one selects the previous rate: the entry is booked at January's rate, and a posting on the first rate's date raises MissingRate. Every posting on a rate change day carries the wrong USD amount. Use bisect_right."
+    },
+    {
+      "file": "ledger/revaluation.py",
+      "line": 37,
+      "blocking": true,
+      "title": "Revaluation silently skips balances that have no closing rate",
+      "trigger": "Close January while a EUR account holds a balance and treasury has not loaded a EUR rate dated 2026-01-31.",
+      "impact": "closing() returns None and the loop continues, so the account is not revalued, close_period still locks the period, and the books close at a stale USD value with no error. A missing closing rate has to stop the close (closing_rate raises MissingRate)."
+    },
+    {
+      "file": "ledger/migrations/m0003_multi_currency.py",
+      "line": 23,
+      "blocking": true,
+      "title": "Migrated import keys use a different format from the importer",
+      "trigger": "Run migration 0003 on existing books, then re-import a statement that was already imported, which the importer promises is safe.",
+      "impact": "The migration writes 'TX-1@operating' while import_key() builds 'operating:TX-1', so no migrated key matches and every previously imported line is posted a second time, doubling bank balances. The migration should write import_key(source, reference)."
+    }
+  ]
+}

@@ -358,6 +358,7 @@ hyperskills/
 │   │   │   │   ├── case.json
 │   │   │   │   ├── fixture/
 │   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── README.md
 │   │   │   │   │   ├── change.diff
 │   │   │   │   │   ├── storefront/
 │   │   │   │   │   │   ├── __init__.py
@@ -371,7 +372,8 @@ hyperskills/
 │   │   │   │   │       ├── __init__.py
 │   │   │   │   │       ├── test_cart.py
 │   │   │   │   │       ├── test_invoice.py
-│   │   │   │   │       └── test_loyalty.py
+│   │   │   │   │       ├── test_loyalty.py
+│   │   │   │   │       └── test_orders.py
 │   │   │   │   ├── oracle/
 │   │   │   │   │   └── review.json
 │   │   │   │   ├── prompt.md
@@ -383,6 +385,7 @@ hyperskills/
 │   │   │   │   ├── case.json
 │   │   │   │   ├── fixture/
 │   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── README.md
 │   │   │   │   │   ├── change.diff
 │   │   │   │   │   ├── storefront/
 │   │   │   │   │   │   ├── __init__.py
@@ -396,7 +399,8 @@ hyperskills/
 │   │   │   │   │       ├── __init__.py
 │   │   │   │   │       ├── test_cart.py
 │   │   │   │   │       ├── test_invoice.py
-│   │   │   │   │       └── test_loyalty.py
+│   │   │   │   │       ├── test_loyalty.py
+│   │   │   │   │       └── test_orders.py
 │   │   │   │   ├── oracle/
 │   │   │   │   │   └── review.json
 │   │   │   │   ├── prompt.md
@@ -551,6 +555,342 @@ hyperskills/
 │   │   │   │   │   └── test_proof.py
 │   │   │   │   └── wrong/
 │   │   │   │       └── review.json
+│   │   │   ├── large-dev-b/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── digests/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── cadence.py
+│   │   │   │   │   │   ├── cli.py
+│   │   │   │   │   │   ├── collect.py
+│   │   │   │   │   │   ├── events.py
+│   │   │   │   │   │   ├── job.py
+│   │   │   │   │   │   ├── ledger.py
+│   │   │   │   │   │   ├── mailer.py
+│   │   │   │   │   │   ├── models.py
+│   │   │   │   │   │   ├── notify.py
+│   │   │   │   │   │   ├── preferences.py
+│   │   │   │   │   │   ├── render.py
+│   │   │   │   │   │   ├── sender.py
+│   │   │   │   │   │   ├── settings.py
+│   │   │   │   │   │   └── users.py
+│   │   │   │   │   ├── docs/
+│   │   │   │   │   │   └── OPERATIONS.md
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_cadence.py
+│   │   │   │   │       ├── test_cli.py
+│   │   │   │   │       ├── test_collect.py
+│   │   │   │   │       ├── test_events.py
+│   │   │   │   │       ├── test_job.py
+│   │   │   │   │       ├── test_mailer.py
+│   │   │   │   │       ├── test_notify.py
+│   │   │   │   │       ├── test_preferences.py
+│   │   │   │   │       ├── test_sender.py
+│   │   │   │   │       ├── test_settings.py
+│   │   │   │   │       └── test_users.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── large-dev-b-clean/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── digests/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── cadence.py
+│   │   │   │   │   │   ├── cli.py
+│   │   │   │   │   │   ├── collect.py
+│   │   │   │   │   │   ├── events.py
+│   │   │   │   │   │   ├── job.py
+│   │   │   │   │   │   ├── ledger.py
+│   │   │   │   │   │   ├── mailer.py
+│   │   │   │   │   │   ├── models.py
+│   │   │   │   │   │   ├── notify.py
+│   │   │   │   │   │   ├── preferences.py
+│   │   │   │   │   │   ├── render.py
+│   │   │   │   │   │   ├── sender.py
+│   │   │   │   │   │   ├── settings.py
+│   │   │   │   │   │   └── users.py
+│   │   │   │   │   ├── docs/
+│   │   │   │   │   │   └── OPERATIONS.md
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_cadence.py
+│   │   │   │   │       ├── test_cli.py
+│   │   │   │   │       ├── test_collect.py
+│   │   │   │   │       ├── test_events.py
+│   │   │   │   │       ├── test_job.py
+│   │   │   │   │       ├── test_mailer.py
+│   │   │   │   │       ├── test_notify.py
+│   │   │   │   │       ├── test_preferences.py
+│   │   │   │   │       ├── test_sender.py
+│   │   │   │   │       ├── test_settings.py
+│   │   │   │   │       └── test_users.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── large-holdout-a/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── stockpile/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── access.py
+│   │   │   │   │   │   ├── catalog.py
+│   │   │   │   │   │   ├── clock.py
+│   │   │   │   │   │   ├── inventory.py
+│   │   │   │   │   │   ├── migrations/
+│   │   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   │   ├── common.py
+│   │   │   │   │   │   │   ├── m0002_bin_codes.py
+│   │   │   │   │   │   │   ├── m0003_key_roles.py
+│   │   │   │   │   │   │   └── m0004_holds_and_scopes.py
+│   │   │   │   │   │   ├── models.py
+│   │   │   │   │   │   ├── notify.py
+│   │   │   │   │   │   ├── reports.py
+│   │   │   │   │   │   ├── reservations.py
+│   │   │   │   │   │   ├── service.py
+│   │   │   │   │   │   ├── store.py
+│   │   │   │   │   │   └── worker.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_access.py
+│   │   │   │   │       ├── test_catalog.py
+│   │   │   │   │       ├── test_inventory.py
+│   │   │   │   │       ├── test_migration.py
+│   │   │   │   │       ├── test_reports.py
+│   │   │   │   │       ├── test_reservations.py
+│   │   │   │   │       ├── test_service.py
+│   │   │   │   │       └── test_worker.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── large-holdout-a-clean/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── stockpile/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── access.py
+│   │   │   │   │   │   ├── catalog.py
+│   │   │   │   │   │   ├── clock.py
+│   │   │   │   │   │   ├── inventory.py
+│   │   │   │   │   │   ├── migrations/
+│   │   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   │   ├── common.py
+│   │   │   │   │   │   │   ├── m0002_bin_codes.py
+│   │   │   │   │   │   │   ├── m0003_key_roles.py
+│   │   │   │   │   │   │   └── m0004_holds_and_scopes.py
+│   │   │   │   │   │   ├── models.py
+│   │   │   │   │   │   ├── notify.py
+│   │   │   │   │   │   ├── reports.py
+│   │   │   │   │   │   ├── reservations.py
+│   │   │   │   │   │   ├── service.py
+│   │   │   │   │   │   ├── store.py
+│   │   │   │   │   │   └── worker.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_access.py
+│   │   │   │   │       ├── test_catalog.py
+│   │   │   │   │       ├── test_inventory.py
+│   │   │   │   │       ├── test_migration.py
+│   │   │   │   │       ├── test_reports.py
+│   │   │   │   │       ├── test_reservations.py
+│   │   │   │   │       ├── test_service.py
+│   │   │   │   │       └── test_worker.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── large-holdout-b/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── stockroom/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── api.py
+│   │   │   │   │   │   ├── auth.py
+│   │   │   │   │   │   ├── counting.py
+│   │   │   │   │   │   ├── events.py
+│   │   │   │   │   │   ├── models.py
+│   │   │   │   │   │   ├── picking.py
+│   │   │   │   │   │   ├── reports.py
+│   │   │   │   │   │   ├── reservations.py
+│   │   │   │   │   │   ├── settings.py
+│   │   │   │   │   │   ├── snapshots.py
+│   │   │   │   │   │   ├── stock.py
+│   │   │   │   │   │   └── sweeper.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── helpers.py
+│   │   │   │   │       ├── test_api.py
+│   │   │   │   │       ├── test_auth.py
+│   │   │   │   │       ├── test_counting.py
+│   │   │   │   │       ├── test_events.py
+│   │   │   │   │       ├── test_reports.py
+│   │   │   │   │       ├── test_reservations.py
+│   │   │   │   │       ├── test_settings.py
+│   │   │   │   │       ├── test_stock.py
+│   │   │   │   │       └── test_sweeper.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── large-holdout-b-clean/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── stockroom/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── api.py
+│   │   │   │   │   │   ├── auth.py
+│   │   │   │   │   │   ├── counting.py
+│   │   │   │   │   │   ├── events.py
+│   │   │   │   │   │   ├── models.py
+│   │   │   │   │   │   ├── picking.py
+│   │   │   │   │   │   ├── reports.py
+│   │   │   │   │   │   ├── reservations.py
+│   │   │   │   │   │   ├── settings.py
+│   │   │   │   │   │   ├── snapshots.py
+│   │   │   │   │   │   ├── stock.py
+│   │   │   │   │   │   └── sweeper.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── helpers.py
+│   │   │   │   │       ├── test_api.py
+│   │   │   │   │       ├── test_auth.py
+│   │   │   │   │       ├── test_counting.py
+│   │   │   │   │       ├── test_events.py
+│   │   │   │   │       ├── test_reports.py
+│   │   │   │   │       ├── test_reservations.py
+│   │   │   │   │       ├── test_settings.py
+│   │   │   │   │       ├── test_stock.py
+│   │   │   │   │       └── test_sweeper.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── large-ledger/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── ledger/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── accounts.py
+│   │   │   │   │   │   ├── balances.py
+│   │   │   │   │   │   ├── cli.py
+│   │   │   │   │   │   ├── closing.py
+│   │   │   │   │   │   ├── db.py
+│   │   │   │   │   │   ├── fx.py
+│   │   │   │   │   │   ├── importer.py
+│   │   │   │   │   │   ├── invoices.py
+│   │   │   │   │   │   ├── journal.py
+│   │   │   │   │   │   ├── migrations/
+│   │   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   │   ├── m0001_initial.py
+│   │   │   │   │   │   │   ├── m0002_import_keys.py
+│   │   │   │   │   │   │   └── m0003_multi_currency.py
+│   │   │   │   │   │   ├── money.py
+│   │   │   │   │   │   ├── periods.py
+│   │   │   │   │   │   ├── reports.py
+│   │   │   │   │   │   └── revaluation.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── support.py
+│   │   │   │   │       ├── test_balances.py
+│   │   │   │   │       ├── test_cli.py
+│   │   │   │   │       ├── test_closing.py
+│   │   │   │   │       ├── test_fx.py
+│   │   │   │   │       ├── test_importer.py
+│   │   │   │   │       ├── test_invoices.py
+│   │   │   │   │       ├── test_journal.py
+│   │   │   │   │       ├── test_migrations.py
+│   │   │   │   │       ├── test_money.py
+│   │   │   │   │       ├── test_reports.py
+│   │   │   │   │       └── test_revaluation.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── large-ledger-clean/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── ledger/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── accounts.py
+│   │   │   │   │   │   ├── balances.py
+│   │   │   │   │   │   ├── cli.py
+│   │   │   │   │   │   ├── closing.py
+│   │   │   │   │   │   ├── db.py
+│   │   │   │   │   │   ├── fx.py
+│   │   │   │   │   │   ├── importer.py
+│   │   │   │   │   │   ├── invoices.py
+│   │   │   │   │   │   ├── journal.py
+│   │   │   │   │   │   ├── migrations/
+│   │   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   │   ├── m0001_initial.py
+│   │   │   │   │   │   │   ├── m0002_import_keys.py
+│   │   │   │   │   │   │   └── m0003_multi_currency.py
+│   │   │   │   │   │   ├── money.py
+│   │   │   │   │   │   ├── periods.py
+│   │   │   │   │   │   ├── reports.py
+│   │   │   │   │   │   └── revaluation.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── support.py
+│   │   │   │   │       ├── test_balances.py
+│   │   │   │   │       ├── test_cli.py
+│   │   │   │   │       ├── test_closing.py
+│   │   │   │   │       ├── test_fx.py
+│   │   │   │   │       ├── test_importer.py
+│   │   │   │   │       ├── test_invoices.py
+│   │   │   │   │       ├── test_journal.py
+│   │   │   │   │       ├── test_migrations.py
+│   │   │   │   │       ├── test_money.py
+│   │   │   │   │       ├── test_reports.py
+│   │   │   │   │       └── test_revaluation.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
 │   │   │   ├── silent-failure/
 │   │   │   │   ├── case.json
 │   │   │   │   ├── fixture/
@@ -603,6 +943,7 @@ hyperskills/
 │   │   │   │   ├── case.json
 │   │   │   │   ├── fixture/
 │   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── README.md
 │   │   │   │   │   ├── change.diff
 │   │   │   │   │   ├── teamdir/
 │   │   │   │   │   │   ├── __init__.py
@@ -629,6 +970,7 @@ hyperskills/
 │   │   │   │   ├── case.json
 │   │   │   │   ├── fixture/
 │   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── README.md
 │   │   │   │   │   ├── change.diff
 │   │   │   │   │   ├── teamdir/
 │   │   │   │   │   │   ├── __init__.py

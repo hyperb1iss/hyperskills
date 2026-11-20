@@ -30,6 +30,16 @@ class AcknowledgementProof(unittest.TestCase):
         self.assertEqual(published, 1)
         self.assertEqual([row.topic for row in outbox.pending(10)], ["orders.paid"])
 
+    def test_a_held_topic_keeps_every_row_pending_in_order(self):
+        logging.disable(logging.CRITICAL)
+        self.addCleanup(logging.disable, logging.NOTSET)
+        outbox = Outbox()
+        for n in range(3):
+            outbox.add("orders.paid", {"n": n})
+        publisher = Publisher(TimingOutClient("orders.paid"), "orders", max_batch=1)
+        relay_once(outbox, publisher, lambda: datetime(2026, 4, 1, tzinfo=timezone.utc))
+        self.assertEqual([row.id for row in outbox.pending(10)], [1, 2, 3])
+
 
 if __name__ == "__main__":
     unittest.main()

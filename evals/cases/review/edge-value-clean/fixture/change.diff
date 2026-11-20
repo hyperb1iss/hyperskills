@@ -36,7 +36,7 @@ index 57eccb5..ee5aceb 100644
 +    def confirmed(self):
 +        return self.ticket is not None
 diff --git a/boxoffice/notify.py b/boxoffice/notify.py
-index ca7378a..70d6356 100644
+index ca7378a..a6efa23 100644
 --- a/boxoffice/notify.py
 +++ b/boxoffice/notify.py
 @@ -19,3 +19,9 @@ def ticket_cancelled(outbox, event, ticket):
@@ -46,7 +46,7 @@ index ca7378a..70d6356 100644
 +
 +
 +def waitlist_joined(outbox, event, buyer, position):
-+    ahead = "1 person" if position == 2 else f"{position - 1} people"
++    ahead = {1: "nobody", 2: "1 person"}.get(position, f"{position - 1} people")
 +    body = f"{event.name} is sold out. You are number {position} on the waitlist with {ahead} ahead of you."
 +    outbox.append(_message(buyer, f"Waitlist: {event.name}", body))
 diff --git a/boxoffice/orders.py b/boxoffice/orders.py

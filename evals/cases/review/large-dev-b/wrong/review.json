@@ -1,0 +1,29 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "digests/sender.py",
+      "line": 30,
+      "blocking": true,
+      "title": "An invalid address aborts send_batch",
+      "trigger": "parse_address raises InvalidAddress outside the try block.",
+      "impact": "Everyone after that recipient gets no digest and the ledger is never saved."
+    },
+    {
+      "file": "digests/cadence.py",
+      "line": 18,
+      "blocking": true,
+      "title": "isoweekday() is off by one from digest_weekday",
+      "trigger": "digest_weekday is 0 to 6 with Monday as 0; isoweekday() is 1 to 7.",
+      "impact": "Weekly digests arrive a day early and Monday digests never arrive."
+    },
+    {
+      "file": "digests/render.py",
+      "line": 27,
+      "blocking": false,
+      "title": "Subject line could name the period more clearly",
+      "trigger": "A weekly digest reads '12 updates this week'.",
+      "impact": "Cosmetic; consider including the date range."
+    }
+  ]
+}

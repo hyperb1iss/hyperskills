@@ -4,7 +4,6 @@ from decimal import Decimal, InvalidOperation
 FACTORS = {
     "wh": 1,
     "kwh": 1000,
-    "mwh": 1000000,
 }
 
 
@@ -21,6 +20,6 @@ def to_wh(value, unit):
         amount = Decimal(value.strip())
     except InvalidOperation:
         raise UnitError(f"not a number: {value!r}") from None
-    if not amount.is_finite() or amount < 0:
+    if not amount.is_finite() or amount < 0 or amount.adjusted() > 15:
         raise UnitError(f"not a usable reading: {value!r}")
     return int((amount * factor).to_integral_value())

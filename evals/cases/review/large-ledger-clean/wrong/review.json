@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "ledger/journal.py",
+      "line": 66,
+      "blocking": true,
+      "title": "Rounding tolerance lets unbalanced entries through",
+      "trigger": "A mixed-currency entry that is off by a few cents.",
+      "impact": "Up to one cent per foreign line is booked to the rounding account instead of being rejected, so real imbalances are hidden."
+    }
+  ]
+}

@@ -36,10 +36,10 @@ class ImportTests(unittest.TestCase):
         self.assertEqual(import_file(path, store).imported, 0)
 
     def test_rejected_row_is_reported(self):
-        path = self.write("m-1,2026-03-01 10:00,1.5,kWh\nm-2,2026-03-01 10:00,900,Wh\nm-3,2026-03-01 10:00,n/a,kWh\n")
+        path = self.write("m-1,2026-03-01 10:00,1.5,kWh\n\nm-2,2026-03-01 10:00,900,Wh\nm-3,2026-03-01 10:00,n/a,kWh\n")
         summary = import_file(path, ReadingStore())
         self.assertEqual(summary.imported, 2)
-        self.assertEqual(summary.rejected, ["line 4: meter m-3: not a number: 'n/a'"])
+        self.assertEqual(summary.rejected, ["line 5: meter m-3: not a number: 'n/a'"])
 
     def test_cli_exit_code_reflects_rejections(self):
         path = self.write("m-1,2026-03-01 10:00,1.5,kWh\nm-2,,1,kWh\n")

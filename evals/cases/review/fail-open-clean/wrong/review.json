@@ -3,7 +3,7 @@
   "findings": [
     {
       "file": "hookline/signatures.py",
-      "line": 35,
+      "line": 49,
       "blocking": true,
       "title": "Accepting any of several v1 values lets an attacker pad the header",
       "trigger": "A request carrying several v1 values.",

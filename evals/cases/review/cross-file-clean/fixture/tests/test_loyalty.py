@@ -1,14 +1,6 @@
 import unittest
 
-from storefront.loyalty import multiplier_for, points_after_purchase
-
-
-class StubCart:
-    def __init__(self, subtotal):
-        self._subtotal = subtotal
-
-    def subtotal(self):
-        return self._subtotal
+from storefront.loyalty import SIGNUP_BONUS, multiplier_for, points_after_purchase
 
 
 class LoyaltyTests(unittest.TestCase):
@@ -20,10 +12,10 @@ class LoyaltyTests(unittest.TestCase):
             multiplier_for("platinum")
 
     def test_signup_bonus_on_first_order(self):
-        self.assertEqual(points_after_purchase(100, StubCart(0), first_order=True), 350)
+        self.assertEqual(points_after_purchase(100, 0, first_order=True), 100 + SIGNUP_BONUS)
 
     def test_no_bonus_after_first_order(self):
-        self.assertEqual(points_after_purchase(100, StubCart(0)), 100)
+        self.assertEqual(points_after_purchase(100, 0), 100)
 
 
 if __name__ == "__main__":

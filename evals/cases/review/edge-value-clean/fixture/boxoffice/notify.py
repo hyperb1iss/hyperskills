@@ -22,6 +22,6 @@ def ticket_cancelled(outbox, event, ticket):
 
 
 def waitlist_joined(outbox, event, buyer, position):
-    ahead = "1 person" if position == 2 else f"{position - 1} people"
+    ahead = {1: "nobody", 2: "1 person"}.get(position, f"{position - 1} people")
     body = f"{event.name} is sold out. You are number {position} on the waitlist with {ahead} ahead of you."
     outbox.append(_message(buyer, f"Waitlist: {event.name}", body))

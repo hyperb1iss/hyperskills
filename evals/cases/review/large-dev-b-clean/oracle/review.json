@@ -1,0 +1,13 @@
+{
+  "verdict": "approve",
+  "findings": [
+    {
+      "file": "tests/test_sender.py",
+      "line": 1,
+      "blocking": false,
+      "title": "No test covers the invalid-address path in send_batch",
+      "trigger": "send_batch reports INVALID for an unusable address, but no test sends one.",
+      "impact": "Optional: add a case with a malformed address so the per-message isolation stays covered."
+    }
+  ]
+}

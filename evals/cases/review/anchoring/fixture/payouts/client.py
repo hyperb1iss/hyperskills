@@ -1,4 +1,7 @@
-"""Client for submitting payouts to the gateway."""
+"""Client for submitting payouts to the gateway.
+
+The nightly payout batch is the only caller; nothing submits payouts on a request path.
+"""
 
 import logging
 import time

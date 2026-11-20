@@ -6,8 +6,8 @@
   "trap": null,
   "defect": {
     "file": "gridmeter/importer.py",
-    "start_line": 23,
-    "end_line": 27,
+    "start_line": 26,
+    "end_line": 30,
     "function": "import_file"
   },
   "also_accept": [
@@ -15,6 +15,11 @@
       "file": "tests/test_importer.py",
       "start_line": 38,
       "end_line": 42
+    },
+    {
+      "file": "gridmeter/cli.py",
+      "start_line": 18,
+      "end_line": 23
     }
   ]
 }

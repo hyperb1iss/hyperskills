@@ -93,15 +93,17 @@ index dfa7f4b..fe5aa64 100644
 +    dollars, remainder = divmod(abs(cents), 100)
 +    return f"{sign}${dollars:,}.{remainder:02d}"
 diff --git a/storefront/loyalty.py b/storefront/loyalty.py
-index b01ae3b..33e2b69 100644
+index 2dc299c..823b6ab 100644
 --- a/storefront/loyalty.py
 +++ b/storefront/loyalty.py
-@@ -13,7 +13,7 @@ def multiplier_for(tier):
+@@ -12,8 +12,8 @@ def multiplier_for(tier):
  
- def points_for(cart, tier="standard"):
-     """Points for a purchase: one per whole dollar of subtotal, times the tier multiplier."""
--    whole_dollars = int(cart.subtotal())
-+    whole_dollars = cart.subtotal() // 100
+ 
+ def points_for(amount, tier="standard"):
+-    """Points for a purchase amount in dollars: one per whole dollar, times the tier multiplier."""
+-    whole_dollars = int(amount)
++    """Points for a purchase amount in integer cents: one per whole dollar, times the tier multiplier."""
++    whole_dollars = amount // 100
      return whole_dollars * multiplier_for(tier)
  
  
@@ -140,10 +142,10 @@ index 543d267..114c1d3 100644
  
      def test_unknown_product(self):
 diff --git a/tests/test_invoice.py b/tests/test_invoice.py
-index 650dacc..e42411d 100644
+index 4237de0..37ed4fd 100644
 --- a/tests/test_invoice.py
 +++ b/tests/test_invoice.py
-@@ -20,7 +20,7 @@ def sample_cart():
+@@ -19,7 +19,7 @@ def sample_cart():
  
  class TaxTests(unittest.TestCase):
      def test_rounds_half_up_to_the_cent(self):
@@ -152,7 +154,7 @@ index 650dacc..e42411d 100644
  
      def test_unknown_region(self):
          with self.assertRaises(UnknownRegion):
-@@ -30,10 +30,7 @@ class TaxTests(unittest.TestCase):
+@@ -29,10 +29,7 @@ class TaxTests(unittest.TestCase):
  class InvoiceTests(unittest.TestCase):
      def test_totals(self):
          invoice = build_invoice(sample_cart(), "north")
@@ -164,7 +166,7 @@ index 650dacc..e42411d 100644
  
      def test_render(self):
          text = build_invoice(sample_cart(), "east").render()
-@@ -46,15 +43,15 @@ class InvoiceTests(unittest.TestCase):
+@@ -45,8 +42,8 @@ class InvoiceTests(unittest.TestCase):
              build_invoice(Cart(), "north")
  
      def test_format_money(self):
@@ -174,12 +176,4 @@ index 650dacc..e42411d 100644
 +        self.assertEqual(format_money(-5), "-$0.05")
  
  
- class PlaceOrderTests(unittest.TestCase):
-     def test_counts_orders_and_credits_points(self):
-         account = Account("cust-9", points=40, order_count=3)
-         order = place_order(sample_cart(), account, "west")
--        self.assertEqual(order.invoice.total, Decimal("18.47"))
-+        self.assertEqual(order.invoice.total, 1847)
-         self.assertEqual(account.order_count, 4)
-         self.assertEqual(account.points, 40 + order.points_earned)
- 
+ if __name__ == "__main__":

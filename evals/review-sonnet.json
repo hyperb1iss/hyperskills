@@ -261,6 +261,104 @@
         "cases/review/bugfix-regression-clean/fixture",
         "cases/review/bugfix-regression-clean/case.json"
       ]
+    },
+    {
+      "id": "review-large-ledger",
+      "family": "review",
+      "split": "development",
+      "prompt": "cases/review/large-ledger/prompt.md",
+      "fixture": "cases/review/large-ledger/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "large-ledger"],
+      "grader_inputs": ["cases/review/large-ledger/fixture", "cases/review/large-ledger/case.json"]
+    },
+    {
+      "id": "review-large-ledger-clean",
+      "family": "review",
+      "split": "development",
+      "prompt": "cases/review/large-ledger-clean/prompt.md",
+      "fixture": "cases/review/large-ledger-clean/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "large-ledger-clean"],
+      "grader_inputs": [
+        "cases/review/large-ledger-clean/fixture",
+        "cases/review/large-ledger-clean/case.json"
+      ]
+    },
+    {
+      "id": "review-large-dev-b",
+      "family": "review",
+      "split": "development",
+      "prompt": "cases/review/large-dev-b/prompt.md",
+      "fixture": "cases/review/large-dev-b/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "large-dev-b"],
+      "grader_inputs": ["cases/review/large-dev-b/fixture", "cases/review/large-dev-b/case.json"]
+    },
+    {
+      "id": "review-large-dev-b-clean",
+      "family": "review",
+      "split": "development",
+      "prompt": "cases/review/large-dev-b-clean/prompt.md",
+      "fixture": "cases/review/large-dev-b-clean/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "large-dev-b-clean"],
+      "grader_inputs": [
+        "cases/review/large-dev-b-clean/fixture",
+        "cases/review/large-dev-b-clean/case.json"
+      ]
+    },
+    {
+      "id": "review-large-holdout-a",
+      "family": "review",
+      "split": "holdout",
+      "prompt": "cases/review/large-holdout-a/prompt.md",
+      "fixture": "cases/review/large-holdout-a/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "large-holdout-a"],
+      "grader_inputs": [
+        "cases/review/large-holdout-a/fixture",
+        "cases/review/large-holdout-a/case.json"
+      ]
+    },
+    {
+      "id": "review-large-holdout-a-clean",
+      "family": "review",
+      "split": "holdout",
+      "prompt": "cases/review/large-holdout-a-clean/prompt.md",
+      "fixture": "cases/review/large-holdout-a-clean/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "large-holdout-a-clean"],
+      "grader_inputs": [
+        "cases/review/large-holdout-a-clean/fixture",
+        "cases/review/large-holdout-a-clean/case.json"
+      ]
+    },
+    {
+      "id": "review-large-holdout-b",
+      "family": "review",
+      "split": "holdout",
+      "prompt": "cases/review/large-holdout-b/prompt.md",
+      "fixture": "cases/review/large-holdout-b/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "large-holdout-b"],
+      "grader_inputs": [
+        "cases/review/large-holdout-b/fixture",
+        "cases/review/large-holdout-b/case.json"
+      ]
+    },
+    {
+      "id": "review-large-holdout-b-clean",
+      "family": "review",
+      "split": "holdout",
+      "prompt": "cases/review/large-holdout-b-clean/prompt.md",
+      "fixture": "cases/review/large-holdout-b-clean/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "large-holdout-b-clean"],
+      "grader_inputs": [
+        "cases/review/large-holdout-b-clean/fixture",
+        "cases/review/large-holdout-b-clean/case.json"
+      ]
     }
   ]
 }

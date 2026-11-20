@@ -1,0 +1,782 @@
+diff --git a/digests/cadence.py b/digests/cadence.py
+new file mode 100644
+index 0000000..ad1f1ad
+--- /dev/null
++++ b/digests/cadence.py
+@@ -0,0 +1,29 @@
++"""When a user's digest is due, and where its first window starts."""
++
++from datetime import timedelta
++
++PERIODS = {"daily": timedelta(days=1), "weekly": timedelta(days=7)}
++
++
++def is_due(prefs, local_now):
++    """Whether ``prefs`` asks for a digest in the hour containing ``local_now``.
++
++    ``local_now`` is the current time in the user's own offset.
++    """
++    if prefs.digest not in PERIODS:
++        return False
++    if local_now.hour != prefs.digest_hour:
++        return False
++    if prefs.digest == "weekly":
++        return local_now.isoweekday() == prefs.digest_weekday
++    return True
++
++
++def slot_start(local_now):
++    """Start of the delivery slot, the local hour, that contains ``local_now``."""
++    return local_now.replace(minute=0, second=0, microsecond=0)
++
++
++def first_window_start(prefs, now):
++    """Start of a user's first digest window: one period before ``now``."""
++    return now - PERIODS[prefs.digest]
+diff --git a/digests/cli.py b/digests/cli.py
+index bf9e7fd..87c571f 100644
+--- a/digests/cli.py
++++ b/digests/cli.py
+@@ -9,6 +9,9 @@ import sys
+ from dataclasses import dataclass
+ from datetime import datetime, timezone
+ 
++from .job import DigestJob
++from .ledger import DigestLedger
++from .mailer import RecordingTransport
+ from .notify import notify_new_events
+ 
+ 
+@@ -20,10 +23,16 @@ class Context:
+     transport: object
+     settings: object
+     clock: object = None
++    ledger: object = None
+ 
+     def now(self):
+         return self.clock() if self.clock else datetime.now(timezone.utc)
+ 
++    def digest_ledger(self):
++        if self.ledger is None:
++            self.ledger = DigestLedger(self.settings.digest_ledger_path)
++        return self.ledger
++
+ 
+ def parse_moment(text):
+     """An ISO 8601 timestamp with an explicit offset."""
+@@ -42,6 +51,9 @@ def build_parser():
+     notify = commands.add_parser("notify", help="email events received in a window")
+     notify.add_argument("--since", type=parse_moment, required=True)
+     notify.add_argument("--until", type=parse_moment)
++    digest = commands.add_parser("digest", help="send the digests due now")
++    digest.add_argument("--now", type=parse_moment, help="run as if it were this time")
++    digest.add_argument("--dry-run", action="store_true", help="show what would be sent; send and record nothing")
+     return parser
+ 
+ 
+@@ -58,4 +70,17 @@ def main(argv, context, out=sys.stdout):
+         )
+         print(f"sent={report.sent} skipped={report.skipped}", file=out)
+         return 0
++    if args.command == "digest":
++        now = args.now or context.now()
++        transport = RecordingTransport() if args.dry_run else context.transport
++        job = DigestJob(
++            context.users, context.prefs, context.events, context.digest_ledger(),
++            transport, context.settings, record=not args.dry_run,
++        )
++        report = job.run(now)
++        print(report.summary(), file=out)
++        if args.dry_run:
++            for message in transport.sent:
++                print(f"would send to {message.to}: {message.subject}", file=out)
++        return 0
+     return 2
+diff --git a/digests/collect.py b/digests/collect.py
+new file mode 100644
+index 0000000..ad1232e
+--- /dev/null
++++ b/digests/collect.py
+@@ -0,0 +1,69 @@
++"""Gather the events that go into one user's digest."""
++
++from dataclasses import dataclass
++from datetime import datetime
++
++SECTION_ORDER = ("review_request", "mention", "comment", "follow", "release")
++SECTION_TITLES = {
++    "review_request": "Reviews requested from you",
++    "mention": "Mentions",
++    "comment": "Comments",
++    "follow": "New followers",
++    "release": "Releases",
++}
++
++
++@dataclass(frozen=True)
++class Section:
++    kind: str
++    title: str
++    events: tuple
++    more: int = 0
++
++    @property
++    def total(self):
++        return len(self.events) + self.more
++
++
++@dataclass(frozen=True)
++class Digest:
++    user_id: str
++    since: datetime
++    until: datetime
++    sections: tuple
++
++    @property
++    def total(self):
++        return sum(section.total for section in self.sections)
++
++    def is_empty(self):
++        return not self.sections
++
++
++def collect_digest(store, user, prefs, since, until, max_events):
++    """Build ``user``'s digest from the events in the window (since, until].
++
++    Muted kinds are left out. Sections follow SECTION_ORDER, newest event first.
++    At most ``max_events`` events are listed across all sections; each section
++    counts the events that did not fit in ``more``.
++    """
++    events = [
++        event for event in store.occurred_between(user.id, since, until)
++        if prefs.wants_in_digest(event.kind)
++    ]
++    by_kind = {}
++    for event in events:
++        by_kind.setdefault(event.kind, []).append(event)
++    sections = []
++    room = max_events
++    for kind in sorted(by_kind, key=_section_rank):
++        group = sorted(by_kind[kind], key=lambda event: (event.occurred_at, event.id), reverse=True)
++        shown = group[:room]
++        room -= len(shown)
++        title = SECTION_TITLES.get(kind, kind.replace("_", " ").capitalize())
++        sections.append(Section(kind, title, tuple(shown), len(group) - len(shown)))
++    return Digest(user.id, since, until, tuple(sections))
++
++
++def _section_rank(kind):
++    return (SECTION_ORDER.index(kind) if kind in SECTION_ORDER else len(SECTION_ORDER), kind)
+diff --git a/digests/job.py b/digests/job.py
+new file mode 100644
+index 0000000..139d95a
+--- /dev/null
++++ b/digests/job.py
+@@ -0,0 +1,81 @@
++"""The hourly digest job."""
++
++from dataclasses import dataclass, field
++from datetime import timedelta
++
++from . import cadence
++from .collect import collect_digest
++from .render import render_digest
++from .sender import FAILED, INVALID, SENT, send_batch
++
++
++@dataclass
++class JobReport:
++    due: int = 0
++    empty: int = 0
++    already_sent: int = 0
++    results: list = field(default_factory=list)
++
++    def count(self, status):
++        return sum(1 for result in self.results if result.status == status)
++
++    def summary(self):
++        counts = {"due": self.due, "empty": self.empty, "already_sent": self.already_sent}
++        counts.update((status, self.count(status)) for status in (SENT, FAILED, INVALID))
++        return " ".join(f"{name}={value}" for name, value in counts.items())
++
++
++class DigestJob:
++    """Sends the digests that are due at a given time.
++
++    The scheduler runs it at minute 5 of every hour. With ``record=False`` the job
++    renders and sends to ``transport`` but leaves the ledger untouched, which is
++    what ``digests digest --dry-run`` uses.
++    """
++
++    def __init__(self, users, prefs, events, ledger, transport, settings, is_due=cadence.is_due, record=True):
++        self._users = users
++        self._prefs = prefs
++        self._events = events
++        self._ledger = ledger
++        self._transport = transport
++        self._settings = settings
++        self._is_due = is_due
++        self._record = record
++
++    def run(self, now):
++        report = JobReport()
++        oldest = now - timedelta(days=self._settings.digest_lookback_days)
++        batch = []
++        for user in self._users.active():
++            prefs = self._prefs.get(user.id)
++            local_now = user.local(now)
++            if not self._is_due(prefs, local_now):
++                continue
++            report.due += 1
++            previous = self._ledger.cutoff_for(user.id)
++            if previous is not None and previous >= cadence.slot_start(local_now):
++                report.already_sent += 1
++                continue
++            since = previous if previous is not None else cadence.first_window_start(prefs, now)
++            since = max(since, oldest)
++            digest = collect_digest(self._events, user, prefs, since, now, self._settings.digest_max_events)
++            if digest.is_empty():
++                report.empty += 1
++                self._advance(user.id, now)
++                continue
++            batch.append((user.id, render_digest(user, digest, prefs.digest, self._settings)))
++        report.results = send_batch(self._transport, batch)
++        for result in report.results:
++            if result.status == SENT:
++                # Each window is (previous cutoff, now], and now becomes the next
++                # cutoff, so consecutive digests tile time: no event falls between
++                # two digests, however late or irregular the runs are.
++                self._advance(result.key, now)
++        if self._record:
++            self._ledger.save()
++        return report
++
++    def _advance(self, user_id, cutoff):
++        if self._record:
++            self._ledger.record(user_id, cutoff)
+diff --git a/digests/ledger.py b/digests/ledger.py
+new file mode 100644
+index 0000000..93eeac5
+--- /dev/null
++++ b/digests/ledger.py
+@@ -0,0 +1,42 @@
++"""Where each user's last digest window ended.
++
++The ledger is one JSON object mapping user id to an ISO timestamp. ``save``
++replaces the file atomically, so a crash leaves either the old file or the new
++one, never a partial write.
++"""
++
++import json
++import os
++import tempfile
++from datetime import datetime
++
++
++class DigestLedger:
++    def __init__(self, path=None):
++        self._path = path
++        self._cutoffs = {}
++        if path and os.path.exists(path):
++            with open(path, encoding="utf-8") as fh:
++                raw = json.load(fh)
++            self._cutoffs = {user_id: datetime.fromisoformat(value) for user_id, value in raw.items()}
++
++    def cutoff_for(self, user_id):
++        """End of the user's last recorded window, or None before their first digest."""
++        return self._cutoffs.get(user_id)
++
++    def record(self, user_id, cutoff):
++        self._cutoffs[user_id] = cutoff
++
++    def save(self):
++        if self._path is None:
++            return
++        directory = os.path.dirname(os.path.abspath(self._path))
++        fd, tmp_path = tempfile.mkstemp(dir=directory, suffix=".tmp")
++        try:
++            with os.fdopen(fd, "w", encoding="utf-8") as fh:
++                json.dump({key: value.isoformat() for key, value in sorted(self._cutoffs.items())}, fh, indent=1)
++            os.replace(tmp_path, self._path)
++        except BaseException:
++            if os.path.exists(tmp_path):
++                os.unlink(tmp_path)
++            raise
+diff --git a/digests/preferences.py b/digests/preferences.py
+index ec24d19..e449f66 100644
+--- a/digests/preferences.py
++++ b/digests/preferences.py
+@@ -9,6 +9,7 @@ corruption and raises.
+ from dataclasses import dataclass
+ 
+ KNOWN_KINDS = frozenset({"comment", "mention", "follow", "review_request", "release"})
++DIGEST_CADENCES = ("off", "daily", "weekly")
+ 
+ 
+ class InvalidPreferences(ValueError):
+@@ -17,24 +18,53 @@ class InvalidPreferences(ValueError):
+ 
+ @dataclass(frozen=True)
+ class Preferences:
++    """One user's settings.
++
++    ``digest`` is "off", "daily", or "weekly". ``digest_hour`` is the local hour,
++    0 to 23, in which the digest goes out. ``digest_weekday`` picks the day of a
++    weekly digest, 0 for Monday through 6 for Sunday, as in ``datetime.weekday()``.
++    """
++
+     user_id: str
+     immediate: bool = True
+     muted_kinds: frozenset = frozenset()
++    digest: str = "off"
++    digest_hour: int = 8
++    digest_weekday: int = 0
++
++    def __post_init__(self):
++        if self.digest not in DIGEST_CADENCES:
++            raise InvalidPreferences(f"digest must be one of {', '.join(DIGEST_CADENCES)}")
++        if not 0 <= self.digest_hour <= 23:
++            raise InvalidPreferences("digest_hour must be 0 to 23")
++        if not 0 <= self.digest_weekday <= 6:
++            raise InvalidPreferences("digest_weekday must be 0 to 6")
+ 
+     def wants_immediate(self, kind):
+         return self.immediate and kind not in self.muted_kinds
+ 
++    def wants_in_digest(self, kind):
++        return self.digest != "off" and kind not in self.muted_kinds
++
+     @classmethod
+     def from_record(cls, record):
+         muted = frozenset(record.get("muted_kinds", ()))
+         unknown = muted - KNOWN_KINDS
+         if unknown:
+             raise InvalidPreferences("unknown kinds: " + ", ".join(sorted(unknown)))
+-        return cls(
+-            user_id=record["user_id"],
+-            immediate=bool(record.get("immediate", True)),
+-            muted_kinds=muted,
+-        )
++        try:
++            return cls(
++                user_id=record["user_id"],
++                immediate=bool(record.get("immediate", True)),
++                muted_kinds=muted,
++                digest=record.get("digest", "off"),
++                digest_hour=int(record.get("digest_hour", 8)),
++                digest_weekday=int(record.get("digest_weekday", 0)),
++            )
++        except InvalidPreferences:
++            raise
++        except (TypeError, ValueError) as exc:
++            raise InvalidPreferences(str(exc)) from None
+ 
+ 
+ class PreferenceStore:
+diff --git a/digests/render.py b/digests/render.py
+new file mode 100644
+index 0000000..d4c542d
+--- /dev/null
++++ b/digests/render.py
+@@ -0,0 +1,31 @@
++"""Digest emails."""
++
++from .mailer import Message
++
++PERIOD_WORDS = {"daily": "today", "weekly": "this week"}
++
++
++def render_digest(user, digest, cadence, settings):
++    """The digest email for ``user``. ``cadence`` is "daily" or "weekly"."""
++    lines = [f"Hi {user.name or 'there'},", "", f"Here is what happened {PERIOD_WORDS[cadence]}."]
++    for section in digest.sections:
++        lines += ["", f"{section.title} ({section.total})"]
++        for event in section.events:
++            lines.append(f"- {event.subject}")
++            if event.url:
++                lines.append(f"  {event.url}")
++        if section.more:
++            lines.append(f"- and {section.more} more")
++    lines += [
++        "",
++        "--",
++        f"You get this {cadence} digest because of your notification settings.",
++        f"Change them at {settings.preferences_url}",
++    ]
++    return Message(
++        to=user.email,
++        subject=f"{digest.total} {'update' if digest.total == 1 else 'updates'} {PERIOD_WORDS[cadence]}",
++        body="\n".join(lines) + "\n",
++        sender=settings.digest_sender,
++        category=f"digest-{cadence}",
++    )
+diff --git a/digests/sender.py b/digests/sender.py
+new file mode 100644
+index 0000000..0e2eada
+--- /dev/null
++++ b/digests/sender.py
+@@ -0,0 +1,38 @@
++"""Send a batch of messages and report what happened to each one."""
++
++import logging
++from dataclasses import dataclass, replace
++
++from . import mailer
++
++log = logging.getLogger(__name__)
++
++SENT = "sent"
++FAILED = "failed"
++INVALID = "invalid"
++
++
++@dataclass(frozen=True)
++class SendResult:
++    key: str
++    status: str
++    detail: str = ""
++
++
++def send_batch(transport, batch):
++    """Send each ``(key, message)`` pair and return one SendResult per pair, in order.
++
++    ``key`` is the caller's name for the message, such as a user id. A relay
++    failure marks that message failed and the rest of the batch still goes out.
++    """
++    results = []
++    for key, message in batch:
++        address = mailer.parse_address(message.to)
++        try:
++            transport.send(replace(message, to=address))
++        except mailer.TransportError as exc:
++            log.warning("message for %s not sent: %s", key, exc)
++            results.append(SendResult(key, FAILED, str(exc)))
++            continue
++        results.append(SendResult(key, SENT))
++    return results
+diff --git a/digests/settings.py b/digests/settings.py
+index 5d296d3..2b4dc76 100644
+--- a/digests/settings.py
++++ b/digests/settings.py
+@@ -13,6 +13,11 @@ class Settings:
+     sender: str = "Notifications <notify@example.invalid>"
+     relay_url: str = "smtp://relay.example.invalid:25"
+     relay_timeout_seconds: int = 10
++    digest_sender: str = "Your digest <digest@example.invalid>"
++    digest_max_events: int = 50
++    digest_lookback_days: int = 14
++    digest_ledger_path: str = "/var/lib/digests/ledger.json"
++    preferences_url: str = "https://app.example.invalid/settings/notifications"
+ 
+     @classmethod
+     def from_env(cls, env=None):
+@@ -22,6 +27,11 @@ class Settings:
+             sender=env.get("NOTIFY_SENDER", defaults.sender),
+             relay_url=env.get("NOTIFY_RELAY_URL", defaults.relay_url),
+             relay_timeout_seconds=_int(env, "NOTIFY_RELAY_TIMEOUT", defaults.relay_timeout_seconds, minimum=1),
++            digest_sender=env.get("DIGEST_SENDER", defaults.digest_sender),
++            digest_max_events=_int(env, "DIGEST_MAX_EVENTS", defaults.digest_max_events, minimum=1),
++            digest_lookback_days=_int(env, "DIGEST_LOOKBACK_DAYS", defaults.digest_lookback_days, minimum=7),
++            digest_ledger_path=env.get("DIGEST_LEDGER_PATH", defaults.digest_ledger_path),
++            preferences_url=env.get("PREFERENCES_URL", defaults.preferences_url),
+         )
+ 
+ 
+diff --git a/tests/test_cadence.py b/tests/test_cadence.py
+new file mode 100644
+index 0000000..56d9b4e
+--- /dev/null
++++ b/tests/test_cadence.py
+@@ -0,0 +1,25 @@
++import unittest
++from datetime import datetime, timedelta, timezone
++
++from digests.cadence import is_due
++from digests.preferences import Preferences
++
++LOCAL = timezone(timedelta(hours=-5))
++MORNING = datetime(2026, 3, 4, 8, 5, tzinfo=LOCAL)
++
++
++class IsDueTests(unittest.TestCase):
++    def test_off_is_never_due(self):
++        self.assertFalse(is_due(Preferences("u-ada"), MORNING))
++
++    def test_daily_is_due_during_the_chosen_local_hour(self):
++        prefs = Preferences("u-ada", digest="daily", digest_hour=8)
++        self.assertTrue(is_due(prefs, MORNING))
++        self.assertTrue(is_due(prefs, MORNING.replace(minute=59)))
++        self.assertFalse(is_due(prefs, MORNING + timedelta(hours=1)))
++        self.assertFalse(is_due(prefs, MORNING - timedelta(hours=1)))
++
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/tests/test_collect.py b/tests/test_collect.py
+new file mode 100644
+index 0000000..7bec5da
+--- /dev/null
++++ b/tests/test_collect.py
+@@ -0,0 +1,64 @@
++import unittest
++from datetime import datetime, timedelta, timezone
++
++from digests.collect import collect_digest
++from digests.events import EventStore
++from digests.models import Event, User
++from digests.preferences import Preferences
++from digests.render import render_digest
++from digests.settings import Settings
++
++SINCE = datetime(2026, 3, 1, 8, 5, tzinfo=timezone.utc)
++UNTIL = SINCE + timedelta(days=1)
++ADA = User("u-ada", "ada@example.com", "Ada Park")
++DAILY = Preferences("u-ada", digest="daily")
++
++
++def event(event_id, kind, hours, user_id="u-ada"):
++    moment = SINCE + timedelta(hours=hours)
++    return Event(event_id, user_id, kind, f"{kind} {event_id}", moment, moment, url=f"https://app.example.invalid/{event_id}")
++
++
++class CollectTests(unittest.TestCase):
++    def test_window_excludes_its_start_and_includes_its_end(self):
++        store = EventStore([event("e0", "comment", 0), event("e1", "comment", 1), event("e2", "comment", 24)])
++        digest = collect_digest(store, ADA, DAILY, SINCE, UNTIL, max_events=50)
++        self.assertEqual([e.id for e in digest.sections[0].events], ["e2", "e1"])
++
++    def test_sections_follow_the_fixed_order(self):
++        store = EventStore([event("c", "comment", 1), event("r", "review_request", 2), event("m", "mention", 3)])
++        digest = collect_digest(store, ADA, DAILY, SINCE, UNTIL, max_events=50)
++        self.assertEqual([s.kind for s in digest.sections], ["review_request", "mention", "comment"])
++
++    def test_muted_kinds_are_left_out(self):
++        prefs = Preferences("u-ada", digest="daily", muted_kinds=frozenset({"follow"}))
++        store = EventStore([event("f", "follow", 1), event("c", "comment", 2)])
++        digest = collect_digest(store, ADA, prefs, SINCE, UNTIL, max_events=50)
++        self.assertEqual([s.kind for s in digest.sections], ["comment"])
++
++    def test_cap_applies_across_sections(self):
++        store = EventStore([event(f"m{i}", "mention", i + 1) for i in range(3)] + [event("c", "comment", 5)])
++        digest = collect_digest(store, ADA, DAILY, SINCE, UNTIL, max_events=2)
++        mentions, comments = digest.sections
++        self.assertEqual(([e.id for e in mentions.events], mentions.more), (["m2", "m1"], 1))
++        self.assertEqual((comments.events, comments.more), ((), 1))
++        self.assertEqual(digest.total, 4)
++
++
++
++class RenderTests(unittest.TestCase):
++    def setUp(self):
++        store = EventStore([event(f"m{i}", "mention", i + 1) for i in range(3)])
++        self.digest = collect_digest(store, ADA, DAILY, SINCE, UNTIL, max_events=2)
++
++    def test_subject_and_body(self):
++        message = render_digest(ADA, self.digest, "daily", Settings())
++        self.assertEqual((message.subject, message.category), ("3 updates today", "digest-daily"))
++        body = message.body
++        self.assertIn("Mentions (3)\n- mention m2\n  https://app.example.invalid/m2\n", body)
++        self.assertIn("- and 1 more\n", body)
++        self.assertTrue(body.endswith(f"Change them at {Settings().preferences_url}\n"))
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/tests/test_job.py b/tests/test_job.py
+new file mode 100644
+index 0000000..5d22ffd
+--- /dev/null
++++ b/tests/test_job.py
+@@ -0,0 +1,117 @@
++import io
++import os
++import tempfile
++import unittest
++from datetime import datetime, timedelta, timezone
++
++from digests import cadence
++from digests.cli import Context, main
++from digests.events import EventStore
++from digests.job import DigestJob
++from digests.ledger import DigestLedger
++from digests.mailer import RecordingTransport
++from digests.models import Event, User
++from digests.preferences import PreferenceStore
++from digests.settings import Settings
++from digests.users import UserDirectory
++
++MONDAY_0805 = datetime(2026, 3, 2, 8, 5, tzinfo=timezone.utc)
++
++
++def always_due(prefs, local_now):
++    return prefs.digest != "off"
++
++
++def event(event_id, user_id, hours_before, kind="comment"):
++    moment = MONDAY_0805 - timedelta(hours=hours_before)
++    return Event(event_id, user_id, kind, f"{kind} {event_id}", moment, moment)
++
++
++class DigestJobTests(unittest.TestCase):
++    def setUp(self):
++        self.users = UserDirectory([
++            User("u-ada", "ada@example.com", "Ada Park"),
++            User("u-ben", "ben@example.com", "Ben Ortiz", utc_offset_minutes=60),
++            User("u-cy", "cy@example.com", "Cy Lund"),
++        ])
++        self.prefs = PreferenceStore([
++            {"user_id": "u-ada", "digest": "daily", "digest_hour": 8},
++            {"user_id": "u-ben", "digest": "daily", "digest_hour": 9},
++            {"user_id": "u-cy", "digest": "weekly", "digest_hour": 8, "digest_weekday": 2},
++        ])
++        self.events = EventStore([event("e1", "u-ada", 2), event("e2", "u-ben", 3), event("e3", "u-cy", 30)])
++        self.ledger = DigestLedger()
++        self.transport = RecordingTransport()
++
++    def make_job(self, **kwargs):
++        kwargs.setdefault("is_due", always_due)
++        return DigestJob(self.users, self.prefs, self.events, self.ledger, self.transport, Settings(), **kwargs)
++
++    def test_sends_a_digest_to_each_due_user_with_events(self):
++        report = self.make_job().run(MONDAY_0805)
++        self.assertEqual(sorted(m.to for m in self.transport.sent), ["ada@example.com", "ben@example.com", "cy@example.com"])
++        self.assertEqual(report.summary(), "due=3 empty=0 already_sent=0 sent=3 failed=0 invalid=0")
++
++    def test_uses_each_users_local_hour(self):
++        self.make_job(is_due=cadence.is_due).run(MONDAY_0805)
++        self.assertEqual(sorted(m.to for m in self.transport.sent), ["ada@example.com", "ben@example.com"])
++
++    def test_rerun_in_the_same_slot_sends_nothing(self):
++        job = self.make_job()
++        job.run(MONDAY_0805)
++        report = job.run(MONDAY_0805 + timedelta(minutes=20))
++        self.assertEqual((report.already_sent, len(self.transport.sent)), (3, 3))
++
++    def test_next_digest_starts_where_the_last_one_ended(self):
++        job = self.make_job()
++        job.run(MONDAY_0805)
++        self.events.add(event("e4", "u-ada", -2))
++        self.transport.sent.clear()
++        job.run(MONDAY_0805 + timedelta(days=1))
++        ada = [m for m in self.transport.sent if m.to == "ada@example.com"]
++        self.assertEqual(len(ada), 1)
++        self.assertIn("comment e4", ada[0].body)
++        self.assertNotIn("comment e1", ada[0].body)
++
++    def test_user_with_nothing_new_gets_no_email_but_the_window_moves(self):
++        self.events = EventStore()
++        report = self.make_job().run(MONDAY_0805)
++        self.assertEqual((report.empty, self.transport.sent), (3, []))
++        self.assertEqual(self.ledger.cutoff_for("u-ada"), MONDAY_0805)
++
++    def test_failed_send_is_not_recorded(self):
++        self.transport = RecordingTransport(refuse={"ada@example.com"})
++        report = self.make_job().run(MONDAY_0805)
++        self.assertEqual(report.count("failed"), 1)
++        self.assertIsNone(self.ledger.cutoff_for("u-ada"))
++        self.assertEqual(self.ledger.cutoff_for("u-ben"), MONDAY_0805)
++
++    def test_digest_command_dry_run_sends_and_records_nothing(self):
++        context = Context(self.users, self.prefs, self.events, self.transport, Settings(), ledger=self.ledger)
++        out = io.StringIO()
++        code = main(["digest", "--now", MONDAY_0805.isoformat(), "--dry-run"], context, out)
++        self.assertEqual(code, 0)
++        self.assertIn("would send to ada@example.com: 1 update today", out.getvalue())
++        self.assertEqual((self.transport.sent, self.ledger.cutoff_for("u-ada")), ([], None))
++
++    def test_weekly_digest_goes_out_on_the_chosen_day(self):
++        wednesday = MONDAY_0805 + timedelta(days=2)
++        self.make_job().run(wednesday)
++        self.assertIn("cy@example.com", [m.to for m in self.transport.sent])
++
++
++
++class LedgerTests(unittest.TestCase):
++    def test_save_and_reload(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            path = os.path.join(tmp, "ledger.json")
++            ledger = DigestLedger(path)
++            ledger.record("u-ada", MONDAY_0805)
++            ledger.save()
++            self.assertEqual(DigestLedger(path).cutoff_for("u-ada"), MONDAY_0805)
++            self.assertEqual(os.listdir(tmp), ["ledger.json"])
++
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/tests/test_preferences.py b/tests/test_preferences.py
+index bfc0534..6371a58 100644
+--- a/tests/test_preferences.py
++++ b/tests/test_preferences.py
+@@ -7,6 +7,7 @@ class PreferencesTests(unittest.TestCase):
+     def test_defaults_for_users_without_a_record(self):
+         prefs = PreferenceStore().get("u-ada")
+         self.assertTrue(prefs.immediate)
++        self.assertEqual(prefs.digest, "off")
+ 
+     def test_muted_kinds_suppress_immediate_mail(self):
+         prefs = Preferences.from_record({"user_id": "u-ada", "muted_kinds": ["follow"]})
+@@ -17,6 +18,22 @@ class PreferencesTests(unittest.TestCase):
+         with self.assertRaises(InvalidPreferences):
+             Preferences.from_record({"user_id": "u-ada", "muted_kinds": ["gossip"]})
+ 
++    def test_reads_digest_settings(self):
++        prefs = Preferences.from_record(
++            {"user_id": "u-ada", "digest": "weekly", "digest_hour": "7", "digest_weekday": 4}
++        )
++        self.assertEqual((prefs.digest, prefs.digest_hour, prefs.digest_weekday), ("weekly", 7, 4))
++
++    def test_rejects_out_of_range_digest_settings(self):
++        for record in (
++            {"user_id": "u-ada", "digest": "hourly"},
++            {"user_id": "u-ada", "digest_hour": 24},
++            {"user_id": "u-ada", "digest_weekday": 7},
++            {"user_id": "u-ada", "digest_hour": "noon"},
++        ):
++            with self.subTest(record=record), self.assertRaises(InvalidPreferences):
++                Preferences.from_record(record)
++
+ 
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/tests/test_sender.py b/tests/test_sender.py
+new file mode 100644
+index 0000000..52c90a4
+--- /dev/null
++++ b/tests/test_sender.py
+@@ -0,0 +1,33 @@
++import unittest
++
++from digests.mailer import Message, RecordingTransport
++from digests.sender import FAILED, SENT, send_batch
++
++
++def message(to):
++    return Message(to=to, subject="3 updates today", body="...", sender="digest@example.invalid", category="digest-daily")
++
++
++class SendBatchTests(unittest.TestCase):
++    def test_sends_every_message_in_order(self):
++        transport = RecordingTransport()
++        results = send_batch(transport, [("u-ada", message("ada@example.com")), ("u-ben", message("ben@example.com"))])
++        self.assertEqual([m.to for m in transport.sent], ["ada@example.com", "ben@example.com"])
++        self.assertEqual([(r.key, r.status) for r in results], [("u-ada", SENT), ("u-ben", SENT)])
++
++    def test_relay_failure_fails_only_that_message(self):
++        transport = RecordingTransport(refuse={"ada@example.com"})
++        results = send_batch(transport, [("u-ada", message("ada@example.com")), ("u-ben", message("ben@example.com"))])
++        self.assertEqual([r.status for r in results], [FAILED, SENT])
++        self.assertIn("refused", results[0].detail)
++        self.assertEqual([m.to for m in transport.sent], ["ben@example.com"])
++
++    def test_addresses_are_normalized_before_sending(self):
++        transport = RecordingTransport()
++        send_batch(transport, [("u-ada", message("  ada@example.com "))])
++        self.assertEqual(transport.sent[0].to, "ada@example.com")
++
++
++
++if __name__ == "__main__":
++    unittest.main()

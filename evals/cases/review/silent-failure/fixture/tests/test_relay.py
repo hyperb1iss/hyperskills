@@ -1,8 +1,7 @@
 import unittest
 from datetime import datetime, timezone
-from decimal import Decimal
 
-from courier.broker import Publisher
+from courier.broker import BrokerTimeout, Publisher
 from courier.outbox import Outbox
 from courier.relay import build_publisher, drain, relay_once
 from courier.serialization import decode
@@ -25,6 +24,17 @@ class FakeClient:
 
     def send_batch(self, topic, messages):
         self.batches.append((topic, [decode(m) for m in messages]))
+
+
+class FlakyClient(FakeClient):
+    def __init__(self, failing_topic):
+        super().__init__()
+        self.failing_topic = failing_topic
+
+    def send_batch(self, topic, messages):
+        if topic == self.failing_topic:
+            raise BrokerTimeout(topic)
+        super().send_batch(topic, messages)
 
 
 def outbox_with(count, topic="orders.created"):
@@ -54,15 +64,19 @@ class RelayTests(unittest.TestCase):
         client = FakeClient()
         relay_once(outbox_with(1), Publisher(client, "billing"), clock)
         self.assertEqual(client.sent[0][1]["source"], "billing")
-        self.assertEqual(client.sent[0][1]["schema"], 2)
 
     def test_batches_split_by_topic_and_size(self):
         outbox, client = outbox_with(3), FakeClient()
-        outbox.add("orders.paid", {"total": Decimal("19.90")})
+        outbox.add("orders.paid", {"total": "19.90"})
         relay_once(outbox, Publisher(client, "orders", max_batch=2), clock)
         sizes = [(topic, len(batch)) for topic, batch in client.batches]
         self.assertEqual(sizes, [("orders.created", 2), ("orders.created", 1), ("orders.paid", 1)])
-        self.assertEqual(client.sent[-1][1]["data"], {"total": "19.90"})
+
+    def test_timeout_holds_the_rest_of_that_topic_only(self):
+        outbox, client = outbox_with(4), FlakyClient("orders.created")
+        outbox.add("orders.paid", {"n": 9})
+        relay_once(outbox, Publisher(client, "orders", max_batch=2), clock)
+        self.assertEqual([(topic, len(batch)) for topic, batch in client.batches], [("orders.paid", 1)])
 
     def test_drain_stops_on_a_short_pass(self):
         settings = RelaySettings(poll_limit=2, max_batch=2)

@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "stockpile/inventory.py",
+      "line": 15,
+      "blocking": true,
+      "title": "Lapsed holds release their units before they are expired, so stock is promised twice",
+      "trigger": "A hold passes expires_at; before the worker runs, another client reserves the freed units, and the first client then confirms its old hold.",
+      "impact": "reserved_in_bin stops counting the lapsed hold while it is still HELD, so its units go to the new hold, and the late confirm turns the same units into a confirmed order, overselling the bin."
+    }
+  ]
+}

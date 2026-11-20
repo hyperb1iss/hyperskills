@@ -11,14 +11,14 @@ def multiplier_for(tier):
         raise ValueError(f"unknown loyalty tier {tier!r}") from None
 
 
-def points_for(cart, tier="standard"):
-    """Points for a purchase: one per whole dollar of subtotal, times the tier multiplier."""
-    whole_dollars = int(cart.subtotal())
+def points_for(amount, tier="standard"):
+    """Points for a purchase amount in dollars: one per whole dollar, times the tier multiplier."""
+    whole_dollars = int(amount)
     return whole_dollars * multiplier_for(tier)
 
 
-def points_after_purchase(balance, cart, tier="standard", first_order=False):
-    earned = points_for(cart, tier)
+def points_after_purchase(balance, amount, tier="standard", first_order=False):
+    earned = points_for(amount, tier)
     if first_order:
         earned += SIGNUP_BONUS
     return balance + earned

@@ -36,10 +36,10 @@ index aef1b80..5037be8 100644
      writer.writerow(FIELDS)
      for contact in contacts:
 diff --git a/contactbook/export.py b/contactbook/export.py
-index 7fb6dc8..946cf35 100644
+index f52c3b6..b57061d 100644
 --- a/contactbook/export.py
 +++ b/contactbook/export.py
-@@ -14,13 +14,20 @@ class Download:
+@@ -14,6 +14,13 @@ class Download:
      content_type: str
      body: bytes
  
@@ -52,6 +52,10 @@ index 7fb6dc8..946cf35 100644
 +
  
  def download_response(book, today):
+     """The file behind the contacts page's Download CSV button.
+@@ -22,10 +29,10 @@ def download_response(book, today):
+     never from this download.
+     """
      buffer = io.StringIO()
 -    write_contacts(book.all(), buffer)
 +    write_contacts(book.all(), buffer, bom=True)

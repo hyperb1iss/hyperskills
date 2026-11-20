@@ -3,6 +3,8 @@
 The gateway applies each message_id at most once. When it receives a message
 whose message_id it has already applied, it does not apply it again and answers
 with the reply it gave the first time. Message ids are remembered for 24 hours.
+The gateway stores sent_at for reconciliation only; it never rejects a message
+because sent_at is old.
 """
 
 from .errors import GatewayTimeout, GatewayUnavailable, PayoutError

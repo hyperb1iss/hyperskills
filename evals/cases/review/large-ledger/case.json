@@ -1,0 +1,90 @@
+{
+  "split": "development",
+  "kind": "defect",
+  "twin": "large-ledger-clean",
+  "class": "multi-defect",
+  "trap": null,
+  "defects": [
+    {
+      "id": "rate-effective-date",
+      "class": "edge-value",
+      "file": "ledger/fx.py",
+      "start_line": 39,
+      "end_line": 39,
+      "function": "find",
+      "also_accept": [
+        {
+          "file": "ledger/fx.py",
+          "start_line": 50,
+          "end_line": 53
+        },
+        {
+          "file": "ledger/fx.py",
+          "start_line": 82,
+          "end_line": 82
+        },
+        {
+          "file": "ledger/journal.py",
+          "start_line": 56,
+          "end_line": 56
+        },
+        {
+          "file": "tests/test_fx.py",
+          "start_line": 15,
+          "end_line": 17
+        }
+      ]
+    },
+    {
+      "id": "revaluation-skips-missing-rate",
+      "class": "silent-failure",
+      "file": "ledger/revaluation.py",
+      "start_line": 37,
+      "end_line": 39,
+      "function": "revalue",
+      "also_accept": [
+        {
+          "file": "ledger/closing.py",
+          "start_line": 16,
+          "end_line": 16
+        },
+        {
+          "file": "ledger/closing.py",
+          "start_line": 21,
+          "end_line": 21
+        }
+      ]
+    },
+    {
+      "id": "migrated-import-keys",
+      "class": "key-mismatch",
+      "file": "ledger/migrations/m0003_multi_currency.py",
+      "start_line": 21,
+      "end_line": 23,
+      "function": "apply",
+      "also_accept": [
+        {
+          "file": "ledger/importer.py",
+          "start_line": 30,
+          "end_line": 31
+        },
+        {
+          "file": "ledger/importer.py",
+          "start_line": 56,
+          "end_line": 56
+        },
+        {
+          "file": "ledger/importer.py",
+          "start_line": 62,
+          "end_line": 64
+        },
+        {
+          "file": "tests/test_migrations.py",
+          "start_line": 28,
+          "end_line": 40
+        }
+      ]
+    }
+  ],
+  "also_accept": []
+}

@@ -3,7 +3,7 @@
   "findings": [
     {
       "file": "courier/broker.py",
-      "line": 35,
+      "line": 44,
       "blocking": true,
       "title": "A timed-out batch is sent twice",
       "trigger": "The broker stores a batch but the acknowledgement times out.",

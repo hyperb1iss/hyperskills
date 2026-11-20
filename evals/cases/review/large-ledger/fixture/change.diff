@@ -1,0 +1,777 @@
+diff --git a/ledger/accounts.py b/ledger/accounts.py
+index f3b4028..c21d47d 100644
+--- a/ledger/accounts.py
++++ b/ledger/accounts.py
+@@ -1,8 +1,11 @@
+-"""Chart of accounts."""
++"""Chart of accounts. Only assets and liabilities may be held in a foreign currency."""
+ from dataclasses import dataclass
+ 
++from .money import BASE_CURRENCY, exponent
++
+ KINDS = ("asset", "liability", "equity", "income", "expense")
+ DEBIT_NORMAL = {"asset", "expense"}
++FOREIGN_KINDS = {"asset", "liability"}
+ 
+ 
+ class AccountError(ValueError):
+@@ -14,6 +17,7 @@ class Account:
+     code: str
+     name: str
+     kind: str
++    currency: str = BASE_CURRENCY
+ 
+     @property
+     def debit_normal(self):
+@@ -21,17 +25,20 @@ class Account:
+ 
+ 
+ def _from_row(row):
+-    return Account(row["code"], row["name"], row["kind"])
++    return Account(row["code"], row["name"], row["kind"], row["currency"])
+ 
+ 
+-def create_account(store, code, name, kind):
++def create_account(store, code, name, kind, currency=BASE_CURRENCY):
+     if kind not in KINDS:
+         raise AccountError(f"unknown account kind {kind!r}")
+     if not code.isdigit() or len(code) != 4:
+         raise AccountError(f"account codes are four digits, got {code!r}")
++    exponent(currency)
++    if currency != BASE_CURRENCY and kind not in FOREIGN_KINDS:
++        raise AccountError(f"{kind} accounts are kept in {BASE_CURRENCY}")
+     if store.select("accounts", code=code):
+         raise AccountError(f"account {code} already exists")
+-    return _from_row(store.insert("accounts", {"code": code, "name": name, "kind": kind}))
++    return _from_row(store.insert("accounts", {"code": code, "name": name, "kind": kind, "currency": currency}))
+ 
+ 
+ def get_account(store, code):
+diff --git a/ledger/balances.py b/ledger/balances.py
+index ddba1cd..c51a615 100644
+--- a/ledger/balances.py
++++ b/ledger/balances.py
+@@ -1,16 +1,21 @@
+-"""Account balances from posted lines."""
++"""Account balances from posted lines, in the base currency unless noted."""
+ from .accounts import get_account, list_accounts
+ from .journal import lines_for
+ from .money import format_amount
+ 
+ 
+ def balance(store, code, through=None):
+-    """Signed balance, debits positive."""
++    """Signed base-currency balance, debits positive."""
++    return sum(row["base_debit"] - row["base_credit"] for _, row in lines_for(store, code, through))
++
++
++def foreign_balance(store, code, through=None):
++    """Signed balance in the account's own currency, debits positive."""
+     return sum(row["debit"] - row["credit"] for _, row in lines_for(store, code, through))
+ 
+ 
+ def natural_balance(store, code, through=None):
+-    """Balance with the account's normal side positive."""
++    """Base-currency balance with the account's normal side positive."""
+     value = balance(store, code, through)
+     return value if get_account(store, code).debit_normal else -value
+ 
+diff --git a/ledger/closing.py b/ledger/closing.py
+index d28ee69..59b4706 100644
+--- a/ledger/closing.py
++++ b/ledger/closing.py
+@@ -1,20 +1,22 @@
+-"""Month-end close."""
++"""Month-end close: revalue foreign balances, check the trial balance, lock the period."""
+ from .balances import trial_balance
+ from .periods import PeriodClosed, closed_through
++from .revaluation import FX_GAIN, FX_LOSS, revalue
+ 
+ 
+ class CloseError(ValueError):
+     pass
+ 
+ 
+-def close_period(store, end):
++def close_period(store, end, gain_account=FX_GAIN, loss_account=FX_LOSS):
+     """Close the books through end; returns the trial balance the period closed on."""
+     last = closed_through(store)
+     if last is not None and end <= last:
+         raise PeriodClosed(f"already closed through {last}")
++    revaluation = revalue(store, end, gain_account, loss_account)
+     balances = trial_balance(store, end)
+     off_by = sum(balances.values())
+     if off_by:
+         raise CloseError(f"trial balance through {end} is off by {off_by}")
+-    store.insert("periods", {"end": end.isoformat()})
++    store.insert("periods", {"end": end.isoformat(), "revaluation_entry": revaluation.entry_id})
+     return balances
+diff --git a/ledger/fx.py b/ledger/fx.py
+new file mode 100644
+index 0000000..990688d
+--- /dev/null
++++ b/ledger/fx.py
+@@ -0,0 +1,82 @@
++"""Exchange rates: the base-currency value of one unit, in effect from its date until the next one.
++
++Treasury also loads a closing rate dated on each period end for revaluation.
++"""
++import bisect
++from datetime import date
++from decimal import Decimal
++
++from .money import BASE_CURRENCY, exponent, to_major, to_minor
++
++
++class MissingRate(LookupError):
++    pass
++
++
++class RateTable:
++    def __init__(self):
++        self._days = {}
++        self._rates = {}
++
++    def add(self, currency, effective_on, rate):
++        exponent(currency)
++        if currency == BASE_CURRENCY:
++            raise ValueError("the base currency has no rate")
++        if rate <= 0:
++            raise ValueError(f"rate must be positive, got {rate}")
++        days = self._days.setdefault(currency, [])
++        rates = self._rates.setdefault(currency, [])
++        index = bisect.bisect_left(days, effective_on)
++        if index < len(days) and days[index] == effective_on:
++            rates[index] = rate
++        else:
++            days.insert(index, effective_on)
++            rates.insert(index, rate)
++
++    def find(self, currency, day):
++        """The rate in effect on day, or None before the currency's first rate."""
++        days = self._days.get(currency, [])
++        index = bisect.bisect_left(days, day) - 1
++        return self._rates[currency][index] if index >= 0 else None
++
++    def closing(self, currency, day):
++        """The rate dated exactly on day, or None."""
++        days = self._days.get(currency, [])
++        index = bisect.bisect_left(days, day)
++        if index < len(days) and days[index] == day:
++            return self._rates[currency][index]
++        return None
++
++    def rate_on(self, currency, day):
++        rate = self.find(currency, day)
++        if rate is None:
++            raise MissingRate(f"no {currency} rate on or before {day}")
++        return rate
++
++    def closing_rate(self, currency, day):
++        rate = self.closing(currency, day)
++        if rate is None:
++            raise MissingRate(f"no closing {currency} rate dated {day}")
++        return rate
++
++
++def load_rates(store):
++    table = RateTable()
++    for row in store.table("rates"):
++        table.add(row["currency"], date.fromisoformat(row["effective_on"]), Decimal(row["rate"]))
++    return table
++
++
++def record_rate(store, currency, effective_on, rate):
++    """Store a rate; a second rate for the same currency and day replaces the first."""
++    RateTable().add(currency, effective_on, rate)
++    for row in store.select("rates", currency=currency, effective_on=effective_on.isoformat()):
++        store.table("rates").remove(row)
++    store.insert("rates", {"currency": currency, "effective_on": effective_on.isoformat(), "rate": str(rate)})
++
++
++def to_base(rates, minor, currency, day):
++    """Convert minor units of currency on day to base-currency minor units."""
++    if currency == BASE_CURRENCY:
++        return minor
++    return to_minor(to_major(minor, currency) * rates.rate_on(currency, day), BASE_CURRENCY)
+diff --git a/ledger/importer.py b/ledger/importer.py
+index d99f425..0931066 100644
+--- a/ledger/importer.py
++++ b/ledger/importer.py
+@@ -1,18 +1,25 @@
+ """Import bank statement CSVs as journal entries against a clearing account.
+ 
+ Columns: date (YYYY-MM-DD), reference, description, amount (positive is money
+-in). Each bank feed is a source. A statement line whose reference was already
+-imported is skipped, so re-running an import is safe. Rows that cannot be
+-posted are reported with their line number and the rest of the file continues.
++in, in the bank account's currency). Each bank feed is a source. A statement
++line already imported, by import_key(source, reference), is skipped, so
++re-running an import is safe. Rows that cannot be posted are reported with
++their line number and the rest of the file continues.
+ """
+ import csv
+ from dataclasses import dataclass, field
+ from datetime import date
+ 
++from .accounts import get_account
++from .fx import MissingRate
+ from .journal import Entry, Line, post
+ from .money import parse_amount
+ 
+ 
++class StatementError(ValueError):
++    pass
++
++
+ @dataclass
+ class ImportResult:
+     posted: list = field(default_factory=list)
+@@ -20,6 +27,10 @@ class ImportResult:
+     rejected: list = field(default_factory=list)
+ 
+ 
++def import_key(source, reference):
++    return f"{source}:{reference}"
++
++
+ def read_statement(path):
+     with open(path, newline="", encoding="utf-8-sig") as handle:
+         reader = csv.DictReader(handle)
+@@ -38,6 +49,9 @@ def _entry(row, day, amount, source, bank_account, clearing_account):
+ 
+ 
+ def import_statement(store, path, source, bank_account, clearing_account):
++    currency = get_account(store, bank_account).currency
++    if get_account(store, clearing_account).currency != currency:
++        raise StatementError(f"clearing account {clearing_account} is not in {currency}")
+     result = ImportResult()
+     known = {row["key"] for row in store.table("import_keys")}
+     for line_no, row in read_statement(path):
+@@ -45,19 +59,20 @@ def import_statement(store, path, source, bank_account, clearing_account):
+         if not reference:
+             result.rejected.append(f"line {line_no}: missing reference")
+             continue
+-        if reference in known:
++        key = import_key(source, reference)
++        if key in known:
+             result.skipped.append(reference)
+             continue
+         try:
+             day = date.fromisoformat((row.get("date") or "").strip())
+-            amount = parse_amount(row.get("amount") or "")
++            amount = parse_amount(row.get("amount") or "", currency)
+             if amount == 0:
+                 raise ValueError("zero amount")
+             entry = post(store, _entry(row, day, amount, source, bank_account, clearing_account))
+-        except ValueError as error:
++        except (ValueError, MissingRate) as error:
+             result.rejected.append(f"line {line_no}: {error}")
+             continue
+-        store.insert("import_keys", {"key": reference})
+-        known.add(reference)
++        store.insert("import_keys", {"key": key})
++        known.add(key)
+         result.posted.append(entry.id)
+     return result
+diff --git a/ledger/journal.py b/ledger/journal.py
+index f407177..79ac504 100644
+--- a/ledger/journal.py
++++ b/ledger/journal.py
+@@ -4,13 +4,21 @@ An entry is a set of lines whose debits equal its credits. Posting validates the
+ entry, checks the period is open, and stores one entries row plus one lines row
+ per line. Posted entries are never edited; a correction is a reversal plus a new
+ entry.
++
++Lines store the amount in their account's currency and the base amount it was
++booked at, converted at the rate in effect on the posting date. Conversion
++rounding is booked to ROUNDING_ACCOUNT.
+ """
+ from dataclasses import dataclass, field
+ from datetime import date
+ 
+ from .accounts import get_account
++from .fx import load_rates, to_base
++from .money import BASE_CURRENCY, format_amount
+ from .periods import ensure_open
+ 
++ROUNDING_ACCOUNT = "7990"
++
+ 
+ class JournalError(ValueError):
+     pass
+@@ -41,14 +49,31 @@ class Entry:
+ 
+ 
+ def _line_rows(store, entry):
++    rates = load_rates(store)
++    rows = []
+     for line in entry.lines:
+-        get_account(store, line.account)
+-    debits = sum(line.debit for line in entry.lines)
+-    credits = sum(line.credit for line in entry.lines)
+-    if debits != credits:
+-        raise JournalError(f"entry does not balance: debits {debits}, credits {credits}")
+-    return [{"account": line.account, "debit": line.debit, "credit": line.credit, "memo": line.memo}
+-            for line in entry.lines]
++        currency = get_account(store, line.account).currency
++        base = to_base(rates, line.debit or line.credit, currency, entry.posted_on)
++        rows.append({"account": line.account, "currency": currency, "debit": line.debit, "credit": line.credit,
++                     "base_debit": base if line.debit else 0, "base_credit": base if line.credit else 0,
++                     "memo": line.memo})
++    if len({row["currency"] for row in rows}) == 1:
++        debits = sum(row["debit"] for row in rows)
++        credits = sum(row["credit"] for row in rows)
++        if debits != credits:
++            raise JournalError(f"entry does not balance: debits {debits}, credits {credits}")
++    residue = sum(row["base_debit"] - row["base_credit"] for row in rows)
++    tolerance = sum(1 for row in rows if row["currency"] != BASE_CURRENCY)
++    if abs(residue) > tolerance:
++        raise JournalError(f"entry does not balance in {BASE_CURRENCY}: off by {format_amount(residue)}")
++    if residue:
++        get_account(store, ROUNDING_ACCOUNT)
++        amount = abs(residue)
++        rows.append({"account": ROUNDING_ACCOUNT, "currency": BASE_CURRENCY,
++                     "debit": amount if residue < 0 else 0, "credit": amount if residue > 0 else 0,
++                     "base_debit": amount if residue < 0 else 0, "base_credit": amount if residue > 0 else 0,
++                     "memo": "Conversion rounding"})
++    return rows
+ 
+ 
+ def _insert(store, posted_on, memo, rows, source=None, external_id=None):
+@@ -69,6 +94,19 @@ def post(store, entry):
+     return entry
+ 
+ 
++def post_adjustment(store, posted_on, memo, amounts):
++    """Post signed base amounts as (account, amount) pairs without moving foreign balances."""
++    if sum(amount for _, amount in amounts) != 0:
++        raise JournalError("adjustment does not balance")
++    rows = []
++    for code, amount in amounts:
++        currency = get_account(store, code).currency
++        native = amount if currency == BASE_CURRENCY else 0
++        rows.append({"account": code, "currency": currency, "debit": max(native, 0), "credit": max(-native, 0),
++                     "base_debit": max(amount, 0), "base_credit": max(-amount, 0), "memo": memo})
++    return _insert(store, posted_on, memo, rows)
++
++
+ def lines_for(store, account, through=None):
+     """(posted_on, line row) pairs for an account, oldest first, optionally through a date."""
+     dates = {row["id"]: date.fromisoformat(row["posted_on"]) for row in store.table("entries")}
+@@ -79,8 +117,10 @@ def lines_for(store, account, through=None):
+ 
+ 
+ def reverse(store, entry_id, on):
+-    """Post the mirror image of an entry on another day; returns the new entry id."""
++    """Post the mirror image of an entry on another day, at the original base amounts; returns its id."""
+     original = store.one("entries", id=entry_id)
+-    rows = [{"account": row["account"], "debit": row["credit"], "credit": row["debit"], "memo": row["memo"]}
++    rows = [{"account": row["account"], "currency": row["currency"], "debit": row["credit"],
++             "credit": row["debit"], "base_debit": row["base_credit"], "base_credit": row["base_debit"],
++             "memo": row["memo"]}
+             for row in store.select("lines", entry_id=entry_id)]
+     return _insert(store, on, f"Reversal of entry {entry_id}: {original['memo']}", rows)
+diff --git a/ledger/migrations/m0003_multi_currency.py b/ledger/migrations/m0003_multi_currency.py
+new file mode 100644
+index 0000000..a2adff6
+--- /dev/null
++++ b/ledger/migrations/m0003_multi_currency.py
+@@ -0,0 +1,29 @@
++"""Multi-currency books: currencies and base amounts on existing rows, per-feed import keys,
++a rates table, and the exchange gain, loss, and rounding accounts."""
++BASE_CURRENCY = "USD"
++SEEDED_ACCOUNTS = [
++    ("7910", "Exchange gain", "income"),
++    ("7920", "Exchange loss", "expense"),
++    ("7990", "Currency conversion rounding", "expense"),
++]
++
++
++def apply(store):
++    for account in store.table("accounts"):
++        account.setdefault("currency", BASE_CURRENCY)
++    for line in store.table("lines"):
++        line.setdefault("currency", BASE_CURRENCY)
++        line.setdefault("base_debit", line["debit"])
++        line.setdefault("base_credit", line["credit"])
++    store.table("rates")
++    keys = store.table("import_keys")
++    keys.clear()
++    for entry in store.table("entries"):
++        if entry.get("external_id"):
++            store.insert("import_keys", {"key": f"{entry['external_id']}@{entry['source']}"})
++    existing = {account["code"]: account for account in store.table("accounts")}
++    for code, name, kind in SEEDED_ACCOUNTS:
++        if code not in existing:
++            store.insert("accounts", {"code": code, "name": name, "kind": kind, "currency": BASE_CURRENCY})
++        elif existing[code]["kind"] != kind:
++            raise ValueError(f"account {code} is already a {existing[code]['kind']} account; 0003 needs it for {name}")
+diff --git a/ledger/money.py b/ledger/money.py
+index 4bcb4e9..b32e51f 100644
+--- a/ledger/money.py
++++ b/ledger/money.py
+@@ -1,15 +1,24 @@
+-"""Amounts are integers in minor units (cents) of the ledger currency."""
+-from decimal import Decimal, InvalidOperation
++"""Amounts are integers in minor units of their currency: cents, pence, or whole yen."""
++from decimal import ROUND_HALF_EVEN, Decimal, InvalidOperation
+ 
+-CURRENCY = "USD"
++BASE_CURRENCY = "USD"
++EXPONENTS = {"USD": 2, "EUR": 2, "GBP": 2, "CHF": 2, "JPY": 0}
+ 
+ 
+ class AmountError(ValueError):
+     pass
+ 
+ 
+-def parse_amount(text):
+-    """'1,234.50' or '-12' to minor units; more than two decimal places is an error."""
++def exponent(currency):
++    try:
++        return EXPONENTS[currency]
++    except KeyError:
++        raise AmountError(f"unsupported currency {currency!r}") from None
++
++
++def parse_amount(text, currency=BASE_CURRENCY):
++    """'1,234.50' or '-12' to minor units of currency; more decimals than it has is an error."""
++    scale = 10 ** exponent(currency)
+     cleaned = text.strip().replace(",", "")
+     try:
+         value = Decimal(cleaned)
+@@ -17,13 +26,25 @@ def parse_amount(text):
+         raise AmountError(f"not an amount: {text!r}") from None
+     if not value.is_finite():
+         raise AmountError(f"not an amount: {text!r}")
+-    minor = value * 100
++    minor = value * scale
+     if minor != minor.to_integral_value():
+-        raise AmountError(f"too many decimal places: {text!r}")
++        raise AmountError(f"too many decimal places for {currency}: {text!r}")
+     return int(minor)
+ 
+ 
+-def format_amount(minor):
++def format_amount(minor, currency=BASE_CURRENCY):
++    digits = exponent(currency)
+     sign = "-" if minor < 0 else ""
+-    whole, cents = divmod(abs(minor), 100)
+-    return f"{sign}{whole:,}.{cents:02d}"
++    whole, fraction = divmod(abs(minor), 10 ** digits)
++    if not digits:
++        return f"{sign}{whole:,}"
++    return f"{sign}{whole:,}.{fraction:0{digits}d}"
++
++
++def to_major(minor, currency):
++    return Decimal(minor).scaleb(-exponent(currency))
++
++
++def to_minor(amount, currency):
++    """Round a Decimal amount of currency to whole minor units, half to even."""
++    return int(amount.scaleb(exponent(currency)).to_integral_value(rounding=ROUND_HALF_EVEN))
+diff --git a/ledger/revaluation.py b/ledger/revaluation.py
+new file mode 100644
+index 0000000..310857e
+--- /dev/null
++++ b/ledger/revaluation.py
+@@ -0,0 +1,49 @@
++"""Period-end revaluation: restate each foreign balance at the closing rate and post the difference.
++
++Running it twice for the same day posts nothing the second time.
++"""
++from dataclasses import dataclass, field
++from datetime import date
++from typing import Optional
++
++from .accounts import list_accounts
++from .balances import balance, foreign_balance
++from .fx import load_rates
++from .journal import post_adjustment
++from .money import BASE_CURRENCY, to_major, to_minor
++
++FX_GAIN = "7910"
++FX_LOSS = "7920"
++
++
++@dataclass
++class Revaluation:
++    period_end: date
++    adjustments: dict = field(default_factory=dict)
++    entry_id: Optional[int] = None
++
++
++def revalue(store, period_end, gain_account=FX_GAIN, loss_account=FX_LOSS):
++    """Restate every foreign-currency balance at the period end's closing rate."""
++    rates = load_rates(store)
++    adjustments = []
++    for account in list_accounts(store):
++        if account.currency == BASE_CURRENCY:
++            continue
++        native = foreign_balance(store, account.code, period_end)
++        carried = balance(store, account.code, period_end)
++        if native == 0 and carried == 0:
++            continue
++        rate = rates.closing(account.currency, period_end)
++        if rate is None:
++            continue
++        restated = to_minor(to_major(native, account.currency) * rate, BASE_CURRENCY)
++        if restated != carried:
++            adjustments.append((account.code, restated - carried))
++    result = Revaluation(period_end, dict(adjustments))
++    net = sum(amount for _, amount in adjustments)
++    if net:
++        adjustments.append((gain_account if net > 0 else loss_account, -net))
++    if adjustments:
++        result.entry_id = post_adjustment(store, period_end, f"Revaluation at {period_end}", adjustments)
++    return result
+diff --git a/tests/test_fx.py b/tests/test_fx.py
+new file mode 100644
+index 0000000..1023dc8
+--- /dev/null
++++ b/tests/test_fx.py
+@@ -0,0 +1,48 @@
++import unittest
++from datetime import date
++from decimal import Decimal
++
++from ledger.fx import MissingRate, RateTable, to_base
++from ledger.money import AmountError, format_amount, parse_amount
++
++
++class RateTableTests(unittest.TestCase):
++    def setUp(self):
++        self.rates = RateTable()
++        self.rates.add("EUR", date(2026, 1, 1), Decimal("1.0850"))
++        self.rates.add("EUR", date(2026, 2, 1), Decimal("1.1000"))
++
++    def test_rate_carries_forward(self):
++        self.assertEqual(self.rates.find("EUR", date(2026, 1, 20)), Decimal("1.0850"))
++        self.assertEqual(self.rates.find("EUR", date(2026, 3, 15)), Decimal("1.1000"))
++
++    def test_no_rate_before_the_first_one(self):
++        self.assertIsNone(self.rates.find("EUR", date(2025, 12, 31)))
++        with self.assertRaises(MissingRate):
++            self.rates.rate_on("GBP", date(2026, 1, 20))
++
++    def test_closing_rate_must_be_dated_on_the_day(self):
++        self.assertEqual(self.rates.closing_rate("EUR", date(2026, 2, 1)), Decimal("1.1000"))
++        self.assertIsNone(self.rates.closing("EUR", date(2026, 1, 31)))
++        with self.assertRaises(MissingRate):
++            self.rates.closing_rate("EUR", date(2026, 1, 31))
++
++    def test_a_second_rate_for_a_day_replaces_the_first(self):
++        self.rates.add("EUR", date(2026, 2, 1), Decimal("1.0990"))
++        self.assertEqual(self.rates.closing("EUR", date(2026, 2, 1)), Decimal("1.0990"))
++
++    def test_to_base_rounds_half_even(self):
++        self.assertEqual(to_base(self.rates, 5, "EUR", date(2026, 1, 20)), 5)
++        self.assertEqual(to_base(self.rates, 100000, "EUR", date(2026, 1, 20)), 108500)
++        self.assertEqual(to_base(self.rates, 4200, "USD", date(2026, 1, 20)), 4200)
++
++
++class CurrencyAmountTests(unittest.TestCase):
++    def test_yen_has_no_minor_unit(self):
++        self.assertEqual(parse_amount("1,500", "JPY"), 1500)
++        self.assertEqual(format_amount(1500, "JPY"), "1,500")
++        with self.assertRaises(AmountError):
++            parse_amount("1.5", "JPY")
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/tests/test_importer.py b/tests/test_importer.py
+index a70ff07..c941390 100644
+--- a/tests/test_importer.py
++++ b/tests/test_importer.py
+@@ -2,8 +2,11 @@ import os
+ import tempfile
+ import unittest
+ from datetime import date
++from decimal import Decimal
+ 
+-from ledger.balances import balance
++from ledger.accounts import create_account
++from ledger.balances import balance, foreign_balance
++from ledger.fx import record_rate
+ from ledger.importer import import_statement
+ 
+ from .support import make_store
+@@ -54,5 +57,29 @@ class ImportTests(unittest.TestCase):
+         self.assertIn("closed period", result.rejected[0])
+ 
+ 
++class EuroFeedTests(ImportTests):
++    def setUp(self):
++        super().setUp()
++        create_account(self.store, "1010", "Euro bank", "asset", "EUR")
++        create_account(self.store, "1110", "Euro clearing", "asset", "EUR")
++        record_rate(self.store, "EUR", date(2026, 1, 1), Decimal("1.0850"))
++
++    def test_amounts_are_in_the_bank_currency(self):
++        path = self.write("2026-01-04,TX-1,Euro customer,250.50\n")
++        import_statement(self.store, path, "operating-eur", "1010", "1110")
++        self.assertEqual(foreign_balance(self.store, "1010"), 25050)
++
++    def test_references_are_scoped_to_the_feed(self):
++        path = self.write("2026-01-04,TX-1,Payment,10.00\n")
++        self.assertEqual(len(self.run_import(path).posted), 1)
++        self.assertEqual(len(import_statement(self.store, path, "operating-eur", "1010", "1110").posted), 1)
++        self.assertEqual(self.run_import(path).skipped, ["TX-1"])
++
++    def test_missing_rate_rejects_the_row_only(self):
++        path = self.write("2025-12-30,TX-1,Too early,10.00\n2026-01-05,TX-2,ok,10.00\n")
++        result = import_statement(self.store, path, "operating-eur", "1010", "1110")
++        self.assertEqual(len(result.posted), 1)
++        self.assertIn("no EUR rate", result.rejected[0])
++
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/tests/test_journal.py b/tests/test_journal.py
+index a00c751..6549b14 100644
+--- a/tests/test_journal.py
++++ b/tests/test_journal.py
+@@ -1,7 +1,10 @@
+ import unittest
+ from datetime import date
++from decimal import Decimal
+ 
+-from ledger.balances import balance
++from ledger.accounts import create_account
++from ledger.balances import balance, foreign_balance
++from ledger.fx import record_rate
+ from ledger.journal import Entry, JournalError, Line, post, reverse
+ from ledger.periods import PeriodClosed
+ 
+@@ -51,5 +54,40 @@ class PostTests(unittest.TestCase):
+         self.assertEqual(balance(store, "4000"), 0)
+ 
+ 
++def euro_store():
++    store = make_store()
++    create_account(store, "1010", "Euro bank", "asset", "EUR")
++    create_account(store, "1210", "Euro receivables", "asset", "EUR")
++    record_rate(store, "EUR", date(2026, 1, 1), Decimal("1.0850"))
++    record_rate(store, "EUR", date(2026, 2, 1), Decimal("1.1000"))
++    return store
++
++
++class MultiCurrencyTests(unittest.TestCase):
++    def test_foreign_line_carries_its_base_amount(self):
++        store = euro_store()
++        post(store, Entry(date(2026, 1, 15), "Euro customer", [Line("1210", debit=100000), Line("4000", credit=108500)]))
++        self.assertEqual((foreign_balance(store, "1210"), balance(store, "1210")), (100000, 108500))
++
++    def test_conversion_rounding_is_booked(self):
++        store = euro_store()
++        lines = [Line("1210", debit=5), Line("1210", debit=5), Line("1010", credit=10)]
++        entry = post(store, Entry(date(2026, 1, 15), "Split", lines))
++        rounding = store.select("lines", entry_id=entry.id, account="7990")
++        self.assertEqual([(row["debit"], row["credit"]) for row in rounding], [(1, 0)])
++        self.assertEqual(sum(balance(store, code) for code in ("1210", "1010", "7990")), 0)
++
++    def test_mixed_entry_must_balance_in_base(self):
++        store = euro_store()
++        lines = [Line("1010", debit=100000), Line("1000", credit=100000)]
++        with self.assertRaisesRegex(JournalError, "does not balance in USD"):
++            post(store, Entry(date(2026, 1, 15), "Transfer", lines))
++
++    def test_reversal_uses_the_original_base_amounts(self):
++        store = euro_store()
++        entry = post(store, Entry(date(2026, 1, 15), "Euro sale", [Line("1210", debit=100000), Line("4000", credit=108500)]))
++        reverse(store, entry.id, date(2026, 2, 10))
++        self.assertEqual((balance(store, "1210"), foreign_balance(store, "1210")), (0, 0))
++
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/tests/test_migrations.py b/tests/test_migrations.py
+index c681b5c..4571af7 100644
+--- a/tests/test_migrations.py
++++ b/tests/test_migrations.py
+@@ -25,6 +25,21 @@ class MigrationTests(unittest.TestCase):
+         self.assertEqual([row["key"] for row in store.table("import_keys")], ["TX-9"])
+         self.assertIsNone(store.select("entries", memo="manual")[0]["source"])
+ 
++    def test_multi_currency_backfill(self):
++        store = Store()
++        migrate(store, target=2)
++        store.insert("accounts", {"code": "1000", "name": "Bank", "kind": "asset"})
++        entry = store.insert("entries", {"posted_on": "2026-01-04", "memo": "x", "source": "operating",
++                                         "external_id": "TX-9"})
++        store.insert("lines", {"entry_id": entry["id"], "account": "1000", "debit": 500, "credit": 0, "memo": ""})
++        store.insert("import_keys", {"key": "TX-9"})
++        migrate(store)
++        self.assertEqual(store.one("accounts", code="1000")["currency"], "USD")
++        line = store.table("lines")[0]
++        self.assertEqual((line["currency"], line["base_debit"], line["base_credit"]), ("USD", 500, 0))
++        self.assertEqual(len(store.table("import_keys")), 1)
++        self.assertTrue({"7910", "7920", "7990"} <= {row["code"] for row in store.table("accounts")})
++
+     def test_round_trip_through_a_file(self):
+         store = Store()
+         migrate(store)
+diff --git a/tests/test_revaluation.py b/tests/test_revaluation.py
+new file mode 100644
+index 0000000..1b58a0c
+--- /dev/null
++++ b/tests/test_revaluation.py
+@@ -0,0 +1,58 @@
++import unittest
++from datetime import date
++from decimal import Decimal
++
++from ledger.accounts import create_account
++from ledger.balances import balance, foreign_balance
++from ledger.closing import close_period
++from ledger.fx import record_rate
++from ledger.journal import Entry, Line, post
++from ledger.revaluation import revalue
++
++from .support import make_store
++
++JAN_31 = date(2026, 1, 31)
++
++
++def euro_books():
++    store = make_store()
++    create_account(store, "1010", "Euro bank", "asset", "EUR")
++    create_account(store, "2010", "Euro payables", "liability", "EUR")
++    record_rate(store, "EUR", date(2026, 1, 1), Decimal("1.0800"))
++    post(store, Entry(date(2026, 1, 10), "Fund euro account", [Line("1010", debit=1000000), Line("3000", credit=1080000)]))
++    return store
++
++
++class RevaluationTests(unittest.TestCase):
++    def test_gain_when_the_currency_strengthens(self):
++        store = euro_books()
++        record_rate(store, "EUR", JAN_31, Decimal("1.1000"))
++        result = revalue(store, JAN_31)
++        self.assertEqual(result.adjustments, {"1010": 20000})
++        self.assertEqual((balance(store, "1010"), foreign_balance(store, "1010")), (1100000, 1000000))
++        self.assertEqual(balance(store, "7910"), -20000)
++
++    def test_liabilities_offset_assets(self):
++        store = euro_books()
++        post(store, Entry(date(2026, 1, 12), "Supplier bill", [Line("5100", debit=216000), Line("2010", credit=200000)]))
++        record_rate(store, "EUR", JAN_31, Decimal("1.1000"))
++        result = revalue(store, JAN_31)
++        self.assertEqual(result.adjustments, {"1010": 20000, "2010": -4000})
++        self.assertEqual(balance(store, "7910"), -16000)
++
++    def test_running_twice_posts_once(self):
++        store = euro_books()
++        record_rate(store, "EUR", JAN_31, Decimal("1.1000"))
++        self.assertIsNotNone(revalue(store, JAN_31).entry_id)
++        self.assertIsNone(revalue(store, JAN_31).entry_id)
++
++    def test_close_revalues_then_locks(self):
++        store = euro_books()
++        record_rate(store, "EUR", JAN_31, Decimal("1.1000"))
++        close_period(store, JAN_31)
++        self.assertIsNotNone(store.one("periods", end="2026-01-31")["revaluation_entry"])
++        self.assertEqual(balance(store, "1010"), 1100000)
++
++
++if __name__ == "__main__":
++    unittest.main()

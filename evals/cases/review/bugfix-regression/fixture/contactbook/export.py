@@ -23,6 +23,11 @@ class Download:
 
 
 def download_response(book, today):
+    """The file behind the contacts page's Download CSV button.
+
+    People open it in spreadsheet apps. Integrations read contacts from the JSON API,
+    never from this download.
+    """
     buffer = io.StringIO()
     write_contacts(book.all(), buffer, bom=True)
     return Download(

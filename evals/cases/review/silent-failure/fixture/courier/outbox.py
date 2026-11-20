@@ -1,7 +1,9 @@
 """Transactional outbox: rows are written with the business change and published later.
 
 A row stays pending until a publisher reports it acknowledged, so delivery is
-at-least-once and consumers deduplicate on the row id.
+at-least-once and consumers deduplicate on the row id. Within a topic, rows are
+delivered in id order: a row is never published while an older row of the same
+topic is still pending.
 """
 from dataclasses import dataclass
 from datetime import datetime

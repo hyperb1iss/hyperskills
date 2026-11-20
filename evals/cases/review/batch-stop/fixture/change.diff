@@ -23,10 +23,10 @@ index 8c4e6ca..f2cf56c 100644
  
  if __name__ == "__main__":
 diff --git a/gridmeter/importer.py b/gridmeter/importer.py
-index 95f9340..424ef93 100644
+index 95f9340..db924aa 100644
 --- a/gridmeter/importer.py
 +++ b/gridmeter/importer.py
-@@ -1,17 +1,29 @@
+@@ -1,17 +1,32 @@
  """Load a vendor CSV drop into the reading store."""
  import csv
 +from dataclasses import dataclass, field
@@ -43,8 +43,12 @@ index 95f9340..424ef93 100644
  
  def read_rows(path):
 -    with open(path, newline="", encoding="utf-8") as handle:
+-        yield from csv.DictReader(handle)
++    """Yield (line number, row); csv counts physical lines, so blank lines and quoted newlines are included."""
 +    with open(path, newline="", encoding="utf-8-sig") as handle:
-         yield from csv.DictReader(handle)
++        reader = csv.DictReader(handle)
++        for row in reader:
++            yield reader.line_num, row
  
  
  def import_file(path, store):
@@ -57,25 +61,29 @@ index 95f9340..424ef93 100644
 +    summary = ImportSummary()
 +    readings = []
 +    try:
-+        for line, row in enumerate(read_rows(path), start=2):
++        for line, row in read_rows(path):
 +            readings.append(parse_row(row))
 +    except RowError as error:
 +        summary.rejected.append(f"line {line}: {error}")
 +    summary.imported = store.save_batch(readings)
 +    return summary
 diff --git a/gridmeter/parsing.py b/gridmeter/parsing.py
-index 1e6f26f..fd00767 100644
+index 1e6f26f..088d4ff 100644
 --- a/gridmeter/parsing.py
 +++ b/gridmeter/parsing.py
-@@ -16,12 +16,20 @@ class RowError(ValueError):
+@@ -16,12 +16,24 @@ class RowError(ValueError):
      pass
  
  
 +def _parse_time(text):
-+    """Older drops use 'YYYY-MM-DD HH:MM' in UTC; newer ones use ISO 8601 with an offset."""
-+    moment = datetime.fromisoformat(text.strip())
++    """Older drops use 'YYYY-MM-DD HH:MM' in UTC; newer ones use ISO 8601 with a time and an offset."""
++    text = text.strip()
++    try:
++        return datetime.strptime(text, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
++    except ValueError:
++        moment = datetime.fromisoformat(text)
 +    if moment.tzinfo is None:
-+        return moment.replace(tzinfo=timezone.utc)
++        raise ValueError(f"ISO timestamp without a UTC offset: {text!r}")
 +    return moment.astimezone(timezone.utc)
 +
 +
@@ -110,20 +118,8 @@ index 6340269..463993f 100644
      def count(self):
          return len(self._rows)
  
-diff --git a/gridmeter/units.py b/gridmeter/units.py
-index d75ecfa..6447e9f 100644
---- a/gridmeter/units.py
-+++ b/gridmeter/units.py
-@@ -4,6 +4,7 @@ from decimal import Decimal, InvalidOperation
- FACTORS = {
-     "wh": 1,
-     "kwh": 1000,
-+    "mwh": 1000000,
- }
- 
- 
 diff --git a/tests/test_importer.py b/tests/test_importer.py
-index ccd6b83..c355c79 100644
+index ccd6b83..23f65b0 100644
 --- a/tests/test_importer.py
 +++ b/tests/test_importer.py
 @@ -16,23 +16,36 @@ class ImportTests(unittest.TestCase):
@@ -158,10 +154,10 @@ index ccd6b83..c355c79 100644
 +        self.assertEqual(import_file(path, store).imported, 0)
 +
 +    def test_rejected_row_is_reported(self):
-+        path = self.write("m-1,2026-03-01 10:00,1.5,kWh\nm-2,2026-03-01 10:00,900,Wh\nm-3,2026-03-01 10:00,n/a,kWh\n")
++        path = self.write("m-1,2026-03-01 10:00,1.5,kWh\n\nm-2,2026-03-01 10:00,900,Wh\nm-3,2026-03-01 10:00,n/a,kWh\n")
 +        summary = import_file(path, ReadingStore())
 +        self.assertEqual(summary.imported, 2)
-+        self.assertEqual(summary.rejected, ["line 4: meter m-3: not a number: 'n/a'"])
++        self.assertEqual(summary.rejected, ["line 5: meter m-3: not a number: 'n/a'"])
 +
 +    def test_cli_exit_code_reflects_rejections(self):
 +        path = self.write("m-1,2026-03-01 10:00,1.5,kWh\nm-2,,1,kWh\n")
@@ -174,10 +170,10 @@ index ccd6b83..c355c79 100644
  
  if __name__ == "__main__":
 diff --git a/tests/test_parsing.py b/tests/test_parsing.py
-index 741a5fc..cc2fc99 100644
+index 741a5fc..b0fa06c 100644
 --- a/tests/test_parsing.py
 +++ b/tests/test_parsing.py
-@@ -31,6 +31,13 @@ class ParseRowTests(unittest.TestCase):
+@@ -31,6 +31,15 @@ class ParseRowTests(unittest.TestCase):
          with self.assertRaisesRegex(RowError, "meter m-1: not a number"):
              parse_row(row(value="abc"))
  
@@ -185,8 +181,10 @@ index 741a5fc..cc2fc99 100644
 +        reading = parse_row(row(timestamp="2026-03-01T11:00:00+01:00"))
 +        self.assertEqual(reading.taken_at, datetime(2026, 3, 1, 10, 0, tzinfo=timezone.utc))
 +
-+    def test_megawatt_hours(self):
-+        self.assertEqual(parse_row(row(value="0.25", unit="MWh")).wh, 250000)
++    def test_timestamp_needs_a_time_and_an_offset(self):
++        for value in ("2026-03-01", "2026-03-01T10:00"):
++            with self.subTest(value=value), self.assertRaises(RowError):
++                parse_row(row(timestamp=value))
 +
      def test_negative_value(self):
          with self.assertRaises(RowError):

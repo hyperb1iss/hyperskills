@@ -1,0 +1,8 @@
+{
+  "split": "holdout",
+  "kind": "clean",
+  "twin": "large-holdout-b",
+  "class": "multi-defect",
+  "trap": null,
+  "also_accept": []
+}

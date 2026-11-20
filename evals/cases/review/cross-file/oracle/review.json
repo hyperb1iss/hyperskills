@@ -6,8 +6,8 @@
       "line": 16,
       "blocking": true,
       "title": "Loyalty points are now awarded per cent instead of per dollar",
-      "trigger": "points_for (not touched by this PR) still does int(cart.subtotal()), which assumed a Decimal dollar subtotal. Cart.subtotal() now returns integer cents, so a $42.50 cart yields 4250 instead of 42. place_order credits this on every order.",
-      "impact": "Every order credits 100 times the intended points (times the tier multiplier), inflating balances customers can redeem. Convert with cart.subtotal() // 100 and add a test that uses a real Cart."
+      "trigger": "orders.place_order (not touched by this PR) passes invoice.subtotal to points_after_purchase, and points_for does int(amount), documented as a dollar amount. Invoice.subtotal is now integer cents, so a $42.50 order earns 4250 points instead of 42.",
+      "impact": "Every order credits 100 times the intended points (times the tier multiplier), inflating balances customers can redeem. Convert in points_for (amount // 100) or pass dollars from place_order, and add an order-level test that checks points."
     }
   ]
 }

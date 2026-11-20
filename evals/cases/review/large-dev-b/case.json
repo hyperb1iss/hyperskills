@@ -1,0 +1,65 @@
+{
+  "split": "development",
+  "kind": "defect",
+  "twin": "large-dev-b-clean",
+  "class": "multi-defect",
+  "trap": null,
+  "also_accept": [],
+  "defects": [
+    {
+      "id": "batch-stop",
+      "class": "batch-stop",
+      "file": "digests/sender.py",
+      "start_line": 29,
+      "end_line": 33,
+      "function": "send_batch",
+      "also_accept": [
+        {
+          "file": "digests/job.py",
+          "start_line": 68,
+          "end_line": 68
+        }
+      ]
+    },
+    {
+      "id": "weekday-untested",
+      "class": "test-stays-green",
+      "file": "digests/cadence.py",
+      "start_line": 17,
+      "end_line": 18,
+      "function": "is_due",
+      "also_accept": [
+        {
+          "file": "tests/test_job.py",
+          "start_line": 97,
+          "end_line": 100
+        },
+        {
+          "file": "digests/preferences.py",
+          "start_line": 24,
+          "end_line": 25
+        }
+      ]
+    },
+    {
+      "id": "late-events-skipped",
+      "class": "anchoring",
+      "file": "digests/collect.py",
+      "start_line": 50,
+      "end_line": 53,
+      "function": "collect_digest",
+      "also_accept": [
+        {
+          "file": "digests/job.py",
+          "start_line": 62,
+          "end_line": 62
+        },
+        {
+          "file": "digests/job.py",
+          "start_line": 71,
+          "end_line": 74
+        }
+      ]
+    }
+  ]
+}

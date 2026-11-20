@@ -25,15 +25,24 @@ class Publisher:
         self.max_batch = max_batch
 
     def publish(self, rows):
-        """Send rows in per-topic batches; returns the ids the broker acknowledged."""
+        """Send rows in per-topic batches; returns the ids the broker acknowledged.
+
+        A topic stops at its first unacknowledged batch, so that batch and the
+        rest of the topic stay pending and keep their order.
+        """
         acknowledged = []
         ordered = sorted(rows, key=lambda row: (row.topic, row.id))
         for topic, group in groupby(ordered, key=lambda row: row.topic):
-            for batch in _chunks(list(group), self.max_batch):
-                try:
-                    self.client.send_batch(topic, [encode(row, self.source) for row in batch])
-                except BrokerTimeout:
-                    log.warning("broker timed out on %d outbox rows for %s", len(batch), topic)
-                    continue
-                acknowledged.extend(row.id for row in batch)
+            acknowledged.extend(self._publish_topic(topic, list(group)))
         return acknowledged
+
+    def _publish_topic(self, topic, rows):
+        sent = []
+        for batch in _chunks(rows, self.max_batch):
+            try:
+                self.client.send_batch(topic, [encode(row, self.source) for row in batch])
+            except BrokerTimeout:
+                log.warning("broker timed out on %d outbox rows for %s; holding the topic", len(batch), topic)
+                break
+            sent.extend(row.id for row in batch)
+        return sent

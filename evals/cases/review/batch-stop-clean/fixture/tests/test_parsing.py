@@ -35,8 +35,10 @@ class ParseRowTests(unittest.TestCase):
         reading = parse_row(row(timestamp="2026-03-01T11:00:00+01:00"))
         self.assertEqual(reading.taken_at, datetime(2026, 3, 1, 10, 0, tzinfo=timezone.utc))
 
-    def test_megawatt_hours(self):
-        self.assertEqual(parse_row(row(value="0.25", unit="MWh")).wh, 250000)
+    def test_timestamp_needs_a_time_and_an_offset(self):
+        for value in ("2026-03-01", "2026-03-01T10:00"):
+            with self.subTest(value=value), self.assertRaises(RowError):
+                parse_row(row(timestamp=value))
 
     def test_negative_value(self):
         with self.assertRaises(RowError):

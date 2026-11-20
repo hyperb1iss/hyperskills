@@ -3,7 +3,7 @@
   "findings": [
     {
       "file": "gridmeter/importer.py",
-      "line": 15,
+      "line": 16,
       "blocking": true,
       "title": "utf-8-sig breaks drops without a byte order mark",
       "trigger": "An older vendor drop that has no BOM.",

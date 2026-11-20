@@ -1,0 +1,46 @@
+{
+  "split": "holdout",
+  "kind": "defect",
+  "twin": "large-holdout-b-clean",
+  "class": "multi-defect",
+  "trap": null,
+  "also_accept": [],
+  "defects": [
+    {
+      "id": "reserve-scope-fails-open",
+      "class": "fail-open",
+      "file": "stockroom/api.py",
+      "start_line": 144,
+      "end_line": 150,
+      "function": "reserve",
+      "also_accept": [
+        {"file": "stockroom/reservations.py", "start_line": 95, "end_line": 99}
+      ]
+    },
+    {
+      "id": "count-uses-net-stock",
+      "class": "untouched-caller",
+      "file": "stockroom/snapshots.py",
+      "start_line": 7,
+      "end_line": 9,
+      "function": "warehouse_snapshot",
+      "also_accept": [
+        {"file": "stockroom/snapshots.py", "start_line": 16, "end_line": 16},
+        {"file": "stockroom/counting.py", "start_line": 20, "end_line": 25},
+        {"file": "stockroom/stock.py", "start_line": 66, "end_line": 68}
+      ]
+    },
+    {
+      "id": "walk-order-breaks-rotation",
+      "class": "regression-from-fix",
+      "file": "stockroom/picking.py",
+      "start_line": 11,
+      "end_line": 13,
+      "function": "pick_sequence",
+      "also_accept": [
+        {"file": "stockroom/picking.py", "start_line": 20, "end_line": 20},
+        {"file": "stockroom/stock.py", "start_line": 97, "end_line": 104}
+      ]
+    }
+  ]
+}

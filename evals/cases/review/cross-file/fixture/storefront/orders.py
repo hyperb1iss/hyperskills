@@ -25,7 +25,7 @@ def place_order(cart, account, region):
     invoice = build_invoice(cart, region)
     before = account.points
     account.points = points_after_purchase(
-        before, cart, account.tier, first_order=account.order_count == 0
+        before, invoice.subtotal, account.tier, first_order=account.order_count == 0
     )
     account.order_count += 1
     return Order(account.customer_id, invoice, account.points - before)

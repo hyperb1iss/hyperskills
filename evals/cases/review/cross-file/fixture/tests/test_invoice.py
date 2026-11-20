@@ -4,7 +4,6 @@ from decimal import Decimal
 from storefront.cart import Cart
 from storefront.catalog import Product
 from storefront.invoice import build_invoice, format_money
-from storefront.orders import Account, place_order
 from storefront.tax import UnknownRegion, tax_for
 
 PEN = Product("PEN-01", "Gel pen", Decimal("1.99"))
@@ -45,15 +44,6 @@ class InvoiceTests(unittest.TestCase):
     def test_format_money(self):
         self.assertEqual(format_money(123456), "$1,234.56")
         self.assertEqual(format_money(-5), "-$0.05")
-
-
-class PlaceOrderTests(unittest.TestCase):
-    def test_counts_orders_and_credits_points(self):
-        account = Account("cust-9", points=40, order_count=3)
-        order = place_order(sample_cart(), account, "west")
-        self.assertEqual(order.invoice.total, 1847)
-        self.assertEqual(account.order_count, 4)
-        self.assertEqual(account.points, 40 + order.points_earned)
 
 
 if __name__ == "__main__":

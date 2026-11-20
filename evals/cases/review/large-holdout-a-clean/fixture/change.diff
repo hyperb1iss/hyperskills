@@ -1,0 +1,790 @@
+diff --git a/stockpile/access.py b/stockpile/access.py
+index 423ddbb..b1f5fbf 100644
+--- a/stockpile/access.py
++++ b/stockpile/access.py
+@@ -1,9 +1,10 @@
+-"""API keys: authentication and role checks.
++"""API keys: authentication, role checks, and warehouse scopes.
+ 
+ A request carries "Authorization: Bearer <key_id>.<secret>". The store keeps
+ only a SHA-256 digest of the secret, compared in constant time. Roles rank
+ viewer < operator < admin, and each action names the least role allowed to
+-perform it.
++perform it. A key's scope lists the warehouses it may act in; "*" stands for
++every warehouse.
+ """
+ import hashlib
+ import hmac
+@@ -19,6 +20,7 @@ REQUIRED_ROLE = {
+     "cancel": OPERATOR,
+     "pick": OPERATOR,
+ }
++WILDCARD = "*"
+ 
+ 
+ class Unauthorized(Exception):
+@@ -33,20 +35,49 @@ class Forbidden(Exception):
+ class ApiKey:
+     key_id: str
+     role: str
++    warehouses: tuple = ()
+ 
+ 
+ def _digest(secret):
+     return hashlib.sha256(secret.encode("utf-8")).hexdigest()
+ 
+ 
+-def issue_key(store, role):
++def normalize_scope(warehouses):
++    """Return a scope as a sorted tuple of distinct warehouse ids.
++
++    "*" cannot be combined with named warehouses. An empty scope is valid: the
++    key authenticates but may not act in any warehouse until it is given one.
++    """
++    items = None if isinstance(warehouses, str) else list(warehouses)
++    if items is None or not all(isinstance(item, str) and item.strip() for item in items):
++        raise ValueError("warehouses must be a list of nonempty warehouse ids")
++    scope = tuple(sorted({item.strip() for item in items}))
++    if WILDCARD in scope and len(scope) > 1:
++        raise ValueError('"*" cannot be combined with named warehouses')
++    return scope
++
++
++def issue_key(store, role, warehouses=()):
+     """Create a key and return (ApiKey, token); the token is shown once and not stored."""
+     if role not in ROLE_RANK:
+         raise ValueError(f"unknown role {role!r}")
++    scope = normalize_scope(warehouses)
+     key_id = "key-" + secrets.token_hex(4)
+     secret = secrets.token_urlsafe(24)
+-    store.put_key({"key_id": key_id, "role": role, "digest": _digest(secret), "revoked": False})
+-    return ApiKey(key_id, role), f"{key_id}.{secret}"
++    store.put_key({"key_id": key_id, "role": role, "digest": _digest(secret), "revoked": False,
++                   "warehouses": list(scope)})
++    return ApiKey(key_id, role, scope), f"{key_id}.{secret}"
++
++
++def set_scope(store, key_id, warehouses):
++    """Replace a key's scope; it applies from the key's next request."""
++    scope = list(normalize_scope(warehouses))
++    with store.lock:
++        row = store.key_row(key_id)
++        if row is None:
++            raise LookupError(f"no key {key_id}")
++        row["warehouses"] = scope
++        store.put_key(row)
+ 
+ 
+ def revoke_key(store, key_id):
+@@ -67,7 +98,7 @@ def authenticate(store, header):
+     row = store.key_row(key_id)
+     if row is None or row["revoked"] or not hmac.compare_digest(row["digest"], _digest(secret)):
+         raise Unauthorized("unknown key, revoked key, or wrong secret")
+-    return ApiKey(row["key_id"], row["role"])
++    return ApiKey(row["key_id"], row["role"], tuple(row.get("warehouses", ())))
+ 
+ 
+ def require_role(key, action):
+@@ -75,3 +106,14 @@ def require_role(key, action):
+     needed = REQUIRED_ROLE[action]
+     if ROLE_RANK[key.role] < ROLE_RANK[needed]:
+         raise Forbidden(f"key {key.key_id} needs the {needed} role to {action}")
++
++
++def authorize(key, action, warehouse_id):
++    """Raise Forbidden unless key may perform action in warehouse_id.
++
++    The key's role must allow the action and warehouse_id must be in its scope.
++    """
++    require_role(key, action)
++    scope = key.warehouses
++    if WILDCARD not in scope and warehouse_id not in scope:
++        raise Forbidden(f"key {key.key_id} is not scoped to warehouse {warehouse_id}")
+diff --git a/stockpile/inventory.py b/stockpile/inventory.py
+index 202eb59..8557fc4 100644
+--- a/stockpile/inventory.py
++++ b/stockpile/inventory.py
+@@ -5,24 +5,31 @@ reservation stay on the shelf until it is picked, so the free stock in a bin is
+ its quantity minus what reservations still hold there. Receiving and cycle
+ counts change quantity directly and never touch reservations.
+ """
+-from .models import CANCELLED, PICKED
++from .clock import utcnow
++from .models import CANCELLED, EXPIRED, PICKED
+ 
+ 
+-def reserved_in_bin(store, bin_id):
+-    """Units in bin_id promised to reservations that still hold stock."""
++def reserved_in_bin(store, bin_id, now):
++    """Units in bin_id promised to reservations that still hold stock at now."""
+     return sum(reservation.quantity for reservation in store.reservations(bin_id=bin_id)
+-               if reservation.status not in (PICKED, CANCELLED))
++               if reservation.status not in (PICKED, CANCELLED, EXPIRED) and not reservation.lapsed(now))
+ 
+ 
+-def free_in_bin(store, bin_id):
++def free_in_bin(store, bin_id, now=None):
++    """Free units in bin_id at now, which defaults to the current time.
++
++    A hold stops holding stock at its expires_at, without waiting for the
++    expiry worker's next pass.
++    """
+     with store.lock:
+-        return store.bin(bin_id).quantity - reserved_in_bin(store, bin_id)
++        return store.bin(bin_id).quantity - reserved_in_bin(store, bin_id, now or utcnow())
+ 
+ 
+-def available(store, warehouse_id, sku):
+-    """Units of sku in warehouse_id that a new reservation could still take."""
++def available(store, warehouse_id, sku, now=None):
++    """Units of sku in warehouse_id that a new reservation could take at now."""
++    now = now or utcnow()
+     with store.lock:
+-        return sum(max(free_in_bin(store, bin_.bin_id), 0)
++        return sum(max(free_in_bin(store, bin_.bin_id, now), 0)
+                    for bin_ in store.bins(warehouse_id=warehouse_id, sku=sku))
+ 
+ 
+@@ -40,7 +47,8 @@ def adjust(store, bin_id, counted):
+     """Record a cycle count: set bin_id to the counted quantity and return the change.
+ 
+     A count below what reservations hold there is still recorded; the bin then
+-    shows negative free stock until those reservations are picked or cancelled.
++    shows negative free stock until those reservations are picked, cancelled, or
++    lapse.
+     """
+     if counted < 0:
+         raise ValueError("a count cannot be negative")
+diff --git a/stockpile/migrations/__init__.py b/stockpile/migrations/__init__.py
+index 43d4149..2bbe3c1 100644
+--- a/stockpile/migrations/__init__.py
++++ b/stockpile/migrations/__init__.py
+@@ -7,10 +7,10 @@ succeeds. upgrade must leave store.tables untouched when it raises: it builds
+ replacement rows first and swaps them in at the end. Running migrate() on an
+ up-to-date store does nothing.
+ """
+-from . import m0002_bin_codes, m0003_key_roles
++from . import m0002_bin_codes, m0003_key_roles, m0004_holds_and_scopes
+ from .common import MigrationError
+ 
+-MIGRATIONS = (m0002_bin_codes, m0003_key_roles)
++MIGRATIONS = (m0002_bin_codes, m0003_key_roles, m0004_holds_and_scopes)
+ 
+ __all__ = ["MIGRATIONS", "MigrationError", "migrate"]
+ 
+diff --git a/stockpile/migrations/m0004_holds_and_scopes.py b/stockpile/migrations/m0004_holds_and_scopes.py
+new file mode 100644
+index 0000000..6ee8ace
+--- /dev/null
++++ b/stockpile/migrations/m0004_holds_and_scopes.py
+@@ -0,0 +1,18 @@
++"""Schema 4: holds can lapse, and keys carry a warehouse scope.
++
++Every existing reservation gets expires_at None: it was made without a hold
++window, so it lasts until confirmed or cancelled, as before. Every existing key
++gets the ["*"] scope, so no client loses access at deploy; an admin narrows a
++key afterwards with access.set_scope.
++"""
++from ..access import WILDCARD
++
++VERSION = 4
++
++
++def upgrade(store, now):
++    reservations = {reservation_id: dict(row, expires_at=None)
++                    for reservation_id, row in store.tables["reservations"].items()}
++    keys = {key_id: dict(row, warehouses=[WILDCARD]) for key_id, row in store.tables["keys"].items()}
++    store.tables["reservations"] = reservations
++    store.tables["keys"] = keys
+diff --git a/stockpile/models.py b/stockpile/models.py
+index ab8b743..d3d67e6 100644
+--- a/stockpile/models.py
++++ b/stockpile/models.py
+@@ -12,13 +12,15 @@ HELD = "held"
+ CONFIRMED = "confirmed"
+ PICKED = "picked"
+ CANCELLED = "cancelled"
++EXPIRED = "expired"
+ 
+ # A reservation only moves forward along these edges.
+ TRANSITIONS = {
+-    HELD: (CONFIRMED, CANCELLED),
++    HELD: (CONFIRMED, CANCELLED, EXPIRED),
+     CONFIRMED: (PICKED, CANCELLED),
+     PICKED: (),
+     CANCELLED: (),
++    EXPIRED: (),
+ }
+ 
+ 
+@@ -55,7 +57,11 @@ class Bin:
+ 
+ @dataclass
+ class Reservation:
+-    """Units of one SKU in one bin promised to an order."""
++    """Units of one SKU in one bin promised to an order.
++
++    expires_at is when the hold lapses if it is still HELD by then, or None for
++    a hold that waits until it is confirmed or cancelled.
++    """
+ 
+     reservation_id: int
+     key_id: str
+@@ -65,12 +71,18 @@ class Reservation:
+     quantity: int
+     status: str
+     created_at: datetime
++    expires_at: datetime = None
++
++    def lapsed(self, now):
++        """True once a HELD reservation has reached its expires_at."""
++        return self.status == HELD and self.expires_at is not None and self.expires_at <= now
+ 
+     @classmethod
+     def from_row(cls, row):
+         return cls(row["reservation_id"], row["key_id"], row["order_ref"], row["sku"],
+                    row["bin_id"], row["quantity"], row["status"],
+-                   parse_timestamp(row["created_at"]))
++                   parse_timestamp(row["created_at"]),
++                   parse_timestamp(row["expires_at"]) if row["expires_at"] else None)
+ 
+     def to_row(self):
+         return {
+@@ -82,4 +94,5 @@ class Reservation:
+             "quantity": self.quantity,
+             "status": self.status,
+             "created_at": format_timestamp(self.created_at),
++            "expires_at": format_timestamp(self.expires_at) if self.expires_at else None,
+         }
+diff --git a/stockpile/reservations.py b/stockpile/reservations.py
+index 3fbd576..4e71336 100644
+--- a/stockpile/reservations.py
++++ b/stockpile/reservations.py
+@@ -1,12 +1,18 @@
+-"""Reservation lifecycle: hold, confirm, pick, and cancel.
++"""Reservation lifecycle: hold, confirm, pick, cancel, and expire.
+ 
+ A hold promises units of one SKU in one bin to an order without moving them.
+-Confirming it commits the order; picking takes the units off the shelf.
+-Status changes go through _transition, which enforces models.TRANSITIONS, so
+-each change happens at most once. Callers pass `now` so tests control time.
++Confirming it commits the order; picking takes the units off the shelf. A hold
++with a hold window lapses at expires_at unless confirmed first, and the expiry
++worker then marks it expired. Status changes go through _transition, which
++enforces models.TRANSITIONS, so each change happens at most once. Callers pass
++`now` so tests control time.
+ """
++from datetime import timedelta
++
+ from . import inventory
+-from .models import CANCELLED, CONFIRMED, HELD, PICKED, TRANSITIONS, Reservation
++from .models import CANCELLED, CONFIRMED, EXPIRED, HELD, PICKED, TRANSITIONS, Reservation
++
++MAX_HOLD = timedelta(hours=24)
+ 
+ 
+ class InsufficientStock(Exception):
+@@ -21,27 +27,35 @@ class InvalidTransition(Exception):
+     pass
+ 
+ 
++class HoldExpired(InvalidTransition):
++    """The hold lapsed before it was confirmed."""
++
++
+ class ShortPick(Exception):
+     """A bin holds fewer units than were promised from it; it needs a cycle count."""
+ 
+ 
+-def reserve(store, key_id, order_ref, sku, bin_id, quantity, now):
++def reserve(store, key_id, order_ref, sku, bin_id, quantity, now, hold=None):
+     """Hold quantity units of sku in bin_id and return the new Reservation.
+ 
+-    Checking free stock and writing the hold happen under the store lock, so
+-    two concurrent holds never promise the same units.
++    With a hold window (a timedelta up to MAX_HOLD) the hold lapses at
++    now + hold; without one it lasts until confirmed or cancelled. Checking free
++    stock and writing the hold happen under the store lock, so two concurrent
++    holds never promise the same units.
+     """
+     if quantity < 1:
+         raise ValueError("quantity must be at least 1")
++    if hold is not None and not timedelta(0) < hold <= MAX_HOLD:
++        raise ValueError(f"a hold window must be positive and at most {MAX_HOLD}")
+     with store.lock:
+         bin_ = store.bin(bin_id)
+         if bin_.sku != sku:
+             raise WrongSku(f"bin {bin_id} holds {bin_.sku}, not {sku}")
+-        free = inventory.free_in_bin(store, bin_id)
++        free = inventory.free_in_bin(store, bin_id, now)
+         if free < quantity:
+             raise InsufficientStock(f"bin {bin_id} has {max(free, 0)} free units, {quantity} requested")
+         reservation = Reservation(store.next_id("reservations"), key_id, order_ref, sku,
+-                                  bin_id, quantity, HELD, now)
++                                  bin_id, quantity, HELD, now, now + hold if hold else None)
+         store.insert_reservation(reservation)
+     return reservation
+ 
+@@ -57,7 +71,13 @@ def _transition(store, reservation_id, status):
+ 
+ 
+ def confirm(store, reservation_id, now):
++    """Confirm a hold. A lapsed hold cannot be confirmed, even before the
++    worker marks it expired, because its units were only promised until then."""
+     with store.lock:
++        reservation = store.reservation(reservation_id)
++        if reservation.lapsed(now) or reservation.status == EXPIRED:
++            raise HoldExpired(f"reservation {reservation_id} lapsed at "
++                              f"{reservation.expires_at.isoformat()}")
+         return _transition(store, reservation_id, CONFIRMED)
+ 
+ 
+@@ -66,6 +86,19 @@ def cancel(store, reservation_id):
+         return _transition(store, reservation_id, CANCELLED)
+ 
+ 
++def expire_hold(store, reservation_id, now):
++    """Mark one lapsed hold expired and return True, or return False if it has not lapsed.
++
++    The worker calls this for holds it saw as due, and a client may confirm or
++    cancel in between, so the check is repeated under the lock.
++    """
++    with store.lock:
++        if not store.reservation(reservation_id).lapsed(now):
++            return False
++        _transition(store, reservation_id, EXPIRED)
++        return True
++
++
+ def pick(store, reservation_id):
+     """Take a confirmed reservation's units off the shelf.
+ 
+diff --git a/stockpile/service.py b/stockpile/service.py
+index 81f1f45..95a12b8 100644
+--- a/stockpile/service.py
++++ b/stockpile/service.py
+@@ -10,19 +10,27 @@ routes each request to handle():
+     GET  /stock/<warehouse>/<sku>      stock
+ 
+ Each handler authenticates the caller, checks its role, validates the input,
+-and then calls into reservations or inventory. Failures come back as
+-{"error": code, "message": text}; the status codes and error codes are part of
+-the API contract that existing clients rely on.
++checks that the key's scope covers the warehouse involved (a bin's warehouse
++for reservations), and then calls into reservations or inventory. Failures
++come back as {"error": code, "message": text}; the status codes and error codes
++are part of the API contract that existing clients rely on.
++
++A reserve body may add hold_minutes to make the hold lapse unless confirmed in
++time. Bodies without it behave as before, and responses only gain fields
++(expires_at, null for holds that do not lapse), so existing clients are
++unaffected.
+ """
+ from dataclasses import dataclass, field
++from datetime import timedelta
+ 
+ from . import inventory, reservations
+-from .access import Forbidden, Unauthorized, authenticate, require_role
++from .access import Forbidden, Unauthorized, authenticate, authorize, require_role
+ from .catalog import normalize_sku
+ from .clock import format_timestamp
+ from .store import NotFound
+ 
+ ROUTES = ("reserve", "confirm", "cancel", "pick", "stock")
++MAX_HOLD_MINUTES = int(reservations.MAX_HOLD.total_seconds() // 60)
+ 
+ 
+ @dataclass
+@@ -56,6 +64,14 @@ def _order_ref(value):
+     return value.strip()
+ 
+ 
++def _hold_window(value):
++    if value is None:
++        return None
++    if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= MAX_HOLD_MINUTES:
++        raise ValueError(f"hold_minutes must be an integer from 1 to {MAX_HOLD_MINUTES}")
++    return timedelta(minutes=value)
++
++
+ class ReservationService:
+     def __init__(self, store, clock):
+         self.store = store
+@@ -92,11 +108,13 @@ class ReservationService:
+             sku = normalize_sku(body.get("sku"))
+             quantity = _quantity(body.get("quantity"))
+             order_ref = _order_ref(body.get("order_ref"))
++            hold = _hold_window(body.get("hold_minutes"))
+             bin_id = body.get("bin_id")
+             if not isinstance(bin_id, str):
+                 raise ValueError("bin_id is required")
++            authorize(key, "reserve", self.store.bin(bin_id).warehouse_id)
+             reservation = reservations.reserve(self.store, key.key_id, order_ref, sku, bin_id,
+-                                               quantity, self.clock())
++                                               quantity, self.clock(), hold)
+         except NotFound as error:
+             raise ApiError(400, "invalid_request", str(error))
+         except ValueError as error:
+@@ -112,10 +130,13 @@ class ReservationService:
+             raise ApiError(404, "not_found", str(error))
+ 
+     def _step(self, request, reservation_id, action, step):
+-        self._caller(request, action)
+-        self._reservation(reservation_id)
++        key = self._caller(request, action)
++        reservation = self._reservation(reservation_id)
++        authorize(key, action, self.store.bin(reservation.bin_id).warehouse_id)
+         try:
+             return Response(200, self._view(step(reservation_id)))
++        except reservations.HoldExpired as error:
++            raise ApiError(409, "hold_expired", str(error))
+         except reservations.InvalidTransition as error:
+             raise ApiError(409, "invalid_transition", str(error))
+         except reservations.ShortPick as error:
+@@ -134,12 +155,13 @@ class ReservationService:
+                           lambda rid: reservations.pick(self.store, rid))
+ 
+     def _stock(self, request, warehouse_id, sku):
+-        self._caller(request, "view")
++        key = self._caller(request, "view")
+         try:
+             sku = normalize_sku(sku)
+         except ValueError as error:
+             raise ApiError(400, "invalid_request", str(error))
+-        units = inventory.available(self.store, warehouse_id, sku)
++        authorize(key, "view", warehouse_id)
++        units = inventory.available(self.store, warehouse_id, sku, self.clock())
+         return Response(200, {"warehouse_id": warehouse_id, "sku": sku, "available": units})
+ 
+     def _view(self, reservation):
+@@ -151,4 +173,5 @@ class ReservationService:
+             "quantity": reservation.quantity,
+             "status": reservation.status,
+             "created_at": format_timestamp(reservation.created_at),
++            "expires_at": format_timestamp(reservation.expires_at) if reservation.expires_at else None,
+         }
+diff --git a/stockpile/store.py b/stockpile/store.py
+index aac872e..a262c02 100644
+--- a/stockpile/store.py
++++ b/stockpile/store.py
+@@ -8,9 +8,9 @@ writer can change the rows in between; the lock is reentrant for that reason.
+ """
+ import threading
+ 
+-from .models import Bin, Reservation
++from .models import HELD, Bin, Reservation
+ 
+-SCHEMA_VERSION = 3
++SCHEMA_VERSION = 4
+ TABLES = ("bins", "reservations", "keys")
+ 
+ 
+@@ -98,6 +98,14 @@ class Store:
+             return [Reservation.from_row(row)
+                     for row in sorted(rows, key=lambda row: row["reservation_id"])]
+ 
++    def holds_expiring_before(self, moment):
++        """HELD reservations with an expires_at earlier than moment, soonest first."""
++        with self.lock:
++            due = [Reservation.from_row(row) for row in self.tables["reservations"].values()
++                   if row["status"] == HELD and row["expires_at"] is not None]
++        return sorted((reservation for reservation in due if reservation.expires_at < moment),
++                      key=lambda reservation: (reservation.expires_at, reservation.reservation_id))
++
+     def put_key(self, row):
+         with self.lock:
+             self.tables["keys"][row["key_id"]] = dict(row)
+diff --git a/stockpile/worker.py b/stockpile/worker.py
+new file mode 100644
+index 0000000..617c09d
+--- /dev/null
++++ b/stockpile/worker.py
+@@ -0,0 +1,66 @@
++"""Background worker that warns about and expires lapsing holds.
++
++One ExpiryWorker lives for the life of the worker process; run_forever calls
++tick() on a fixed interval. Each tick looks at the HELD reservations due to
++lapse within warn_ahead. Lapsed holds are marked expired; every other one gets
++one hold_expiring notice, sent to the key that made the hold. A notice that
++fails to send is tried again on the next tick, and a restarted worker sends
++the notices again, so a client may see a notice twice. A notice still failing
++when the hold lapses is dropped.
++"""
++import logging
++import time
++from datetime import timedelta
++
++from .clock import format_timestamp
++from .notify import NotifyError
++from .reservations import expire_hold
++
++log = logging.getLogger(__name__)
++
++
++class ExpiryWorker:
++    def __init__(self, store, notifier, clock, warn_ahead=timedelta(minutes=5)):
++        self.store = store
++        self.notifier = notifier
++        self.clock = clock
++        self.warn_ahead = warn_ahead
++        self._warned = set()
++
++    def tick(self):
++        """Run one pass; return counts of holds expired and warned and of failed notices."""
++        now = self.clock()
++        counts = {"expired": 0, "warned": 0, "failed": 0}
++        due = self.store.holds_expiring_before(now + self.warn_ahead)
++        for reservation in due:
++            reservation_id = reservation.reservation_id
++            if reservation.expires_at <= now:
++                if expire_hold(self.store, reservation_id, now):
++                    counts["expired"] += 1
++                self._warned.discard(reservation_id)
++                continue
++            if reservation_id in self._warned:
++                continue
++            try:
++                self.notifier.send(reservation.key_id, "hold_expiring", {
++                    "reservation_id": reservation_id,
++                    "order_ref": reservation.order_ref,
++                    "expires_at": format_timestamp(reservation.expires_at),
++                })
++            except NotifyError as error:
++                counts["failed"] += 1
++                log.warning("hold_expiring notice for reservation %s not sent: %s", reservation_id, error)
++                continue
++            self._warned.add(reservation_id)
++            counts["warned"] += 1
++        self._warned.intersection_update(held.reservation_id for held in due)
++        return counts
++
++    def run_forever(self, interval=30.0, sleep=time.sleep):
++        """Tick every interval seconds; a failed tick is logged and the loop goes on."""
++        while True:
++            try:
++                self.tick()
++            except Exception:
++                log.exception("expiry tick failed")
++            sleep(interval)
+diff --git a/tests/test_migration.py b/tests/test_migration.py
+new file mode 100644
+index 0000000..6d5cb16
+--- /dev/null
++++ b/tests/test_migration.py
+@@ -0,0 +1,44 @@
++import hashlib
++import unittest
++from datetime import datetime, timedelta, timezone
++
++from stockpile import inventory
++from stockpile.access import authenticate
++from stockpile.migrations import migrate
++from stockpile.store import Store
++
++NOW = datetime(2026, 11, 2, 9, 0, tzinfo=timezone.utc)
++
++
++def v3_store():
++    bin_ = {"bin_id": "A-01", "warehouse_id": "WH-1", "sku": "TEA-0001", "quantity": 10, "lot_expires": None}
++    rows = {rid: {"reservation_id": rid, "key_id": "key-op", "order_ref": f"order-{rid}", "sku": "TEA-0001",
++                  "bin_id": "A-01", "quantity": rid + 2, "status": status,
++                  "created_at": "2026-10-30T15:00:00+00:00"}
++            for rid, status in ((1, "held"), (2, "confirmed"))}
++    keys = {key_id: {"key_id": key_id, "role": role, "revoked": False,
++                     "digest": hashlib.sha256(f"secret-{key_id}".encode()).hexdigest()}
++            for key_id, role in (("key-op", "operator"), ("key-admin", "admin"))}
++    return Store.load({"bins": {"A-01": bin_}, "reservations": rows, "keys": keys}, schema_version=3)
++
++
++class HoldsAndScopesMigrationTest(unittest.TestCase):
++    def test_existing_holds_never_lapse(self):
++        store = v3_store()
++        self.assertEqual(migrate(store, NOW), [4])
++        self.assertIsNone(store.reservation(1).expires_at)
++        self.assertEqual(store.holds_expiring_before(NOW + timedelta(days=365)), [])
++        self.assertEqual(inventory.free_in_bin(store, "A-01", NOW + timedelta(days=365)), 3)
++        self.assertEqual((store.schema_version, store.next_id("reservations")), (4, 3))
++        self.assertEqual(migrate(store, NOW), [])
++
++    def test_existing_keys_keep_every_warehouse(self):
++        store = v3_store()
++        migrate(store, NOW)
++        for key_id in ("key-op", "key-admin"):
++            key = authenticate(store, f"Bearer {key_id}.secret-{key_id}")
++            self.assertEqual(key.warehouses, ("*",))
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/tests/test_reservations.py b/tests/test_reservations.py
+index 3cfe600..766d9f9 100644
+--- a/tests/test_reservations.py
++++ b/tests/test_reservations.py
+@@ -1,8 +1,8 @@
+ import unittest
+-from datetime import datetime, timezone
++from datetime import datetime, timedelta, timezone
+ 
+ from stockpile import inventory, reservations
+-from stockpile.models import CANCELLED, CONFIRMED, HELD, PICKED, Bin
++from stockpile.models import CANCELLED, CONFIRMED, EXPIRED, HELD, PICKED, Bin
+ from stockpile.store import Store
+ 
+ NOW = datetime(2026, 11, 2, 9, 0, tzinfo=timezone.utc)
+@@ -14,8 +14,8 @@ class ReservationTest(unittest.TestCase):
+         self.store.add_bin(Bin("A-01", "WH-1", "TEA-0001", 10))
+         self.store.add_bin(Bin("A-02", "WH-1", "CUP-0002", 4))
+ 
+-    def hold(self, quantity, bin_id="A-01", sku="TEA-0001"):
+-        return reservations.reserve(self.store, "key-1", "order-1", sku, bin_id, quantity, NOW)
++    def hold(self, quantity, bin_id="A-01", sku="TEA-0001", hold=None):
++        return reservations.reserve(self.store, "key-1", "order-1", sku, bin_id, quantity, NOW, hold)
+ 
+     def test_hold_reduces_free_stock_but_not_the_shelf(self):
+         reservation = self.hold(4)
+@@ -55,6 +55,27 @@ class ReservationTest(unittest.TestCase):
+         self.assertEqual(self.store.bin("A-01").quantity, 5)
+         self.assertEqual(self.store.reservation(reservation.reservation_id).status, CONFIRMED)
+ 
++    def test_a_hold_window_sets_expires_at(self):
++        self.assertEqual(self.hold(2, hold=timedelta(minutes=15)).expires_at, NOW + timedelta(minutes=15))
++        self.assertIsNone(self.hold(1).expires_at)
++        for hold in (timedelta(0), timedelta(minutes=-5), reservations.MAX_HOLD + timedelta(seconds=1)):
++            with self.subTest(hold=hold), self.assertRaises(ValueError):
++                self.hold(1, hold=hold)
++
++    def test_a_lapsed_hold_frees_its_units_before_the_worker_runs(self):
++        reservation = self.hold(6, hold=timedelta(minutes=10))
++        self.assertEqual(inventory.free_in_bin(self.store, "A-01", NOW), 4)
++        self.assertEqual(inventory.free_in_bin(self.store, "A-01", reservation.expires_at), 10)
++        self.assertEqual(self.store.reservation(reservation.reservation_id).status, HELD)
++
++    def test_expire_hold_only_expires_lapsed_holds(self):
++        reservation = self.hold(2, hold=timedelta(minutes=10))
++        rid = reservation.reservation_id
++        self.assertFalse(reservations.expire_hold(self.store, rid, NOW))
++        self.assertTrue(reservations.expire_hold(self.store, rid, reservation.expires_at))
++        self.assertEqual(self.store.reservation(rid).status, EXPIRED)
++        self.assertFalse(reservations.expire_hold(self.store, rid, reservation.expires_at))
++
+     def test_status_only_moves_forward(self):
+         reservation = self.hold(1)
+         reservations.cancel(self.store, reservation.reservation_id)
+diff --git a/tests/test_service.py b/tests/test_service.py
+index 4076e87..e55550f 100644
+--- a/tests/test_service.py
++++ b/tests/test_service.py
+@@ -1,7 +1,7 @@
+ import unittest
+-from datetime import datetime, timezone
++from datetime import datetime, timedelta, timezone
+ 
+-from stockpile.access import OPERATOR, VIEWER, issue_key
++from stockpile.access import OPERATOR, VIEWER, WILDCARD, issue_key, set_scope
+ from stockpile.models import Bin
+ from stockpile.service import Request, ReservationService
+ from stockpile.store import Store
+@@ -16,8 +16,9 @@ class ServiceTest(unittest.TestCase):
+         self.store.add_bin(Bin("B-01", "WH-2", "TEA-0001", 8))
+         self.now = NOW
+         self.service = ReservationService(self.store, lambda: self.now)
+-        _, self.operator = issue_key(self.store, OPERATOR)
+-        _, self.viewer = issue_key(self.store, VIEWER)
++        self.operator_key, self.operator = issue_key(self.store, OPERATOR, ["WH-1"])
++        _, self.elsewhere = issue_key(self.store, OPERATOR, ["WH-2"])
++        _, self.viewer = issue_key(self.store, VIEWER, [WILDCARD])
+ 
+     def call(self, route, token, body=None, *args):
+         request = Request({"Authorization": "Bearer " + token}, body)
+@@ -42,7 +43,8 @@ class ServiceTest(unittest.TestCase):
+ 
+     def test_invalid_bodies_are_rejected(self):
+         for body in ({"quantity": 0}, {"quantity": True}, {"sku": "tea"}, {"order_ref": ""},
+-                     {"bin_id": "Z-99"}):
++                     {"bin_id": "Z-99"}, {"hold_minutes": 0}, {"hold_minutes": 1441},
++                     {"hold_minutes": "15"}, {"hold_minutes": True}):
+             with self.subTest(body=body):
+                 self.assertEqual(self.reserve(self.operator, **body).status, 400)
+         self.assertEqual(self.call("reserve", self.operator, ["not", "an", "object"]).status, 400)
+@@ -59,6 +61,29 @@ class ServiceTest(unittest.TestCase):
+         response = self.call("stock", self.viewer, None, "WH-1", "tea-0001")
+         self.assertEqual(response.body, {"warehouse_id": "WH-1", "sku": "TEA-0001", "available": 7})
+ 
++    def test_keys_act_only_in_their_warehouses(self):
++        self.assertEqual(self.reserve(self.elsewhere).status, 403)
++        rid = self.reserve(self.operator).body["reservation_id"]
++        self.assertEqual(self.call("confirm", self.elsewhere, None, rid).status, 403)
++        self.assertEqual(self.call("stock", self.elsewhere, None, "WH-1", "TEA-0001").status, 403)
++        self.assertEqual(self.reserve(self.elsewhere, bin_id="B-01").status, 201)
++
++    def test_a_new_scope_applies_to_the_next_request(self):
++        with self.assertRaises(ValueError):
++            set_scope(self.store, self.operator_key.key_id, ["*", "WH-2"])
++        set_scope(self.store, self.operator_key.key_id, ["WH-2"])
++        self.assertEqual(self.reserve(self.operator).status, 403)
++        self.assertEqual(self.reserve(self.operator, bin_id="B-01").status, 201)
++
++    def test_confirming_a_lapsed_hold_is_a_conflict(self):
++        self.assertIsNone(self.reserve(self.operator).body["expires_at"])
++        body = self.reserve(self.operator, hold_minutes=10).body
++        self.assertEqual(body["expires_at"], "2026-11-02T09:10:00+00:00")
++        rid = body["reservation_id"]
++        self.now = NOW + timedelta(minutes=10)
++        response = self.call("confirm", self.operator, None, rid)
++        self.assertEqual((response.status, response.body["error"]), (409, "hold_expired"))
++
+ 
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/tests/test_worker.py b/tests/test_worker.py
+new file mode 100644
+index 0000000..bc4c39f
+--- /dev/null
++++ b/tests/test_worker.py
+@@ -0,0 +1,46 @@
++import unittest
++from datetime import datetime, timedelta, timezone
++
++from stockpile import reservations
++from stockpile.models import CONFIRMED, EXPIRED, Bin
++from stockpile.notify import MemoryTransport, Notifier
++from stockpile.store import Store
++from stockpile.worker import ExpiryWorker
++
++NOW = datetime(2026, 11, 2, 9, 0, tzinfo=timezone.utc)
++
++
++class ExpiryWorkerTest(unittest.TestCase):
++    def setUp(self):
++        self.store = Store()
++        self.store.add_bin(Bin("A-01", "WH-1", "TEA-0001", 20))
++        self.now = NOW
++        self.transport = MemoryTransport()
++        self.worker = ExpiryWorker(self.store, Notifier(self.transport), lambda: self.now)
++
++    def hold(self, minutes, key_id="key-1"):
++        return reservations.reserve(self.store, key_id, "order-1", "TEA-0001", "A-01", 1, NOW,
++                                    timedelta(minutes=minutes) if minutes else None)
++
++    def test_each_lapsing_hold_is_warned_once(self):
++        soon = self.hold(4, key_id="key-7")
++        self.hold(20)
++        self.hold(None)
++        self.assertEqual(self.worker.tick(), {"expired": 0, "warned": 1, "failed": 0})
++        self.assertEqual(self.worker.tick(), {"expired": 0, "warned": 0, "failed": 0})
++        [notice] = self.transport.sent
++        self.assertEqual((notice.recipient, notice.kind), ("key-7", "hold_expiring"))
++        self.assertEqual(notice.payload["reservation_id"], soon.reservation_id)
++
++    def test_lapsed_holds_are_expired_and_confirmed_ones_are_not(self):
++        lapsed = self.hold(10)
++        kept = self.hold(10)
++        reservations.confirm(self.store, kept.reservation_id, NOW)
++        self.now = NOW + timedelta(minutes=10)
++        self.assertEqual(self.worker.tick()["expired"], 1)
++        self.assertEqual(self.store.reservation(lapsed.reservation_id).status, EXPIRED)
++        self.assertEqual(self.store.reservation(kept.reservation_id).status, CONFIRMED)
++
++
++if __name__ == "__main__":
++    unittest.main()

@@ -1,0 +1,13 @@
+{
+  "verdict": "approve",
+  "findings": [
+    {
+      "file": "stockroom/api.py",
+      "line": 176,
+      "blocking": false,
+      "title": "release_reservation does not check warehouse access",
+      "trigger": "A key of the same channel without access to the held warehouse can release the hold.",
+      "impact": "Low: releasing only frees stock. Consider matching fulfill's check for symmetry."
+    }
+  ]
+}

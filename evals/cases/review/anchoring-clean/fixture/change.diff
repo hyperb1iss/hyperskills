@@ -1,9 +1,10 @@
 diff --git a/payouts/client.py b/payouts/client.py
-index 8668903..89db0c0 100644
+index 5673fdd..e9ad085 100644
 --- a/payouts/client.py
 +++ b/payouts/client.py
-@@ -1,9 +1,14 @@
- """Client for submitting payouts to the gateway."""
+@@ -3,10 +3,15 @@
+ The nightly payout batch is the only caller; nothing submits payouts on a request path.
+ """
  
 +import logging
 +import time
@@ -18,7 +19,7 @@ index 8668903..89db0c0 100644
  
  
  def _utcnow():
-@@ -11,14 +16,36 @@ def _utcnow():
+@@ -14,14 +19,36 @@ def _utcnow():
  
  
  class PayoutClient:
@@ -90,10 +91,10 @@ index 0000000..cc0dc8e
 +
 +NO_RETRY = RetryPolicy(max_attempts=1)
 diff --git a/payouts/transport.py b/payouts/transport.py
-index bed10e9..e17044b 100644
+index 4937c9e..c4a043c 100644
 --- a/payouts/transport.py
 +++ b/payouts/transport.py
-@@ -39,6 +39,8 @@ def raise_for_status(status, body):
+@@ -41,6 +41,8 @@ def raise_for_status(status, body):
      """Return ``body`` for a 2xx status, otherwise raise the matching error."""
      if 200 <= status < 300:
          return body

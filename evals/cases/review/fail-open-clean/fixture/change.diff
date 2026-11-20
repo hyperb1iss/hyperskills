@@ -41,10 +41,10 @@ index ef860ac..2a83626 100644
 +        "osprey": Provider("osprey", _required(env, "OSPREY_SIGNING_SECRET"), "Osprey-Signature", tolerance=600),
      }
 diff --git a/hookline/signatures.py b/hookline/signatures.py
-index 6ef4e32..e7153f0 100644
+index 6ef4e32..38ba757 100644
 --- a/hookline/signatures.py
 +++ b/hookline/signatures.py
-@@ -1,6 +1,7 @@
+@@ -1,11 +1,15 @@
  """HMAC signatures on incoming webhooks.
  
 -Header format: "t=<unix seconds>,v1=<hex HMAC-SHA256 of '<t>.<body>'>".
@@ -53,7 +53,15 @@ index 6ef4e32..e7153f0 100644
  """
  import hashlib
  import hmac
-@@ -19,17 +20,30 @@ def parse_header(value):
+ 
+ 
++MAX_SIGNATURES = 8
++
++
+ class SignatureError(Exception):
+     pass
+ 
+@@ -19,17 +23,29 @@ def parse_header(value):
      fields = {}
      for part in value.split(","):
          key, _, item = part.strip().partition("=")
@@ -70,10 +78,6 @@ index 6ef4e32..e7153f0 100644
 +    return ""
 +
 +
-+def _matches(candidate, secrets, timestamp, body):
-+    return any(hmac.compare_digest(candidate, sign(secret, timestamp, body)) for secret in secrets)
-+
-+
  def verify(provider, headers, body, now):
 -    fields = parse_header(headers.get(provider.header, ""))
 +    fields = parse_header(_header(headers, provider.header))
@@ -86,7 +90,10 @@ index 6ef4e32..e7153f0 100644
          raise SignatureError("timestamp outside tolerance")
 -    if not hmac.compare_digest(fields.get("v1", ""), sign(provider.secret, timestamp, body)):
 +    candidates = fields.get("v1", [])
-+    if not any(_matches(c, provider.secrets, timestamp, body) for c in candidates):
++    if len(candidates) > MAX_SIGNATURES:
++        raise SignatureError("too many signatures")
++    expected = [sign(secret, timestamp, body) for secret in provider.secrets]
++    if not any(hmac.compare_digest(c, e) for c in candidates for e in expected):
          raise SignatureError("signature mismatch")
 diff --git a/tests/test_handlers.py b/tests/test_handlers.py
 index a8fbf9f..840c191 100644

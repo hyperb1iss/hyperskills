@@ -3,7 +3,7 @@
   "findings": [
     {
       "file": "courier/broker.py",
-      "line": 30,
+      "line": 34,
       "blocking": false,
       "title": "Batching changes the publish order across topics",
       "trigger": "A page that mixes orders.created and orders.paid rows.",

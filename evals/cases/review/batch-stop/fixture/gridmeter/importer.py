@@ -12,8 +12,11 @@ class ImportSummary:
 
 
 def read_rows(path):
+    """Yield (line number, row); csv counts physical lines, so blank lines and quoted newlines are included."""
     with open(path, newline="", encoding="utf-8-sig") as handle:
-        yield from csv.DictReader(handle)
+        reader = csv.DictReader(handle)
+        for row in reader:
+            yield reader.line_num, row
 
 
 def import_file(path, store):
@@ -21,7 +24,7 @@ def import_file(path, store):
     summary = ImportSummary()
     readings = []
     try:
-        for line, row in enumerate(read_rows(path), start=2):
+        for line, row in read_rows(path):
             readings.append(parse_row(row))
     except RowError as error:
         summary.rejected.append(f"line {line}: {error}")

@@ -7,6 +7,9 @@ import hashlib
 import hmac
 
 
+MAX_SIGNATURES = 8
+
+
 class SignatureError(Exception):
     pass
 
@@ -32,10 +35,6 @@ def _header(headers, name):
     return ""
 
 
-def _matches(candidate, secrets, timestamp, body):
-    return any(hmac.compare_digest(candidate, sign(secret, timestamp, body)) for secret in secrets)
-
-
 def verify(provider, headers, body, now):
     fields = parse_header(_header(headers, provider.header))
     try:
@@ -45,5 +44,8 @@ def verify(provider, headers, body, now):
     if abs(now - timestamp) > provider.tolerance:
         raise SignatureError("timestamp outside tolerance")
     candidates = fields.get("v1", [])
-    if candidates and not any(_matches(c, provider.secrets, timestamp, body) for c in candidates):
+    if len(candidates) > MAX_SIGNATURES:
+        raise SignatureError("too many signatures")
+    expected = [sign(secret, timestamp, body) for secret in provider.secrets]
+    if candidates and not any(hmac.compare_digest(c, e) for c in candidates for e in expected):
         raise SignatureError("signature mismatch")

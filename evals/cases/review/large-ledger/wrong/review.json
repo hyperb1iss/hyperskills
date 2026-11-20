@@ -1,0 +1,21 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "ledger/revaluation.py",
+      "line": 37,
+      "blocking": true,
+      "title": "Revaluation skips balances without a closing rate",
+      "trigger": "Closing a month before treasury loads the closing rate.",
+      "impact": "The foreign balance stays at its old USD value while the period locks."
+    },
+    {
+      "file": "tests/test_importer.py",
+      "line": 60,
+      "blocking": false,
+      "title": "EuroFeedTests reruns every ImportTests case",
+      "trigger": "Running the test suite.",
+      "impact": "Subclassing ImportTests repeats the USD import tests with euro accounts present; harmless but slower and confusing."
+    }
+  ]
+}

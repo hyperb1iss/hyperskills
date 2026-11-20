@@ -17,10 +17,14 @@ class RowError(ValueError):
 
 
 def _parse_time(text):
-    """Older drops use 'YYYY-MM-DD HH:MM' in UTC; newer ones use ISO 8601 with an offset."""
-    moment = datetime.fromisoformat(text.strip())
+    """Older drops use 'YYYY-MM-DD HH:MM' in UTC; newer ones use ISO 8601 with a time and an offset."""
+    text = text.strip()
+    try:
+        return datetime.strptime(text, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
+    except ValueError:
+        moment = datetime.fromisoformat(text)
     if moment.tzinfo is None:
-        return moment.replace(tzinfo=timezone.utc)
+        raise ValueError(f"ISO timestamp without a UTC offset: {text!r}")
     return moment.astimezone(timezone.utc)
 
 

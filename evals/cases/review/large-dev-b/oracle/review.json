@@ -1,0 +1,29 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "digests/sender.py",
+      "line": 30,
+      "blocking": true,
+      "title": "One unusable address stops the whole digest batch",
+      "trigger": "parse_address runs before the try block, so an account with a malformed email (users.py says about 0.3 percent of active accounts have one) raises InvalidAddress out of send_batch and out of DigestJob.run.",
+      "impact": "Every user after that account in the batch gets no digest, and because run never reaches ledger.save, the users before it are not recorded and get the same events again next time. This repeats every day until support fixes the address. Parse inside the try, report the message as invalid, and keep going."
+    },
+    {
+      "file": "digests/cadence.py",
+      "line": 18,
+      "blocking": true,
+      "title": "Weekly digests use isoweekday against a 0-based weekday",
+      "trigger": "Preferences documents and validates digest_weekday as 0 for Monday through 6 for Sunday (datetime.weekday()), but is_due compares it with isoweekday(), which runs 1 to 7.",
+      "impact": "Every weekly digest goes out a day early, and users who chose Monday (0) never get one. The job test for weekly digests stubs is_due with always_due, so it passes regardless; use weekday() and test the weekly case through cadence.is_due."
+    },
+    {
+      "file": "digests/collect.py",
+      "line": 51,
+      "blocking": true,
+      "title": "Windows by occurred_at skip events that are stored after the run",
+      "trigger": "The job's windows end at the run time and the next window starts there, but collect_digest selects events by occurred_at. events.py documents ingest lag of up to 15 minutes, so an event that occurred at 07:59 and was stored at 08:10 is not in the 08:05 digest (not stored yet) and is excluded from the next one (it occurred before the cutoff).",
+      "impact": "Late-ingested events never reach any digest, contradicting the PR's and the job comment's claim that no event falls between two digests. Select with received_between, which is the clock the cutoffs actually track."
+    }
+  ]
+}

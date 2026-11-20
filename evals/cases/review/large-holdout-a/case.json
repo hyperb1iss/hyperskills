@@ -1,0 +1,80 @@
+{
+  "split": "holdout",
+  "kind": "defect",
+  "twin": "large-holdout-a-clean",
+  "class": "multi-defect",
+  "trap": null,
+  "defects": [
+    {
+      "id": "empty-scope-allows-all",
+      "class": "fail-open",
+      "file": "stockpile/access.py",
+      "start_line": 118,
+      "end_line": 119,
+      "function": "authorize",
+      "also_accept": [
+        {
+          "file": "stockpile/access.py",
+          "start_line": 101,
+          "end_line": 101
+        },
+        {
+          "file": "stockpile/access.py",
+          "start_line": 60,
+          "end_line": 60
+        },
+        {
+          "file": "stockpile/service.py",
+          "start_line": 115,
+          "end_line": 115
+        }
+      ]
+    },
+    {
+      "id": "warned-set-grows",
+      "class": "unbounded-growth",
+      "file": "stockpile/worker.py",
+      "start_line": 54,
+      "end_line": 56,
+      "function": "tick",
+      "also_accept": [
+        {
+          "file": "stockpile/worker.py",
+          "start_line": 28,
+          "end_line": 28
+        }
+      ]
+    },
+    {
+      "id": "expired-holds-stay-reserved",
+      "class": "interaction",
+      "file": "stockpile/inventory.py",
+      "start_line": 12,
+      "end_line": 15,
+      "function": "reserved_in_bin",
+      "also_accept": [
+        {
+          "file": "stockpile/inventory.py",
+          "start_line": 25,
+          "end_line": 25
+        },
+        {
+          "file": "stockpile/models.py",
+          "start_line": 76,
+          "end_line": 78
+        },
+        {
+          "file": "stockpile/reservations.py",
+          "start_line": 89,
+          "end_line": 98
+        },
+        {
+          "file": "tests/test_reservations.py",
+          "start_line": 65,
+          "end_line": 69
+        }
+      ]
+    }
+  ],
+  "also_accept": []
+}

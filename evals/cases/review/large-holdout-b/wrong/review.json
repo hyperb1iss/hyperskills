@@ -1,0 +1,29 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "stockroom/api.py",
+      "line": 150,
+      "blocking": true,
+      "title": "Reservations without warehouse_id bypass the warehouse scope",
+      "trigger": "A key scoped to east omits warehouse_id; the fallback uses every warehouse.",
+      "impact": "Holds stock in warehouses the key cannot access."
+    },
+    {
+      "file": "stockroom/picking.py",
+      "line": 13,
+      "blocking": true,
+      "title": "Walk order now beats receipt date in pick_sequence",
+      "trigger": "An older lot in a higher pick_order bin is picked after a newer lot.",
+      "impact": "Oldest-first rotation is lost for picks and reservations."
+    },
+    {
+      "file": "stockroom/reports.py",
+      "line": 21,
+      "blocking": false,
+      "title": "low_stock changed meaning",
+      "trigger": "A fully reserved SKU now appears in the low-stock list.",
+      "impact": "Intended per the description; worth a note for the purchasing team."
+    }
+  ]
+}

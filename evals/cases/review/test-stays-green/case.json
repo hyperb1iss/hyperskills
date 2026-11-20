@@ -6,6 +6,7 @@
   "trap": "test-stays-green",
   "defect": {"file": "teamdir/service.py", "start_line": 20, "end_line": 25, "function": "update_profile"},
   "also_accept": [
+    {"file": "teamdir/service.py", "start_line": 15, "end_line": 17},
     {"file": "tests/test_service.py", "start_line": 64, "end_line": 68}
   ]
 }
