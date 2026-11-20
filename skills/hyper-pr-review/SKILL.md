@@ -174,7 +174,7 @@ Posting comments, submitting approval, requesting changes on GitHub, or contacti
 
 ## Research Basis
 
-Reviewed 2026-09-04 and 2026-10-27; sources and their limits are in `references/evidence.md`.
+Reviewed 2026-09-04, 2026-10-27, and 2026-11-20; sources and their limits are in `references/evidence.md`.
 
 ## Anti-Patterns
 
