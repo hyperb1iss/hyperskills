@@ -102,7 +102,7 @@ A latency delta would require measurements. An edit must not turn that sentence 
 | R19 | Invented concept labels               | Define a useful new concept or use the established term; a label coined mid-work is new to the reader                 |
 | R20 | Forced metaphor                       | Keep imagery that serves the author's purpose; remove decorative domain-word reuse                                    |
 | R21 | Importance flag                       | State the consequence that "this matters" points at, or cut the flag when the sentence already has it                 |
-| R22 | Tradeoff denial                       | Keep "X without sacrificing Y" when the source shows both; otherwise state the supported property                     |
+| R22 | Tradeoff denial                       | Keep `X without sacrificing Y` when the source shows both; otherwise state the supported property                     |
 | R23 | Vague relation                        | Write the actual relation when the source gives one; keep "associated with" when association is all that was measured |
 
 A vague draft such as `A powerful, seamless CLI that makes deployment effortless` supports the limited rewrite `A deployment CLI`. A single-command workflow or a claim that cluster access is unnecessary needs additional source evidence.
