@@ -78,6 +78,24 @@ class MetadataTests(unittest.TestCase):
         )
         self.assertEqual(self.snapshot(), before)
 
+    def test_case_fixture_directories_are_summarized(self):
+        self.write("evals/cases/README.md", "cases")
+        self.write("evals/cases/review/grade.py", "grader")
+        self.write("evals/cases/review/edge/prompt.md", "prompt")
+        self.write("evals/cases/review/edge/fixture/pkg/core.py", "code")
+        self.write("evals/cases/review/edge/fixture/pkg/util.py", "code")
+        self.write("evals/cases/seed/fixture/one.py", "code")
+        self.write("evals/other/deep/nested/file.md", "kept")
+        synchronize(self.root)
+        tree = (self.root / "AGENTS.md").read_text()
+        self.assertIn("edge/ (3 files)", tree)
+        self.assertIn("fixture/ (1 file)", tree)
+        self.assertIn("grade.py", tree)
+        self.assertNotIn("core.py", tree)
+        self.assertNotIn("one.py", tree)
+        self.assertIn("file.md", tree)
+        self.assertEqual(synchronize(self.root, check=True), [])
+
     def test_idempotent_sorted_generation_preserves_prose(self):
         self.write("skills/alpha/references/guide.md", "reference")
         self.write("skills/alpha/references/fixtures/example.txt", "fixture")
