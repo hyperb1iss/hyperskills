@@ -103,6 +103,30 @@ class ReaderStageTests(unittest.TestCase):
         self.assertIsNone(result['cost_usd'])
         self.assertEqual(result['cost_missing_repeats'], 1)
 
+    def test_duplicate_keys_and_booleans_are_invalid_repeats(self):
+        binary = self.fake([
+            event('{"a": 0, "a": 1, "b": 2, "c": 0}'),
+            event('{"a": 1, "a": 0, "b": 2, "c": 0}'),
+            event('{"a": false, "a": 1, "b": 2, "c": 0}'),
+            event('{"a": true, "b": 2, "c": 0}'),
+            event('{"a": 1, "b": 2, "c": 0}'),
+        ])
+        result = self.ask(binary, 5)
+        self.assertEqual((result['valid_repeats'], result['invalid_repeats']), (1, 4))
+        self.assertEqual(result['accuracy'], 1.0)
+        errors = [r['error'] for r in result['repeats'][:4]]
+        self.assertEqual(errors[:3], ['reader output repeats a question id'] * 3)
+        self.assertEqual(errors[3], 'reader chose an invalid option for a')
+        self.assertTrue(all(r['answers'] is None and r['accuracy'] is None for r in result['repeats'][:4]))
+
+    def test_questions_reject_boolean_answers_and_duplicate_keys(self):
+        for body in ('{"version": 1, "questions": [{"id": "a", "question": "Q?", "options": ["x", "y", "%s"], "answer": true}]}' % MOD.NOT_STATED,
+                     '{"version": 1, "questions": [{"id": "a", "question": "Q?", "options": ["x", "y", "%s"], "answer": 0, "answer": 1}]}' % MOD.NOT_STATED):
+            with self.subTest(body=body):
+                self.questions.write_text(body)
+                with self.assertRaises(ValueError):
+                    MOD.load_questions(self.questions)
+
     def test_version_mismatch_refuses_before_any_reader_call(self):
         binary = self.fake([event('{"a": 1, "b": 2, "c": 0}')])
         with self.assertRaisesRegex(ValueError, 'CLI version mismatch'):

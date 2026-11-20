@@ -55,7 +55,7 @@ def sha256(data: bytes) -> str:
 
 
 def load_questions(path) -> list[dict]:
-    data = json.loads(Path(path).read_text(encoding='utf-8'))
+    data = json.loads(Path(path).read_text(encoding='utf-8'), object_pairs_hook=unique_object)
     questions = data.get('questions') if isinstance(data, dict) else None
     if not isinstance(questions, list) or not questions:
         raise ValueError(f'{path}: questions must be a nonempty list')
@@ -89,6 +89,18 @@ def build_prompt(text: str, questions: list[dict]) -> str:
     return '\n'.join(lines) + '\n'
 
 
+class DuplicateKeyError(ValueError):
+    pass
+
+
+def unique_object(pairs):
+    # json.loads keeps the last duplicate silently; an ambiguous object must fail instead.
+    keys = [key for key, _ in pairs]
+    if len(keys) != len(set(keys)):
+        raise DuplicateKeyError('JSON object repeats a key')
+    return dict(pairs)
+
+
 def parse_answers(raw, questions: list[dict]) -> dict:
     if not isinstance(raw, str):
         raise ValueError('reader returned no text')
@@ -97,7 +109,9 @@ def parse_answers(raw, questions: list[dict]) -> dict:
     if fenced:
         body = fenced.group(1).strip()
     try:
-        answers = json.loads(body)
+        answers = json.loads(body, object_pairs_hook=unique_object)
+    except DuplicateKeyError:
+        raise ValueError('reader output repeats a question id') from None
     except ValueError:
         raise ValueError('reader output is not JSON') from None
     if not isinstance(answers, dict):
