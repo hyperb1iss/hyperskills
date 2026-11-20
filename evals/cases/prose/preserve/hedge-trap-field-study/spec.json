@@ -20,67 +20,157 @@
   "calibrations": [
     {
       "label": "in this sample",
-      "patterns": ["\\bin (?:this|our|the) sample\\b", "\\b(?:this|our) sample\\b", "\\bsampled\\b"]
+      "patterns": [
+        "\\bin (?:this|our|the) sample\\b",
+        "\\b(?:this|our) sample\\b",
+        "\\bsampled\\b",
+        "\\b(?:this|our) study\\b",
+        "\\bstudied\\b"
+      ],
+      "accepts": [
+        "In our sample of 412 seedlings, mulching was associated with higher survival.",
+        "Among the 412 seedlings sampled, survival was higher with mulch.",
+        "In this study, mulched plots had higher survival.",
+        "Across the 412 seedlings we studied, survival was higher with mulch."
+      ],
+      "rejects": [
+        "Mulching increases 120-day survival.",
+        "Across 412 seedlings, mulching increased survival."
+      ]
     },
     {
       "label": "associated with",
       "patterns": [
-        "associated with",
-        "correlated with",
-        "coincided with",
-        "linked to",
+        "\\bassociat(?:ed|ion)\\b",
+        "\\bcorrelat",
+        "\\bcoincid",
+        "\\blinked (?:to|with)\\b",
+        "\\btrack(?:s|ed)? (?:with|alongside)\\b",
         "\\btracked\\b",
-        "lined up with",
-        "corresponded with",
-        "co-occurred with"
+        "\\blined up with\\b",
+        "\\bcorrespond(?:s|ed)? (?:to|with)\\b",
+        "\\bco-occur"
+      ],
+      "accepts": [
+        "Mulching was correlated with higher survival.",
+        "Mulching coincided with higher survival.",
+        "Higher survival was linked to mulching.",
+        "We found an association between mulching and survival."
+      ],
+      "rejects": [
+        "Mulching increased survival.",
+        "Mulching caused higher survival.",
+        "Survival improved because of mulching."
       ]
     },
     {
       "label": "may reflect",
       "patterns": [
-        "\\b(?:may|might|could)\\s+(?:reflect|be due to|come from|stem from|result from|be explained by|arise from|indicate)\\b",
-        "\\bpossibly\\b",
-        "\\bperhaps\\b"
+        "\\b(?:may|might|could)\\s+(?:\\w+\\s+){0,2}?(?:reflect|due to|come from|stem from|result from|explained by|arise from|indicate|driven by|attributable to|caused by)\\b",
+        "\\bpossibl",
+        "\\bperhaps\\b",
+        "\\bpotentially\\b",
+        "\\bplausibl",
+        "\\bone (?:possible |plausible )?explanation\\b",
+        "\\b(?:appears|seems) to (?:reflect|come from|stem from)\\b"
+      ],
+      "accepts": [
+        "The difference could be explained by reduced frost heave.",
+        "The difference possibly reflects reduced frost heave.",
+        "One explanation is reduced frost heave.",
+        "The difference may be driven by reduced frost heave."
+      ],
+      "rejects": [
+        "The gain comes from reduced frost heave.",
+        "Reduced frost heave explains the difference.",
+        "The difference likely reflects reduced frost heave."
       ]
     },
     {
       "label": "did not measure",
       "patterns": [
-        "(?:did not|didn't) (?:directly )?measure",
-        "(?:was|were) not (?:directly )?measured",
-        "(?:wasn't|weren't) (?:directly )?measured",
-        "not directly measured",
-        "no direct measurement",
-        "unmeasured"
+        "\\b(?:did not|didn't|could not|couldn't) (?:directly )?measure",
+        "\\b(?:was|were|is|are) not (?:directly )?(?:measured|captured|recorded|instrumented)",
+        "\\b(?:wasn't|weren't|isn't|aren't) (?:directly )?(?:measured|captured|recorded|instrumented)",
+        "\\bnever (?:directly )?(?:measured|captured|recorded)",
+        "\\bnot directly measured\\b",
+        "\\bno (?:direct )?(?:measurement|data)\\b",
+        "\\black(?:s|ed)? (?:a )?(?:direct )?(?:measure|measurement|data)",
+        "\\bunmeasured\\b",
+        "\\b(?:did not|didn't) (?:directly )?(?:capture|record|instrument)"
+      ],
+      "accepts": [
+        "We did not measure soil temperature or nitrogen.",
+        "Soil temperature and nitrogen were not measured.",
+        "We have no data on soil temperature or nitrogen.",
+        "We didn't record soil temperature or nitrogen."
+      ],
+      "rejects": [
+        "Soil temperature and nitrogen were outside the scope of this analysis.",
+        "We measured soil temperature and nitrogen."
       ]
     },
     {
       "label": "not statistically distinguishable",
       "patterns": [
-        "not statistically distinguishable",
-        "not distinguishable from zero",
-        "indistinguishable from zero",
-        "not statistically significant",
-        "not significant",
-        "no (?:statistically )?(?:significant|detectable)"
+        "\\bnot statistically distinguishable",
+        "\\bnot distinguishable from zero",
+        "\\bindistinguishable from zero",
+        "\\b(?:could not|couldn't|cannot|can't) be distinguished from zero",
+        "\\bnot (?:statistically )?significant",
+        "\\bno (?:statistically )?(?:significant|detectable|clear)\\b",
+        "\\b(?:includes|spans|crosses|overlaps|contains|straddles) zero\\b",
+        "\\bconsistent with (?:no|zero) (?:effect|difference|gain)\\b"
+      ],
+      "accepts": [
+        "The gain was not statistically significant.",
+        "The confidence interval includes zero.",
+        "The gain could not be distinguished from zero.",
+        "There was no detectable gain on north-facing plots."
+      ],
+      "rejects": [
+        "The gain was smaller (95% CI, -4 to 11 percentage points).",
+        "The gain was smaller but significant."
       ]
     },
     {
       "label": "suggest, not establish",
       "patterns": [
-        "\\bsuggests?\\b",
-        "(?:do|does|did) not establish",
-        "(?:don't|doesn't) establish",
-        "\\bconsistent with\\b"
+        "\\bsuggest",
+        "\\b(?:do|does|did) not (?:establish|prove|show|demonstrate)\\b",
+        "\\b(?:don't|doesn't|didn't) (?:establish|prove|show|demonstrate)\\b",
+        "\\bconsistent with\\b",
+        "\\bcompatible with\\b",
+        "\\bpoints? to\\b",
+        "\\bhint",
+        "\\btentativ"
+      ],
+      "accepts": [
+        "These results suggest that mulching could help.",
+        "These results point to a benefit on similar slopes, but do not prove it.",
+        "These results are consistent with a benefit on similar slopes.",
+        "The results hint that mulching could improve establishment."
+      ],
+      "rejects": [
+        "These results demonstrate that mulching improves establishment.",
+        "These results show that mulching improves establishment."
       ]
     },
     {
       "label": "similar slopes",
       "patterns": [
-        "similar (?:exposed )?slopes",
-        "similar sites",
-        "comparable (?:exposed )?slopes",
-        "comparable sites"
+        "\\b(?:similar|comparable) (?:\\w+ )?(?:slopes?|sites?|terrain|conditions)\\b",
+        "\\b(?:slopes|sites) like (?:this|these|it|harrow ridge)\\b"
+      ],
+      "accepts": [
+        "Mulching could improve establishment on similar exposed slopes.",
+        "It could help on comparable sites.",
+        "It could help on slopes like this one.",
+        "It could help under similar conditions."
+      ],
+      "rejects": [
+        "Mulching improves establishment on exposed slopes.",
+        "Mulching improves establishment everywhere."
       ]
     }
   ],

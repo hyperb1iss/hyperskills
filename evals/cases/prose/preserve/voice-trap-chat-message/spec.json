@@ -4,9 +4,11 @@
   "surface": "team chat message",
   "protected": [
     "02:10",
-    ["tuesday", "Tuesday"],
+    "tuesday",
     ["3 extra columns", "three extra columns"],
-    "fix/import-cols",
+    {
+      "exact": "fix/import-cols"
+    },
     "column count",
     "after lunch",
     ["30 minutes", "30-minute", "half an hour"]

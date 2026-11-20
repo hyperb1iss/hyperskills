@@ -38,6 +38,9 @@ CONTRAST_FRAMES = (
 )
 NEGATORS = {'not', 'no', 'never', 'cannot', "can't", "don't", "doesn't", "didn't", "isn't", "wasn't",
             "aren't", "weren't", "won't", "hasn't", "haven't", 'nor', 'without'}
+# A negator only reaches words in its own sentence or clause. Closing quotes, brackets, and
+# emphasis markers may follow the punctuation; a decimal point never ends a sentence.
+SENTENCE_END = re.compile(r'[.!?;:]+["\')\]*_]*(?=\s|$)|\n+')
 
 
 class Unreadable(Exception):
@@ -101,11 +104,12 @@ def introduced_numbers(draft, edit):
 
 
 def certainty_counts(text, terms):
-    tokens = re.findall(r"[a-z]+(?:'[a-z]+)?", normalize(text).lower())
     counts = {term.lower(): 0 for term in terms}
-    for index, token in enumerate(tokens):
-        if token in counts and not NEGATORS.intersection(tokens[max(0, index - 3):index]):
-            counts[token] += 1
+    for sentence in SENTENCE_END.split(normalize(text).lower()):
+        tokens = re.findall(r"[a-z]+(?:'[a-z]+)?", sentence)
+        for index, token in enumerate(tokens):
+            if token in counts and not NEGATORS.intersection(tokens[max(0, index - 3):index]):
+                counts[token] += 1
     return counts
 
 
@@ -114,14 +118,32 @@ def certainty_added(draft, edit, terms):
     return {term: after[term] - before[term] for term in after if after[term] > before[term]}
 
 
+def protected_options(item):
+    """Return (spellings, exact). {"exact": ...} items are commands, code, identifiers,
+    quotations, or case-significant units; everything else is prose and ignores case."""
+    exact = isinstance(item, dict)
+    if exact:
+        if set(item) != {'exact'}:
+            raise ValueError(f'protected object needs only an "exact" key: {item}')
+        item = item['exact']
+    return ([item] if isinstance(item, str) else list(item)), exact
+
+
+def calibration_holds(patterns, text):
+    flat = flatten(text)
+    return any(re.search(pattern, flat, re.I) for pattern in patterns)
+
+
 def evaluate(spec, draft, edit):
     flat_draft, flat_edit = flatten(draft), flatten(edit)
     checks = {}
     for item in spec.get('protected', []):
-        options = [item] if isinstance(item, str) else item
-        checks[f'protected:{options[0]}'] = any(flatten(option) in flat_edit for option in options)
+        options, exact = protected_options(item)
+        haystack = flat_edit if exact else flat_edit.lower()
+        checks[f'protected:{options[0]}'] = any(
+            (flatten(option) if exact else flatten(option).lower()) in haystack for option in options)
     for item in spec.get('calibrations', []):
-        checks[f"calibration:{item['label']}"] = any(re.search(p, flat_edit, re.I) for p in item['patterns'])
+        checks[f"calibration:{item['label']}"] = calibration_holds(item['patterns'], edit)
     if spec.get('certainty_terms'):
         checks['no_certainty_upgrade'] = not certainty_added(draft, edit, spec['certainty_terms'])
     if spec.get('no_new_numbers'):

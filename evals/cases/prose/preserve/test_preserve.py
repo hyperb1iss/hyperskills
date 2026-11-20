@@ -141,6 +141,68 @@ class PreserveGraderTests(unittest.TestCase):
         self.assertEqual(g.flatten(curly), '"don\'t" - 3-4 weeks - -4')
         self.assertEqual(g.count(g.CONTRACTION, curly), 1)
 
+    def test_negation_does_not_cross_a_sentence_boundary(self):
+        probe = ' The investigation is not complete. Results prove the rollback fixes the problem.'
+        edit = edit_from('hedge-trap-postmortem', 'oracle').rstrip('\n') + probe + '\n'
+        result = grade('hedge-trap-postmortem', edit)
+        self.assertFalse(result['passed'])
+        self.assertIs(result['checks']['no_certainty_upgrade'], False)
+        self.assertEqual(result['metrics']['certainty_terms_added'], {'prove': 1})
+        g = grader_module()
+        self.assertEqual(g.certainty_added('', 'This does not prove it.', ['prove']), {})
+        self.assertEqual(g.certainty_added('', 'Not yet; this proves it.', ['proves']), {'proves': 1})
+        self.assertEqual(g.certainty_added('', 'We did not see 2.5 proven gains.', ['proven']), {})
+
+    def test_prose_terms_ignore_case_and_exact_items_do_not(self):
+        postmortem = edit_from('hedge-trap-postmortem', 'oracle')
+        bulleted = (postmortem
+                    .replace('The retry storm that followed', '- **Retry storm:** the storm that followed')
+                    .replace('the connection-pool change in build', 'the **Connection-pool change** in build'))
+        self.assertNotIn('retry storm', bulleted)
+        self.assertNotIn('connection-pool', bulleted)
+        result = grade('hedge-trap-postmortem', bulleted)
+        self.assertTrue(result['passed'], result)
+        status = edit_from('padded-slop-status-update', 'oracle')
+        command = grade('padded-slop-status-update', status.replace('`tidectl move', '`Tidectl move'))
+        self.assertFalse(command['passed'])
+        self.assertIs(command['checks']['protected:tidectl move --queue <name> --verify'], False)
+        quote = grade('padded-slop-status-update', status.replace('"Nothing gets', '"nothing gets'))
+        self.assertFalse(quote['passed'])
+        self.assertEqual([k for k, v in quote['checks'].items() if v is not True],
+                         ['protected:Nothing gets deleted from the old cluster until the verify step reports zero drift'])
+
+    def test_commitment_phrasing_keeps_the_claim_and_a_bare_estimate_does_not(self):
+        oracle = edit_from('padded-slop-status-update', 'oracle')
+        original = 'That is an estimate, not a guarantee; the timeline'
+        self.assertIn(original, oracle)
+        kept = grade('padded-slop-status-update', oracle.replace(original, 'This is an estimate, not a commitment. The timeline'))
+        self.assertTrue(kept['passed'], kept)
+        bare = grade('padded-slop-status-update', oracle.replace(original, 'This is an estimate. The timeline'))
+        self.assertFalse(bare['passed'])
+        self.assertIs(bare['checks']['calibration:not a guarantee'], False)
+        self.assertIs(bare['checks']['calibration:estimate'], True)
+
+    def test_calibration_examples_match_and_counterexamples_do_not(self):
+        g = grader_module()
+        for case in CASES:
+            for item in load_spec(case).get('calibrations', []):
+                with self.subTest(case=case, calibration=item['label']):
+                    self.assertGreaterEqual(len(item['accepts']), 3)
+                    self.assertTrue(item['rejects'])
+                    for text in item['accepts']:
+                        self.assertTrue(g.calibration_holds(item['patterns'], text), text)
+                    for text in item['rejects']:
+                        self.assertFalse(g.calibration_holds(item['patterns'], text), text)
+
+    def test_protected_items_are_strings_lists_or_exact_objects(self):
+        g = grader_module()
+        for case in CASES:
+            for item in load_spec(case)['protected']:
+                with self.subTest(case=case, item=item):
+                    options, exact = g.protected_options(item)
+                    self.assertTrue(options and all(isinstance(o, str) and o for o in options))
+                    self.assertEqual(exact, isinstance(item, dict))
+
 
 if __name__ == '__main__':
     unittest.main()

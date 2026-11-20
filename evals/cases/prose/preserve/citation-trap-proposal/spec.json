@@ -3,11 +3,21 @@
   "split": "holdout",
   "surface": "grant proposal section",
   "protected": [
-    "Halvorsen 2018",
-    "Ibarra 2020",
-    "Seppala 2017",
-    "Okonkwo-Reyes 2021",
-    "Marchetti 2022",
+    {
+      "exact": "Halvorsen 2018"
+    },
+    {
+      "exact": "Ibarra 2020"
+    },
+    {
+      "exact": "Seppala 2017"
+    },
+    {
+      "exact": "Okonkwo-Reyes 2021"
+    },
+    {
+      "exact": "Marchetti 2022"
+    },
     ["Figure 2", "Fig. 2"],
     "Table 1",
     "Callow Point",

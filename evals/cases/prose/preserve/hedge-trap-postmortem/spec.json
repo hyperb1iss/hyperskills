@@ -17,56 +17,137 @@
     {
       "label": "associated with",
       "patterns": [
-        "associated with",
-        "correlated with",
-        "coincided with",
-        "linked to",
+        "\\bassociat(?:ed|ion)\\b",
+        "\\bcorrelat",
+        "\\bcoincid",
+        "\\blinked (?:to|with)\\b",
+        "\\btrack(?:s|ed)? (?:with|alongside)\\b",
         "\\btracked\\b",
-        "lined up with",
-        "corresponded with",
-        "co-occurred with"
+        "\\blined up with\\b",
+        "\\bcorrespond(?:s|ed)? (?:to|with)\\b",
+        "\\bco-occur"
+      ],
+      "accepts": [
+        "Elevated p99 latency correlates with the connection-pool change.",
+        "Latency coincided with the connection-pool change.",
+        "We see an association between latency and the connection-pool change.",
+        "Latency lined up with build 4127."
+      ],
+      "rejects": [
+        "Latency was caused by the connection-pool change.",
+        "The connection-pool change resulted in elevated latency.",
+        "Latency rose due to build 4127."
       ]
     },
     {
       "label": "may have",
-      "patterns": ["\\b(?:may|might|could)(?: also)? have\\b", "\\bpossibly\\b", "\\bperhaps\\b"]
+      "patterns": [
+        "\\b(?:may|might|could)(?: also| well)? have\\b",
+        "\\bpossibl",
+        "\\bperhaps\\b",
+        "\\bpotentially\\b",
+        "\\b(?:appears|seems|appear|seem) to have\\b",
+        "\\bwe suspect\\b"
+      ],
+      "accepts": [
+        "The retry storm might have added roughly 20 minutes.",
+        "The retry storm possibly extended the incident.",
+        "It is possible the retry storm extended the incident.",
+        "The retry storm appears to have extended the incident.",
+        "We suspect the retry storm added about 20 minutes."
+      ],
+      "rejects": [
+        "The retry storm extended the incident by 20 minutes.",
+        "The retry storm likely extended the incident."
+      ]
     },
     {
       "label": "roughly 20 minutes",
       "patterns": [
-        "\\b(?:roughly|about|approximately|around|an estimated|an approximate)\\s+20\\b",
-        "~\\s?20\\b"
+        "\\b(?:roughly|about|approximately|approx\\.?|around|some|an estimated|an approximate)\\s+(?:20|twenty)\\b",
+        "~\\s?20\\b",
+        "\\b(?:20|twenty) minutes,? (?:or so|give or take)",
+        "\\bestimated (?:at )?(?:20|twenty)\\b",
+        "\\b(?:20|twenty)-odd\\b"
+      ],
+      "accepts": [
+        "It added about 20 minutes.",
+        "It added an estimated 20 minutes.",
+        "It added 20 minutes or so.",
+        "It added ~20 minutes.",
+        "It added some twenty minutes."
+      ],
+      "rejects": [
+        "It added 20 minutes.",
+        "It added exactly 20 minutes.",
+        "It added at least 20 minutes."
       ]
     },
     {
       "label": "did not measure",
       "patterns": [
-        "(?:did not|didn't) (?:directly )?measure",
-        "(?:was|were) not (?:directly )?measured",
-        "(?:wasn't|weren't) (?:directly )?measured",
-        "not directly measured",
-        "no direct measurement",
-        "unmeasured"
+        "\\b(?:did not|didn't|could not|couldn't) (?:directly )?measure",
+        "\\b(?:was|were|is|are) not (?:directly )?(?:measured|captured|recorded|instrumented)",
+        "\\b(?:wasn't|weren't|isn't|aren't) (?:directly )?(?:measured|captured|recorded|instrumented)",
+        "\\bnever (?:directly )?(?:measured|captured|recorded)",
+        "\\bnot directly measured\\b",
+        "\\bno (?:direct )?(?:measurement|data)\\b",
+        "\\black(?:s|ed)? (?:a )?(?:direct )?(?:measure|measurement|data)",
+        "\\bunmeasured\\b",
+        "\\b(?:did not|didn't) (?:directly )?(?:capture|record|instrument)"
+      ],
+      "accepts": [
+        "We did not measure retry volume directly.",
+        "Retry volume wasn't measured directly.",
+        "We have no direct measurement of retry volume.",
+        "We didn't capture retry volume during the window.",
+        "We lack a direct measure of retry volume."
+      ],
+      "rejects": [
+        "The figure comes from load-balancer logs.",
+        "We measured retry volume during the window."
       ]
     },
     {
       "label": "regions we sampled",
       "patterns": [
-        "regions we sampled",
-        "sampled regions",
-        "regions (?:that )?we (?:checked|tested|looked at)",
-        "\\bthree regions\\b",
-        "\\b3 regions\\b"
+        "\\bsampled\\b",
+        "\\bregions (?:that )?we (?:checked|tested|looked at|examined|measured)\\b",
+        "\\b(?:three|3) regions\\b",
+        "\\b(?:our|the) sample\\b"
+      ],
+      "accepts": [
+        "In the three regions we sampled, rollback restored p99.",
+        "In the sampled regions, rollback restored p99.",
+        "Across the 3 regions we checked, rollback restored p99.",
+        "In our sample, rollback restored p99."
+      ],
+      "rejects": [
+        "Rolling back the pool change restored p99 within 6 minutes.",
+        "In every region, rollback restored p99."
       ]
     },
     {
       "label": "not yet tested",
       "patterns": [
-        "not (?:yet )?(?:been )?tested",
-        "(?:haven't|hasn't) (?:yet )?(?:been )?tested",
+        "\\bnot (?:yet )?(?:been )?(?:tested|checked|verified|confirmed)",
+        "\\b(?:haven't|hasn't|have not|has not) (?:yet )?(?:been )?(?:tested|checked|verified|confirmed)",
         "\\buntested\\b",
-        "(?:haven't|hasn't|have not|has not) (?:yet )?(?:checked|verified|confirmed)",
-        "not yet (?:checked|verified|confirmed)"
+        "\\bunverified\\b",
+        "\\b(?:don't|do not) (?:yet )?know\\b",
+        "\\bnot (?:yet )?known\\b",
+        "\\bunknown\\b",
+        "\\bopen question\\b"
+      ],
+      "accepts": [
+        "We haven't tested the two drained regions yet.",
+        "The two drained regions remain untested.",
+        "We don't know yet whether the same holds for the two drained regions.",
+        "Whether the same holds for the two drained regions is not yet known."
+      ],
+      "rejects": [
+        "The same fix will hold for the two drained regions.",
+        "The fix also works for the two drained regions."
       ]
     }
   ],

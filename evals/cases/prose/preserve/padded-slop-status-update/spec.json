@@ -5,34 +5,77 @@
   "protected": [
     ["1,840", "1840"],
     ["2,300", "2300"],
-    ["38 ms", "38ms"],
-    ["11 ms", "11ms"],
+    {
+      "exact": ["38 ms", "38ms"]
+    },
+    {
+      "exact": ["11 ms", "11ms"]
+    },
     ["22%", "22 percent"],
     "460",
     ["3 to 4 weeks", "3-4 weeks", "three to four weeks"],
-    "tidectl move --queue <name> --verify",
+    {
+      "exact": "tidectl move --queue <name> --verify"
+    },
     "ops bastion",
-    "Nothing gets deleted from the old cluster until the verify step reports zero drift",
+    {
+      "exact": "Nothing gets deleted from the old cluster until the verify step reports zero drift"
+    },
     "platform lead",
     "retry audit"
   ],
   "calibrations": [
     {
       "label": "estimate",
-      "patterns": ["\\bestimat", "\\bexpect", "\\bprojected\\b", "\\bforecast"]
+      "patterns": [
+        "\\bestimat",
+        "\\bexpect",
+        "\\bproject(?:ed|ion)\\b",
+        "\\bforecast",
+        "\\bbest guess\\b",
+        "\\bshould take\\b",
+        "\\b(?:about|roughly|around|approximately|~) ?(?:3|three) ?(?:to|-) ?(?:4|four)\\b"
+      ],
+      "accepts": [
+        "This is an estimate.",
+        "We expect the remaining 460 queues to move in 3 to 4 weeks.",
+        "Our best guess is 3 to 4 weeks for the remaining 460 queues.",
+        "The remaining 460 queues should take about 3 to 4 weeks."
+      ],
+      "rejects": [
+        "The remaining 460 queues will move in 3 to 4 weeks.",
+        "The remaining 460 queues are scheduled to finish within 3 to 4 weeks."
+      ]
     },
     {
       "label": "not a guarantee",
       "patterns": [
-        "not a guarantee",
-        "no guarantee",
-        "not guaranteed",
-        "isn't guaranteed",
-        "(?:can't|cannot|can not) guarantee",
-        "not a promise",
-        "isn't a promise",
-        "no promise",
-        "not promised"
+        "\\bnot (?:a |any )?guarantee",
+        "\\bno guarantee",
+        "\\bisn't (?:a )?guarantee",
+        "\\b(?:can't|cannot|can not|won't) (?:guarantee|promise|commit)",
+        "\\b(?:not|isn't|no) (?:a |an )?(?:firm |hard )?(?:promise|commitment|deadline)",
+        "\\bnot (?:promised|committed)\\b",
+        "\\bnot a (?:firm|hard) date\\b",
+        "\\b(?:not|isn't) final",
+        "\\bnot set in stone\\b",
+        "\\bsubject to change\\b"
+      ],
+      "accepts": [
+        "This is an estimate, not a commitment.",
+        "That is an estimate, not a guarantee.",
+        "No promises on the date.",
+        "Treat it as a forecast, not a firm date.",
+        "The date isn't final.",
+        "We can't guarantee it.",
+        "It is not a deadline.",
+        "Nothing is committed yet, so this is not committed."
+      ],
+      "rejects": [
+        "This is an estimate.",
+        "This is a firm date.",
+        "The date is guaranteed.",
+        "This is a commitment."
       ]
     },
     {
@@ -40,7 +83,21 @@
       "patterns": [
         "\\b(?:may|might|could)\\b(?:\\s+\\w+){0,2}\\s+(?:shift|slip|change|move|slide|stretch|extend|grow)",
         "\\b(?:may|might|could)\\b(?:\\s+\\w+){0,2}\\s+(?:be later|take longer|run longer|run over)",
-        "subject to change"
+        "\\bsubject to change\\b",
+        "\\bdelay",
+        "\\bslip(?:s|ped|page)?\\b",
+        "\\b(?:take|run) longer\\b",
+        "\\bpush(?:es|ed)? (?:\\w+ ){0,2}(?:out|back)\\b"
+      ],
+      "accepts": [
+        "The timeline could slip if the retry audit finds problems.",
+        "Problems in the retry audit would delay it.",
+        "If the retry audit turns up problems, it will take longer.",
+        "The date may shift if the retry audit turns up problems."
+      ],
+      "rejects": [
+        "The remaining 460 queues will move in 3 to 4 weeks, after the retry audit.",
+        "The retry audit will not change the date."
       ]
     }
   ],

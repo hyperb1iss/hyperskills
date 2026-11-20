@@ -35,7 +35,13 @@ The two padded-slop drafts contain em dashes and curly quotes on purpose, becaus
 
 `grade.py CASE WORKSPACE` reads `CASE/spec.json` and the trusted `CASE/fixture/draft.md`, then grades `WORKSPACE/edited.md`. It prints one JSON object with `passed`, `checks`, `metrics`, `trap`, `grading_scope`, and `requires_human_review: true`. Every case also checks that `draft.md` is byte-identical to the fixture. A missing, empty, or undecodable `edited.md` fails with `edited_readable: false` and an `error` saying which.
 
-Matching runs after typographic normalization (curly quotes to straight, en and em dashes and the minus sign to a hyphen, non-breaking space to space) and whitespace collapse, so rewrapping or retyping punctuation does not fail a protected string. Protected strings are case-sensitive substrings; a list entry accepts any of its spellings. Calibrations are case-insensitive regular expressions. Certainty words are counted per word form against the draft; an occurrence within three words after a negator ("not", "didn't", "without", and similar) does not count, so "this does not prove" stays legal.
+Matching runs after typographic normalization (curly quotes to straight, en and em dashes and the minus sign to a hyphen, non-breaking space to space) and whitespace collapse, so rewrapping or retyping punctuation does not fail a protected string.
+
+A protected item is a string, a list of accepted spellings, or an object `{"exact": ...}` holding either. Plain items are prose terms and match case-insensitively, so turning "retry storm" into a bold lead "**Retry storm:**" keeps the fact. Items wrapped in `exact` match case-sensitively: commands, code, identifiers (citation keys, versions, branch names), direct quotations, and quantities whose unit changes meaning with case ("8 MB" against "8 Mb"). The spec author makes that call per item; the grader never infers it.
+
+Calibrations are case-insensitive regular expressions. Each calibration also lists `accepts`, natural phrasings that keep the claim, and `rejects`, phrasings that drop or strengthen it; the tests run every pattern list against both, so widening a list cannot silently admit a rejected phrasing.
+
+Certainty words are counted per word form against the draft. An occurrence within three words after a negator ("not", "didn't", "without", and similar) in the same sentence or clause does not count, so "this does not prove" stays legal while "The investigation is not complete. Results prove the fix works." does not.
 
 `metrics` is reported for every case and never affects `passed`:
 
@@ -52,7 +58,9 @@ Matching runs after typographic normalization (curly quotes to straight, en and 
 
 A pass means the checks in the spec held: the listed strings survived, the listed hedges or an allowed equivalent survived, and the length, number, and voice limits held. It does not establish that the edit is better writing, that unlisted facts survived, that a surviving hedge still attaches to the right claim, or that the edit is coherent. Word salad that contains every protected string passes the citation-trap. Pair these results with blind human preference before claiming a skill improves prose, as the [protocol](../../../PROTOCOL.md) requires.
 
-A fail is more specific than a pass, but allowed-equivalent lists are finite. A correct edit can phrase a hedge in a way the list does not anticipate. Before counting such a fail, read the diff; if the grader is wrong, record it as a grader defect and widen the list in a new revision rather than mid-run.
+A fail is more specific than a pass, but allowed-equivalent lists are finite. A correct edit can phrase a hedge in a way the list does not anticipate. Before counting such a fail, read the diff; if the grader is wrong, record it as a grader defect and widen the list in a new revision rather than mid-run. Add the missed phrasing to `accepts` when widening, and check that every `rejects` entry still fails.
+
+Equivalents admit phrasings of the same strength and exclude stronger ones. "Not a commitment" keeps "not a guarantee"; "likely" does not keep "may", because it raises the probability the draft claimed.
 
 ## Thresholds and why
 
@@ -80,4 +88,4 @@ When running trials, only `fixture/` belongs in the agent's workspace. Keep `spe
 python3 evals/cases/prose/preserve/test_preserve.py
 ```
 
-The tests check that every oracle passes, every wrong edit fails on the checks named in its `wrong_must_fail`, an unchanged copy passes the voice-trap cases and fails the padded-slop cases, every spec string and pattern matches its own draft, a modified `draft.md` fails, and missing, empty, or unknown inputs fail with a readable error. They also pin the metric patterns on small examples.
+The tests check that every oracle passes, every wrong edit fails on the checks named in its `wrong_must_fail`, an unchanged copy passes the voice-trap cases and fails the padded-slop cases, every spec string and pattern matches its own draft, a modified `draft.md` fails, and missing, empty, or unknown inputs fail with a readable error. They run every calibration's `accepts` and `rejects`, and pin three regressions: a negator in one sentence must not excuse a certainty word in the next, a recased prose term passes while a recased command or quotation fails, and "not a commitment" keeps the estimate's hedge while a bare "This is an estimate." does not. They also pin the metric patterns on small examples.
