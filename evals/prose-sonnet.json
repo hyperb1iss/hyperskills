@@ -1,0 +1,177 @@
+{
+  "version": 1,
+  "name": "prose-editing",
+  "skills_root": "../skills",
+  "configurations": [
+    {
+      "id": "claude-file-tools-sonnet",
+      "model": "claude-sonnet-5-5",
+      "harness": "Claude Code 2.1.329; controlled-file-tools-catalog",
+      "adapter": ["python3", "../scripts/eval_claude.py"],
+      "adapter_inputs": ["../scripts/eval_trace.py"],
+      "settings": {
+        "effort": "high",
+        "claude_version": "2.1.329 (Claude Code)",
+        "expected_served_models": ["claude-sonnet-5-5"]
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "id": "prose-reader-handoff-report",
+      "family": "prose-reader",
+      "split": "development",
+      "prompt": "cases/prose/reader/handoff-report/prompt.md",
+      "fixture": "cases/prose/reader/handoff-report/fixture",
+      "skills": ["deslop"],
+      "grader": ["python3", "cases/prose/reader/grade.py", "handoff-report"],
+      "grader_inputs": [
+        "cases/prose/reader/handoff-report/fixture",
+        "cases/prose/reader/handoff-report/protected.json"
+      ]
+    },
+    {
+      "id": "prose-reader-status-update",
+      "family": "prose-reader",
+      "split": "development",
+      "prompt": "cases/prose/reader/status-update/prompt.md",
+      "fixture": "cases/prose/reader/status-update/fixture",
+      "skills": ["deslop"],
+      "grader": ["python3", "cases/prose/reader/grade.py", "status-update"],
+      "grader_inputs": [
+        "cases/prose/reader/status-update/fixture",
+        "cases/prose/reader/status-update/protected.json"
+      ]
+    },
+    {
+      "id": "prose-reader-review-reply",
+      "family": "prose-reader",
+      "split": "holdout",
+      "prompt": "cases/prose/reader/review-reply/prompt.md",
+      "fixture": "cases/prose/reader/review-reply/fixture",
+      "skills": ["deslop"],
+      "grader": ["python3", "cases/prose/reader/grade.py", "review-reply"],
+      "grader_inputs": [
+        "cases/prose/reader/review-reply/fixture",
+        "cases/prose/reader/review-reply/protected.json"
+      ]
+    },
+    {
+      "id": "prose-reader-incident-summary",
+      "family": "prose-reader",
+      "split": "holdout",
+      "prompt": "cases/prose/reader/incident-summary/prompt.md",
+      "fixture": "cases/prose/reader/incident-summary/fixture",
+      "skills": ["deslop"],
+      "grader": ["python3", "cases/prose/reader/grade.py", "incident-summary"],
+      "grader_inputs": [
+        "cases/prose/reader/incident-summary/fixture",
+        "cases/prose/reader/incident-summary/protected.json"
+      ]
+    },
+    {
+      "id": "prose-preserve-padded-slop-status-update",
+      "family": "prose-preserve",
+      "split": "development",
+      "prompt": "cases/prose/preserve/padded-slop-status-update/prompt.md",
+      "fixture": "cases/prose/preserve/padded-slop-status-update/fixture",
+      "skills": ["deslop"],
+      "grader": ["python3", "cases/prose/preserve/grade.py", "padded-slop-status-update"],
+      "grader_inputs": [
+        "cases/prose/preserve/padded-slop-status-update/fixture",
+        "cases/prose/preserve/padded-slop-status-update/spec.json"
+      ]
+    },
+    {
+      "id": "prose-preserve-citation-trap-related-work",
+      "family": "prose-preserve",
+      "split": "development",
+      "prompt": "cases/prose/preserve/citation-trap-related-work/prompt.md",
+      "fixture": "cases/prose/preserve/citation-trap-related-work/fixture",
+      "skills": ["deslop"],
+      "grader": ["python3", "cases/prose/preserve/grade.py", "citation-trap-related-work"],
+      "grader_inputs": [
+        "cases/prose/preserve/citation-trap-related-work/fixture",
+        "cases/prose/preserve/citation-trap-related-work/spec.json"
+      ]
+    },
+    {
+      "id": "prose-preserve-voice-trap-chat-message",
+      "family": "prose-preserve",
+      "split": "development",
+      "prompt": "cases/prose/preserve/voice-trap-chat-message/prompt.md",
+      "fixture": "cases/prose/preserve/voice-trap-chat-message/fixture",
+      "skills": ["deslop"],
+      "grader": ["python3", "cases/prose/preserve/grade.py", "voice-trap-chat-message"],
+      "grader_inputs": [
+        "cases/prose/preserve/voice-trap-chat-message/fixture",
+        "cases/prose/preserve/voice-trap-chat-message/spec.json"
+      ]
+    },
+    {
+      "id": "prose-preserve-hedge-trap-postmortem",
+      "family": "prose-preserve",
+      "split": "development",
+      "prompt": "cases/prose/preserve/hedge-trap-postmortem/prompt.md",
+      "fixture": "cases/prose/preserve/hedge-trap-postmortem/fixture",
+      "skills": ["deslop"],
+      "grader": ["python3", "cases/prose/preserve/grade.py", "hedge-trap-postmortem"],
+      "grader_inputs": [
+        "cases/prose/preserve/hedge-trap-postmortem/fixture",
+        "cases/prose/preserve/hedge-trap-postmortem/spec.json"
+      ]
+    },
+    {
+      "id": "prose-preserve-padded-slop-help-article",
+      "family": "prose-preserve",
+      "split": "holdout",
+      "prompt": "cases/prose/preserve/padded-slop-help-article/prompt.md",
+      "fixture": "cases/prose/preserve/padded-slop-help-article/fixture",
+      "skills": ["deslop"],
+      "grader": ["python3", "cases/prose/preserve/grade.py", "padded-slop-help-article"],
+      "grader_inputs": [
+        "cases/prose/preserve/padded-slop-help-article/fixture",
+        "cases/prose/preserve/padded-slop-help-article/spec.json"
+      ]
+    },
+    {
+      "id": "prose-preserve-citation-trap-proposal",
+      "family": "prose-preserve",
+      "split": "holdout",
+      "prompt": "cases/prose/preserve/citation-trap-proposal/prompt.md",
+      "fixture": "cases/prose/preserve/citation-trap-proposal/fixture",
+      "skills": ["deslop"],
+      "grader": ["python3", "cases/prose/preserve/grade.py", "citation-trap-proposal"],
+      "grader_inputs": [
+        "cases/prose/preserve/citation-trap-proposal/fixture",
+        "cases/prose/preserve/citation-trap-proposal/spec.json"
+      ]
+    },
+    {
+      "id": "prose-preserve-voice-trap-volunteer-email",
+      "family": "prose-preserve",
+      "split": "holdout",
+      "prompt": "cases/prose/preserve/voice-trap-volunteer-email/prompt.md",
+      "fixture": "cases/prose/preserve/voice-trap-volunteer-email/fixture",
+      "skills": ["deslop"],
+      "grader": ["python3", "cases/prose/preserve/grade.py", "voice-trap-volunteer-email"],
+      "grader_inputs": [
+        "cases/prose/preserve/voice-trap-volunteer-email/fixture",
+        "cases/prose/preserve/voice-trap-volunteer-email/spec.json"
+      ]
+    },
+    {
+      "id": "prose-preserve-hedge-trap-field-study",
+      "family": "prose-preserve",
+      "split": "holdout",
+      "prompt": "cases/prose/preserve/hedge-trap-field-study/prompt.md",
+      "fixture": "cases/prose/preserve/hedge-trap-field-study/fixture",
+      "skills": ["deslop"],
+      "grader": ["python3", "cases/prose/preserve/grade.py", "hedge-trap-field-study"],
+      "grader_inputs": [
+        "cases/prose/preserve/hedge-trap-field-study/fixture",
+        "cases/prose/preserve/hedge-trap-field-study/spec.json"
+      ]
+    }
+  ]
+}

@@ -16,21 +16,21 @@ answers are scored against a key.
 
 Each case directory holds:
 
-| Path | Visible to the editor | Purpose |
-| --- | --- | --- |
-| `fixture/notes.md` | yes | Working log where the labels were coined and the facts live |
-| `fixture/draft.md` | yes | The artifact to edit; it leans on `notes.md` for meaning |
-| `prompt.md` | yes | Edit request naming the reader; it does not name the defect |
-| `questions.json` | no | Six to eight questions, four substantive options plus "The text does not say", key always substantive |
-| `oracle/edited.md` | no | Reference edit that resolves every label using only facts from `notes.md` |
-| `protected.json` | no | Strings that must survive verbatim |
+| Path               | Visible to the editor | Purpose                                                                                               |
+| ------------------ | --------------------- | ----------------------------------------------------------------------------------------------------- |
+| `fixture/notes.md` | yes                   | Working log where the labels were coined and the facts live                                           |
+| `fixture/draft.md` | yes                   | The artifact to edit; it leans on `notes.md` for meaning                                              |
+| `prompt.md`        | yes                   | Edit request naming the reader; it does not name the defect                                           |
+| `questions.json`   | no                    | Six to eight questions, four substantive options plus "The text does not say", key always substantive |
+| `oracle/edited.md` | no                    | Reference edit that resolves every label using only facts from `notes.md`                             |
+| `protected.json`   | no                    | Strings that must survive verbatim                                                                    |
 
-| Case | Split | Surface |
-| --- | --- | --- |
-| `handoff-report` | development | Agent end-of-task handoff, dense and compressed |
-| `status-update` | development | Team chat status update, padded in the older chatbot style |
-| `review-reply` | holdout | Reply to code review comments |
-| `incident-summary` | holdout | Incident summary for someone outside the incident |
+| Case               | Split       | Surface                                                    |
+| ------------------ | ----------- | ---------------------------------------------------------- |
+| `handoff-report`   | development | Agent end-of-task handoff, dense and compressed            |
+| `status-update`    | development | Team chat status update, padded in the older chatbot style |
+| `review-reply`     | holdout     | Reply to code review comments                              |
+| `incident-summary` | holdout     | Incident summary for someone outside the incident          |
 
 Task ids in a manifest are `prose-reader-<case>`, family `prose-reader`.
 
@@ -85,12 +85,12 @@ calls run at once (default 4).
 Checked 2026-11-20 with `claude-haiku-5-5` on Claude Code 2.1.329, three
 repeats each, every repeat valid:
 
-| Case | Draft accuracy | Oracle accuracy |
-| --- | --- | --- |
-| `handoff-report` | 0.00 | 1.00 |
-| `status-update` | 0.00 | 1.00 |
-| `review-reply` | 0.00 | 1.00 |
-| `incident-summary` | 0.00 | 1.00 |
+| Case               | Draft accuracy | Oracle accuracy |
+| ------------------ | -------------- | --------------- |
+| `handoff-report`   | 0.00           | 1.00            |
+| `status-update`    | 0.00           | 1.00            |
+| `review-reply`     | 0.00           | 1.00            |
+| `incident-summary` | 0.00           | 1.00            |
 
 On every draft the reader chose "The text does not say" for all questions.
 Rewrites of the two development drafts that fixed style but kept the coined
