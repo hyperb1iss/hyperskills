@@ -43,6 +43,8 @@ The task measures evidence interpretation, not browsing performance. The review
 fixture supplies its contract explicitly so its grader does not impose an
 unstated preference.
 
+Two prose families live beside these seeds and have their own notes: [prose-preserve](prose/preserve/README.md), which checks what an edit must not break, and [prose-reader](prose/reader/README.md), which scores an edit with a reader task. Each has development and holdout cases.
+
 Run the grader regression checks with:
 
 ```sh

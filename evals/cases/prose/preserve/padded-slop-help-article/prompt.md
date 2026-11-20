@@ -1,0 +1,1 @@
+Rewrite the help-center article in draft.md into edited.md for customers who are upgrading their desktop client. Cut the fluff, but keep every fact, the command, and the quoted advice. Don't modify draft.md.

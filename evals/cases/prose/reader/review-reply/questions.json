@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "questions": [
+    {
+      "id": "q1",
+      "question": "Why was the second option for placing the clamp rejected?",
+      "options": [
+        "It would need the backfill to land first",
+        "It would make the reload test flaky",
+        "It would keep two copies of the rule, and the admin API would still show unclamped values",
+        "It would reject jobs from teams whose quota is unset",
+        "The text does not say"
+      ],
+      "answer": 2
+    },
+    {
+      "id": "q2",
+      "question": "What does the backfill that blocks dropping the double read do?",
+      "options": [
+        "It rewrites every quota-0 row in the quota table as unset",
+        "It copies the teams that exist only in the legacy file into the quota table",
+        "It adds a quota_floor value to every row in the quota table",
+        "It recomputes each team's historical job counts",
+        "The text does not say"
+      ],
+      "answer": 1
+    },
+    {
+      "id": "q3",
+      "question": "Under the double read, which value applies when a team has a quota in both places?",
+      "options": [
+        "The value in the legacy file",
+        "The larger of the two values",
+        "The smaller of the two values",
+        "The value in the new quota table",
+        "The text does not say"
+      ],
+      "answer": 3
+    },
+    {
+      "id": "q4",
+      "question": "What does min_quota mean in the legacy file?",
+      "options": [
+        "The minimum number of runners reserved for a team",
+        "The lowest quota an admin is allowed to set",
+        "The default quota applied to teams with no quota",
+        "The number of queued jobs before an alert fires",
+        "The text does not say"
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q5",
+      "question": "What made the reload test flaky?",
+      "options": [
+        "It depended on the order in which teams load from the legacy file",
+        "It relied on the time zone of the machine running it",
+        "It compared wall-clock timestamps and failed when a reload crossed a second boundary",
+        "It shared a quota table with tests running in parallel",
+        "The text does not say"
+      ],
+      "answer": 2
+    },
+    {
+      "id": "q6",
+      "question": "What quota does a team with no configured quota get after this change?",
+      "options": [
+        "10 jobs",
+        "25 jobs",
+        "50 jobs",
+        "Unlimited jobs",
+        "The text does not say"
+      ],
+      "answer": 1
+    },
+    {
+      "id": "q7",
+      "question": "Why is it acceptable that the eleven affected teams can no longer run jobs?",
+      "options": [
+        "The backfill will add them to the quota table",
+        "They already receive the default quota",
+        "Their owners agreed to raise their quotas next week",
+        "They are all archived teams",
+        "The text does not say"
+      ],
+      "answer": 3
+    },
+    {
+      "id": "q8",
+      "question": "Which flag does the change ship behind?",
+      "options": [
+        "quota.zero_is_zero",
+        "quota.honor_zero",
+        "quota.zero_means_zero",
+        "quota.strict_zero",
+        "The text does not say"
+      ],
+      "answer": 2
+    }
+  ]
+}

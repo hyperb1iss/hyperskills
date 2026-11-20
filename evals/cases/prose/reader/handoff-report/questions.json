@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What does the change in PR 4471 do?",
+      "options": [
+        "It raises the acknowledgment timeout so committed batches are not retried",
+        "It attaches a token to each batch so the server skips a batch it has already committed",
+        "It deletes duplicate usage rows and keeps the earliest copy of each",
+        "It sends retried batches to a different ingest worker",
+        "The text does not say"
+      ],
+      "answer": 1
+    },
+    {
+      "id": "q2",
+      "question": "Why was the first fix rolled back?",
+      "options": [
+        "It rejected legitimate events that share an event ID across accounts",
+        "It made the nightly invoice job time out",
+        "Building it locked the usage table on the shard that holds the three largest tenants for about 40 minutes",
+        "It slowed every insert by about 40 ms",
+        "The text does not say"
+      ],
+      "answer": 2
+    },
+    {
+      "id": "q3",
+      "question": "Which suspected cause was investigated and ruled out?",
+      "options": [
+        "Retries sent after an acknowledgment timed out",
+        "The client library sending each event twice",
+        "Packet loss between the ingest workers and the database",
+        "Clock skew between ingest nodes",
+        "The text does not say"
+      ],
+      "answer": 3
+    },
+    {
+      "id": "q4",
+      "question": "Which setting turns the fix on?",
+      "options": [
+        "tally.retry_token",
+        "tally.retry_guard",
+        "tally.retry_dedupe",
+        "tally.batch_retry_skip",
+        "The text does not say"
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q5",
+      "question": "When should the fix be turned on in production?",
+      "options": [
+        "Thursday at noon, after Corwin replies",
+        "Thursday, after the ack delay is removed from staging",
+        "Thursday, after the 18:00 UTC billing cutoff",
+        "Thursday, after 00:07 UTC, once the hourly and daily rollups stop running at the same time",
+        "The text does not say"
+      ],
+      "answer": 3
+    },
+    {
+      "id": "q6",
+      "question": "Which team has to approve before the existing duplicate rows are deleted in production?",
+      "options": [
+        "Billing platform",
+        "Revenue assurance",
+        "The database team",
+        "Customer support",
+        "The text does not say"
+      ],
+      "answer": 1
+    },
+    {
+      "id": "q7",
+      "question": "What should the planned deletions from the production dry run be compared against?",
+      "options": [
+        "The daily usage reconciliation that billing platform runs",
+        "The deduplicated usage records from the staging dry run",
+        "The daily usage report sent out each morning",
+        "The disputed usage requests filed by customers",
+        "The text does not say"
+      ],
+      "answer": 2
+    }
+  ]
+}

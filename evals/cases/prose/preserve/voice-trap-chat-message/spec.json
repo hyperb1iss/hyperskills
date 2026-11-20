@@ -1,0 +1,21 @@
+{
+  "trap": "voice-trap",
+  "split": "development",
+  "surface": "team chat message",
+  "protected": [
+    "02:10",
+    "tuesday",
+    ["3 extra columns", "three extra columns"],
+    {
+      "exact": "fix/import-cols"
+    },
+    "column count",
+    "after lunch",
+    ["30 minutes", "30-minute", "half an hour"]
+  ],
+  "min_similarity": 0.8,
+  "max_contraction_drop": 1,
+  "max_first_person_drop": 1,
+  "max_growth": 0.1,
+  "wrong_must_fail": ["similar_to_draft", "contractions_kept"]
+}

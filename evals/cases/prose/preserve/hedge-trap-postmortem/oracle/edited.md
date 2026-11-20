@@ -1,0 +1,3 @@
+## Contributing factors
+
+Elevated p99 latency on the payments path during the March 4 checkout slowdown was associated with the connection-pool change in build 4127, which lowered the per-host pool size from 64 to 16. The retry storm that followed may have extended the incident by roughly 20 minutes. We did not measure retry volume directly during the window; that figure is a reconstruction from load-balancer logs. In the three regions we sampled, rolling back the pool change restored p99 to its baseline within 6 minutes. We have not yet tested whether the same holds for the two regions that were drained during the incident. The investigation is ongoing.

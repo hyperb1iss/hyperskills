@@ -2,6 +2,22 @@
 
 Use these diagnostics when a sentence or paragraph has a concrete clarity problem. The goal is a useful revision that preserves meaning, not a more impressive rhythm statistic.
 
+## A reader without your context
+
+A writer deep in a task rereads a draft and understands it, because memory supplies whatever the page leaves out. The reader gets only the page. Read the draft as a capable person who was not there: no session, no files, no thread, possibly arriving from other work.
+
+Check each name on the page. A name the reader already knows needs nothing. A name the work produced (a nickname for a bug, a branch, an abbreviation, "the second approach") needs replacing with what it stands for. Define a name once only when it recurs often enough to be worth learning. Put the plain noun first and the identifier beside it when the reader will need to search for it or act on it: `the nightly export job (exp-nightly)`.
+
+Write shorthand back into sentences. An arrow, a slash between alternatives, or a dropped verb forces the reader to choose among meanings the writer already chose.
+
+Unpack a sentence that carries several claims at the boundaries between them, and keep the word that states how they relate. One claim to a sentence is a way to find the joints. It is no quota, and a fixed cap on sentence length makes prose choppy. A long sentence that develops one idea can stay.
+
+Lead with what the reader must know or do, then give the support. A status update that ends on the required action has hidden it.
+
+Unpacking adds words, and the longer version is correct when the reader can now act on it. The opposite failure is restoring padding. Add the missing referent, the missing relation, or the missing next step. Add no preamble, recap, or reassurance.
+
+Every definition and relation comes from the source, so find the source first: the working notes, the log, the thread, the files beside the draft. An editor who reads only the draft can polish it and still leave every label unexplained. When the source does not say what a label meant, ask the writer or flag the gap in the output.
+
 ## Subject and action
 
 Check whether the subject names the relevant actor and the verb carries the action. A nominalization can hide both:
@@ -50,7 +66,9 @@ A stronger statement about load or outage behavior needs evidence. An exponentia
 
 ## Check for drift
 
-Compare the original and revision for changed actors, quantities, time, scope, modality, negation, and causal force. Verify that the rewrite did not rename a defined term or delete a necessary exception. Word-count changes can help find unexpectedly large edits, but no reduction percentage establishes quality.
+Compare the original and revision for changed actors, quantities, time, scope, modality, negation, and causal force. Verify that the rewrite did not rename a defined term or delete a necessary exception. The scanner's compare mode lists dropped and introduced numbers, citations, and hedges, which makes the lexical part of this check mechanical. Meaning still needs a read. Word-count changes can help find unexpectedly large edits, but no reduction percentage establishes quality.
+
+Revision has a direction of its own. Models asked to improve a text tend to add: adjectives, framing, a contrast, a reassuring clause. Editors who improve a text more often remove. When a revision is longer, account for each addition as a fact the reader needed or a term that needed defining.
 
 When a sentence works, keep it. When a passage needs additional explanation, a longer revision may be the right edit. Do not inject staccato fragments or mechanically alternate short and long sentences to make prose appear human.
 

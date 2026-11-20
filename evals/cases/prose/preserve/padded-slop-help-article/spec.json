@@ -1,0 +1,111 @@
+{
+  "trap": "padded-slop",
+  "split": "holdout",
+  "surface": "customer help article",
+  "protected": [
+    {
+      "exact": "4.2"
+    },
+    {
+      "exact": "4.1"
+    },
+    {
+      "exact": ["512 MB", "512MB"]
+    },
+    {
+      "exact": ["8 MB", "8MB"]
+    },
+    "June 30",
+    "read-only",
+    {
+      "exact": "corvane self-update --channel stable"
+    },
+    "tray app",
+    {
+      "exact": "Pause any sync that is mid-transfer before you upgrade"
+    },
+    "local index",
+    ["50,000", "50000"],
+    ["10 to 20 minutes", "10-20 minutes", "10 and 20 minutes"],
+    "network drives"
+  ],
+  "calibrations": [
+    {
+      "label": "typically",
+      "patterns": [
+        "\\btypical",
+        "\\busually\\b",
+        "\\bgenerally\\b",
+        "\\bnormally\\b",
+        "\\bcommonly\\b",
+        "\\bin most cases\\b",
+        "\\bfor most\\b",
+        "\\bon average\\b",
+        "\\btends? to\\b",
+        "\\boften\\b"
+      ],
+      "accepts": [
+        "This usually takes 10 to 20 minutes.",
+        "Expect 10 to 20 minutes in most cases.",
+        "A typical rebuild takes 10 to 20 minutes.",
+        "On average, this takes 10 to 20 minutes."
+      ],
+      "rejects": ["This takes 15 minutes.", "This always takes 10 to 20 minutes."]
+    },
+    {
+      "label": "only an estimate",
+      "patterns": [
+        "\\bestimat",
+        "\\bnot (?:a )?guarantee",
+        "\\bno guarantee",
+        "\\bapproximate\\b",
+        "\\bapproximately (?:10|ten)\\b",
+        "\\brough (?:guide|figure|estimate|number)",
+        "\\bballpark\\b",
+        "\\bnot exact\\b",
+        "\\bvar(?:y|ies)\\b"
+      ],
+      "accepts": [
+        "That is only an estimate.",
+        "Treat this as a rough guide.",
+        "Times vary.",
+        "The time is approximate, not a guarantee.",
+        "It takes approximately 10 to 20 minutes."
+      ],
+      "rejects": [
+        "This takes exactly 15 minutes.",
+        "The rebuild takes 10 to 20 minutes.",
+        "A library of approximately 50,000 files takes 10 to 20 minutes."
+      ]
+    },
+    {
+      "label": "can run longer",
+      "patterns": [
+        "\\b(?:can|may|might|could)\\b(?:\\s+\\w+){0,2}\\s+(?:run|take|be)\\s+longer",
+        "\\b(?:more time|longer)\\b[^.]{0,40}\\bslower\\b",
+        "\\bslower\\b[^.]{0,60}\\b(?:longer|more time)\\b",
+        "\\b(?:can|may|might|could|will) be slower\\b",
+        "\\badds? (?:more )?time\\b",
+        "\\b(?:longer|more time|slower)\\b[^.]{0,60}\\bnetwork drives\\b",
+        "\\bnetwork drives\\b[^.]{0,60}\\b(?:longer|more time|slower)\\b"
+      ],
+      "accepts": [
+        "It can take longer on slower disks or network drives.",
+        "Slower disks and network drives take longer.",
+        "Expect more time on network drives.",
+        "Network drives and slow disks can be slower.",
+        "Slow disks or network drives add time."
+      ],
+      "rejects": ["The rebuild takes 15 minutes.", "Network drives are supported."]
+    }
+  ],
+  "no_new_numbers": true,
+  "shorter_than_draft": true,
+  "wrong_must_fail": [
+    "no_new_numbers",
+    "protected:10 to 20 minutes",
+    "calibration:typically",
+    "calibration:only an estimate",
+    "calibration:can run longer"
+  ]
+}

@@ -1,0 +1,1 @@
+Edit draft.md into edited.md. The draft is a status update I'm posting in team chat for Marit, who covers the search migration while I'm out next week and has not worked on it before. Marit has not seen notes.md, my working notes; they will not be sent, only edited.md will. Preserve every fact in the draft. Do not alter draft.md or notes.md.

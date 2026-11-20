@@ -1,0 +1,22 @@
+{
+  "trap": "voice-trap",
+  "split": "holdout",
+  "surface": "personal email to a group",
+  "protected": [
+    "Saturday",
+    "Fernhill",
+    "9:30",
+    ["until 9", "till 9", "until nine"],
+    "parks office",
+    ["12 pairs", "twelve pairs"],
+    "compost bays",
+    "first frost",
+    "Thursday",
+    "Rowan"
+  ],
+  "min_similarity": 0.8,
+  "max_contraction_drop": 1,
+  "max_first_person_drop": 1,
+  "max_growth": 0.1,
+  "wrong_must_fail": ["similar_to_draft", "contractions_kept", "first_person_kept"]
+}

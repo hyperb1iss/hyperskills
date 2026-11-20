@@ -4,6 +4,39 @@ Stable IDs let an audit name a concrete defect without repeating a long rule. Th
 
 Examples below preserve the stated facts. A replacement that needs a new mechanism, number, or actor must draw it from supplied evidence. When removing vague praise leaves no useful information, flag the missing content instead of inventing specificity.
 
+## Where to look first
+
+Every family applies to every text. When you know where a text came from, these families are useful starting points. They come from dated observations in `evidence.md`, and they say nothing about who wrote a passage.
+
+| Source of the text                                           | Check first                                              |
+| ------------------------------------------------------------ | -------------------------------------------------------- |
+| Older or open-weight model output, or chat pasted into a doc | Padding: L1 to L5, R1 to R8, S1 to S11, E2, E4, M1 to M4 |
+| Recent frontier model output                                 | Packing and frames: C1 to C4, N1, N7, N19, R19, R21      |
+| A report written from inside long work, by a person or model | C1 to C4, E10, L7, R16                                   |
+| Any text after a revision pass                               | N1 and new R or N hits, plus the swap traps at the end   |
+
+A pattern stays in this catalog while any writer still produces it. Newer models dropping a habit is a reason to date the observation, since older and open-weight models, and people who learned to write beside them, keep it in circulation.
+
+## Context (C)
+
+These are defects of a writer who knows more than the page says. They are invisible to the writer, because the writer's own context fills each gap on rereading. The repair starts with finding that context: the working notes, log, thread, or files the draft was written from.
+
+| ID  | Candidate                                 | Decision                                                                                                       |
+| --- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| C1  | Reference to unseen context               | Replace "the earlier fix" or "as discussed" with the thing itself; the reader has this page and nothing else   |
+| C2  | Undefined abbreviation or bare identifier | Expand on first use; lead with the plain noun and keep the identifier beside it when the reader must act on it |
+| C3  | Working shorthand                         | Write the sentence back in: an arrow hides whether it means causes, becomes, then, or returns                  |
+| C4  | Unstated relation                         | State the cause, contrast, or sequence between adjacent facts when the source supports it                      |
+
+Related entries live in other families: a label coined during the work (R19), house jargon (L7), agent-loop vocabulary (E10), a clause stack (N7), a fragment run (N9), and a point that arrives late (R16).
+
+A repair that draws on the working notes:
+
+- Before: `Drain pass fixed the stuck batch; reverted the TTL thing, see earlier.`
+- After: `The stuck batch cleared after a second run of the queue drain job. The cache expiry change from this morning is also reverted, from 30 minutes back to 5.`
+
+The second version is available only because the notes say what the drain pass was and which change was reverted. Look for the source before deciding a label is unexplained; an editor who reads only the draft can do no more than flag. When the source does not say what a label meant, ask or flag the gap. A guessed definition is fabricated specificity (E1). Notation that belongs to the domain, such as a type signature or a chemical equation, is not shorthand.
+
 ## Mechanical (M)
 
 | ID  | Candidate                                      | Decision                                                                                   |
@@ -46,28 +79,31 @@ A latency delta would require measurements. An edit must not turn that sentence 
 
 ## Rhetorical (R)
 
-| ID  | Candidate                             | Decision                                                                           |
-| --- | ------------------------------------- | ---------------------------------------------------------------------------------- |
-| R1  | Inflated significance                 | State the actual change and its supported consequence                              |
-| R2  | Promotional puffery                   | Follow the brief; factual claims still need evidence                               |
-| R3  | Vague attribution                     | Resolve "studies show" or "best practice" to support, qualify it, or remove it     |
-| R4  | Notability name-dropping              | Explain relevant adoption or omit the logo list                                    |
-| R5  | Announcing the explanation            | Begin the explanation unless the transition helps navigation                       |
-| R6  | Generic upbeat close                  | End on a useful fact, decision, or next action                                     |
-| R7  | Formulaic challenges/future section   | Name real limitations and consequences; omit decorative thoroughness               |
-| R8  | Persuasive authority trope            | Replace "the real question" or "at its core" with the actual claim                 |
-| R9  | Aphorism substituting for explanation | State the supported mechanism; retain an author's intentional metaphor when useful |
-| R10 | Theatrical conversational opener      | Remove a staged pause that adds nothing; preserve natural conversational voice     |
-| R11 | Rhetorical question as transition     | Keep a real reader question; remove a repeated manufactured reveal                 |
-| R12 | False balance                         | State the supported recommendation when the task calls for one                     |
-| R13 | Feeling in place of mechanism         | Explain what the system does, using available facts                                |
-| R14 | Generic project copy                  | Add supported project-specific information or cut; required boilerplate is exempt  |
-| R15 | Deliberation residue                  | Keep the conclusion and useful explanation; remove internal self-instructions      |
-| R16 | Premise stacking                      | Lead with the claim when earlier evidence otherwise leaves the reader guessing     |
-| R17 | Announced counts                      | Keep a count when it helps a sequence; remove one that only repeats a visible list |
-| R18 | Tie-back close                        | Avoid re-answering a question already answered unless clarification is needed      |
-| R19 | Invented concept labels               | Define a useful new concept or use the established term; avoid multiplying labels  |
-| R20 | Forced metaphor                       | Keep imagery that serves the author's purpose; remove decorative domain-word reuse |
+| ID  | Candidate                             | Decision                                                                                                              |
+| --- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| R1  | Inflated significance                 | State the actual change and its supported consequence                                                                 |
+| R2  | Promotional puffery                   | Follow the brief; factual claims still need evidence                                                                  |
+| R3  | Vague attribution                     | Resolve "studies show" or "best practice" to support, qualify it, or remove it                                        |
+| R4  | Notability name-dropping              | Explain relevant adoption or omit the logo list                                                                       |
+| R5  | Announcing the explanation            | Begin the explanation unless the transition helps navigation                                                          |
+| R6  | Generic upbeat close                  | End on a useful fact, decision, or next action                                                                        |
+| R7  | Formulaic challenges/future section   | Name real limitations and consequences; omit decorative thoroughness                                                  |
+| R8  | Persuasive authority trope            | Replace "the real question" or "at its core" with the actual claim                                                    |
+| R9  | Aphorism substituting for explanation | State the supported mechanism; retain an author's intentional metaphor when useful                                    |
+| R10 | Theatrical conversational opener      | Remove a staged pause that adds nothing; preserve natural conversational voice                                        |
+| R11 | Rhetorical question as transition     | Keep a real reader question; remove a repeated manufactured reveal                                                    |
+| R12 | False balance                         | State the supported recommendation when the task calls for one                                                        |
+| R13 | Feeling in place of mechanism         | Explain what the system does, using available facts                                                                   |
+| R14 | Generic project copy                  | Add supported project-specific information or cut; required boilerplate is exempt                                     |
+| R15 | Deliberation residue                  | Keep the conclusion and useful explanation; remove internal self-instructions                                         |
+| R16 | Premise stacking                      | Lead with the claim when earlier evidence otherwise leaves the reader guessing                                        |
+| R17 | Announced counts                      | Keep a count when it helps a sequence; remove one that only repeats a visible list                                    |
+| R18 | Tie-back close                        | Avoid re-answering a question already answered unless clarification is needed                                         |
+| R19 | Invented concept labels               | Define a useful new concept or use the established term; a label coined mid-work is new to the reader                 |
+| R20 | Forced metaphor                       | Keep imagery that serves the author's purpose; remove decorative domain-word reuse                                    |
+| R21 | Importance flag                       | State the consequence that "this matters" points at, or cut the flag when the sentence already has it                 |
+| R22 | Tradeoff denial                       | Keep `X without sacrificing Y` when the source shows both; otherwise state the supported property                     |
+| R23 | Vague relation                        | Write the actual relation when the source gives one; keep "associated with" when association is all that was measured |
 
 A vague draft such as `A powerful, seamless CLI that makes deployment effortless` supports the limited rewrite `A deployment CLI`. A single-command workflow or a claim that cluster access is unnecessary needs additional source evidence.
 
@@ -108,6 +144,8 @@ Useful repairs with no added facts:
 
 The retry edit cannot claim thundering-herd prevention without evidence about jitter and the actual workload. The build edit cannot invent earlier failures as a reason nobody was surprised.
 
+The test for a contrast (N1) is whether the rejected alternative is one a reader would plausibly assume or needs warning off. "The cache is per tenant, not global" corrects a likely assumption, and "correlation, not causation" marks a real limit. A contrast that disavows a claim nobody would make ("a hypothesis, not a proven mechanism" when nothing suggested proof) is the empty form. Removing one contrast phrase often produces another, and revision adds them, so apply the test to the rewrite as well as the draft.
+
 The scanner's N19 trigger uses three frame families to locate candidates. The threshold is a convenience, not a model signature or a measured quality boundary. A paragraph can legitimately contain every listed frame. Check what the reader cannot follow before editing it.
 
 ## Lexical (L)
@@ -131,23 +169,23 @@ Words such as `robust`, `leverage`, `just`, and `actually` can be appropriate or
 
 ## Epistemic (E)
 
-| ID  | Candidate                           | Decision                                                                                                                |
-| --- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| E1  | Fabricated specificity              | Add no factual detail without source support; invention belongs only to an authorized creative brief                    |
-| E2  | Knowledge-cutoff disclaimer         | State the relevant information gap and verification status                                                              |
-| E3  | Speculative gap-filling             | Distinguish a useful labeled hypothesis from unsupported factual filler                                                 |
-| E4  | Chatbot artifact                    | Remove interactive offers or greetings pasted into a standalone artifact                                                |
-| E5  | Sycophancy                          | Credit a real catch when justified; do not reflexively agree or praise                                                  |
-| E6  | Diff-anchored documentation         | Describe current behavior in references/comments; change narratives belong in release notes, PRs, or migration guidance |
-| E7  | Unfalsifiable claim                 | Name a testable property and evidence, or remove the claim                                                              |
-| E8  | Confident restatement of the prompt | Add the supported answer or remove the repetition                                                                       |
-| E9  | Process theatre                     | Give relevant evidence instead of an assertion of diligence                                                             |
-| E10 | Agent-loop vocabulary               | Write for the reader of the artifact, not the supervising agent                                                         |
-| E11 | Provider or harness residue         | Repair unresolved citation tokens; inspect footnotes, tracking parameters, and language-specific punctuation in context |
-| E12 | Orphan statistic                    | Cite the actual result or remove unsupported precision                                                                  |
-| E13 | Calibration theatre                 | Keep uncertainty that affects interpretation; omit ornamental confidence scores                                         |
-| E14 | Performed candor                    | State the fact without announcing honesty                                                                               |
-| E15 | Formulaic cleanup                   | Check for meaning lost to clipped fragments or canned closes; do not chase an authorship impression                     |
+| ID  | Candidate                           | Decision                                                                                                                                                                       |
+| --- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| E1  | Fabricated specificity              | Add no factual detail without source support; invention belongs only to an authorized creative brief                                                                           |
+| E2  | Knowledge-cutoff disclaimer         | State the relevant information gap and verification status                                                                                                                     |
+| E3  | Speculative gap-filling             | Distinguish a useful labeled hypothesis from unsupported factual filler                                                                                                        |
+| E4  | Chatbot artifact                    | Remove interactive offers or greetings pasted into a standalone artifact; in a reply, flag an offer to do what was already asked                                               |
+| E5  | Sycophancy                          | Keep agreement and concessions the response's own evidence supports; flag praise or a reversal that follows pushback with no new evidence; never soften what a correction says |
+| E6  | Diff-anchored documentation         | Describe current behavior in references/comments; change narratives belong in release notes, PRs, or migration guidance                                                        |
+| E7  | Unfalsifiable claim                 | Name a testable property and evidence, or remove the claim                                                                                                                     |
+| E8  | Confident restatement of the prompt | Add the supported answer or remove the repetition                                                                                                                              |
+| E9  | Process theatre                     | Give relevant evidence instead of an assertion of diligence                                                                                                                    |
+| E10 | Agent-loop vocabulary               | Write for the reader of the artifact, not the supervising agent                                                                                                                |
+| E11 | Provider or harness residue         | Repair unresolved citation tokens; inspect footnotes, tracking parameters, and language-specific punctuation in context                                                        |
+| E12 | Orphan statistic                    | Cite the actual result or remove unsupported precision                                                                                                                         |
+| E13 | Calibration theatre                 | Keep uncertainty that affects interpretation; omit ornamental confidence scores                                                                                                |
+| E14 | Performed candor                    | State the fact without announcing honesty                                                                                                                                      |
+| E15 | Formulaic cleanup                   | Check for meaning lost to clipped fragments or canned closes; do not chase an authorship impression                                                                            |
 
 ## Swap traps
 
@@ -160,6 +198,10 @@ Words such as `robust`, `leverage`, `just`, and `actually` can be appropriate or
 | Repeated term     | Ambiguous synonym                         | Preserve defined terms               |
 | Long sentence     | Fragmented explanation                    | Read the whole paragraph             |
 | Redundant summary | Loss of procedure reminder                | Check the reader's point of use      |
+| Padding           | Fragments and shorthand                   | Keep the connecting words            |
+| Contrast frame    | A different contrast frame                | Ask who holds the rejected view      |
+| Coined label      | A guessed definition                      | Take it from the source or flag it   |
+| Scanner finding   | Deleted content that held a fact          | Run the compare on both versions     |
 
 ## Evidence and sources
 

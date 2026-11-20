@@ -1,0 +1,48 @@
+{
+  "trap": "citation-trap",
+  "split": "development",
+  "surface": "paper related-work section",
+  "protected": [
+    {
+      "exact": "Varnell2019"
+    },
+    {
+      "exact": "Teskey2022"
+    },
+    {
+      "exact": "Oduya2023"
+    },
+    {
+      "exact": "Brannick2021"
+    },
+    {
+      "exact": "Quist2024"
+    },
+    {
+      "exact": "Lindqvar2020"
+    },
+    ["Fig. 3", "Figure 3"],
+    "Table 2",
+    {
+      "exact": ["2 GB", "2GB"]
+    },
+    {
+      "exact": ["410 ms", "410ms"]
+    },
+    {
+      "exact": ["1.9 s", "1.9s", "1.9 seconds"]
+    },
+    "ARM hosts",
+    "memory pressure",
+    "lazy page loading",
+    "encrypted at rest"
+  ],
+  "require_change": true,
+  "wrong_must_fail": [
+    "protected:Oduya2023",
+    "protected:Brannick2021",
+    "protected:Quist2024",
+    "protected:Lindqvar2020",
+    "protected:Table 2"
+  ]
+}

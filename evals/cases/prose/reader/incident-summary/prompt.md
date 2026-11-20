@@ -1,0 +1,1 @@
+Edit draft.md into edited.md. The draft is the incident summary for yesterday's outage, and it goes to the operations director, who was not in the incident channel. The director has not seen notes.md, the incident working notes; they will not be sent, only edited.md will. Preserve every fact in the draft. Do not alter draft.md or notes.md.

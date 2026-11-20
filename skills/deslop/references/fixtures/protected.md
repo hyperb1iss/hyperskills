@@ -19,9 +19,10 @@ x = "not just a cache, it's a guarantee"  # turn12search4
 
     indented code block with an em dash — and … here
 
-Inline code is protected: `tool -- flag`, `a—b`, `“quoted”`, `utm_source=chatgpt.com`.
+Inline code is protected: `tool -- flag`, `a—b`, `“quoted”`, `utm_source=chatgpt.com`, `parse -> store`.
 
 > A blockquoted example, which is quoted material: this isn't just X, it's Y—really.
 > - **Label:** restated label, plays a crucial role in shaping things.
+> This matters without sacrificing speed, rather than simply guessing -> done.
 
 A link target is protected too: [docs](https://x.test/a?utm_source=chatgpt.com).

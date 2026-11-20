@@ -65,12 +65,25 @@ python3 scripts/skill_eval.py report evals/runs/questions
 A task's `interaction` field names a private JSON packet:
 
 ```json
-{"max_turns": 3, "response": "The team prefers JSON."}
+{ "max_turns": 3, "response": "The team prefers JSON." }
 ```
 
 The agent writes `clarification.json` with a nonempty `question` and ends its turn. The host records the question and current workspace changes, then supplies the fixed reply to the same trial session. The packet is never placed in the model request. Repeated questions consume the declared turn budget; exhausting it is a task failure, not an excluded infrastructure failure.
 
 The grader receives the host-written receipt through `EVAL_INTERACTION_LOG`. Outcome correctness, question count, unnecessary questions, and asking before implementation are separate checks. Workspace changes are observed at turn boundaries; the receipt cannot prove that a file was never temporarily edited and restored. The grader does not match exact question wording. The finite script is suitable for this fixture; it does not simulate arbitrary stakeholders or prove that every question was relevant.
+
+## Reader-task scoring for prose
+
+Deterministic graders cannot tell whether an edited document works for someone who lacks the writer's context. The `prose-reader` family adds a second stage for that. After a run, `scripts/eval_reader.py score` gives a reader model each trial's `edited.md` alone and asks fixed multiple-choice questions scored against a key:
+
+```sh
+python3 scripts/eval_reader.py score evals/runs/<run> \
+  --cases evals/cases/prose/reader --model <pinned reader id> \
+  --claude-version "<exact claude --version output>" \
+  --repeats 3 --output evals/runs/<run>-reader.json
+```
+
+The reader runs with no tools in a fresh HOME, outside the grader, because graders have no network. Its accuracy is reported apart from the deterministic verdict. A model reader is a proxy for a person: it tolerates dense prose better than one, so the cases measure missing context (coined labels, shorthand, references to unseen work) and say nothing about sentence-level readability. Read accuracy beside the grader's word ratio, since pasting the working notes wholesale would also score well. The [family notes](cases/prose/reader/README.md) cover validation and holdout hygiene. The deterministic `prose-preserve` family is described in [its own notes](cases/prose/preserve/README.md), and `evals/prose-sonnet.json` holds both.
 
 ## Subtraction experiment
 

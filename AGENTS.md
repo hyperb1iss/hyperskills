@@ -71,6 +71,126 @@ hyperskills/
 │   │   │   └── worker.py
 │   │   ├── grade.py
 │   │   ├── oracle_adapter.py
+│   │   ├── prose/
+│   │   │   ├── preserve/
+│   │   │   │   ├── README.md
+│   │   │   │   ├── citation-trap-proposal/
+│   │   │   │   │   ├── fixture/
+│   │   │   │   │   │   └── draft.md
+│   │   │   │   │   ├── oracle/
+│   │   │   │   │   │   └── edited.md
+│   │   │   │   │   ├── prompt.md
+│   │   │   │   │   ├── spec.json
+│   │   │   │   │   └── wrong/
+│   │   │   │   │       └── edited.md
+│   │   │   │   ├── citation-trap-related-work/
+│   │   │   │   │   ├── fixture/
+│   │   │   │   │   │   └── draft.md
+│   │   │   │   │   ├── oracle/
+│   │   │   │   │   │   └── edited.md
+│   │   │   │   │   ├── prompt.md
+│   │   │   │   │   ├── spec.json
+│   │   │   │   │   └── wrong/
+│   │   │   │   │       └── edited.md
+│   │   │   │   ├── grade.py
+│   │   │   │   ├── hedge-trap-field-study/
+│   │   │   │   │   ├── fixture/
+│   │   │   │   │   │   └── draft.md
+│   │   │   │   │   ├── oracle/
+│   │   │   │   │   │   └── edited.md
+│   │   │   │   │   ├── prompt.md
+│   │   │   │   │   ├── spec.json
+│   │   │   │   │   └── wrong/
+│   │   │   │   │       └── edited.md
+│   │   │   │   ├── hedge-trap-postmortem/
+│   │   │   │   │   ├── fixture/
+│   │   │   │   │   │   └── draft.md
+│   │   │   │   │   ├── oracle/
+│   │   │   │   │   │   └── edited.md
+│   │   │   │   │   ├── prompt.md
+│   │   │   │   │   ├── spec.json
+│   │   │   │   │   └── wrong/
+│   │   │   │   │       └── edited.md
+│   │   │   │   ├── padded-slop-help-article/
+│   │   │   │   │   ├── fixture/
+│   │   │   │   │   │   └── draft.md
+│   │   │   │   │   ├── oracle/
+│   │   │   │   │   │   └── edited.md
+│   │   │   │   │   ├── prompt.md
+│   │   │   │   │   ├── spec.json
+│   │   │   │   │   └── wrong/
+│   │   │   │   │       └── edited.md
+│   │   │   │   ├── padded-slop-status-update/
+│   │   │   │   │   ├── fixture/
+│   │   │   │   │   │   └── draft.md
+│   │   │   │   │   ├── oracle/
+│   │   │   │   │   │   └── edited.md
+│   │   │   │   │   ├── prompt.md
+│   │   │   │   │   ├── spec.json
+│   │   │   │   │   └── wrong/
+│   │   │   │   │       └── edited.md
+│   │   │   │   ├── test_preserve.py
+│   │   │   │   ├── voice-trap-chat-message/
+│   │   │   │   │   ├── fixture/
+│   │   │   │   │   │   └── draft.md
+│   │   │   │   │   ├── oracle/
+│   │   │   │   │   │   └── edited.md
+│   │   │   │   │   ├── prompt.md
+│   │   │   │   │   ├── spec.json
+│   │   │   │   │   └── wrong/
+│   │   │   │   │       └── edited.md
+│   │   │   │   └── voice-trap-volunteer-email/
+│   │   │   │       ├── fixture/
+│   │   │   │       │   └── draft.md
+│   │   │   │       ├── oracle/
+│   │   │   │       │   └── edited.md
+│   │   │   │       ├── prompt.md
+│   │   │   │       ├── spec.json
+│   │   │   │       └── wrong/
+│   │   │   │           └── edited.md
+│   │   │   └── reader/
+│   │   │       ├── README.md
+│   │   │       ├── grade.py
+│   │   │       ├── handoff-report/
+│   │   │       │   ├── fixture/
+│   │   │       │   │   ├── draft.md
+│   │   │       │   │   └── notes.md
+│   │   │       │   ├── oracle/
+│   │   │       │   │   └── edited.md
+│   │   │       │   ├── prompt-untold.md
+│   │   │       │   ├── prompt.md
+│   │   │       │   ├── protected.json
+│   │   │       │   └── questions.json
+│   │   │       ├── incident-summary/
+│   │   │       │   ├── fixture/
+│   │   │       │   │   ├── draft.md
+│   │   │       │   │   └── notes.md
+│   │   │       │   ├── oracle/
+│   │   │       │   │   └── edited.md
+│   │   │       │   ├── prompt-untold.md
+│   │   │       │   ├── prompt.md
+│   │   │       │   ├── protected.json
+│   │   │       │   └── questions.json
+│   │   │       ├── review-reply/
+│   │   │       │   ├── fixture/
+│   │   │       │   │   ├── draft.md
+│   │   │       │   │   └── notes.md
+│   │   │       │   ├── oracle/
+│   │   │       │   │   └── edited.md
+│   │   │       │   ├── prompt-untold.md
+│   │   │       │   ├── prompt.md
+│   │   │       │   ├── protected.json
+│   │   │       │   └── questions.json
+│   │   │       └── status-update/
+│   │   │           ├── fixture/
+│   │   │           │   ├── draft.md
+│   │   │           │   └── notes.md
+│   │   │           ├── oracle/
+│   │   │           │   └── edited.md
+│   │   │           ├── prompt-untold.md
+│   │   │           ├── prompt.md
+│   │   │           ├── protected.json
+│   │   │           └── questions.json
 │   │   ├── prose-preservation/
 │   │   │   ├── fixture/
 │   │   │   │   └── draft.md
@@ -168,6 +288,7 @@ hyperskills/
 │   ├── experiments/
 │   │   └── implement-self-review.json
 │   ├── pilot.json
+│   ├── prose-sonnet.json
 │   ├── replay/
 │   │   ├── Dockerfile
 │   │   ├── README.md
@@ -202,6 +323,7 @@ hyperskills/
 ├── scripts/
 │   ├── eval_claude.py
 │   ├── eval_container.py
+│   ├── eval_reader.py
 │   ├── eval_subtract.py
 │   ├── eval_trace.py
 │   ├── open_release_pr.py
@@ -259,6 +381,8 @@ hyperskills/
 │   │   │   ├── evidence.md
 │   │   │   ├── fixtures/
 │   │   │   │   ├── clean.md
+│   │   │   │   ├── compare-original.md
+│   │   │   │   ├── compare-revised.md
 │   │   │   │   ├── protected.md
 │   │   │   │   └── slop.md
 │   │   │   ├── pattern-catalog.md
@@ -317,6 +441,7 @@ hyperskills/
     ├── test_eval_claude.py
     ├── test_eval_container.py
     ├── test_eval_interaction.py
+    ├── test_eval_reader.py
     ├── test_eval_subtract.py
     ├── test_eval_trace.py
     ├── test_open_release_pr.py
@@ -338,7 +463,7 @@ hyperskills/
 | [codex-imagegen](skills/codex-imagegen/SKILL.md)         | 1               |
 | [cross-model-review](skills/cross-model-review/SKILL.md) | 5               |
 | [demo-reel](skills/demo-reel/SKILL.md)                   | 8               |
-| [deslop](skills/deslop/SKILL.md)                         | 7               |
+| [deslop](skills/deslop/SKILL.md)                         | 9               |
 | [dream](skills/dream/SKILL.md)                           | 2               |
 | [git](skills/git/SKILL.md)                               | 1               |
 | [hyper-pr-review](skills/hyper-pr-review/SKILL.md)       | 4               |
