@@ -20,7 +20,8 @@ Each case directory holds:
 | ------------------ | --------------------- | ----------------------------------------------------------------------------------------------------- |
 | `fixture/notes.md` | yes                   | Working log where the labels were coined and the facts live                                           |
 | `fixture/draft.md` | yes                   | The artifact to edit; it leans on `notes.md` for meaning                                              |
-| `prompt.md`        | yes                   | Edit request naming the reader; it does not name the defect                                           |
+| `prompt.md`        | yes                   | Told variant: says the recipient has not seen `notes.md`                                              |
+| `prompt-untold.md` | yes                   | Untold variant: a plain cleanup request naming the recipient, no hint about missing context           |
 | `questions.json`   | no                    | Six to eight questions, four substantive options plus "The text does not say", key always substantive |
 | `oracle/edited.md` | no                    | Reference edit that resolves every label using only facts from `notes.md`                             |
 | `protected.json`   | no                    | Strings that must survive verbatim                                                                    |
@@ -33,6 +34,15 @@ Each case directory holds:
 | `incident-summary` | holdout     | Incident summary for someone outside the incident          |
 
 Task ids in a manifest are `prose-reader-<case>`, family `prose-reader`.
+
+Use `prompt-untold.md` to measure the targeted failure. The told prompt
+tells the editor that the recipient lacks the working notes, which gives the
+answer away: in a pilot, a no-skill baseline scored 1.00 reader accuracy on
+both development cases with it. The untold prompt asks only for a cleanup
+before the draft goes to a named person, so an editor has to notice for itself
+that the reader lacks context. `notes.md` still sits in the workspace, and its
+opening line identifies it as the author's notes for the same work. The told
+prompt remains as a ceiling condition.
 
 ## Two stages
 

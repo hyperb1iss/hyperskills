@@ -1,0 +1,1 @@
+Please clean up draft.md, my status update for Marit, who is covering the search migration while I'm out next week. Keep the facts straight, write the result to edited.md, and don't touch the other files.

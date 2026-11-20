@@ -227,6 +227,20 @@ class ReaderCaseTests(unittest.TestCase):
                     self.assertIn(name, prompt)
                 self.assertNotIn('question', prompt.lower())
 
+    def test_untold_prompts_do_not_reveal_the_reader_gap(self):
+        giveaways = ('notes', 'log', 'context', 'question', 'define', 'expand', 'self-contained',
+                     'has not', "hasn't", 'not seen', 'not followed', 'unfamiliar', 'every fact', 'detail')
+        texts = set()
+        for case in CASE_IDS:
+            with self.subTest(case=case):
+                prompt = (CASES / case / 'prompt-untold.md').read_text()
+                texts.add(prompt)
+                for name in ('draft.md', 'edited.md'):
+                    self.assertIn(name, prompt)
+                self.assertEqual([word for word in giveaways if word in prompt.lower()], [])
+                self.assertTrue(2 <= prompt.count('. ') + prompt.count('? ') + 1 <= 3)
+        self.assertEqual(len(texts), len(CASE_IDS))
+
     def test_protected_strings_survive_in_draft_and_oracle(self):
         for case in CASE_IDS:
             with self.subTest(case=case):
