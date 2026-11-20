@@ -1,0 +1,8 @@
+{
+  "split": "development",
+  "kind": "clean",
+  "twin": "test-stays-green",
+  "class": "stale-cache",
+  "trap": "test-stays-green",
+  "also_accept": []
+}

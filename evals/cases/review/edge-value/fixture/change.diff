@@ -1,0 +1,199 @@
+diff --git a/boxoffice/models.py b/boxoffice/models.py
+index 57eccb5..ee5aceb 100644
+--- a/boxoffice/models.py
++++ b/boxoffice/models.py
+@@ -1,5 +1,6 @@
+ from dataclasses import dataclass
+ from datetime import datetime
++from typing import Optional
+ 
+ ACTIVE = "active"
+ CANCELLED = "cancelled"
+@@ -11,7 +12,6 @@ class Event:
+     name: str
+     capacity: int
+     starts_at: datetime
+-    sold: int = 0
+ 
+ 
+ @dataclass
+@@ -22,7 +22,13 @@ class Ticket:
+     status: str = ACTIVE
+ 
+ 
+-class SoldOut(Exception):
+-    def __init__(self, event_id):
+-        super().__init__(f"event {event_id} is sold out")
+-        self.event_id = event_id
++@dataclass
++class Reservation:
++    event_id: str
++    buyer: str
++    ticket: Optional[Ticket] = None
++    waitlist_position: Optional[int] = None
++
++    @property
++    def confirmed(self):
++        return self.ticket is not None
+diff --git a/boxoffice/notify.py b/boxoffice/notify.py
+index ca7378a..70d6356 100644
+--- a/boxoffice/notify.py
++++ b/boxoffice/notify.py
+@@ -19,3 +19,9 @@ def ticket_cancelled(outbox, event, ticket):
+         f"Cancelled: {event.name}",
+         f"Ticket #{ticket.id} for {event.name} has been cancelled and refunded.",
+     ))
++
++
++def waitlist_joined(outbox, event, buyer, position):
++    ahead = "1 person" if position == 2 else f"{position - 1} people"
++    body = f"{event.name} is sold out. You are number {position} on the waitlist with {ahead} ahead of you."
++    outbox.append(_message(buyer, f"Waitlist: {event.name}", body))
+diff --git a/boxoffice/orders.py b/boxoffice/orders.py
+index b19d8fb..74e47dc 100644
+--- a/boxoffice/orders.py
++++ b/boxoffice/orders.py
+@@ -1,6 +1,6 @@
+ """Reserving and cancelling tickets."""
+ from . import notify
+-from .models import ACTIVE, CANCELLED, SoldOut
++from .models import ACTIVE, CANCELLED, Reservation
+ 
+ MAX_TICKETS_PER_BUYER = 4
+ 
+@@ -14,19 +14,26 @@ def reserve(store, event_id, buyer):
+     held = [t for t in store.tickets_held_by(buyer) if t.event_id == event_id]
+     if len(held) >= MAX_TICKETS_PER_BUYER:
+         raise LimitReached(f"{buyer} already holds {len(held)} tickets for {event_id}")
+-    if event.sold == event.capacity:
+-        raise SoldOut(event_id)
+-    event.sold += 1
++    sold = store.count_active(event_id)
++    if sold > event.capacity:
++        position = store.waitlist(event_id).join(buyer)
++        notify.waitlist_joined(store.outbox, event, buyer, position)
++        return Reservation(event_id, buyer, waitlist_position=position)
+     ticket = store.issue_ticket(event_id, buyer)
+     notify.ticket_confirmed(store.outbox, event, ticket)
+-    return ticket
++    return Reservation(event_id, buyer, ticket=ticket)
+ 
+ 
+ def cancel(store, ticket_id):
+     ticket = store.ticket(ticket_id)
+     if ticket.status != ACTIVE:
+-        return
++        return None
+     ticket.status = CANCELLED
+     event = store.event(ticket.event_id)
+-    event.sold -= 1
+     notify.ticket_cancelled(store.outbox, event, ticket)
++    queue = store.waitlist(event.id)
++    if queue and store.count_active(event.id) < event.capacity:
++        promoted = store.issue_ticket(event.id, queue.pop_next())
++        notify.ticket_confirmed(store.outbox, event, promoted)
++        return promoted
++    return None
+diff --git a/boxoffice/store.py b/boxoffice/store.py
+index 13f0608..5d0be0d 100644
+--- a/boxoffice/store.py
++++ b/boxoffice/store.py
+@@ -1,6 +1,7 @@
+ from itertools import count
+ 
+ from .models import ACTIVE, Event, Ticket
++from .waitlist import Waitlist
+ 
+ 
+ class UnknownEvent(KeyError):
+@@ -13,6 +14,7 @@ class Store:
+     def __init__(self):
+         self.events = {}
+         self.tickets = {}
++        self.waitlists = {}
+         self.outbox = []
+         self._ids = count(1)
+ 
+@@ -39,3 +41,10 @@ class Store:
+ 
+     def tickets_held_by(self, buyer):
+         return [t for t in self.tickets.values() if t.buyer == buyer and t.status == ACTIVE]
++
++    def count_active(self, event_id):
++        return sum(1 for t in self.tickets_for(event_id) if t.status == ACTIVE)
++
++    def waitlist(self, event_id):
++        self.event(event_id)
++        return self.waitlists.setdefault(event_id, Waitlist())
+diff --git a/boxoffice/waitlist.py b/boxoffice/waitlist.py
+new file mode 100644
+index 0000000..2ad727e
+--- /dev/null
++++ b/boxoffice/waitlist.py
+@@ -0,0 +1,18 @@
++"""First-come waitlist for a sold-out event."""
++from collections import deque
++
++
++class Waitlist:
++    def __init__(self):
++        self._buyers = deque()
++
++    def __len__(self):
++        return len(self._buyers)
++
++    def join(self, buyer):
++        if buyer not in self._buyers:
++            self._buyers.append(buyer)
++        return self._buyers.index(buyer) + 1
++
++    def pop_next(self):
++        return self._buyers.popleft()
+diff --git a/tests/test_orders.py b/tests/test_orders.py
+index f213516..8372f4e 100644
+--- a/tests/test_orders.py
++++ b/tests/test_orders.py
+@@ -15,7 +15,7 @@ def make_store(capacity=3):
+ class ReserveTests(unittest.TestCase):
+     def test_reserve_issues_ticket_and_confirms(self):
+         store = make_store()
+-        ticket = orders.reserve(store, "gala", "ana@example.com")
++        ticket = orders.reserve(store, "gala", "ana@example.com").ticket
+         self.assertEqual(ticket.buyer, "ana@example.com")
+         self.assertEqual(store.outbox[-1]["subject"], "Your ticket for Spring Gala")
+ 
+@@ -26,18 +26,27 @@ class ReserveTests(unittest.TestCase):
+         with self.assertRaises(orders.LimitReached):
+             orders.reserve(store, "gala", "ben@example.com")
+ 
+-    def test_sold_out(self):
+-        store = make_store(capacity=1)
+-        orders.reserve(store, "gala", "ana@example.com")
+-        with self.assertRaises(orders.SoldOut):
+-            orders.reserve(store, "gala", "ben@example.com")
++    def test_sold_out_event_offers_waitlist(self):
++        store = make_store(capacity=2)
++        results = [orders.reserve(store, "gala", f"fan{n}@example.com") for n in range(5)]
++        waiting = [r.waitlist_position for r in results if not r.confirmed]
++        self.assertEqual(waiting, list(range(1, len(waiting) + 1)))
++        self.assertEqual(store.outbox[-1]["subject"], "Waitlist: Spring Gala")
+ 
+     def test_cancel_frees_seat(self):
+         store = make_store(capacity=1)
+-        ticket = orders.reserve(store, "gala", "ana@example.com")
++        ticket = orders.reserve(store, "gala", "ana@example.com").ticket
+         orders.cancel(store, ticket.id)
+         self.assertEqual(store.ticket(ticket.id).status, CANCELLED)
+-        orders.reserve(store, "gala", "ben@example.com")
++        self.assertTrue(orders.reserve(store, "gala", "ben@example.com").confirmed)
++
++    def test_cancel_promotes_first_waiting_buyer(self):
++        store = make_store(capacity=1)
++        ticket = orders.reserve(store, "gala", "ana@example.com").ticket
++        store.waitlist("gala").join("ben@example.com")
++        promoted = orders.cancel(store, ticket.id)
++        self.assertEqual(promoted.buyer, "ben@example.com")
++        self.assertEqual(store.outbox[-1]["to"], "ben@example.com")
+ 
+ 
+ if __name__ == "__main__":

@@ -1,0 +1,13 @@
+{
+  "verdict": "approve",
+  "findings": [
+    {
+      "file": "boxoffice/notify.py",
+      "line": 24,
+      "blocking": false,
+      "title": "Waitlist email does not say what happens next",
+      "trigger": "A buyer joins the waitlist of a sold-out event.",
+      "impact": "The email gives the position but not that a ticket will be issued automatically if a seat opens, so buyers may keep retrying."
+    }
+  ]
+}

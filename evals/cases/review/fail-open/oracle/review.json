@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "hookline/signatures.py",
+      "line": 48,
+      "blocking": true,
+      "title": "A signature header with no v1 value skips verification",
+      "trigger": "POST /hooks/kestrel with the header 'Kestrel-Signature: t=<current time>' and any body.",
+      "impact": "The timestamp check passes, candidates is empty, and the mismatch check is skipped, so verify returns and a forged payment event is applied to the ledger. The base code rejected a missing v1; an empty candidate list has to fail."
+    }
+  ]
+}

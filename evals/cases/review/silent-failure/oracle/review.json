@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "courier/broker.py",
+      "line": 37,
+      "blocking": true,
+      "title": "Timed-out batches are reported as acknowledged and never retried",
+      "trigger": "send_batch raises BrokerTimeout for any batch.",
+      "impact": "The except block only logs and falls through to acknowledged.extend, so relay_once marks every row in the failed batch published. Those events leave the outbox without reaching the broker, which breaks the at-least-once promise in outbox.py. Before this change a timeout propagated and the rows stayed pending; the except block needs a continue."
+    }
+  ]
+}

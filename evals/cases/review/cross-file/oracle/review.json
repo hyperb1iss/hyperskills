@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "storefront/loyalty.py",
+      "line": 16,
+      "blocking": true,
+      "title": "Loyalty points are now awarded per cent instead of per dollar",
+      "trigger": "points_for (not touched by this PR) still does int(cart.subtotal()), which assumed a Decimal dollar subtotal. Cart.subtotal() now returns integer cents, so a $42.50 cart yields 4250 instead of 42. place_order credits this on every order.",
+      "impact": "Every order credits 100 times the intended points (times the tier multiplier), inflating balances customers can redeem. Convert with cart.subtotal() // 100 and add a test that uses a real Cart."
+    }
+  ]
+}

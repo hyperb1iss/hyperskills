@@ -1,0 +1,21 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "teamdir/service.py",
+      "line": 22,
+      "blocking": true,
+      "title": "update_profile re-caches the pre-update profile, so reads stay stale for the whole TTL",
+      "trigger": "With a TTLCache wired in (the production default from build_service), call update_profile and then get_profile. update_profile deletes the key, then reads through self.get_profile, which misses and stores the current (old) profile under the same key before the new one is saved.",
+      "impact": "Every edit is invisible to readers, including the editing user, for up to TEAMDIR_PROFILE_CACHE_TTL seconds (300 by default); the PR's stated invalidation does not happen. Load from the store directly and delete the key after save."
+    },
+    {
+      "file": "tests/test_service.py",
+      "line": 65,
+      "blocking": true,
+      "title": "The invalidation test runs without a cache, so it passes whether or not invalidation works",
+      "trigger": "make_service() is called with no cache argument, so DirectoryService uses NullCache and every read goes to the store.",
+      "impact": "The test cannot catch the stale read above; pass a TTLCache as test_repeat_reads_are_served_from_cache does."
+    }
+  ]
+}

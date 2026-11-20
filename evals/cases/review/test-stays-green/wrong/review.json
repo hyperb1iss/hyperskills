@@ -1,0 +1,13 @@
+{
+  "verdict": "approve",
+  "findings": [
+    {
+      "file": "teamdir/app.py",
+      "line": 13,
+      "blocking": false,
+      "title": "Consider logging when the profile cache is disabled",
+      "trigger": "TEAMDIR_PROFILE_CACHE_TTL=0 silently selects NullCache.",
+      "impact": "Operators cannot tell from logs whether caching is on; nonblocking."
+    }
+  ]
+}

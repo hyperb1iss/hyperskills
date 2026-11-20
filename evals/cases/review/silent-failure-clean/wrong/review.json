@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "courier/broker.py",
+      "line": 35,
+      "blocking": true,
+      "title": "A timed-out batch is sent twice",
+      "trigger": "The broker stores a batch but the acknowledgement times out.",
+      "impact": "The rows stay pending and the next pass sends them again, so consumers receive duplicate order events."
+    }
+  ]
+}

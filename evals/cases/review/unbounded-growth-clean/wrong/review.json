@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "routeplan/client.py",
+      "line": 28,
+      "blocking": true,
+      "title": "Remembered misses are counted as cache hits",
+      "trigger": "A route repeats an address the backend could not place.",
+      "impact": "get() increments hits for a remembered miss, so the hit rate on the metrics page is inflated and the cache looks healthier than it is."
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "verdict": "approve",
+  "findings": [
+    {
+      "file": "hookline/providers.py",
+      "line": 24,
+      "blocking": false,
+      "title": "Osprey gets twice the replay window",
+      "trigger": "A captured Osprey request replayed within ten minutes.",
+      "impact": "Event id deduplication still blocks the replay, but the wider window is worth confirming with Osprey's documentation."
+    }
+  ]
+}

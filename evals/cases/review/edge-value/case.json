@@ -1,0 +1,20 @@
+{
+  "split": "development",
+  "kind": "defect",
+  "twin": "edge-value-clean",
+  "class": "edge-value",
+  "trap": null,
+  "defect": {
+    "file": "boxoffice/orders.py",
+    "start_line": 18,
+    "end_line": 18,
+    "function": "reserve"
+  },
+  "also_accept": [
+    {
+      "file": "tests/test_orders.py",
+      "start_line": 29,
+      "end_line": 34
+    }
+  ]
+}

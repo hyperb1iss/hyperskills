@@ -1,0 +1,13 @@
+{
+  "verdict": "approve",
+  "findings": [
+    {
+      "file": "gridmeter/store.py",
+      "line": 15,
+      "blocking": false,
+      "title": "Duplicate rows inside one drop are counted once",
+      "trigger": "A drop that repeats the same meter and timestamp.",
+      "impact": "The later row wins and imported counts one reading; worth a note in the summary so operators are not surprised."
+    }
+  ]
+}

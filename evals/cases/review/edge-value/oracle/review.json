@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "boxoffice/orders.py",
+      "line": 18,
+      "blocking": true,
+      "title": "Events sell one ticket more than their capacity",
+      "trigger": "A two-seat event already has two active tickets and a third buyer reserves: sold is 2 and 2 > 2 is false.",
+      "impact": "A third ticket is issued for a two-seat event, so every event oversells by one before the waitlist starts. The base code stopped when remaining reached zero; the comparison needs >=."
+    }
+  ]
+}

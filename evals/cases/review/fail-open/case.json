@@ -1,0 +1,20 @@
+{
+  "split": "holdout",
+  "kind": "defect",
+  "twin": "fail-open-clean",
+  "class": "fail-open",
+  "trap": null,
+  "defect": {
+    "file": "hookline/signatures.py",
+    "start_line": 47,
+    "end_line": 49,
+    "function": "verify"
+  },
+  "also_accept": [
+    {
+      "file": "hookline/handlers.py",
+      "start_line": 15,
+      "end_line": 15
+    }
+  ]
+}

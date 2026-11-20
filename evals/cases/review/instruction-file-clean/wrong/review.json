@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "docvault/handlers.py",
+      "line": 47,
+      "blocking": true,
+      "title": "Archived documents can be exported",
+      "trigger": "Archive a document, then request its export.",
+      "impact": "Archived content leaves the system; export should reject archived documents."
+    }
+  ]
+}

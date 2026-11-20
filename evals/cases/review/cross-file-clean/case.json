@@ -1,0 +1,8 @@
+{
+  "split": "development",
+  "kind": "clean",
+  "twin": "cross-file",
+  "class": "unit-mismatch",
+  "trap": "cross-file",
+  "also_accept": []
+}

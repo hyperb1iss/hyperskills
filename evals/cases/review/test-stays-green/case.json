@@ -1,0 +1,11 @@
+{
+  "split": "development",
+  "kind": "defect",
+  "twin": "test-stays-green-clean",
+  "class": "stale-cache",
+  "trap": "test-stays-green",
+  "defect": {"file": "teamdir/service.py", "start_line": 20, "end_line": 25, "function": "update_profile"},
+  "also_accept": [
+    {"file": "tests/test_service.py", "start_line": 64, "end_line": 68}
+  ]
+}

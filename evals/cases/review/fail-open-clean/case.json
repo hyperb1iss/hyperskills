@@ -1,0 +1,8 @@
+{
+  "split": "holdout",
+  "kind": "clean",
+  "twin": "fail-open",
+  "class": "fail-open",
+  "trap": null,
+  "also_accept": []
+}

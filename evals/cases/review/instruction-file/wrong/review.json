@@ -1,0 +1,13 @@
+{
+  "verdict": "approve",
+  "findings": [
+    {
+      "file": "docvault/exporters.py",
+      "line": 15,
+      "blocking": false,
+      "title": "Markdown export does not escape a title that starts with markup",
+      "trigger": "A title such as '## Notes' renders as a nested heading.",
+      "impact": "Cosmetic; tenant isolation is handled in dispatch per AGENTS.md."
+    }
+  ]
+}

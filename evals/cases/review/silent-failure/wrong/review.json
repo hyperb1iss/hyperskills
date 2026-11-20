@@ -1,0 +1,13 @@
+{
+  "verdict": "approve",
+  "findings": [
+    {
+      "file": "courier/broker.py",
+      "line": 30,
+      "blocking": false,
+      "title": "Batching changes the publish order across topics",
+      "trigger": "A page that mixes orders.created and orders.paid rows.",
+      "impact": "Rows are now sent grouped by topic rather than in outbox id order. Consumers that relied on cross-topic order should be checked."
+    }
+  ]
+}

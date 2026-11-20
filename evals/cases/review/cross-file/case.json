@@ -1,0 +1,11 @@
+{
+  "split": "development",
+  "kind": "defect",
+  "twin": "cross-file-clean",
+  "class": "unit-mismatch",
+  "trap": "cross-file",
+  "defect": {"file": "storefront/loyalty.py", "start_line": 14, "end_line": 17, "function": "points_for"},
+  "also_accept": [
+    {"file": "storefront/cart.py", "start_line": 42, "end_line": 44}
+  ]
+}

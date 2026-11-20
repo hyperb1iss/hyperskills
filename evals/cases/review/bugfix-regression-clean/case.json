@@ -1,0 +1,8 @@
+{
+  "split": "holdout",
+  "kind": "clean",
+  "twin": "bugfix-regression",
+  "class": "silent-data-loss",
+  "trap": "bugfix-regression",
+  "also_accept": []
+}

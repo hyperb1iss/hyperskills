@@ -1,0 +1,13 @@
+{
+  "split": "holdout",
+  "kind": "defect",
+  "twin": "bugfix-regression-clean",
+  "class": "silent-data-loss",
+  "trap": "bugfix-regression",
+  "defect": {"file": "contactbook/csvio.py", "start_line": 11, "end_line": 18, "function": "write_contacts"},
+  "also_accept": [
+    {"file": "contactbook/csvio.py", "start_line": 25, "end_line": 29},
+    {"file": "contactbook/export.py", "start_line": 40, "end_line": 41},
+    {"file": "contactbook/restore.py", "start_line": 7, "end_line": 9}
+  ]
+}

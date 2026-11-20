@@ -1,0 +1,155 @@
+diff --git a/hookline/events.py b/hookline/events.py
+index 9a6f0a1..d00d42b 100644
+--- a/hookline/events.py
++++ b/hookline/events.py
+@@ -2,6 +2,7 @@
+ 
+ HANDLED = {
+     "kestrel": {"payment.settled", "payment.refunded"},
++    "osprey": {"transfer.completed", "transfer.reversed"},
+ }
+ 
+ 
+diff --git a/hookline/providers.py b/hookline/providers.py
+index ef860ac..2a83626 100644
+--- a/hookline/providers.py
++++ b/hookline/providers.py
+@@ -5,19 +5,21 @@ from dataclasses import dataclass
+ @dataclass(frozen=True)
+ class Provider:
+     name: str
+-    secret: str
++    secrets: tuple
+     header: str
+     tolerance: int = 300
+ 
+ 
+ def _required(env, name):
+-    value = env.get(name, "").strip()
+-    if not value:
++    """Comma-separated; during a rotation both the old and the new secret are listed."""
++    values = tuple(part.strip() for part in env.get(name, "").split(",") if part.strip())
++    if not values:
+         raise KeyError(f"{name} is not set")
+-    return value
++    return values
+ 
+ 
+ def load_providers(env):
+     return {
+         "kestrel": Provider("kestrel", _required(env, "KESTREL_SIGNING_SECRET"), "Kestrel-Signature"),
++        "osprey": Provider("osprey", _required(env, "OSPREY_SIGNING_SECRET"), "Osprey-Signature", tolerance=600),
+     }
+diff --git a/hookline/signatures.py b/hookline/signatures.py
+index 6ef4e32..e7153f0 100644
+--- a/hookline/signatures.py
++++ b/hookline/signatures.py
+@@ -1,6 +1,7 @@
+ """HMAC signatures on incoming webhooks.
+ 
+-Header format: "t=<unix seconds>,v1=<hex HMAC-SHA256 of '<t>.<body>'>".
++Header format: "t=<unix seconds>,v1=<hex HMAC-SHA256 of '<t>.<body>'>". A sender
++that is rotating its secret repeats v1, once per secret.
+ """
+ import hashlib
+ import hmac
+@@ -19,17 +20,30 @@ def parse_header(value):
+     fields = {}
+     for part in value.split(","):
+         key, _, item = part.strip().partition("=")
+-        fields[key] = item
++        fields.setdefault(key, []).append(item)
+     return fields
+ 
+ 
++def _header(headers, name):
++    wanted = name.lower()
++    for key, value in headers.items():
++        if key.lower() == wanted:
++            return value
++    return ""
++
++
++def _matches(candidate, secrets, timestamp, body):
++    return any(hmac.compare_digest(candidate, sign(secret, timestamp, body)) for secret in secrets)
++
++
+ def verify(provider, headers, body, now):
+-    fields = parse_header(headers.get(provider.header, ""))
++    fields = parse_header(_header(headers, provider.header))
+     try:
+-        timestamp = int(fields["t"])
++        timestamp = int(fields["t"][0])
+     except (KeyError, ValueError):
+         raise SignatureError("missing or malformed timestamp") from None
+     if abs(now - timestamp) > provider.tolerance:
+         raise SignatureError("timestamp outside tolerance")
+-    if not hmac.compare_digest(fields.get("v1", ""), sign(provider.secret, timestamp, body)):
++    candidates = fields.get("v1", [])
++    if not any(_matches(c, provider.secrets, timestamp, body) for c in candidates):
+         raise SignatureError("signature mismatch")
+diff --git a/tests/test_handlers.py b/tests/test_handlers.py
+index a8fbf9f..840c191 100644
+--- a/tests/test_handlers.py
++++ b/tests/test_handlers.py
+@@ -7,7 +7,7 @@ from hookline.providers import load_providers
+ from hookline.signatures import sign
+ 
+ NOW = 1_780_000_000
+-ENV = {"KESTREL_SIGNING_SECRET": "whsec_kestrel"}
++ENV = {"KESTREL_SIGNING_SECRET": "whsec_kestrel", "OSPREY_SIGNING_SECRET": "whsec_osprey_old, whsec_osprey"}
+ 
+ 
+ def request(provider, event, secret, header):
+@@ -33,6 +33,11 @@ class HandleTests(unittest.TestCase):
+         self.assertEqual(self.call(req), (200, {"status": "duplicate"}))
+         self.assertEqual(len(self.ledger.entries), 1)
+ 
++    def test_osprey_transfer_is_applied(self):
++        req = request("osprey", {"id": "tr_7", "type": "transfer.completed"}, "whsec_osprey", "osprey-signature")
++        self.assertEqual(self.call(req), (200, {"status": "applied"}))
++        self.assertEqual(self.ledger.entries[0]["provider"], "osprey")
++
+     def test_unknown_provider(self):
+         req = request("heron", {"id": "ev_1", "type": "x"}, "s", "Heron-Signature")
+         self.assertEqual(self.call(req)[0], 404)
+@@ -44,7 +49,7 @@ class HandleTests(unittest.TestCase):
+ 
+     def test_missing_secret_fails_at_startup(self):
+         with self.assertRaises(KeyError):
+-            load_providers({})
++            load_providers({"KESTREL_SIGNING_SECRET": "whsec_kestrel", "OSPREY_SIGNING_SECRET": " , "})
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/tests/test_signatures.py b/tests/test_signatures.py
+index 955e28d..c769fd3 100644
+--- a/tests/test_signatures.py
++++ b/tests/test_signatures.py
+@@ -5,7 +5,7 @@ from hookline.signatures import SignatureError, sign, verify
+ 
+ NOW = 1_780_000_000
+ BODY = b'{"id":"ev_1","type":"payment.settled"}'
+-KESTREL = Provider("kestrel", "whsec_test", "Kestrel-Signature")
++KESTREL = Provider("kestrel", ("whsec_test",), "Kestrel-Signature")
+ 
+ 
+ def header(timestamp=NOW, secret="whsec_test", body=BODY):
+@@ -32,6 +32,17 @@ class VerifyTests(unittest.TestCase):
+         with self.assertRaises(SignatureError):
+             verify(KESTREL, {}, BODY, NOW)
+ 
++    def test_header_name_is_case_insensitive(self):
++        verify(KESTREL, {"kestrel-signature": header()["Kestrel-Signature"]}, BODY, NOW)
++
++    def test_previous_secret_is_accepted_during_rotation(self):
++        rotating = Provider("kestrel", ("whsec_new", "whsec_test"), "Kestrel-Signature")
++        verify(rotating, header(), BODY, NOW)
++
++    def test_sender_rotation_sends_two_signatures(self):
++        value = f"t={NOW},v1={sign('whsec_old', NOW, BODY)},v1={sign('whsec_test', NOW, BODY)}"
++        verify(KESTREL, {"Kestrel-Signature": value}, BODY, NOW)
++
+ 
+ if __name__ == "__main__":
+     unittest.main()

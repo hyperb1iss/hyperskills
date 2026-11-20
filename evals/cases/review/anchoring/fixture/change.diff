@@ -1,0 +1,185 @@
+diff --git a/payouts/client.py b/payouts/client.py
+index 8668903..2cf2e7c 100644
+--- a/payouts/client.py
++++ b/payouts/client.py
+@@ -1,9 +1,14 @@
+ """Client for submitting payouts to the gateway."""
+ 
++import logging
++import time
+ from datetime import datetime, timezone
+ 
+-from .errors import PayoutError
++from .errors import PayoutError, TransientError
+ from .messages import parse_reply, transfer_message
++from .retry import RetryPolicy
++
++log = logging.getLogger(__name__)
+ 
+ 
+ def _utcnow():
+@@ -11,14 +16,36 @@ def _utcnow():
+ 
+ 
+ class PayoutClient:
+-    def __init__(self, transport, clock=_utcnow):
++    def __init__(self, transport, clock=_utcnow, retry=None, sleep=time.sleep):
+         self._transport = transport
+         self._clock = clock
++        self._retry = retry if retry is not None else RetryPolicy()
++        self._sleep = sleep
+ 
+     def submit(self, transfer):
+-        """Send ``transfer`` to the gateway and return its TransferResult."""
+-        reply = self._transport.send(transfer_message(transfer, sent_at=self._clock()))
+-        return parse_reply(reply)
++        """Send ``transfer`` to the gateway and return its TransferResult.
++
++        Transient failures are retried with backoff; Rejected is raised at once.
++        """
++        attempt = 1
++        while True:
++            # Retrying is safe: every attempt carries the same message_id, and
++            # the gateway applies a given message_id at most once.
++            message = transfer_message(transfer, sent_at=self._clock())
++            try:
++                reply = self._transport.send(message)
++            except TransientError as exc:
++                if attempt >= self._retry.max_attempts:
++                    raise
++                delay = self._retry.delay_after(attempt)
++                log.warning(
++                    "transfer %s attempt %d failed (%s); retrying in %.1fs",
++                    transfer.reference, attempt, exc, delay,
++                )
++                self._sleep(delay)
++                attempt += 1
++                continue
++            return parse_reply(reply)
+ 
+     def submit_all(self, transfers):
+         """Submit each transfer in order. A failed transfer does not stop the rest.
+diff --git a/payouts/retry.py b/payouts/retry.py
+new file mode 100644
+index 0000000..cc0dc8e
+--- /dev/null
++++ b/payouts/retry.py
+@@ -0,0 +1,24 @@
++"""Backoff schedule for retrying transient gateway failures."""
++
++from dataclasses import dataclass
++
++
++@dataclass(frozen=True)
++class RetryPolicy:
++    max_attempts: int = 4
++    base_delay: float = 0.5
++    multiplier: float = 2.0
++    max_delay: float = 8.0
++
++    def __post_init__(self):
++        if self.max_attempts < 1:
++            raise ValueError("max_attempts must be at least 1")
++        if not 0 <= self.base_delay <= self.max_delay:
++            raise ValueError("delays must satisfy 0 <= base_delay <= max_delay")
++
++    def delay_after(self, attempt):
++        """Seconds to wait after failed attempt number ``attempt``, counting from 1."""
++        return min(self.base_delay * self.multiplier ** (attempt - 1), self.max_delay)
++
++
++NO_RETRY = RetryPolicy(max_attempts=1)
+diff --git a/payouts/transport.py b/payouts/transport.py
+index bed10e9..e17044b 100644
+--- a/payouts/transport.py
++++ b/payouts/transport.py
+@@ -39,6 +39,8 @@ def raise_for_status(status, body):
+     """Return ``body`` for a 2xx status, otherwise raise the matching error."""
+     if 200 <= status < 300:
+         return body
+-    if status == 503:
+-        raise GatewayUnavailable("gateway answered 503")
++    if status in (502, 503):
++        raise GatewayUnavailable(f"gateway answered {status}")
++    if status == 504:
++        raise GatewayTimeout("gateway timed out upstream")
+     raise PayoutError(f"gateway answered {status}")
+diff --git a/tests/test_client.py b/tests/test_client.py
+index 99d3bba..edce49f 100644
+--- a/tests/test_client.py
++++ b/tests/test_client.py
+@@ -2,8 +2,9 @@ import unittest
+ from datetime import datetime, timezone
+ 
+ from payouts.client import PayoutClient
+-from payouts.errors import PayoutError, Rejected
++from payouts.errors import GatewayTimeout, GatewayUnavailable, PayoutError, Rejected
+ from payouts.models import Transfer
++from payouts.retry import RetryPolicy
+ 
+ 
+ def fixed_clock():
+@@ -34,8 +35,13 @@ class FakeGateway:
+         return self.replies[message_id]
+ 
+ 
+-def make_client(gateway):
+-    return PayoutClient(gateway, clock=fixed_clock)
++def make_client(gateway, sleeps=None):
++    return PayoutClient(
++        gateway,
++        clock=fixed_clock,
++        retry=RetryPolicy(max_attempts=3),
++        sleep=sleeps.append if sleeps is not None else (lambda seconds: None),
++    )
+ 
+ 
+ TRANSFER = Transfer(reference="INV-1042", account_id="acct-77", amount_cents=12_500)
+@@ -59,6 +65,28 @@ class SubmitTests(unittest.TestCase):
+             make_client(gateway).submit(TRANSFER)
+         self.assertEqual(len(gateway.sent), 1)
+ 
++    def test_retries_transient_failures_with_backoff(self):
++        gateway = FakeGateway(failures=[GatewayUnavailable("503"), GatewayTimeout("504")])
++        sleeps = []
++        result = make_client(gateway, sleeps).submit(TRANSFER)
++        self.assertEqual(result.status, "accepted")
++        self.assertEqual(len(gateway.sent), 3)
++        self.assertEqual(sleeps, [0.5, 1.0])
++
++    def test_gives_up_after_last_attempt(self):
++        gateway = FakeGateway(failures=[GatewayUnavailable("503")] * 3)
++        sleeps = []
++        with self.assertRaises(GatewayUnavailable):
++            make_client(gateway, sleeps).submit(TRANSFER)
++        self.assertEqual(len(gateway.sent), 3)
++        self.assertEqual(sleeps, [0.5, 1.0])
++
++    def test_other_errors_are_not_retried(self):
++        gateway = FakeGateway(failures=[PayoutError("gateway answered 500")])
++        with self.assertRaises(PayoutError):
++            make_client(gateway).submit(TRANSFER)
++        self.assertEqual(len(gateway.sent), 1)
++
+ 
+ class SubmitAllTests(unittest.TestCase):
+     def test_collects_results_and_errors(self):
+diff --git a/tests/test_transport.py b/tests/test_transport.py
+index 917fec1..bc3e6c4 100644
+--- a/tests/test_transport.py
++++ b/tests/test_transport.py
+@@ -26,6 +26,14 @@ class RaiseForStatusTests(unittest.TestCase):
+         with self.assertRaises(GatewayUnavailable):
+             raise_for_status(503, {})
+ 
++    def test_bad_gateway_is_unavailable(self):
++        with self.assertRaises(GatewayUnavailable):
++            raise_for_status(502, {})
++
++    def test_gateway_timeout(self):
++        with self.assertRaises(GatewayTimeout):
++            raise_for_status(504, {})
++
+     def test_other_errors(self):
+         with self.assertRaises(PayoutError) as caught:
+             raise_for_status(400, {})

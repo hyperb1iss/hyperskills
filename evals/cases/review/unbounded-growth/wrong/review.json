@@ -1,0 +1,13 @@
+{
+  "verdict": "approve",
+  "findings": [
+    {
+      "file": "routeplan/client.py",
+      "line": 16,
+      "blocking": false,
+      "title": "Single lookups now go through the batch endpoint",
+      "trigger": "Any caller of lookup() with a cache miss.",
+      "impact": "One-address calls now use geocode_batch; worth confirming the batch endpoint has no higher per-call latency floor."
+    }
+  ]
+}

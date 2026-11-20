@@ -1,0 +1,172 @@
+diff --git a/storefront/cart.py b/storefront/cart.py
+index 8b07dba..d0bbca2 100644
+--- a/storefront/cart.py
++++ b/storefront/cart.py
+@@ -15,7 +15,8 @@ class CartLine:
+     quantity: int
+ 
+     def total(self):
+-        return self.product.price * self.quantity
++        """Line total in integer cents."""
++        return self.product.price_cents * self.quantity
+ 
+ 
+ @dataclass
+@@ -39,7 +40,7 @@ class Cart:
+         self.lines = [line for line in self.lines if line.product.sku != sku]
+ 
+     def subtotal(self):
+-        """Sum of line totals in dollars."""
++        """Sum of line totals in integer cents."""
+         return sum(line.total() for line in self.lines)
+ 
+     def weight_grams(self):
+diff --git a/storefront/catalog.py b/storefront/catalog.py
+index efafc62..43eeb1f 100644
+--- a/storefront/catalog.py
++++ b/storefront/catalog.py
+@@ -1,7 +1,12 @@
+ """Product catalog."""
+ 
+ from dataclasses import dataclass
+-from decimal import Decimal
++from decimal import ROUND_HALF_UP, Decimal
++
++
++def to_cents(amount):
++    """Convert a dollar amount such as "12.99" to integer cents, rounding half up."""
++    return int((Decimal(amount) * 100).quantize(Decimal(1), rounding=ROUND_HALF_UP))
+ 
+ 
+ @dataclass(frozen=True)
+@@ -11,6 +16,10 @@ class Product:
+     price: Decimal
+     weight_grams: int = 0
+ 
++    @property
++    def price_cents(self):
++        return to_cents(self.price)
++
+ 
+ class UnknownProduct(KeyError):
+     pass
+diff --git a/storefront/invoice.py b/storefront/invoice.py
+index dfa7f4b..fe5aa64 100644
+--- a/storefront/invoice.py
++++ b/storefront/invoice.py
+@@ -1,7 +1,6 @@
+ """Invoices for carts."""
+ 
+ from dataclasses import dataclass
+-from decimal import Decimal
+ 
+ from .tax import tax_for
+ 
+@@ -11,15 +10,15 @@ class InvoiceLine:
+     sku: str
+     name: str
+     quantity: int
+-    amount: Decimal
++    amount: int
+ 
+ 
+ @dataclass(frozen=True)
+ class Invoice:
+     region: str
+     lines: tuple
+-    subtotal: Decimal
+-    tax: Decimal
++    subtotal: int
++    tax: int
+ 
+     @property
+     def total(self):
+@@ -47,6 +46,7 @@ def build_invoice(cart, region):
+     return Invoice(region, lines, subtotal, tax_for(subtotal, region))
+ 
+ 
+-def format_money(amount):
+-    sign = "-" if amount < 0 else ""
+-    return f"{sign}${abs(amount):,.2f}"
++def format_money(cents):
++    sign = "-" if cents < 0 else ""
++    dollars, remainder = divmod(abs(cents), 100)
++    return f"{sign}${dollars:,}.{remainder:02d}"
+diff --git a/storefront/tax.py b/storefront/tax.py
+index b87db18..3423003 100644
+--- a/storefront/tax.py
++++ b/storefront/tax.py
+@@ -22,5 +22,6 @@ def rate_for(region):
+ 
+ 
+ def tax_for(subtotal, region):
+-    """Tax on a dollar subtotal, rounded half up to the cent."""
+-    return (subtotal * rate_for(region)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
++    """Tax on a subtotal in integer cents, rounded half up to a whole cent."""
++    tax = Decimal(subtotal) * rate_for(region)
++    return int(tax.quantize(Decimal(1), rounding=ROUND_HALF_UP))
+diff --git a/tests/test_cart.py b/tests/test_cart.py
+index 543d267..114c1d3 100644
+--- a/tests/test_cart.py
++++ b/tests/test_cart.py
+@@ -13,7 +13,7 @@ class CartTests(unittest.TestCase):
+         cart = Cart()
+         cart.add(PEN, 3)
+         cart.add(NOTEBOOK)
+-        self.assertEqual(cart.subtotal(), Decimal("18.47"))
++        self.assertEqual(cart.subtotal(), 1847)
+ 
+     def test_adding_same_product_merges_lines(self):
+         cart = Cart()
+@@ -39,6 +39,7 @@ class CatalogTests(unittest.TestCase):
+     def test_from_rows_parses_prices(self):
+         catalog = Catalog.from_rows([("PEN-01", "Gel pen", "1.99", "12")])
+         self.assertEqual(catalog.get("PEN-01").price, Decimal("1.99"))
++        self.assertEqual(catalog.get("PEN-01").price_cents, 199)
+         self.assertIn("PEN-01", catalog)
+ 
+     def test_unknown_product(self):
+diff --git a/tests/test_invoice.py b/tests/test_invoice.py
+index 650dacc..e42411d 100644
+--- a/tests/test_invoice.py
++++ b/tests/test_invoice.py
+@@ -20,7 +20,7 @@ def sample_cart():
+ 
+ class TaxTests(unittest.TestCase):
+     def test_rounds_half_up_to_the_cent(self):
+-        self.assertEqual(tax_for(Decimal("10.00"), "north"), Decimal("0.73"))
++        self.assertEqual(tax_for(1000, "north"), 73)
+ 
+     def test_unknown_region(self):
+         with self.assertRaises(UnknownRegion):
+@@ -30,10 +30,7 @@ class TaxTests(unittest.TestCase):
+ class InvoiceTests(unittest.TestCase):
+     def test_totals(self):
+         invoice = build_invoice(sample_cart(), "north")
+-        self.assertEqual(
+-            (invoice.subtotal, invoice.tax, invoice.total),
+-            (Decimal("18.47"), Decimal("1.34"), Decimal("19.81")),
+-        )
++        self.assertEqual((invoice.subtotal, invoice.tax, invoice.total), (1847, 134, 1981))
+ 
+     def test_render(self):
+         text = build_invoice(sample_cart(), "east").render()
+@@ -46,15 +43,15 @@ class InvoiceTests(unittest.TestCase):
+             build_invoice(Cart(), "north")
+ 
+     def test_format_money(self):
+-        self.assertEqual(format_money(Decimal("1234.56")), "$1,234.56")
+-        self.assertEqual(format_money(Decimal("-0.05")), "-$0.05")
++        self.assertEqual(format_money(123456), "$1,234.56")
++        self.assertEqual(format_money(-5), "-$0.05")
+ 
+ 
+ class PlaceOrderTests(unittest.TestCase):
+     def test_counts_orders_and_credits_points(self):
+         account = Account("cust-9", points=40, order_count=3)
+         order = place_order(sample_cart(), account, "west")
+-        self.assertEqual(order.invoice.total, Decimal("18.47"))
++        self.assertEqual(order.invoice.total, 1847)
+         self.assertEqual(account.order_count, 4)
+         self.assertEqual(account.points, 40 + order.points_earned)
+ 
