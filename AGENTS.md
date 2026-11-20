@@ -157,6 +157,7 @@ hyperskills/
 │   │   │       │   │   └── notes.md
 │   │   │       │   ├── oracle/
 │   │   │       │   │   └── edited.md
+│   │   │       │   ├── prompt-untold.md
 │   │   │       │   ├── prompt.md
 │   │   │       │   ├── protected.json
 │   │   │       │   └── questions.json
@@ -166,6 +167,7 @@ hyperskills/
 │   │   │       │   │   └── notes.md
 │   │   │       │   ├── oracle/
 │   │   │       │   │   └── edited.md
+│   │   │       │   ├── prompt-untold.md
 │   │   │       │   ├── prompt.md
 │   │   │       │   ├── protected.json
 │   │   │       │   └── questions.json
@@ -175,6 +177,7 @@ hyperskills/
 │   │   │       │   │   └── notes.md
 │   │   │       │   ├── oracle/
 │   │   │       │   │   └── edited.md
+│   │   │       │   ├── prompt-untold.md
 │   │   │       │   ├── prompt.md
 │   │   │       │   ├── protected.json
 │   │   │       │   └── questions.json
@@ -184,6 +187,7 @@ hyperskills/
 │   │   │           │   └── notes.md
 │   │   │           ├── oracle/
 │   │   │           │   └── edited.md
+│   │   │           ├── prompt-untold.md
 │   │   │           ├── prompt.md
 │   │   │           ├── protected.json
 │   │   │           └── questions.json
