@@ -74,6 +74,22 @@ After:
 
 A timeout value, row count, root cause, batching recommendation, or promise to push a fix needs separate support. A warmer or more detailed reply can be appropriate when the context supplies it.
 
+In an ongoing conversation, read the sender's recent messages to that person. A greeting or sign-off repeated across several messages reads as a form letter, even when each message is fine alone. No scan of a single message can see this.
+
+## Agent report, handoff, and status update
+
+The reader did not watch the work. They have not seen the tool calls, the files, or the names the work produced, and they may read only the first lines. Lead with the outcome and what is left for them. Replace every coined label and bare identifier with what it stands for, using the working notes. Keep exact values, commands, and any step the reader must take.
+
+Before:
+
+> Fixed. Root cause was the stale-lease path: reaper wasn't honoring the fence token after the v2 cutover, so orphans piled up → pool exhaustion. Patched reaper, backfilled, reran the soak (green). Left the canary flag on; flip after Thursday.
+
+After:
+
+> The connection pool no longer runs out. Since last week's move to the new lock service, the cleanup job skipped connections whose lock had expired, so abandoned connections built up until none were free. I fixed the cleanup job, removed the 212 abandoned connections, and reran the two-hour load test, which passed. One step is left for you: the fix is on for 5% of traffic behind the `pool_reaper_v2` flag, and it should go to 100% once Thursday's deploy freeze ends.
+
+Every detail the second version adds (the lock service move, 212, two hours, 5%, the freeze) has to come from the working notes. The revision is longer, and it is the one the reader can act on. When the notes do not say what "the v2 cutover" was, ask or flag the gap. A guess that reads smoothly is worse than the unexplained label.
+
 ## PR body and reply
 
 Use `super-good-pr` for structure and authorization. Preserve semantic emoji, reviewer guidance, validation receipts, and human-authored choices. Cut inflated significance without stripping useful evidence or calibrated uncertainty.
@@ -120,6 +136,7 @@ An asymptotic complexity claim needs the actual operations and bounds. The word 
 | Fiction                                             | The creative brief and the distinction between invention and factual attribution |
 | Marketing                                           | Persuasive intent with support for factual claims                                |
 | Agent brief, skill, or memory                       | Useful tables and precise terminology; clarity still matters                     |
+| Text from an older or open-weight model             | The facts and the author's intent; expect padding and stock phrasing first       |
 | Quoted material                                     | Exact wording unless the request authorizes adaptation                           |
 
 When the surface is unclear, infer it from the destination and surrounding artifact. Ask only when the answer would materially change the revision. A second model or an agent reader still needs a clear instruction; being able to ask follow-up questions does not make confusing prose acceptable.
