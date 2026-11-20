@@ -1,0 +1,266 @@
+{
+  "version": 1,
+  "name": "review-defects",
+  "skills_root": "../skills",
+  "configurations": [
+    {
+      "id": "claude-file-tools-sonnet",
+      "model": "claude-sonnet-5-5",
+      "harness": "Claude Code 2.1.329; controlled-file-tools-catalog",
+      "adapter": ["python3", "../scripts/eval_claude.py"],
+      "adapter_inputs": ["../scripts/eval_trace.py"],
+      "settings": {
+        "effort": "high",
+        "claude_version": "2.1.329 (Claude Code)",
+        "expected_served_models": ["claude-sonnet-5-5"]
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "id": "review-edge-value",
+      "family": "review",
+      "split": "development",
+      "prompt": "cases/review/edge-value/prompt.md",
+      "fixture": "cases/review/edge-value/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "edge-value"],
+      "grader_inputs": ["cases/review/edge-value/fixture", "cases/review/edge-value/case.json"]
+    },
+    {
+      "id": "review-edge-value-clean",
+      "family": "review",
+      "split": "development",
+      "prompt": "cases/review/edge-value-clean/prompt.md",
+      "fixture": "cases/review/edge-value-clean/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "edge-value-clean"],
+      "grader_inputs": [
+        "cases/review/edge-value-clean/fixture",
+        "cases/review/edge-value-clean/case.json"
+      ]
+    },
+    {
+      "id": "review-batch-stop",
+      "family": "review",
+      "split": "development",
+      "prompt": "cases/review/batch-stop/prompt.md",
+      "fixture": "cases/review/batch-stop/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "batch-stop"],
+      "grader_inputs": ["cases/review/batch-stop/fixture", "cases/review/batch-stop/case.json"]
+    },
+    {
+      "id": "review-batch-stop-clean",
+      "family": "review",
+      "split": "development",
+      "prompt": "cases/review/batch-stop-clean/prompt.md",
+      "fixture": "cases/review/batch-stop-clean/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "batch-stop-clean"],
+      "grader_inputs": [
+        "cases/review/batch-stop-clean/fixture",
+        "cases/review/batch-stop-clean/case.json"
+      ]
+    },
+    {
+      "id": "review-silent-failure",
+      "family": "review",
+      "split": "development",
+      "prompt": "cases/review/silent-failure/prompt.md",
+      "fixture": "cases/review/silent-failure/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "silent-failure"],
+      "grader_inputs": [
+        "cases/review/silent-failure/fixture",
+        "cases/review/silent-failure/case.json"
+      ]
+    },
+    {
+      "id": "review-silent-failure-clean",
+      "family": "review",
+      "split": "development",
+      "prompt": "cases/review/silent-failure-clean/prompt.md",
+      "fixture": "cases/review/silent-failure-clean/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "silent-failure-clean"],
+      "grader_inputs": [
+        "cases/review/silent-failure-clean/fixture",
+        "cases/review/silent-failure-clean/case.json"
+      ]
+    },
+    {
+      "id": "review-test-stays-green",
+      "family": "review",
+      "split": "development",
+      "prompt": "cases/review/test-stays-green/prompt.md",
+      "fixture": "cases/review/test-stays-green/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "test-stays-green"],
+      "grader_inputs": [
+        "cases/review/test-stays-green/fixture",
+        "cases/review/test-stays-green/case.json"
+      ]
+    },
+    {
+      "id": "review-test-stays-green-clean",
+      "family": "review",
+      "split": "development",
+      "prompt": "cases/review/test-stays-green-clean/prompt.md",
+      "fixture": "cases/review/test-stays-green-clean/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "test-stays-green-clean"],
+      "grader_inputs": [
+        "cases/review/test-stays-green-clean/fixture",
+        "cases/review/test-stays-green-clean/case.json"
+      ]
+    },
+    {
+      "id": "review-anchoring",
+      "family": "review",
+      "split": "development",
+      "prompt": "cases/review/anchoring/prompt.md",
+      "fixture": "cases/review/anchoring/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "anchoring"],
+      "grader_inputs": ["cases/review/anchoring/fixture", "cases/review/anchoring/case.json"]
+    },
+    {
+      "id": "review-anchoring-clean",
+      "family": "review",
+      "split": "development",
+      "prompt": "cases/review/anchoring-clean/prompt.md",
+      "fixture": "cases/review/anchoring-clean/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "anchoring-clean"],
+      "grader_inputs": [
+        "cases/review/anchoring-clean/fixture",
+        "cases/review/anchoring-clean/case.json"
+      ]
+    },
+    {
+      "id": "review-cross-file",
+      "family": "review",
+      "split": "development",
+      "prompt": "cases/review/cross-file/prompt.md",
+      "fixture": "cases/review/cross-file/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "cross-file"],
+      "grader_inputs": ["cases/review/cross-file/fixture", "cases/review/cross-file/case.json"]
+    },
+    {
+      "id": "review-cross-file-clean",
+      "family": "review",
+      "split": "development",
+      "prompt": "cases/review/cross-file-clean/prompt.md",
+      "fixture": "cases/review/cross-file-clean/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "cross-file-clean"],
+      "grader_inputs": [
+        "cases/review/cross-file-clean/fixture",
+        "cases/review/cross-file-clean/case.json"
+      ]
+    },
+    {
+      "id": "review-fail-open",
+      "family": "review",
+      "split": "holdout",
+      "prompt": "cases/review/fail-open/prompt.md",
+      "fixture": "cases/review/fail-open/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "fail-open"],
+      "grader_inputs": ["cases/review/fail-open/fixture", "cases/review/fail-open/case.json"]
+    },
+    {
+      "id": "review-fail-open-clean",
+      "family": "review",
+      "split": "holdout",
+      "prompt": "cases/review/fail-open-clean/prompt.md",
+      "fixture": "cases/review/fail-open-clean/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "fail-open-clean"],
+      "grader_inputs": [
+        "cases/review/fail-open-clean/fixture",
+        "cases/review/fail-open-clean/case.json"
+      ]
+    },
+    {
+      "id": "review-unbounded-growth",
+      "family": "review",
+      "split": "holdout",
+      "prompt": "cases/review/unbounded-growth/prompt.md",
+      "fixture": "cases/review/unbounded-growth/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "unbounded-growth"],
+      "grader_inputs": [
+        "cases/review/unbounded-growth/fixture",
+        "cases/review/unbounded-growth/case.json"
+      ]
+    },
+    {
+      "id": "review-unbounded-growth-clean",
+      "family": "review",
+      "split": "holdout",
+      "prompt": "cases/review/unbounded-growth-clean/prompt.md",
+      "fixture": "cases/review/unbounded-growth-clean/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "unbounded-growth-clean"],
+      "grader_inputs": [
+        "cases/review/unbounded-growth-clean/fixture",
+        "cases/review/unbounded-growth-clean/case.json"
+      ]
+    },
+    {
+      "id": "review-instruction-file",
+      "family": "review",
+      "split": "holdout",
+      "prompt": "cases/review/instruction-file/prompt.md",
+      "fixture": "cases/review/instruction-file/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "instruction-file"],
+      "grader_inputs": [
+        "cases/review/instruction-file/fixture",
+        "cases/review/instruction-file/case.json"
+      ]
+    },
+    {
+      "id": "review-instruction-file-clean",
+      "family": "review",
+      "split": "holdout",
+      "prompt": "cases/review/instruction-file-clean/prompt.md",
+      "fixture": "cases/review/instruction-file-clean/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "instruction-file-clean"],
+      "grader_inputs": [
+        "cases/review/instruction-file-clean/fixture",
+        "cases/review/instruction-file-clean/case.json"
+      ]
+    },
+    {
+      "id": "review-bugfix-regression",
+      "family": "review",
+      "split": "holdout",
+      "prompt": "cases/review/bugfix-regression/prompt.md",
+      "fixture": "cases/review/bugfix-regression/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "bugfix-regression"],
+      "grader_inputs": [
+        "cases/review/bugfix-regression/fixture",
+        "cases/review/bugfix-regression/case.json"
+      ]
+    },
+    {
+      "id": "review-bugfix-regression-clean",
+      "family": "review",
+      "split": "holdout",
+      "prompt": "cases/review/bugfix-regression-clean/prompt.md",
+      "fixture": "cases/review/bugfix-regression-clean/fixture",
+      "skills": ["hyper-pr-review"],
+      "grader": ["python3", "cases/review/grade.py", "bugfix-regression-clean"],
+      "grader_inputs": [
+        "cases/review/bugfix-regression-clean/fixture",
+        "cases/review/bugfix-regression-clean/case.json"
+      ]
+    }
+  ]
+}

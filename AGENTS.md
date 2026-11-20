@@ -200,6 +200,508 @@ hyperskills/
 │   │   │   │   ├── news.md
 │   │   │   │   └── releases.json
 │   │   │   └── prompt.md
+│   │   ├── review/
+│   │   │   ├── README.md
+│   │   │   ├── anchoring/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── payouts/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── client.py
+│   │   │   │   │   │   ├── errors.py
+│   │   │   │   │   │   ├── messages.py
+│   │   │   │   │   │   ├── models.py
+│   │   │   │   │   │   ├── retry.py
+│   │   │   │   │   │   └── transport.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_client.py
+│   │   │   │   │       ├── test_messages.py
+│   │   │   │   │       └── test_transport.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── anchoring-clean/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── payouts/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── client.py
+│   │   │   │   │   │   ├── errors.py
+│   │   │   │   │   │   ├── messages.py
+│   │   │   │   │   │   ├── models.py
+│   │   │   │   │   │   ├── retry.py
+│   │   │   │   │   │   └── transport.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_client.py
+│   │   │   │   │       ├── test_messages.py
+│   │   │   │   │       └── test_transport.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── batch-stop/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── gridmeter/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── cli.py
+│   │   │   │   │   │   ├── importer.py
+│   │   │   │   │   │   ├── parsing.py
+│   │   │   │   │   │   ├── store.py
+│   │   │   │   │   │   ├── units.py
+│   │   │   │   │   │   └── usage.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_importer.py
+│   │   │   │   │       ├── test_parsing.py
+│   │   │   │   │       └── test_usage.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── batch-stop-clean/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── gridmeter/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── cli.py
+│   │   │   │   │   │   ├── importer.py
+│   │   │   │   │   │   ├── parsing.py
+│   │   │   │   │   │   ├── store.py
+│   │   │   │   │   │   ├── units.py
+│   │   │   │   │   │   └── usage.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_importer.py
+│   │   │   │   │       ├── test_parsing.py
+│   │   │   │   │       └── test_usage.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── bugfix-regression/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── CHANGELOG.md
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── contactbook/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── book.py
+│   │   │   │   │   │   ├── csvio.py
+│   │   │   │   │   │   ├── export.py
+│   │   │   │   │   │   ├── models.py
+│   │   │   │   │   │   └── restore.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_book.py
+│   │   │   │   │       ├── test_csvio.py
+│   │   │   │   │       ├── test_export.py
+│   │   │   │   │       └── test_restore.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── bugfix-regression-clean/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── CHANGELOG.md
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── contactbook/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── book.py
+│   │   │   │   │   │   ├── csvio.py
+│   │   │   │   │   │   ├── export.py
+│   │   │   │   │   │   ├── models.py
+│   │   │   │   │   │   └── restore.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_book.py
+│   │   │   │   │       ├── test_csvio.py
+│   │   │   │   │       ├── test_export.py
+│   │   │   │   │       └── test_restore.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── cross-file/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── storefront/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── cart.py
+│   │   │   │   │   │   ├── catalog.py
+│   │   │   │   │   │   ├── invoice.py
+│   │   │   │   │   │   ├── loyalty.py
+│   │   │   │   │   │   ├── orders.py
+│   │   │   │   │   │   └── tax.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_cart.py
+│   │   │   │   │       ├── test_invoice.py
+│   │   │   │   │       └── test_loyalty.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── cross-file-clean/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── storefront/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── cart.py
+│   │   │   │   │   │   ├── catalog.py
+│   │   │   │   │   │   ├── invoice.py
+│   │   │   │   │   │   ├── loyalty.py
+│   │   │   │   │   │   ├── orders.py
+│   │   │   │   │   │   └── tax.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_cart.py
+│   │   │   │   │       ├── test_invoice.py
+│   │   │   │   │       └── test_loyalty.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── edge-value/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── boxoffice/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── models.py
+│   │   │   │   │   │   ├── notify.py
+│   │   │   │   │   │   ├── orders.py
+│   │   │   │   │   │   ├── pricing.py
+│   │   │   │   │   │   ├── store.py
+│   │   │   │   │   │   └── waitlist.py
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_orders.py
+│   │   │   │   │       └── test_pricing.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── edge-value-clean/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── boxoffice/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── models.py
+│   │   │   │   │   │   ├── notify.py
+│   │   │   │   │   │   ├── orders.py
+│   │   │   │   │   │   ├── pricing.py
+│   │   │   │   │   │   ├── store.py
+│   │   │   │   │   │   └── waitlist.py
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_orders.py
+│   │   │   │   │       └── test_pricing.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── fail-open/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── hookline/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── events.py
+│   │   │   │   │   │   ├── handlers.py
+│   │   │   │   │   │   ├── providers.py
+│   │   │   │   │   │   ├── reports.py
+│   │   │   │   │   │   └── signatures.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_events.py
+│   │   │   │   │       ├── test_handlers.py
+│   │   │   │   │       ├── test_reports.py
+│   │   │   │   │       └── test_signatures.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── fail-open-clean/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── hookline/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── events.py
+│   │   │   │   │   │   ├── handlers.py
+│   │   │   │   │   │   ├── providers.py
+│   │   │   │   │   │   ├── reports.py
+│   │   │   │   │   │   └── signatures.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_events.py
+│   │   │   │   │       ├── test_handlers.py
+│   │   │   │   │       ├── test_reports.py
+│   │   │   │   │       └── test_signatures.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── grade.py
+│   │   │   ├── instruction-file/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── AGENTS.md
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── docvault/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── exporters.py
+│   │   │   │   │   │   ├── handlers.py
+│   │   │   │   │   │   ├── models.py
+│   │   │   │   │   │   ├── routes.py
+│   │   │   │   │   │   └── store.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_exporters.py
+│   │   │   │   │       └── test_handlers.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── instruction-file-clean/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── AGENTS.md
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── docvault/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── exporters.py
+│   │   │   │   │   │   ├── handlers.py
+│   │   │   │   │   │   ├── models.py
+│   │   │   │   │   │   ├── routes.py
+│   │   │   │   │   │   └── store.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_exporters.py
+│   │   │   │   │       └── test_handlers.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── silent-failure/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── courier/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── broker.py
+│   │   │   │   │   │   ├── outbox.py
+│   │   │   │   │   │   ├── relay.py
+│   │   │   │   │   │   ├── serialization.py
+│   │   │   │   │   │   └── settings.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_outbox.py
+│   │   │   │   │       ├── test_relay.py
+│   │   │   │   │       └── test_settings.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── silent-failure-clean/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── courier/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── broker.py
+│   │   │   │   │   │   ├── outbox.py
+│   │   │   │   │   │   ├── relay.py
+│   │   │   │   │   │   ├── serialization.py
+│   │   │   │   │   │   └── settings.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_outbox.py
+│   │   │   │   │       ├── test_relay.py
+│   │   │   │   │       └── test_settings.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── test-stays-green/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── teamdir/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── app.py
+│   │   │   │   │   │   ├── cache.py
+│   │   │   │   │   │   ├── models.py
+│   │   │   │   │   │   ├── service.py
+│   │   │   │   │   │   ├── settings.py
+│   │   │   │   │   │   └── store.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_app.py
+│   │   │   │   │       ├── test_cache.py
+│   │   │   │   │       ├── test_service.py
+│   │   │   │   │       └── test_settings.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── test-stays-green-clean/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── teamdir/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── app.py
+│   │   │   │   │   │   ├── cache.py
+│   │   │   │   │   │   ├── models.py
+│   │   │   │   │   │   ├── service.py
+│   │   │   │   │   │   ├── settings.py
+│   │   │   │   │   │   └── store.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_app.py
+│   │   │   │   │       ├── test_cache.py
+│   │   │   │   │       ├── test_service.py
+│   │   │   │   │       └── test_settings.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   ├── test_review.py
+│   │   │   ├── unbounded-growth/
+│   │   │   │   ├── case.json
+│   │   │   │   ├── fixture/
+│   │   │   │   │   ├── PR.md
+│   │   │   │   │   ├── change.diff
+│   │   │   │   │   ├── routeplan/
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── cache.py
+│   │   │   │   │   │   ├── client.py
+│   │   │   │   │   │   ├── normalize.py
+│   │   │   │   │   │   ├── planner.py
+│   │   │   │   │   │   └── windows.py
+│   │   │   │   │   └── tests/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── test_cache.py
+│   │   │   │   │       ├── test_client.py
+│   │   │   │   │       ├── test_planner.py
+│   │   │   │   │       └── test_windows.py
+│   │   │   │   ├── oracle/
+│   │   │   │   │   └── review.json
+│   │   │   │   ├── prompt.md
+│   │   │   │   ├── proof/
+│   │   │   │   │   └── test_proof.py
+│   │   │   │   └── wrong/
+│   │   │   │       └── review.json
+│   │   │   └── unbounded-growth-clean/
+│   │   │       ├── case.json
+│   │   │       ├── fixture/
+│   │   │       │   ├── PR.md
+│   │   │       │   ├── change.diff
+│   │   │       │   ├── routeplan/
+│   │   │       │   │   ├── __init__.py
+│   │   │       │   │   ├── cache.py
+│   │   │       │   │   ├── client.py
+│   │   │       │   │   ├── normalize.py
+│   │   │       │   │   ├── planner.py
+│   │   │       │   │   └── windows.py
+│   │   │       │   └── tests/
+│   │   │       │       ├── __init__.py
+│   │   │       │       ├── test_cache.py
+│   │   │       │       ├── test_client.py
+│   │   │       │       ├── test_planner.py
+│   │   │       │       └── test_windows.py
+│   │   │       ├── oracle/
+│   │   │       │   └── review.json
+│   │   │       ├── prompt.md
+│   │   │       ├── proof/
+│   │   │       │   └── test_proof.py
+│   │   │       └── wrong/
+│   │   │           └── review.json
 │   │   ├── review-boundary/
 │   │   │   ├── fixture/
 │   │   │   │   ├── cache.py
@@ -317,6 +819,7 @@ hyperskills/
 │   │   │   └── replay-work-item-mirror.md
 │   │   ├── suite.json
 │   │   └── test_replay.py
+│   ├── review-sonnet.json
 │   ├── screen-fable.json
 │   └── screen-sonnet.json
 ├── release.json
