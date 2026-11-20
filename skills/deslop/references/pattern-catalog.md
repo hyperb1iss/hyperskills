@@ -6,7 +6,7 @@ Examples below preserve the stated facts. A replacement that needs a new mechani
 
 ## Where to look first
 
-Every family applies to every text. When you know where a text came from, these are the families that most often carry its defects. They are starting points from dated observations in `evidence.md`, and they say nothing about who wrote a passage.
+Every family applies to every text. When you know where a text came from, these families are useful starting points. They come from dated observations in `evidence.md`, and they say nothing about who wrote a passage.
 
 | Source of the text                                           | Check first                                              |
 | ------------------------------------------------------------ | -------------------------------------------------------- |
@@ -19,7 +19,7 @@ A pattern stays in this catalog while any writer still produces it. Newer models
 
 ## Context (C)
 
-These are defects of a writer who knows more than the page says. They are invisible to the writer, because the writer's own context fills each gap on rereading.
+These are defects of a writer who knows more than the page says. They are invisible to the writer, because the writer's own context fills each gap on rereading. The repair starts with finding that context: the working notes, log, thread, or files the draft was written from.
 
 | ID  | Candidate                                 | Decision                                                                                                       |
 | --- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
@@ -35,7 +35,7 @@ A repair that draws on the working notes:
 - Before: `Drain pass fixed the stuck batch; reverted the TTL thing, see earlier.`
 - After: `The stuck batch cleared after a second run of the queue drain job. The cache expiry change from this morning is also reverted, from 30 minutes back to 5.`
 
-The second version is available only because the notes say what the drain pass was and which change was reverted. When the source does not say what a label meant, ask or flag the gap. A guessed definition is fabricated specificity (E1). Notation that belongs to the domain, such as a type signature or a chemical equation, is not shorthand.
+The second version is available only because the notes say what the drain pass was and which change was reverted. Look for the source before deciding a label is unexplained; an editor who reads only the draft can do no more than flag. When the source does not say what a label meant, ask or flag the gap. A guessed definition is fabricated specificity (E1). Notation that belongs to the domain, such as a type signature or a chemical equation, is not shorthand.
 
 ## Mechanical (M)
 
@@ -144,7 +144,7 @@ Useful repairs with no added facts:
 
 The retry edit cannot claim thundering-herd prevention without evidence about jitter and the actual workload. The build edit cannot invent earlier failures as a reason nobody was surprised.
 
-The test for a contrast (N1) is whether a real reader holds the rejected alternative. "The cache is per tenant, not global" corrects a likely assumption. A contrast that disavows a claim nobody made ("a hypothesis, not a proven mechanism" when no one called it proven) is the empty form. Removing one contrast phrase often produces another, and revision adds them, so apply the test to the rewrite as well as the draft.
+The test for a contrast (N1) is whether the rejected alternative is one a reader would plausibly assume or needs warning off. "The cache is per tenant, not global" corrects a likely assumption, and "correlation, not causation" marks a real limit. A contrast that disavows a claim nobody would make ("a hypothesis, not a proven mechanism" when nothing suggested proof) is the empty form. Removing one contrast phrase often produces another, and revision adds them, so apply the test to the rewrite as well as the draft.
 
 The scanner's N19 trigger uses three frame families to locate candidates. The threshold is a convenience, not a model signature or a measured quality boundary. A paragraph can legitimately contain every listed frame. Check what the reader cannot follow before editing it.
 

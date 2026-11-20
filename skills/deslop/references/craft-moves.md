@@ -16,7 +16,7 @@ Lead with what the reader must know or do, then give the support. A status updat
 
 Unpacking adds words, and the longer version is correct when the reader can now act on it. The opposite failure is restoring padding. Add the missing referent, the missing relation, or the missing next step. Add no preamble, recap, or reassurance.
 
-Every definition and relation comes from the source. When the working notes do not say what a label meant, ask the writer or flag the gap in the output.
+Every definition and relation comes from the source, so find the source first: the working notes, the log, the thread, the files beside the draft. An editor who reads only the draft can polish it and still leave every label unexplained. When the source does not say what a label meant, ask the writer or flag the gap in the output.
 
 ## Subject and action
 

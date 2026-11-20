@@ -78,22 +78,22 @@ Choose `house` for our prose, `agent` for our instruction files, and `published`
 
 The scanner is read-only and uses a heuristic Markdown masker. It protects frontmatter, code, blockquotes, comments, and link targets. It also reports raw hard hits suppressed by masking; inspect those when quoting or nested lists make the mask uncertain. A known limitation is a list fence whose closing indentation exceeds three spaces. A clean exit establishes only that the enabled checks found nothing in the visible text they recognized. It does not establish prose quality or parser completeness.
 
-Treat candidates as prompts to inspect, never automatic replacements. The candidates cover both directions: padding phrases common in older and open-weight model output, and frames and shorthand common in recent output. Rhythm and density diagnostics are descriptive and never change the exit code. They report semicolons per 1,000 words, the longest paragraph, and up to three sentences of 45 words or more as places to look. A long sentence that develops one idea is fine, and short technical instructions can legitimately have uniform sentence lengths. Run `scripts/selftest.sh` after changing scanner behavior.
+Treat candidates as prompts to inspect, never automatic replacements. They cover padding phrases and packed or framed prose alike. Rhythm and density diagnostics (sentence spread, semicolon rate, the longest sentences and paragraph) are descriptive and never change the exit code: a long sentence that develops one idea is fine, and short technical instructions can legitimately be uniform. Run `scripts/selftest.sh` after changing scanner behavior.
 
 ### Read in order of consequence
 
 Start with what the reader cannot know, then missing meaning or a confusing argument, then sentence detail. These are diagnostic lenses, not mandatory invocations:
 
-| Lens       | Look for                                                                            | Useful move                                                               |
-| ---------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Reader     | Labels coined during the work, shorthand, references to things the reader never saw | Say what the thing is, using the source; flag a referent the source lacks |
-| Document   | Repeated summaries, decorative headings, reasoning split into unrelated bullets     | Keep the structure that helps the reader navigate or act                  |
-| Argument   | Inflated significance, unsupported attribution, imaginary counterarguments          | State the actual claim and its support                                    |
-| Sentence   | Unclear actor, buried action, clause stacks, empty participial tails                | Give the relevant subject a clear verb; split only where meaning benefits |
-| Vocabulary | Filler, imprecise metaphor, jargon the reader cannot interpret                      | Use the precise familiar term; preserve defined terminology               |
-| Evidence   | Invented specificity, overstated certainty, stale claims, process narration         | Restore qualifications and attribution; flag source gaps                  |
+| Lens       | Look for                                                                            | Useful move                                                                      |
+| ---------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Reader     | Labels coined during the work, shorthand, references to things the reader never saw | Look for the writer's source, say what the thing is, flag what stays unexplained |
+| Document   | Repeated summaries, decorative headings, reasoning split into unrelated bullets     | Keep the structure that helps the reader navigate or act                         |
+| Argument   | Inflated significance, unsupported attribution, imaginary counterarguments          | State the actual claim and its support                                           |
+| Sentence   | Unclear actor, buried action, clause stacks, empty participial tails                | Give the relevant subject a clear verb; split only where meaning benefits        |
+| Vocabulary | Filler, imprecise metaphor, jargon the reader cannot interpret                      | Use the precise familiar term; preserve defined terminology                      |
+| Evidence   | Invented specificity, overstated certainty, stale claims, process narration         | Restore qualifications and attribution; flag source gaps                         |
 
-For the reader lens, read the draft as the person who will receive it: someone capable who has this page and nothing else, perhaps switching in from other work. Every name on the page should point at something that reader already knows or something the page explains.
+For the reader lens, read the draft as the person who will receive it: someone capable who has this page and nothing else, perhaps switching in from other work. When a name on the page is unexplained, find where the writer got it before editing around it: working notes, a log, the thread, or files beside the draft. Resolve what that material explains, and tell the user which names it does not.
 
 The catalog in `references/pattern-catalog.md` gives stable IDs and examples, and says which families to check first for a known source. Consult relevant entries instead of loading every rule for every artifact. The craft moves in `references/craft-moves.md` help when a sentence's shape is the problem or when a passage needs unpacking for a reader without context.
 
@@ -113,11 +113,9 @@ Examples in the references are illustrative. Added specifics are usable only whe
 
 Compare the original and revised text for changed meaning before scanning typography. Check that every new factual clause has support and that deleted clauses did not carry a requirement, exception, or qualification. Use the actual diff for files; reread the complete artifact when edits changed its structure.
 
-When both versions exist as files, run the scanner's compare mode. A protected region (code, quotation, link target, frontmatter, or comment) that is missing or altered is a hard finding. Dropped or introduced numbers, citations, and URLs, hedges that disappeared, certainty words that appeared, and patterns the revision added are candidates.
+When both versions exist as files, run the scanner's compare mode and read its output as questions about the edit. A changed protected region (code, quotation, link target, frontmatter, comment) is a hard finding. A dropped number or citation is correct when a repeated sentence was cut and wrong when that sentence held the only mention. An introduced number needs a source, and a vanished hedge or a new certainty word means rechecking the claim. The inventories are lexical, so a changed unit or a reversed claim passes unseen. A rewrite also brings its own formulas, most often a new contrast in place of the one removed, so scan the revision as well as the draft. An edit that clears a finding by deleting the content around it has failed.
 
-Read its output as questions about the edit. A dropped number is correct when a repeated sentence was cut and wrong when that sentence held the only mention. An introduced number needs a source. A rewrite also brings its own formulas, most often a new contrast in place of the one removed, so scan the revision and not only the draft. An edit that clears a scanner finding by deleting the content around it has failed.
-
-Length is evidence in both directions. A revision that defines terms for a reader without context is often longer and correct. A revision that grew by adding claims, examples, or framing needs each addition traced to the source.
+A longer revision is correct when the added words define terms for a reader without context. Trace any other addition (a claim, an example, a frame) to the source.
 
 For a consequential document, test it on a reader. When the host can run a separate context, give that reader the artifact alone, with no notes and no opinion of the draft, and ask what its real reader will need: what happened, what a named thing is, what to do next. A wrong answer or "it does not say" locates a defect more reliably than rereading your own text. Fluent prose can feel clear to its writer and still fail this test.
 
