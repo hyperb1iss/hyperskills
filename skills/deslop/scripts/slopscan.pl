@@ -45,6 +45,15 @@ my @HEDGE   = qw(may might could likely approximately about estimated roughly
 my @CERTAIN = qw(always never guarantees proves causes definitely certainly);
 my $LONG_SENTENCE = 45;
 
+# Inline code spans, including spans that wrap across a soft line break. The
+# opening run must not be escaped, the closing run must be exactly the same
+# length (a two-tick opener is not closed by a three-tick run), and the span
+# may never cross a blank line, because the paragraph ends there. Without
+# that stop, one unpaired backtick run in prose pairs with another far away
+# and blanks every line between them, which is how the contributor guide's
+# own inventory table went invisible on the first dogfood scan.
+my $INLINE_CODE = qr/(?<!\\)(?<!`)(`+)(?!`)((?:(?!(?<!`)\1(?!`))(?!\n[ \t]*\n).)*?)(?<!`)\1(?!`)/s;
+
 my $surface     = 'house';
 my $json        = 0;
 my $show_masked = 0;
@@ -239,27 +248,27 @@ sub checks {
         push @cand, hits($prose, qr/^\s*[-*+]\s+\*\*[^*]+:\*\*/m, 'bold-lead bullet');
         push @cand, heading_case($prose);
     }
-    push @cand, hits($prose, qr/\bnot (?:just|only|merely|simply)\b[^.!?]{0,60}\b(?:it['\x{2019}]?s|it is|we['\x{2019}]re|they['\x{2019}]re|that['\x{2019}]s|but)\b/i,
+    push @cand, hits($prose, qr/\bnot\s+(?:just|only|merely|simply)\b[^.!?]{0,60}\b(?:it['\x{2019}]?s|it\s+is|we['\x{2019}]re|they['\x{2019}]re|that['\x{2019}]s|but)\b/i,
                      'negative parallelism');
     push @cand, hits($prose, qr/,\s+(?:highlighting|underscoring|emphasizing|ensuring|reflecting|symbolizing|showcasing|fostering|contributing|cultivating|encompassing|demonstrating|solidifying|cementing|signaling|positioning|paving)\s/i,
                      'participial tail');
     push @cand, hits($prose, qr/\b(?:each|every)\s+\w*\s*a\s+\w+\s+(?:in|of)\s+the\b/i,
                      'distributive appositive');
-    push @cand, hits($prose, qr/\b(?:plays?|playing) an? \w+ role in\b/i, 'plays-a-role paradigm');
-    push @cand, hits($prose, qr/\b(?:extends?|goes?|moves?|reaches?) (?:far )?beyond (?:mere|simple|simply|surface)\b/i,
+    push @cand, hits($prose, qr/\b(?:plays?|playing)\s+an?\s+\w+\s+role\s+in\b/i, 'plays-a-role paradigm');
+    push @cand, hits($prose, qr/\b(?:extends?|goes?|moves?|reaches?)\s+(?:far\s+)?beyond\s+(?:mere|simple|simply|surface)\b/i,
                      'beyond family');
-    push @cand, hits($prose, qr/\b(?:load-bearing|in service of|earns its keep|first-order concern|the binding constraint|asymmetric upside|forcing function)\b/i,
+    push @cand, hits($prose, qr/\b(?:load-bearing|in\s+service\s+of|earns\s+its\s+keep|first-order\s+concern|the\s+binding\s+constraint|asymmetric\s+upside|forcing\s+function)\b/i,
                      'house jargon or borrowed rigor');
-    push @cand, hits($prose, qr/\bcheap(?:est|ly)?\b|\bpay(?:s|ing)? rent\b|\bbuys you\b|\bcosts you nothing\b/i,
+    push @cand, hits($prose, qr/\bcheap(?:est|ly)?\b|\bpay(?:s|ing)?\s+rent\b|\bbuys\s+you\b|\bcosts\s+you\s+nothing\b/i,
                      'transactional effort framing');
     push @cand, stacked_frames($prose);
-    push @cand, hits($prose, qr/(?:^|[.!?]\s+|^\s*[-*+]\s+)(?:let me be (?:blunt|clear)|here'?s the thing|the thing is|real talk|to be honest)\b|\bworth naming that\b/i,
+    push @cand, hits($prose, qr/(?:^|[.!?]\s+|^\s*[-*+]\s+)(?:let\s+me\s+be\s+(?:blunt|clear)|here'?s\s+the\s+thing|the\s+thing\s+is|real\s+talk|to\s+be\s+honest)\b|\bworth\s+naming\s+that\b/i,
                      'performed candor');
-    push @cand, hits($prose, qr/\b(?:epistemic status|~?\d{1,3}% confident|I hold this loosely)\b/i,
+    push @cand, hits($prose, qr/\b(?:epistemic\s+status|~?\d{1,3}%\s+confident|I\s+hold\s+this\s+loosely)\b/i,
                      'calibration theatre');
-    push @cand, hits($prose, qr/\b(?:production-ready|enterprise-grade|battle-tested|built with \w+ in mind|designed for scale)\b/i,
+    push @cand, hits($prose, qr/\b(?:production-ready|enterprise-grade|battle-tested|built\s+with\s+\w+\s+in\s+mind|designed\s+for\s+scale)\b/i,
                      'unfalsifiable claim');
-    push @cand, hits($prose, qr/^\s*(?:The result\?|Why does this matter\?|So what changed\?|The catch\?)/mi,
+    push @cand, hits($prose, qr/^\s*(?:The\s+result\?|Why\s+does\s+this\s+matter\?|So\s+what\s+changed\?|The\s+catch\?)/mi,
                      'rhetorical-question transition');
     # Sentence-initial "This matters" is case-sensitive so a wrapped line that
     # merely continues "...because this matters" stays quiet.
@@ -270,23 +279,24 @@ sub checks {
     push @cand, hits($prose, qr/\bwithout\s+(?:sacrificing|compromising|trading\s+off)\b/i,
                      'tradeoff denial');
     # Bare "rather than" is ordinary English; only the corrective intensifier
-    # and the "more than a X ... it" reframe are flagged.
-    push @cand, hits($prose, qr/\brather\s+than\s+(?:simply|merely|just)\b|\b(?:is|are|['\x{2019}]s|['\x{2019}]re)\s+more\s+than\s+(?:just\s+)?an?\s+[\w-]+\b[^.!?]*?\b(?:it|they)\b/i,
+    # and the "more than a X ... it" reframe are flagged. A quantity after
+    # "more than a" ("a dozen", "a few", "a 10x") is a count, not a reframe.
+    push @cand, hits($prose, qr/\brather\s+than\s+(?:simply|merely|just)\b|\b(?:is|are|['\x{2019}]s|['\x{2019}]re)\s+more\s+than\s+(?:just\s+)?an?\s+(?!(?:dozen|few|couple|handful|hundred|thousand|million|billion)\b|\d)[\w-]+\b[^.!?]*?\b(?:it|they)\b/i,
                      'corrective contrast');
     push @cand, arrows($prose, $raw);
 
     # Padding phrases, most common in older and open-weight model output and in
     # chat text pasted into a document. Each has legitimate uses, so each is a
     # candidate. Line-initial forms are case-sensitive on purpose.
-    push @cand, hits($prose, qr/^\s*(?:Certainly|Absolutely|Of course|Sure thing|Great question)[!,.]|(?i:\bhope this (?:helps|(?:email|message) finds you)\b|\blet me know if you(?:['\x{2019}]d| would) like(?: me)? to\b|\bfeel free to (?:reach out|ask)\b|\bas an AI\b|\bhere(?:['\x{2019}]s| is) an? (?:comprehensive|detailed|quick|brief) (?:overview|breakdown|summary|guide)\b)/m,
+    push @cand, hits($prose, qr/^\s*(?:Certainly|Absolutely|Of\s+course|Sure\s+thing|Great\s+question)[!,.]|(?i:\bhope\s+this\s+(?:helps|(?:email|message)\s+finds\s+you)\b|\blet\s+me\s+know\s+if\s+you(?:['\x{2019}]d|\s+would)\s+like(?:\s+me)?\s+to\b|\bfeel\s+free\s+to\s+(?:reach\s+out|ask)\b|\bas\s+an\s+AI\b|\bhere(?:['\x{2019}]s|\s+is)\s+an?\s+(?:comprehensive|detailed|quick|brief)\s+(?:overview|breakdown|summary|guide)\b)/m,
                      'chatbot artifact');
-    push @cand, hits($prose, qr/\bit(?:['\x{2019}]s| is) (?:important|worth|crucial|essential) to (?:note|mention|remember|understand|recognize)\b|\bit(?:['\x{2019}]s| is) worth (?:noting|mentioning|emphasizing|highlighting)\b|\bin today['\x{2019}]s (?:fast-paced|ever-evolving|digital|modern)\b|\bneedless to say\b/i,
+    push @cand, hits($prose, qr/\bit(?:['\x{2019}]s|\s+is)\s+(?:important|worth|crucial|essential)\s+to\s+(?:note|mention|remember|understand|recognize)\b|\bit(?:['\x{2019}]s|\s+is)\s+worth\s+(?:noting|mentioning|emphasizing|highlighting)\b|\bin\s+today['\x{2019}]s\s+(?:fast-paced|ever-evolving|digital|modern)\b|\bneedless\s+to\s+say\b/i,
                      'filler phrase');
-    push @cand, hits($prose, qr/\ban? (?:true |real )?testament to\b|\bpivotal (?:moment|role|step|point)\b|\bmarks? an? (?:significant|pivotal|major|new) (?:milestone|step|shift|chapter|moment)\b|\bgame[- ]chang(?:er|ing)\b|\bthe future (?:of [\w ]{1,30} )?(?:is|looks) bright\b/i,
+    push @cand, hits($prose, qr/\ban?\s+(?:true\s+|real\s+)?testament\s+to\b|\bpivotal\s+(?:moment|role|step|point)\b|\bmarks?\s+an?\s+(?:significant|pivotal|major|new)\s+(?:milestone|step|shift|chapter|moment)\b|\bgame(?:-|\s+)chang(?:er|ing)\b|\bthe\s+future\s+(?:of\s+[\w\s]{1,30}\s)?(?:is|looks)\s+bright\b/i,
                      'inflated significance');
-    push @cand, hits($prose, qr/\bdelv(?:e|es|ed|ing)\b|\btapestry\b|\b(?:ever-evolving|ever-changing|fast-paced) (?:\w+ )?(?:landscape|world)\b|\bin the realm of\b|\bnavigat(?:e|es|ing) the complexit(?:y|ies)\b/i,
+    push @cand, hits($prose, qr/\bdelv(?:e|es|ed|ing)\b|\btapestry\b|\b(?:ever-evolving|ever-changing|fast-paced)\s+(?:\w+\s+)?(?:landscape|world)\b|\bin\s+the\s+realm\s+of\b|\bnavigat(?:e|es|ing)\s+the\s+complexit(?:y|ies)\b/i,
                      'stock vocabulary');
-    push @cand, hits($prose, qr/^\s*(?:In conclusion|To sum up|All in all),/m,
+    push @cand, hits($prose, qr/^\s*(?:In\s+conclusion|To\s+sum\s+up|All\s+in\s+all),/m,
                      'generic close');
 
     return (\@hard, \@cand);
@@ -314,13 +324,16 @@ sub mask {
     my @orig  = @lines;
 
     # Block regions: a new region opens when asked, or when the previous
-    # recorded line belongs to a different kind or is not adjacent.
+    # recorded line belongs to a different kind or is not adjacent. BASE is
+    # the column where a code block's payload starts, so normalization can
+    # strip layout indentation and nothing else.
     my ($cur, $cur_kind, $cur_last) = (undef, '', -2);
     my $rec = sub {
-        my ($kind, $i, $new) = @_;
+        my ($kind, $i, $new, $base) = @_;
         return unless $regions;
         if ($new || !defined $cur || $cur_kind ne $kind || $cur_last != $i - 1) {
-            push @$regions, { kind => $kind, line => $i + 1, text => $orig[$i] };
+            push @$regions, { kind => $kind, line => $i + 1, text => $orig[$i],
+                              base => $base // 0 };
             $cur = $regions->[-1];
         } else {
             $cur->{text} .= "\n" . $orig[$i];
@@ -329,11 +342,19 @@ sub mask {
     };
 
     my $in_front = (@lines && $lines[0] eq '---') ? 1 : 0;
-    my ($fence_char, $fence_len, $in_quote, $in_code, $prev_blank) = ('', 0, 0, 0, 1);
+    my ($fence_char, $fence_len, $fence_base, $in_quote, $in_code, $code_base, $prev_blank)
+        = ('', 0, 0, 0, 0, 0, 1);
+    # Content columns of the open list items, innermost last. Indentation is
+    # measured from the innermost item's content, so a nested bullet indented
+    # four spaces is list content, and only four or more columns past the
+    # content is indented code.
+    my @lists;
 
     for my $i (0 .. $#lines) {
-        my $line = $lines[$i];
+        my $line  = $lines[$i];
         my $blank = ($line =~ /^\s*$/) ? 1 : 0;
+        my $ex    = expand_lead($line);
+        my $ind   = length(($ex =~ /^( *)/)[0]);
 
         if ($in_front) {
             my $end = ($i > 0 && $line =~ /^(?:---|\.\.\.)\s*$/);
@@ -345,25 +366,43 @@ sub mask {
         }
 
         if ($fence_len) {
-            # closer: same character, at least as long, whitespace-only tail
-            my $close = '^ {0,3}' . quotemeta($fence_char)
-                      . '{' . $fence_len . ',}\s*$';
-            $fence_len = 0 if $line =~ /$close/;
-            $lines[$i] = blank($line);
-            $rec->('fenced code', $i, 0);
-            $prev_blank = $blank;
-            next;
+            # A line indented less than the list item holding the fence ends the
+            # item and the fence with it. Otherwise the closer uses the same
+            # character, is at least as long, sits at most three columns past
+            # the item's content, and has a whitespace-only tail.
+            if (!$blank && $ind < $fence_base) {
+                $fence_len = 0;
+            } else {
+                my $close = '^ *' . quotemeta($fence_char) . '{' . $fence_len . ',}\s*$';
+                $fence_len = 0 if $ind - $fence_base <= 3 && $ex =~ /$close/;
+                $lines[$i] = blank($line);
+                $rec->('fenced code', $i, 0);
+                $prev_blank = $blank;
+                next;
+            }
         }
+
+        # After a blank line, or at a line that starts a new block, a line
+        # indented less than an item's content closes that item. Any other
+        # less-indented line is a lazy paragraph continuation and closes nothing.
+        if (!$blank && ($prev_blank
+                        || $ex =~ /^ *(?:#{1,6}(?:\s|$)|`{3,}|~{3,}|>|[-*+](?:\s|$)|\d{1,9}[.)](?:\s|$))/)) {
+            pop @lists while @lists && $lists[-1] > $ind;
+        }
+        my $base = @lists ? $lists[-1] : 0;
+        my $rel  = $ind - $base;
 
         # fence opener. For backtick fences the info string cannot contain a
         # backtick, which is what keeps a prose line of code ticks from opening
         # a fence. A fence also ends any lazy blockquote continuation.
-        if ($line =~ /^ {0,3}(`{3,})([^`]*)$/ || $line =~ /^ {0,3}(~{3,})(.*)$/) {
+        if ($rel >= 0 && $rel <= 3
+            && ($ex =~ /^ *(`{3,})([^`]*)$/ || $ex =~ /^ *(~{3,})(.*)$/)) {
             $in_quote   = 0;
             $fence_char = substr($1, 0, 1);
             $fence_len  = length $1;
+            $fence_base = $base;
             $lines[$i]  = blank($line);
-            $rec->('fenced code', $i, 1);
+            $rec->('fenced code', $i, 1, $ind);
             $prev_blank = 0;
             next;
         }
@@ -371,7 +410,7 @@ sub mask {
         # blockquote, including lazy continuation. A lazy continuation ends at a
         # blank line or at any line that starts a new block, because an ATX
         # heading, fence, list, or thematic break interrupts a paragraph.
-        if ($line =~ /^ {0,3}>/) { $in_quote = 1 }
+        if ($rel >= 0 && $rel <= 3 && $ex =~ /^ *>/) { $in_quote = 1 }
         elsif ($blank
                || $line =~ /^ {0,3}(?:\#{1,6}\s|[-*+]\s|\d+[.)]\s|(?:-\s*){3,}$|(?:_\s*){3,}$|(?:\*\s*){3,}$)/
                || $line =~ m{^ {0,3}</?(?:script|pre|style|textarea|div|table|p|ul|ol|li|h[1-6]|blockquote|section|article|!--)}i) {
@@ -384,10 +423,11 @@ sub mask {
             next;
         }
 
-        # indented code block: opens on four or more spaces (or a tab) after a
-        # blank line, and continues across further indented and blank lines.
+        # indented code block: opens four or more columns past the current
+        # content column after a blank line, and continues across further
+        # lines indented that far and across blank lines.
         if ($in_code) {
-            if ($blank || $line =~ /^(?: {4,}|\t)/) {
+            if ($blank || $ind >= $code_base) {
                 $lines[$i] = blank($line);
                 $rec->('indented code', $i, 0);
                 $prev_blank = $blank;
@@ -395,12 +435,23 @@ sub mask {
             }
             $in_code = 0;
         }
-        if (!$blank && $prev_blank && $line =~ /^(?: {4,}|\t)\S/) {
+        if (!$blank && $prev_blank && $rel >= 4) {
             $in_code    = 1;
+            $code_base  = $base + 4;
             $lines[$i]  = blank($line);
-            $rec->('indented code', $i, 1);
+            $rec->('indented code', $i, 1, $code_base);
             $prev_blank = 0;
             next;
+        }
+
+        # list item: its content column is the marker plus one to four spaces;
+        # an empty item or a wider gap puts the content one column past the
+        # marker.
+        if (!$blank && $rel >= 0 && $rel <= 3 && $ex !~ /^ *(?:[-*_] *){3,}$/
+            && $ex =~ /^( *)([-*+]|\d{1,9}[.)])(?:( +)\S|\s*$)/) {
+            my ($m, $w, $n) = (length $1, length $2, defined $3 ? length $3 : 0);
+            pop @lists while @lists && $lists[-1] > $m;
+            push @lists, $m + $w + (($n >= 1 && $n <= 4) ? $n : 1);
         }
 
         $prev_blank = $blank;
@@ -420,24 +471,17 @@ sub mask {
     # link inside a code span is never seen as a link. A pass flagged as a
     # tail masks from the closing bracket onward and leaves the label visible.
     my @passes = (
-        # Inline code spans, including spans that wrap across a soft line
-        # break. The opening run must not be escaped, the closing run must be
-        # exactly the same length (a two-tick opener is not closed by a
-        # three-tick run), and the span may never cross a blank line, because
-        # the paragraph ends there. Without that stop, one unpaired backtick
-        # run in prose pairs with another far away and blanks every line
-        # between them, which is how the contributor guide's own inventory
-        # table went invisible on the first dogfood scan.
-        [ 'inline code', 0,
-          qr/(?<!\\)(?<!`)(`+)(?!`)((?:(?!(?<!`)\1(?!`))(?!\n[ \t]*\n).)*?)(?<!`)\1(?!`)/s ],
+        [ 'inline code', 0, $INLINE_CODE ],
         [ 'link target', 1, qr/$label\(\s*<[^>\n]*>$title\s*\)/ ],
         [ 'link target', 1, qr/$label\(\s*$bare$title\s*\)/ ],
         # reference definitions, but never a footnote definition, whose body is prose
         [ 'reference definition', 0, qr/^ {0,3}\[(?!\^)[^\]]+\]:\s*(?:<[^>\n]*>|\S+)$title/m ],
         [ 'autolink', 0, qr/<(?:https?|ftp|mailto):[^>\s]*>/ ],
-        # HTML comments never reach a reader, and a bare URL is not prose
+        # HTML comments never reach a reader, and a bare URL is not prose. A
+        # URL may hold balanced parentheses, as in a_(one); an unbalanced
+        # closing parenthesis belongs to the surrounding sentence.
         [ 'HTML comment', 0, qr/<!--.*?-->/s ],
-        [ 'url', 0, qr{(?<![\w/])(?:https?|ftp)://[^\s<>()\[\]"']+} ],
+        [ 'url', 0, qr{(?<![\w/])(?:https?|ftp)://(?:[^\s<>()\[\]"']|\([^\s<>()\[\]"']*\))+} ],
     );
     for my $pass (@passes) {
         my ($kind, $tail, $re) = @$pass;
@@ -465,6 +509,50 @@ sub mask {
 }
 
 sub blank { my ($s) = @_; $s =~ s/[^\n]/ /g; return $s }
+
+# The line with tabs in its first 80 characters expanded to stops of four,
+# for measuring indentation. Structure never sits further right than that.
+sub expand_lead {
+    my ($line) = @_;
+    return $line unless $line =~ /\t/;
+    my $head = substr($line, 0, 80);
+    1 while $head =~ s/^([^\t]*)\t/$1 . (' ' x (4 - length($1) % 4))/e;
+    return $head . (length($line) > 80 ? substr($line, 80) : '');
+}
+
+# Removes up to N columns of leading whitespace, counting a tab to the next
+# stop of four, and keeps any columns of a split tab as spaces.
+sub strip_cols {
+    my ($line, $n) = @_;
+    my ($col, $k) = (0, 0);
+    while ($k < length($line) && $col < $n) {
+        my $c = substr($line, $k, 1);
+        if ($c eq ' ') {
+            $col++;
+        } elsif ($c eq "\t") {
+            my $w = 4 - $col % 4;
+            return (' ' x ($col + $w - $n)) . substr($line, $k + 1) if $col + $w > $n;
+            $col += $w;
+        } else {
+            last;
+        }
+        $k++;
+    }
+    return substr($line, $k);
+}
+
+# Two lines join across a soft wrap when both carry text and the second does
+# not start a new block, so a phrase or citation split by the wrap still reads
+# as one.
+sub soft_break {
+    my ($lines, $i) = @_;
+    return 0 if $i >= $#$lines;
+    my ($cur, $nxt) = ($lines->[$i], $lines->[$i + 1]);
+    return 0 unless $cur =~ /\S/ && $nxt =~ /\S/;
+    return 0 if $cur =~ /^\s*[#|]/;
+    return 0 if $nxt =~ /^\s*(?:[-*+]\s|\d+[.)]\s|[#|>]|(?:[-*_=]\s*){3,}$)/;
+    return 1;
+}
 
 # Title case is a style choice rather than a tell; the tell is a file that
 # mixes heading cases, which is how an inserted section betrays a second
@@ -586,7 +674,12 @@ sub hits {
     for my $i (0 .. $#lines) {
         # table delimiter rows and horizontal rules carry no prose
         next if $lines[$i] =~ /^\s*\|?[\s:|+-]{3,}\|?\s*$/;
-        next unless $lines[$i] =~ /$re/;
+        # A match may run on into the next line of the same paragraph, so a
+        # phrase split by a soft wrap still fires, but it must start on this
+        # line. The leftmost match decides, so a later start cannot hide one.
+        my $win = $lines[$i];
+        $win .= "\n" . $lines[$i + 1] if soft_break(\@lines, $i);
+        next unless $win =~ $re && $-[0] < length $lines[$i];
         push @out, snippet($label, $i, $lines[$i]);
     }
     return @out;
@@ -770,35 +863,83 @@ sub run_compare {
     return 0;
 }
 
-# Normalized comparison text for a protected region. Code keeps its interior
-# whitespace but not trailing spaces or a uniform indent, so a block moved
-# into or out of a list item still matches. Inline code tolerates a soft
-# wrap. Quotes and link markup tolerate reflowing.
+# Normalized comparison text for a protected region. Only Markdown layout is
+# normalized; code payload compares exactly, whitespace included. Code drops
+# the indentation that places it in a list item or fence (its base column),
+# a fence line drops its outer whitespace, and indented code drops trailing
+# blank lines, so a block moved into or out of a list still matches. Inline
+# code tolerates a soft wrap. A quote is parsed so its prose tolerates
+# reflowing while any code inside it stays exact. Frontmatter is exact.
 sub region_norm {
     my ($r) = @_;
     my ($kind, $t) = ($r->{kind}, $r->{text});
-    if ($kind eq 'fenced code' || $kind eq 'indented code' || $kind eq 'frontmatter') {
-        my @l = map { my $x = $_; $x =~ s/\s+\z//; $x } split /\n/, $t, -1;
-        shift @l while @l && $l[0] eq '';
-        pop @l   while @l && $l[-1] eq '';
-        my $min;
-        for (grep { length } @l) {
-            my $n = length((/^([ \t]*)/)[0]);
-            $min = $n if !defined $min || $n < $min;
+    return $t if $kind eq 'frontmatter';
+    if ($kind eq 'fenced code' || $kind eq 'indented code') {
+        my @l = map { strip_cols($_, $r->{base} // 0) } split /\n/, $t, -1;
+        if ($kind eq 'fenced code') {
+            $l[0]  =~ s/^\s+|\s+\z//g;
+            $l[-1] =~ s/^\s+|\s+\z//g if @l > 1 && $l[-1] =~ /^\s*(?:`{3,}|~{3,})\s*\z/;
+        } else {
+            pop @l while @l && $l[-1] =~ /^\s*\z/;
         }
-        $min //= 0;
-        return join "\n", map { length($_) >= $min ? substr($_, $min) : $_ } @l;
+        return join "\n", @l;
     }
     if ($kind eq 'inline code') {
         $t =~ s/[ \t]*\n[ \t]*/ /g;
         return $t;
     }
-    if ($kind eq 'blockquote') {
-        $t =~ s/^[ \t]*(?:>[ \t]*)*//mg;
-    }
+    return quote_norm($t) if $kind eq 'blockquote';
     $t =~ s/\s+/ /g;
     $t =~ s/^ | $//g;
     return $t;
+}
+
+# One quote level comes off each line (the marker and one optional space),
+# and the inner text is masked like a document. Code and nested quotes inside
+# it normalize as regions of their own; each prose paragraph collapses its
+# whitespace outside inline code. Paragraph breaks stay significant.
+sub quote_norm {
+    my ($t) = @_;
+    # the leading empty line keeps an inner "---" from reading as frontmatter
+    my $inner = join "\n", '', map { my $x = $_; $x =~ s/^ {0,3}> ?//; $x } split /\n/, $t, -1;
+    my @reg;
+    mask($inner, \@reg);
+    my @lines = split /\n/, $inner, -1;
+    my %owner;
+    for my $r (grep { $_->{kind} =~ /^(?:fenced code|indented code|blockquote)\z/ } @reg) {
+        my $n = ($r->{text} =~ tr/\n//) + 1;
+        $owner{ $r->{line} - 1 + $_ } = $r for 0 .. $n - 1;
+    }
+    my (@out, @para, %done);
+    my $flush = sub { push @out, prose_norm(join "\n", @para) if @para; @para = () };
+    for my $k (0 .. $#lines) {
+        if (my $r = $owner{$k}) {
+            $flush->();
+            push @out, "[$r->{kind}]\n" . region_norm($r) unless $done{$r}++;
+        } elsif ($lines[$k] =~ /^\s*\z/) {
+            $flush->();
+        } else {
+            push @para, $lines[$k];
+        }
+    }
+    $flush->();
+    return join "\n", @out;
+}
+
+sub prose_norm {
+    my ($p) = @_;
+    my ($out, $last) = ('', 0);
+    while ($p =~ /$INLINE_CODE/g) {
+        my ($s, $e) = ($-[0], $+[0]);
+        (my $gap  = substr($p, $last, $s - $last)) =~ s/\s+/ /g;
+        (my $span = substr($p, $s, $e - $s))       =~ s/[ \t]*\n[ \t]*/ /g;
+        $out .= $gap . $span;
+        $last = $e;
+    }
+    (my $rest = substr($p, $last)) =~ s/\s+/ /g;
+    $out .= $rest;
+    $out =~ s/^ | $//g;
+    return $out;
 }
 
 sub region_show {
@@ -844,9 +985,11 @@ sub compare_regions {
         if (defined $j) {
             $taken{$j} = 1;
             my ($was, $now) = first_difference(region_norm($or), region_norm($r->[$j]));
+            my ($ws, $ns) = (region_show($was, 50), region_show($now, 50));
             my $q = $or->{kind} eq 'inline code' ? '' : '"';
-            push @hard, sprintf('protected %s altered: %s%s%s now %s%s%s (original line %d, revised line %d)',
-                                $or->{kind}, $q, region_show($was, 50), $q, $q, region_show($now, 50), $q,
+            push @hard, sprintf('protected %s altered: %s%s%s now %s%s%s%s (original line %d, revised line %d)',
+                                $or->{kind}, $q, $ws, $q, $q, $ns, $q,
+                                ($ws eq $ns ? ', whitespace differs' : ''),
                                 $or->{line}, $r->[$j]{line});
         } else {
             push @hard, sprintf('protected %s missing: %s (original line %d)',
@@ -903,38 +1046,63 @@ sub inventory {
     );
     my %stop = map { $_ => 1 } qw(a an and are as at be by for from in is it
                                   of on or per than that the to was were with);
+
+    # One string with every soft wrap turned into a space, so a citation or
+    # number split by a reflow reads the same as before it. Every edit keeps
+    # length, so an offset still maps back to its original line.
     my @lines = split /\n/, $prose, -1;
+    my @join  = map { soft_break(\@lines, $_) } 0 .. $#lines;
+    for (@lines) {
+        $_ = blank($_) if /^\s*\|?[\s:|+-]{3,}\|?\s*$/;          # table delimiter row
+        s/^(\s*)(\d+[.)])(?=\s)/$1 . (' ' x length $2)/e;      # ordered list marker
+    }
+    my ($flat, @starts) = ('');
     for my $i (0 .. $#lines) {
-        my $l = $lines[$i];
-        next if $l =~ /^\s*\|?[\s:|+-]{3,}\|?\s*$/;
-        $l =~ s/^(\s*)(\d+[.)])(?=\s)/$1 . (' ' x length $2)/e;   # ordered list marker
-        for my $re (@cite) {
-            $l =~ s{$re}{
-                my $m   = $&;
-                my $key = lc $m;
-                if ($key =~ /^(?:\[|arxiv|doi|10\.)/) {
-                    $key =~ s/[.,;:)\]]+\z// if $key =~ /^(?:doi|10\.)/;
-                    $key =~ s/^doi://;
-                    $key =~ s/\s+//g;
-                } else {
-                    $key =~ s/^\(?see\s+//;
-                    $key =~ tr/(),.;//d;
-                    $key =~ s/\s+/ /g;
-                }
-                $add->('citation', $key, $m, $i + 1);
-                ' ' x length $m;
-            }ge;
+        push @starts, length $flat;
+        $flat .= $lines[$i] . ($i < $#lines ? ($join[$i] ? ' ' : "\n") : '');
+    }
+    my $line_of = sub {
+        my ($off) = @_;
+        my ($lo, $hi) = (0, $#starts);
+        while ($lo < $hi) {
+            my $mid = int(($lo + $hi + 1) / 2);
+            if ($starts[$mid] <= $off) { $lo = $mid } else { $hi = $mid - 1 }
         }
-        while ($l =~ /(?<![\w.\/\\-])(v?)(\d+(?:[.,:\/\x{2013}-]\d+)*)(%?)(?:([ \t]?)([[:alpha:]]+))?/g) {
-            my ($v, $num, $pct, $gap, $unit) = ($1, $2, $3, $4 // '', $5);
-            my $key = $num;
-            $key =~ tr/\x{2013}/-/;
-            $key =~ tr/,//d if $key =~ /^\d{1,3}(?:,\d{3})+(?:\.\d+)?$/;
-            $key .= '%' if $pct || (defined $unit && lc $unit eq 'percent');
-            my $show = "$v$num$pct";
-            $show .= "$gap$unit" if defined $unit && !$stop{ lc $unit };
-            $add->('number', $key, $show, $i + 1);
-        }
+        return $lo + 1;
+    };
+
+    for my $re (@cite) {
+        $flat =~ s{$re}{
+            my $m   = $&;
+            my $off = $-[0];
+            my $key = lc $m;
+            if ($key =~ /^(?:\[|arxiv|doi|10\.)/) {
+                $key =~ s/[.,;:)\]]+\z// if $key =~ /^(?:doi|10\.)/;
+                $key =~ s/^doi://;
+                $key =~ s/\s+//g;
+            } else {
+                $key =~ s/^\(?see\s+//;
+                $key =~ tr/(),.;//d;
+                $key =~ s/\s+/ /g;
+            }
+            $add->('citation', $key, $m, $line_of->($off));
+            ' ' x length $m;
+        }ge;
+    }
+    # A sign counts only where it is a sign: at the start, after whitespace,
+    # or after an opening bracket. Digits after a letter, dot, slash, or a
+    # hyphen that is not a sign belong to an identifier, path, or range.
+    while ($flat =~ /(?:(?<![^\s(\[{])([-+\x{2212}])(?=v?\d))?(?(1)|(?<![\w.\/\\-]))(v?)(\d+(?:[.,:\/\x{2013}-]\d+)*)(%?)(?:([ \t]?)([[:alpha:]]+))?/g) {
+        my ($sign, $v, $num, $pct, $gap, $unit) = ($1 // '', $2, $3, $4, $5 // '', $6);
+        my $key = $num;
+        $key =~ tr/\x{2013}/-/;
+        $key =~ tr/,//d if $key =~ /^\d{1,3}(?:,\d{3})+(?:\.\d+)?$/;
+        (my $s = $sign) =~ tr/\x{2212}/-/;
+        $key = $s . $key;
+        $key .= '%' if $pct || (defined $unit && lc $unit eq 'percent');
+        my $show = "$sign$v$num$pct";
+        $show .= "$gap$unit" if defined $unit && !$stop{ lc $unit };
+        $add->('number', $key, $show, $line_of->($-[0]));
     }
     return \%inv;
 }

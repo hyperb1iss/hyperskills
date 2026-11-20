@@ -220,10 +220,26 @@ check "footnote body is prose"                20 "$TMP/footnotebody.md"
 printf 'see ](<https://x.test/a\nb>) and a dash \xe2\x80\x94 in prose\n' > "$TMP/anglenewline.md"
 check "angle destination cannot span a newline" 20 "$TMP/anglenewline.md"
 
-# The known remaining gap: a fence closed deeper than its list indent still
-# over-masks. It must announce the suppression rather than report clean.
+# A closer may sit up to three columns past its list item's content, so a
+# fence closed deeper than the list indent still ends there and the prose
+# after it stays visible.
 printf -- 'ok\n\n- item\n\n  ```\n  code\n    ```\n\nvisible prose with a dash \xe2\x80\x94 here\n' > "$TMP/listdeep.md"
-suppressed_check "known gap announces itself"  "$TMP/listdeep.md"
+check "list fence closer past the item indent"  20 "$TMP/listdeep.md"
+grep_check "prose after a deep list closer is visible" 'visible prose' "$TMP/listdeep.md"
+
+# ---- list containers decide what indentation means ---------------------------
+# Inside a list item, indentation up to the item's content is list content,
+# and only four or more columns past it is code.
+printf -- '- Parent\n\n    - nested wording with a dash \xe2\x80\x94 here\n' > "$TMP/nestedprose.md"
+check "nested bullet after a blank line is prose" 20 "$TMP/nestedprose.md"
+printf -- '- Parent\n\n      code in the item \xe2\x80\x94 here\n' > "$TMP/listcode.md"
+check "code past the item content stays masked"   0 "$TMP/listcode.md"
+printf 'para\n\n    top-level code \xe2\x80\x94 here\n' > "$TMP/topcode.md"
+check "top-level indented code stays masked"      0 "$TMP/topcode.md"
+printf -- '- a\n  - b\n\n    ```\n    code \xe2\x80\x94 here\n    ```\n\nafter\n' > "$TMP/nestedfence.md"
+check "fence inside a nested item stays masked"   0 "$TMP/nestedfence.md"
+printf -- '- a\n\n  ```\n  code\n\nvisible prose with a dash \xe2\x80\x94 here\n' > "$TMP/itemends.md"
+check "the item ending closes its fence"         20 "$TMP/itemends.md"
 suppressed_check "protected fixture reports its suppressions" "$FIX/protected.md"
 
 # ---- degenerate inputs --------------------------------------------------
@@ -485,6 +501,58 @@ if [[ "$cmp_json" == *'"mode": "compare"'* && "$cmp_json" == *'"ratio": 0.84'* \
 else
   fail=$((fail + 1)); printf '  FAIL  compare JSON lacks mode, size, or counts\n'
 fi
+
+# ---- compare: layout normalizes, payload stays exact ------------------------
+printf '> ```py\n> s = "a  b"\n> ```\n' > "$TMP/c-qcode-o.md"
+printf '> ```py\n> s = "a b"\n> ```\n' > "$TMP/c-qcode-r.md"
+compare_check "whitespace in quoted code is payload"  20 "$TMP/c-qcode-o.md" "$TMP/c-qcode-r.md"
+printf '```py\ns = """a   \nb"""\n```\n' > "$TMP/c-trail-o.md"
+printf '```py\ns = """a\nb"""\n```\n' > "$TMP/c-trail-r.md"
+compare_check "trailing spaces in code are payload"   20 "$TMP/c-trail-o.md" "$TMP/c-trail-r.md"
+compare_grep "an invisible change says so" 'whitespace differs' "$TMP/c-trail-o.md" "$TMP/c-trail-r.md"
+printf '> quoted prose that\n> wraps, then code:\n>\n>     x  =  1\n' > "$TMP/c-qwrap-o.md"
+printf '> quoted prose that wraps, then code:\n>\n>     x  =  1\n' > "$TMP/c-qwrap-r.md"
+compare_check "quoted prose may reflow around code"    0 "$TMP/c-qwrap-o.md" "$TMP/c-qwrap-r.md"
+printf -- '- a\n\n      make  x\n' > "$TMP/c-lcode-o.md"
+printf -- '- a\n\n      make x\n' > "$TMP/c-lcode-r.md"
+compare_check "edited code inside a list item is hard" 20 "$TMP/c-lcode-o.md" "$TMP/c-lcode-r.md"
+printf 'x\n\n```sh\nmake  x\n```\n' > "$TMP/c-move-o.md"
+printf -- '- a\n  - b\n\n    ```sh\n    make  x\n    ```\n' > "$TMP/c-move-r.md"
+compare_check "code moved into a nested item matches"   0 "$TMP/c-move-o.md" "$TMP/c-move-r.md"
+
+printf -- '- Parent\n\n    - old wording here\n' > "$TMP/c-nest-o.md"
+printf -- '- Parent\n\n    - new wording here\n' > "$TMP/c-nest-r.md"
+compare_check "nested list prose edits are not code"    0 "$TMP/c-nest-o.md" "$TMP/c-nest-r.md"
+
+printf 'Temperature is -5 degrees and drift is -0.5 units.\n' > "$TMP/c-neg-o.md"
+printf 'Temperature is -6 degrees and drift is -0.7 units.\n' > "$TMP/c-neg-r.md"
+compare_check "changed negative numbers are candidates" 10 "$TMP/c-neg-o.md" "$TMP/c-neg-r.md"
+compare_grep "a negative keeps its sign" 'dropped number: -5 degrees' "$TMP/c-neg-o.md" "$TMP/c-neg-r.md"
+compare_grep "a negative decimal keeps its sign" 'dropped number: -0.5 units' "$TMP/c-neg-o.md" "$TMP/c-neg-r.md"
+printf 'Use x-5, v2-4, 2026-11-20, and path/-3 here.\n' > "$TMP/c-nosign-o.md"
+printf 'Use x-5, v2-4, 2026-11-20, and path/-3 there.\n' > "$TMP/c-nosign-r.md"
+compare_check "identifiers, ranges, dates, paths stay unsigned" 0 "$TMP/c-nosign-o.md" "$TMP/c-nosign-r.md"
+
+printf 'See https://example.org/a_(one) for details.\n' > "$TMP/c-paren-o.md"
+printf 'See https://example.org/a_(two) for details.\n' > "$TMP/c-paren-r.md"
+compare_check "a URL keeps balanced parentheses"       10 "$TMP/c-paren-o.md" "$TMP/c-paren-r.md"
+compare_grep "the whole URL is named" 'dropped url: https://example.org/a_(one)' "$TMP/c-paren-o.md" "$TMP/c-paren-r.md"
+printf 'See it (https://x.test/a) today.\n' > "$TMP/c-wrap-url-o.md"
+printf 'See it at https://x.test/a today.\n' > "$TMP/c-wrap-url-r.md"
+compare_check "a prose parenthesis is not part of a URL" 0 "$TMP/c-wrap-url-o.md" "$TMP/c-wrap-url-r.md"
+
+printf 'As shown by Smith et al. (2024) the cache helps.\n' > "$TMP/c-reflow-o.md"
+printf 'As shown by Smith et al.\n(2024) the cache helps.\n' > "$TMP/c-reflow-r.md"
+compare_check "a reflowed citation is the same citation" 0 "$TMP/c-reflow-o.md" "$TMP/c-reflow-r.md"
+
+# ---- soft wraps and quantities in candidates ---------------------------------
+printf 'It is important to\nnote the cache.\n' > "$TMP/wrapfill.md"
+check "a phrase split by a soft wrap fires"           10 "$TMP/wrapfill.md"
+grep_check "the wrapped phrase cites its first line" 'filler phrase:1' "$TMP/wrapfill.md"
+printf 'It is important to\n\nnote the cache.\n' > "$TMP/parafill.md"
+check "a paragraph break is not a soft wrap"           0 "$TMP/parafill.md"
+printf 'There are more than a dozen tests; they run nightly.\n' > "$TMP/dozen.md"
+check "a quantity after more than a is clean"          0 "$TMP/dozen.md"
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]
