@@ -164,7 +164,7 @@
     {
       "id": "review-fail-open",
       "family": "review",
-      "split": "holdout",
+      "split": "development",
       "prompt": "cases/review/fail-open/prompt.md",
       "fixture": "cases/review/fail-open/fixture",
       "skills": ["hyper-pr-review"],
@@ -174,7 +174,7 @@
     {
       "id": "review-fail-open-clean",
       "family": "review",
-      "split": "holdout",
+      "split": "development",
       "prompt": "cases/review/fail-open-clean/prompt.md",
       "fixture": "cases/review/fail-open-clean/fixture",
       "skills": ["hyper-pr-review"],
@@ -187,7 +187,7 @@
     {
       "id": "review-unbounded-growth",
       "family": "review",
-      "split": "holdout",
+      "split": "development",
       "prompt": "cases/review/unbounded-growth/prompt.md",
       "fixture": "cases/review/unbounded-growth/fixture",
       "skills": ["hyper-pr-review"],
@@ -200,7 +200,7 @@
     {
       "id": "review-unbounded-growth-clean",
       "family": "review",
-      "split": "holdout",
+      "split": "development",
       "prompt": "cases/review/unbounded-growth-clean/prompt.md",
       "fixture": "cases/review/unbounded-growth-clean/fixture",
       "skills": ["hyper-pr-review"],
@@ -213,7 +213,7 @@
     {
       "id": "review-instruction-file",
       "family": "review",
-      "split": "holdout",
+      "split": "development",
       "prompt": "cases/review/instruction-file/prompt.md",
       "fixture": "cases/review/instruction-file/fixture",
       "skills": ["hyper-pr-review"],
@@ -226,7 +226,7 @@
     {
       "id": "review-instruction-file-clean",
       "family": "review",
-      "split": "holdout",
+      "split": "development",
       "prompt": "cases/review/instruction-file-clean/prompt.md",
       "fixture": "cases/review/instruction-file-clean/fixture",
       "skills": ["hyper-pr-review"],
@@ -239,7 +239,7 @@
     {
       "id": "review-bugfix-regression",
       "family": "review",
-      "split": "holdout",
+      "split": "development",
       "prompt": "cases/review/bugfix-regression/prompt.md",
       "fixture": "cases/review/bugfix-regression/fixture",
       "skills": ["hyper-pr-review"],
@@ -252,7 +252,7 @@
     {
       "id": "review-bugfix-regression-clean",
       "family": "review",
-      "split": "holdout",
+      "split": "development",
       "prompt": "cases/review/bugfix-regression-clean/prompt.md",
       "fixture": "cases/review/bugfix-regression-clean/fixture",
       "skills": ["hyper-pr-review"],
@@ -311,7 +311,7 @@
     {
       "id": "review-large-holdout-a",
       "family": "review",
-      "split": "holdout",
+      "split": "development",
       "prompt": "cases/review/large-holdout-a/prompt.md",
       "fixture": "cases/review/large-holdout-a/fixture",
       "skills": ["hyper-pr-review"],
@@ -324,7 +324,7 @@
     {
       "id": "review-large-holdout-a-clean",
       "family": "review",
-      "split": "holdout",
+      "split": "development",
       "prompt": "cases/review/large-holdout-a-clean/prompt.md",
       "fixture": "cases/review/large-holdout-a-clean/fixture",
       "skills": ["hyper-pr-review"],
@@ -337,7 +337,7 @@
     {
       "id": "review-large-holdout-b",
       "family": "review",
-      "split": "holdout",
+      "split": "development",
       "prompt": "cases/review/large-holdout-b/prompt.md",
       "fixture": "cases/review/large-holdout-b/fixture",
       "skills": ["hyper-pr-review"],
@@ -350,7 +350,7 @@
     {
       "id": "review-large-holdout-b-clean",
       "family": "review",
-      "split": "holdout",
+      "split": "development",
       "prompt": "cases/review/large-holdout-b-clean/prompt.md",
       "fixture": "cases/review/large-holdout-b-clean/fixture",
       "skills": ["hyper-pr-review"],

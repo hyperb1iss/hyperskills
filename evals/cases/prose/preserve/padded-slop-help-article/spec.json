@@ -1,6 +1,6 @@
 {
   "trap": "padded-slop",
-  "split": "holdout",
+  "split": "development",
   "surface": "customer help article",
   "protected": [
     {
@@ -10,10 +10,16 @@
       "exact": "4.1"
     },
     {
-      "exact": ["512 MB", "512MB"]
+      "exact": [
+        "512 MB",
+        "512MB"
+      ]
     },
     {
-      "exact": ["8 MB", "8MB"]
+      "exact": [
+        "8 MB",
+        "8MB"
+      ]
     },
     "June 30",
     "read-only",
@@ -25,8 +31,15 @@
       "exact": "Pause any sync that is mid-transfer before you upgrade"
     },
     "local index",
-    ["50,000", "50000"],
-    ["10 to 20 minutes", "10-20 minutes", "10 and 20 minutes"],
+    [
+      "50,000",
+      "50000"
+    ],
+    [
+      "10 to 20 minutes",
+      "10-20 minutes",
+      "10 and 20 minutes"
+    ],
     "network drives"
   ],
   "calibrations": [
@@ -50,7 +63,10 @@
         "A typical rebuild takes 10 to 20 minutes.",
         "On average, this takes 10 to 20 minutes."
       ],
-      "rejects": ["This takes 15 minutes.", "This always takes 10 to 20 minutes."]
+      "rejects": [
+        "This takes 15 minutes.",
+        "This always takes 10 to 20 minutes."
+      ]
     },
     {
       "label": "only an estimate",
@@ -96,7 +112,10 @@
         "Network drives and slow disks can be slower.",
         "Slow disks or network drives add time."
       ],
-      "rejects": ["The rebuild takes 15 minutes.", "Network drives are supported."]
+      "rejects": [
+        "The rebuild takes 15 minutes.",
+        "Network drives are supported."
+      ]
     }
   ],
   "no_new_numbers": true,
@@ -107,5 +126,6 @@
     "calibration:typically",
     "calibration:only an estimate",
     "calibration:can run longer"
-  ]
+  ],
+  "held_out_until": "2026-11-20"
 }

@@ -1,5 +1,5 @@
 {
-  "split": "holdout",
+  "split": "development",
   "kind": "defect",
   "twin": "large-holdout-a-clean",
   "class": "multi-defect",
@@ -76,5 +76,6 @@
       ]
     }
   ],
-  "also_accept": []
+  "also_accept": [],
+  "held_out_until": "2026-11-20"
 }

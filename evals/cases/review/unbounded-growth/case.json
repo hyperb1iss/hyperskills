@@ -1,5 +1,5 @@
 {
-  "split": "holdout",
+  "split": "development",
   "kind": "defect",
   "twin": "unbounded-growth-clean",
   "class": "unbounded-growth",
@@ -21,5 +21,6 @@
       "start_line": 15,
       "end_line": 15
     }
-  ]
+  ],
+  "held_out_until": "2026-11-20"
 }

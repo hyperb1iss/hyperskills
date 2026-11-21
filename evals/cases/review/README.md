@@ -18,12 +18,12 @@ There are two tiers. A single-defect pair is a small pull request (80 to 200 dif
 | `test-stays-green` / `test-stays-green-clean`   | development | stale-cache          | test-stays-green  |
 | `large-ledger` / `large-ledger-clean`           | development | multi-defect         |                   |
 | `large-dev-b` / `large-dev-b-clean`             | development | multi-defect         |                   |
-| `fail-open` / `fail-open-clean`                 | holdout     | fail-open            |                   |
-| `unbounded-growth` / `unbounded-growth-clean`   | holdout     | unbounded-growth     |                   |
-| `bugfix-regression` / `bugfix-regression-clean` | holdout     | silent-data-loss     | bugfix-regression |
-| `instruction-file` / `instruction-file-clean`   | holdout     | cross-tenant-read    | instruction-file  |
-| `large-holdout-a` / `large-holdout-a-clean`     | holdout     | multi-defect         |                   |
-| `large-holdout-b` / `large-holdout-b-clean`     | holdout     | multi-defect         |                   |
+| `fail-open` / `fail-open-clean`                 | development | fail-open            |                   |
+| `unbounded-growth` / `unbounded-growth-clean`   | development | unbounded-growth     |                   |
+| `bugfix-regression` / `bugfix-regression-clean` | development | silent-data-loss     | bugfix-regression |
+| `instruction-file` / `instruction-file-clean`   | development | cross-tenant-read    | instruction-file  |
+| `large-holdout-a` / `large-holdout-a-clean`     | development | multi-defect         |                   |
+| `large-holdout-b` / `large-holdout-b-clean`     | development | multi-defect         |                   |
 
 Each `case.json` is authoritative; this table is a convenience. A large pair's class is `multi-defect`, and each of its defects carries its own class. Five classes come from a week of a human reviewer's findings on real pull requests:
 
@@ -105,15 +105,17 @@ The cases are synthetic, single-language, and small even in the large tier. Pass
 
 All thresholds are author-chosen and carry no external validation:
 
-| Threshold         | Value                                          | Reason                                                                                                                                                |
-| ----------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Pass scope        | The enclosing function, plus `also_accept`     | Baseline trials gave the right diagnosis anchored 5 to 10 lines from the span, so a narrow window failed correct findings                             |
-| Strict window     | 3 lines either side of the span, metric only   | Keeps the tighter reading visible next to the pass rule                                                                                               |
-| Diff-line reading | Only for a line past the end of the named file | A line inside the file cannot be told apart from a diff line, so it is never reinterpreted                                                            |
-| Tier sizes        | See the tier table                             | Small enough to review in one sitting, large enough that the defects are a part of the change; the large tier is several times the single-defect size |
-| Hint check radius | 10 lines either side of each span              | Covers the surrounding block where a stray comment would point at a defect                                                                            |
+| Threshold         | Value                                        | Reason                                                                                                                                                                                                                                                          |
+| ----------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pass scope        | The enclosing function, plus `also_accept`   | Baseline trials gave the right diagnosis anchored 5 to 10 lines from the span, so a narrow window failed correct findings                                                                                                                                       |
+| Strict window     | 3 lines either side of the span, metric only | Keeps the tighter reading visible next to the pass rule                                                                                                                                                                                                         |
+| Diff-line reading | Both readings when a number is valid in both | A line past the end of its file can only be a diff line. A number valid as a file line and as a diff line of the same file keeps both readings. Guessing one reading lost correct findings in stored trials more often than keeping both credited a coincidence |
+| Tier sizes        | See the tier table                           | Small enough to review in one sitting, large enough that the defects are a part of the change; the large tier is several times the single-defect size                                                                                                           |
+| Hint check radius | 10 lines either side of each span            | Covers the surrounding block where a stray comment would point at a defect                                                                                                                                                                                      |
 
 ## Development and holdout hygiene
+
+All holdout cases in this family were used in the confirmation run of 2026-11-20, and its result led to a skill edit being withdrawn. They are relabeled `development`, with `held_out_until` in `case.json` recording when they stopped being untouched. No untouched holdout remains: confirming any later skill edit needs new pairs.
 
 Tune skill wording against development cases only. Whoever edits a skill must not read a holdout's fixture, `case.json`, proof, oracle, or wrong review before freezing that edit; the split and class in the table above are the most they should know. Once a holdout informs an edit, it becomes development material: relabel both twins and write a replacement pair with new content. These files are public, so "holdout" means "not used to tune the current candidate", not "private".
 
@@ -131,3 +133,30 @@ The tests run over every case directory present. They check:
 - **Twins:** that twins pair up and share `PR.md`, prompt, and proof, that twin trees and diffs differ only where the contract allows, that `change.diff` applies in reverse to the head tree (with `git apply --check -R`), and that no hint word sits near a defect.
 - **Execution:** each fixture's own tests in both twins, and each proof against both twins, requiring test failures (not import errors) on the defect tree, one per defect in a large case, and a pass on the clean twin.
 - **Grading:** every oracle passes with every defect found and every wrong review fails on its outcome check. The grader's edges are pinned too: missing, malformed, and misshapen reviews, a modified fixture, an unknown case, path spellings, a finding anywhere in the enclosing function, the strict metric's window, nonblocking findings at a defect, `also_accept` anchors, a review that misses one of three defects, one finding never counting for two defects, diff-numbered lines past the end of a file, and metrics that must not affect `passed`.
+
+## What the fixtures do and do not hide
+
+No fixture comments on its defect, and the contract test checks for hint words within ten lines of each span. That check is narrow. Trap cases carry deliberate cues by design: in `anchoring` the description and a code comment assert the broken property, and in `test-stays-green` a test is named for the behavior it fails to cover. Those cues are the trap, not a leak.
+
+Twins are believed clean, not proven clean. Reviewers in trials and an independent review found real defects in several of them, and repairs did not end it. A blocking finding on a twin is a candidate for adjudication. Do not report twin results as a false-positive rate.
+
+## Run record, 2026-11-20
+
+The checked-in manifest pins one model at high effort as a template. The runs below used private manifests derived from it with absolute paths into an exported snapshot of the commit, at the effort shown.
+
+| Item                    | Value                                                                                                                                                                        |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Harness                 | Claude Code 2.1.329, controlled file-tools adapter, no shell                                                                                                                 |
+| Models and effort       | Sonnet 5.5 and Haiku 5.5 at low; one probe with Sonnet 5.5 at medium                                                                                                         |
+| Cases snapshot          | commit `22539e3` (cases as first hardened)                                                                                                                                   |
+| Skill before the change | `skills/hyper-pr-review` at `22539e3`, identical to `main` at the time                                                                                                       |
+| Candidate               | commit `b21ab62` for development runs, `37ec69a` for the holdout (same entrypoint text apart from a review-date line)                                                        |
+| Hypothesis              | Listing every altered behavior before checking candidates, plus eight class questions in the entrypoint, raises defects found on large multi-defect changes                  |
+| Development             | seed 9; Haiku 3 repeats, Sonnet 2; large cases: Haiku 14, 14, 18 of 18 and Sonnet 8, 8, 9 of 12 (no skill, before, candidate)                                                |
+| Prediction              | Written before the holdout ran: candidate at least 3 more of 24 than the skill before the change, Haiku, two large holdout cases                                             |
+| Holdout                 | seed 31; Haiku 4 repeats, Sonnet 2; large cases: Haiku 16, 15, 14 of 24 and Sonnet 7, 6, 9 of 12; single-defect cases found in 159 of 161 trials over both runs and all arms |
+| Medium-effort probe     | seed 41, 3 repeats, two large development cases: 16 of 18 before and 16 of 18 with the candidate                                                                             |
+| Decision                | Not confirmed. Candidate text withdrawn in commit `c47bb10`                                                                                                                  |
+| Cost                    | 22.76 USD of trials, summed from per-trial receipts                                                                                                                          |
+
+Counts are from regrading stored reviews with the grader at this commit, each against the fixture its run used. Two candidate trials on Haiku failed in the adapter and are excluded. Trial directories are kept outside the repository.

@@ -1,8 +1,9 @@
 {
-  "split": "holdout",
+  "split": "development",
   "kind": "clean",
   "twin": "bugfix-regression",
   "class": "silent-data-loss",
   "trap": "bugfix-regression",
-  "also_accept": []
+  "also_accept": [],
+  "held_out_until": "2026-11-20"
 }
