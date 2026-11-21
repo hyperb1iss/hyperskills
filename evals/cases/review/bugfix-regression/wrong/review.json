@@ -1,0 +1,13 @@
+{
+  "verdict": "approve",
+  "findings": [
+    {
+      "file": "contactbook/export.py",
+      "line": 21,
+      "blocking": false,
+      "title": "Content-Disposition filename is not RFC 5987 encoded",
+      "trigger": "The filename is ASCII today, so this is only a concern if it ever includes user text.",
+      "impact": "None currently; consider filename* if names become user-controlled."
+    }
+  ]
+}

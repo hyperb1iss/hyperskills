@@ -1,0 +1,21 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "stockpile/access.py",
+      "line": 118,
+      "blocking": true,
+      "title": "An empty scope authorizes every warehouse",
+      "trigger": "A key issued without warehouses (issue_key's default), narrowed to none with set_scope(key, []), or read from a key row with no warehouses field calls reserve, confirm, cancel, pick, or stock.",
+      "impact": "authorize skips the scope test whenever key.warehouses is empty, so a key that normalize_scope documents as able to act in no warehouse can move stock in every warehouse. An admin who parks a kiosk key by clearing its scope widens it to the whole network instead. The check should be WILDCARD not in scope and warehouse_id not in scope, with no truthiness short-circuit."
+    },
+    {
+      "file": "stockpile/store.py",
+      "line": 101,
+      "blocking": false,
+      "title": "The expiry query scans every reservation on each tick",
+      "trigger": "A store with a long reservation history and the worker ticking every 30 seconds.",
+      "impact": "holds_expiring_before parses every row to find the few HELD ones; an index on status and expires_at would keep each tick cheap as history grows."
+    }
+  ]
+}

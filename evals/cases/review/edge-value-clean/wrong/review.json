@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "boxoffice/orders.py",
+      "line": 35,
+      "blocking": true,
+      "title": "Promotion check is off by one",
+      "trigger": "A ticket is cancelled on a full event with buyers waiting.",
+      "impact": "The comparison should be <= so the freed seat is handed out; as written the first waiting buyer is never promoted."
+    }
+  ]
+}

@@ -1,0 +1,183 @@
+diff --git a/courier/broker.py b/courier/broker.py
+index f4c5bb9..7968431 100644
+--- a/courier/broker.py
++++ b/courier/broker.py
+@@ -1,20 +1,48 @@
+ """Publishing outbox rows to the message broker."""
++import logging
++from itertools import groupby
++
+ from .serialization import encode
+ 
++log = logging.getLogger(__name__)
++
+ 
+ class BrokerTimeout(Exception):
+     """The broker did not acknowledge in time; the message may or may not be stored."""
+ 
+ 
++def _chunks(items, size):
++    for start in range(0, len(items), size):
++        yield items[start:start + size]
++
++
+ class Publisher:
+-    def __init__(self, client, source):
++    def __init__(self, client, source, max_batch=100):
++        if max_batch < 1:
++            raise ValueError("max_batch must be at least 1")
+         self.client = client
+         self.source = source
++        self.max_batch = max_batch
+ 
+     def publish(self, rows):
+-        """Send rows one at a time; returns the ids the broker acknowledged."""
++        """Send rows in per-topic batches; returns the ids the broker acknowledged.
++
++        A topic stops at its first unacknowledged batch, so that batch and the
++        rest of the topic stay pending and keep their order.
++        """
+         acknowledged = []
+-        for row in rows:
+-            self.client.send(row.topic, encode(row, self.source))
+-            acknowledged.append(row.id)
++        ordered = sorted(rows, key=lambda row: (row.topic, row.id))
++        for topic, group in groupby(ordered, key=lambda row: row.topic):
++            acknowledged.extend(self._publish_topic(topic, list(group)))
+         return acknowledged
++
++    def _publish_topic(self, topic, rows):
++        sent = []
++        for batch in _chunks(rows, self.max_batch):
++            try:
++                self.client.send_batch(topic, [encode(row, self.source) for row in batch])
++            except BrokerTimeout:
++                log.warning("broker timed out on %d outbox rows for %s; holding the topic", len(batch), topic)
++                break
++            sent.extend(row.id for row in batch)
++        return sent
+diff --git a/courier/relay.py b/courier/relay.py
+index 673958b..b968650 100644
+--- a/courier/relay.py
++++ b/courier/relay.py
+@@ -1,4 +1,9 @@
+ """Polls the outbox and publishes pending rows."""
++from .broker import Publisher
++
++
++def build_publisher(client, settings):
++    return Publisher(client, settings.source, max_batch=settings.max_batch)
+ 
+ 
+ def relay_once(outbox, publisher, clock, limit=500):
+@@ -8,3 +13,17 @@ def relay_once(outbox, publisher, clock, limit=500):
+     published = publisher.publish(rows)
+     outbox.mark_published(published, clock())
+     return len(published)
++
++
++def drain(outbox, publisher, clock, settings, max_passes=10):
++    """Relay full pages until a pass comes back short or max_passes runs out.
++
++    A timed-out batch also makes a pass short; the next scheduled drain retries it.
++    """
++    total = 0
++    for _ in range(max_passes):
++        sent = relay_once(outbox, publisher, clock, settings.poll_limit)
++        total += sent
++        if sent < settings.poll_limit:
++            break
++    return total
+diff --git a/courier/settings.py b/courier/settings.py
+index f2fb61a..d5b543b 100644
+--- a/courier/settings.py
++++ b/courier/settings.py
+@@ -7,6 +7,7 @@ from dataclasses import dataclass
+ class RelaySettings:
+     source: str = "orders"
+     poll_limit: int = 500
++    max_batch: int = 100
+ 
+     @classmethod
+     def from_env(cls, env=None):
+@@ -14,6 +15,7 @@ class RelaySettings:
+         return cls(
+             source=env.get("COURIER_SOURCE", "orders"),
+             poll_limit=_positive_int(env, "COURIER_POLL_LIMIT", 500),
++            max_batch=_positive_int(env, "COURIER_MAX_BATCH", 100),
+         )
+ 
+ 
+diff --git a/tests/test_relay.py b/tests/test_relay.py
+index 776626d..11d0b5e 100644
+--- a/tests/test_relay.py
++++ b/tests/test_relay.py
+@@ -1,10 +1,11 @@
+ import unittest
+ from datetime import datetime, timezone
+ 
+-from courier.broker import Publisher
++from courier.broker import BrokerTimeout, Publisher
+ from courier.outbox import Outbox
+-from courier.relay import relay_once
++from courier.relay import build_publisher, drain, relay_once
+ from courier.serialization import decode
++from courier.settings import RelaySettings
+ 
+ NOON = datetime(2026, 4, 1, 12, 0, tzinfo=timezone.utc)
+ 
+@@ -15,10 +16,25 @@ def clock():
+ 
+ class FakeClient:
+     def __init__(self):
+-        self.sent = []
++        self.batches = []
+ 
+-    def send(self, topic, message):
+-        self.sent.append((topic, decode(message)))
++    @property
++    def sent(self):
++        return [(topic, message) for topic, batch in self.batches for message in batch]
++
++    def send_batch(self, topic, messages):
++        self.batches.append((topic, [decode(m) for m in messages]))
++
++
++class FlakyClient(FakeClient):
++    def __init__(self, failing_topic):
++        super().__init__()
++        self.failing_topic = failing_topic
++
++    def send_batch(self, topic, messages):
++        if topic == self.failing_topic:
++            raise BrokerTimeout(topic)
++        super().send_batch(topic, messages)
+ 
+ 
+ def outbox_with(count, topic="orders.created"):
+@@ -49,6 +65,25 @@ class RelayTests(unittest.TestCase):
+         relay_once(outbox_with(1), Publisher(client, "billing"), clock)
+         self.assertEqual(client.sent[0][1]["source"], "billing")
+ 
++    def test_batches_split_by_topic_and_size(self):
++        outbox, client = outbox_with(3), FakeClient()
++        outbox.add("orders.paid", {"total": "19.90"})
++        relay_once(outbox, Publisher(client, "orders", max_batch=2), clock)
++        sizes = [(topic, len(batch)) for topic, batch in client.batches]
++        self.assertEqual(sizes, [("orders.created", 2), ("orders.created", 1), ("orders.paid", 1)])
++
++    def test_timeout_holds_the_rest_of_that_topic_only(self):
++        outbox, client = outbox_with(4), FlakyClient("orders.created")
++        outbox.add("orders.paid", {"n": 9})
++        relay_once(outbox, Publisher(client, "orders", max_batch=2), clock)
++        self.assertEqual([(topic, len(batch)) for topic, batch in client.batches], [("orders.paid", 1)])
++
++    def test_drain_stops_on_a_short_pass(self):
++        settings = RelaySettings(poll_limit=2, max_batch=2)
++        outbox, client = outbox_with(5), FakeClient()
++        self.assertEqual(drain(outbox, build_publisher(client, settings), clock, settings), 5)
++        self.assertEqual(len(client.batches), 3)
++
+ 
+ if __name__ == "__main__":
+     unittest.main()

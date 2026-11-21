@@ -1,0 +1,8 @@
+{
+  "split": "development",
+  "kind": "clean",
+  "twin": "anchoring",
+  "class": "non-idempotent-retry",
+  "trap": "anchoring",
+  "also_accept": []
+}

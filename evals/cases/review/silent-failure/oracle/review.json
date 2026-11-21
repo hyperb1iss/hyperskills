@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "courier/broker.py",
+      "line": 42,
+      "blocking": true,
+      "title": "Timed-out batches are reported as acknowledged and never retried",
+      "trigger": "send_batch raises BrokerTimeout for any batch.",
+      "impact": "_publish_topic records a batch's ids before sending it, so when send_batch times out the batch is already in the returned list and relay_once marks it published. Those events leave the outbox without reaching the broker, breaking the at-least-once promise in outbox.py; the ids belong after a successful send."
+    }
+  ]
+}

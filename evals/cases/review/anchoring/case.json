@@ -1,0 +1,25 @@
+{
+  "split": "development",
+  "kind": "defect",
+  "twin": "anchoring-clean",
+  "class": "non-idempotent-retry",
+  "trap": "anchoring",
+  "defect": {
+    "file": "payouts/client.py",
+    "start_line": 33,
+    "end_line": 37,
+    "function": "submit"
+  },
+  "also_accept": [
+    {
+      "file": "payouts/client.py",
+      "start_line": 38,
+      "end_line": 50
+    },
+    {
+      "file": "payouts/messages.py",
+      "start_line": 11,
+      "end_line": 18
+    }
+  ]
+}

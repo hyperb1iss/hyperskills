@@ -1,0 +1,36 @@
+{
+  "split": "development",
+  "kind": "defect",
+  "twin": "bugfix-regression-clean",
+  "class": "silent-data-loss",
+  "trap": "bugfix-regression",
+  "defect": {
+    "file": "contactbook/csvio.py",
+    "start_line": 11,
+    "end_line": 18,
+    "function": "write_contacts"
+  },
+  "also_accept": [
+    {
+      "file": "contactbook/csvio.py",
+      "start_line": 25,
+      "end_line": 31
+    },
+    {
+      "file": "contactbook/export.py",
+      "start_line": 45,
+      "end_line": 46
+    },
+    {
+      "file": "contactbook/restore.py",
+      "start_line": 7,
+      "end_line": 10
+    },
+    {
+      "file": "contactbook/restore.py",
+      "start_line": 16,
+      "end_line": 16
+    }
+  ],
+  "held_out_until": "2026-11-20"
+}

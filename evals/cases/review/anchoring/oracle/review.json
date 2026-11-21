@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "payouts/client.py",
+      "line": 37,
+      "blocking": true,
+      "title": "Each retry mints a new message_id, so a retry after a lost reply pays the transfer twice",
+      "trigger": "transfer_message is called inside the retry loop, and transfer_message (messages.py) sets message_id from new_message_id(), a fresh uuid4 on every call. When an attempt is applied but its reply is lost (GatewayTimeout, or a 504 from the gateway), the next attempt carries a different message_id.",
+      "impact": "The gateway deduplicates only on message_id, so it applies the retried message as a new transfer: the recipient is paid twice. The comment and PR description claim the opposite. Build the message once before the loop so every attempt sends the same message_id."
+    }
+  ]
+}

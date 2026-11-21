@@ -1,0 +1,13 @@
+{
+  "verdict": "approve",
+  "findings": [
+    {
+      "file": "payouts/retry.py",
+      "line": 21,
+      "blocking": false,
+      "title": "Backoff has no jitter",
+      "trigger": "Many clients that fail at the same moment retry on the same schedule.",
+      "impact": "Optional: jitter would spread retries against a recovering gateway."
+    }
+  ]
+}

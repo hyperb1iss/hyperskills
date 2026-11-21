@@ -1,0 +1,25 @@
+{
+  "split": "development",
+  "kind": "defect",
+  "twin": "silent-failure-clean",
+  "class": "silent-failure",
+  "trap": null,
+  "defect": {
+    "file": "courier/broker.py",
+    "start_line": 42,
+    "end_line": 47,
+    "function": "_publish_topic"
+  },
+  "also_accept": [
+    {
+      "file": "courier/broker.py",
+      "start_line": 36,
+      "end_line": 36
+    },
+    {
+      "file": "courier/relay.py",
+      "start_line": 13,
+      "end_line": 14
+    }
+  ]
+}

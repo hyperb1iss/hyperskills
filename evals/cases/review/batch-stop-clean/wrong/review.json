@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "gridmeter/importer.py",
+      "line": 16,
+      "blocking": true,
+      "title": "utf-8-sig breaks drops without a byte order mark",
+      "trigger": "An older vendor drop that has no BOM.",
+      "impact": "Decoding with utf-8-sig fails on files that do not start with a BOM, so every existing vendor's import breaks."
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "storefront/loyalty.py",
+      "line": 16,
+      "blocking": true,
+      "title": "Loyalty points are now awarded per cent instead of per dollar",
+      "trigger": "orders.place_order (not touched by this PR) passes invoice.subtotal to points_after_purchase, and points_for does int(amount), documented as a dollar amount. Invoice.subtotal is now integer cents, so a $42.50 order earns 4250 points instead of 42.",
+      "impact": "Every order credits 100 times the intended points (times the tier multiplier), inflating balances customers can redeem. Convert in points_for (amount // 100) or pass dollars from place_order, and add an order-level test that checks points."
+    }
+  ]
+}

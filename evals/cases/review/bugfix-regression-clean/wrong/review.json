@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "contactbook/export.py",
+      "line": 32,
+      "blocking": true,
+      "title": "The BOM breaks programmatic consumers of the download",
+      "trigger": "A script parses the downloaded CSV with a plain utf-8 decoder.",
+      "impact": "The first header becomes a BOM followed by 'email'; the download should not carry a BOM."
+    }
+  ]
+}

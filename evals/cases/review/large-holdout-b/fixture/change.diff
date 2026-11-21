@@ -1,0 +1,779 @@
+diff --git a/stockroom/api.py b/stockroom/api.py
+index d19a5f0..b43af31 100644
+--- a/stockroom/api.py
++++ b/stockroom/api.py
+@@ -9,6 +9,14 @@ from datetime import date, datetime
+ from .auth import can_access_warehouse, visible_warehouses
+ from .events import EXPORT_FIELDS, export_rows
+ from .reports import low_stock, stock_report
++from .reservations import (
++    DuplicateReservation,
++    NotHeld,
++    ReservationExpired,
++    UnknownReservation,
++    Unavailable,
++    order_warehouses,
++)
+ from .stock import InsufficientStock, UnknownBin
+ 
+ 
+@@ -16,6 +24,7 @@ from .stock import InsufficientStock, UnknownBin
+ class Context:
+     stock: object
+     settings: object
++    reservations: object = None
+ 
+ 
+ def _positive_int(value):
+@@ -104,3 +113,92 @@ def pick(ctx, principal, body):
+         return 409, {"error": "insufficient_stock", "available": exc.available}
+     return 200, {"takes": [{"bin": bin_id, "quantity": units} for bin_id, units in takes]}
+ 
++
++def _reservation_body(reservation):
++    return {
++        "id": reservation.id,
++        "order_id": reservation.order_id,
++        "sku": reservation.sku,
++        "status": reservation.status,
++        "held": reservation.held,
++        "shortfall": reservation.shortfall,
++        "expires_at": reservation.expires_at.isoformat(),
++        "allocations": [
++            {"warehouse": a.warehouse_id, "bin": a.bin_id, "quantity": a.quantity}
++            for a in reservation.allocations
++        ],
++    }
++
++
++def reserve(ctx, principal, body):
++    if not principal.has_role("reservations:write") or not principal.channel:
++        return 403, {"error": "forbidden"}
++    sku, order_id, quantity = body.get("sku"), body.get("order_id"), body.get("quantity")
++    ttl = body.get("ttl_seconds", ctx.settings.reservation_ttl)
++    if not _text(sku) or not _text(order_id):
++        return 400, {"error": "invalid_request"}
++    if not _positive_int(quantity):
++        return 400, {"error": "invalid_quantity"}
++    if not _positive_int(ttl) or ttl > ctx.settings.max_reservation_ttl:
++        return 400, {"error": "invalid_ttl", "max": ctx.settings.max_reservation_ttl}
++    warehouse_id = body.get("warehouse_id")
++    if warehouse_id is not None and not can_access_warehouse(principal, warehouse_id):
++        return 403, {"error": "forbidden"}
++    if warehouse_id is not None:
++        warehouses = [warehouse_id]
++    else:
++        warehouses = order_warehouses(ctx.stock.warehouse_ids(), ctx.settings.warehouse_priority)
++    try:
++        reservation = ctx.reservations.reserve(
++            order_id, principal.channel, sku, quantity, warehouses, ttl,
++            allow_partial=body.get("allow_partial") is True,
++        )
++    except DuplicateReservation:
++        return 409, {"error": "duplicate_reservation"}
++    except Unavailable as exc:
++        return 409, {"error": "insufficient_stock", "available": exc.available}
++    return 201, _reservation_body(reservation)
++
++
++def _owned_reservation(ctx, principal, body):
++    """The reservation named in ``body`` if the caller's channel owns it.
++
++    A reservation of another channel is reported as unknown, so ids of other
++    channels' orders cannot be probed.
++    """
++    reservation = ctx.reservations.get(body.get("reservation_id"))
++    if principal.is_admin or (principal.channel and reservation.channel == principal.channel):
++        return reservation
++    raise UnknownReservation(reservation.id)
++
++
++def release_reservation(ctx, principal, body):
++    if not principal.has_role("reservations:write"):
++        return 403, {"error": "forbidden"}
++    try:
++        reservation = ctx.reservations.release(_owned_reservation(ctx, principal, body).id)
++    except UnknownReservation:
++        return 404, {"error": "unknown_reservation"}
++    except NotHeld:
++        return 409, {"error": "not_held"}
++    return 200, _reservation_body(reservation)
++
++
++def fulfill_reservation(ctx, principal, body):
++    if not principal.has_role("reservations:write") or not principal.has_role("stock:write"):
++        return 403, {"error": "forbidden"}
++    try:
++        reservation = _owned_reservation(ctx, principal, body)
++        if not all(can_access_warehouse(principal, a.warehouse_id) for a in reservation.allocations):
++            return 403, {"error": "forbidden"}
++        picked = ctx.reservations.fulfill(reservation.id)
++    except UnknownReservation:
++        return 404, {"error": "unknown_reservation"}
++    except NotHeld:
++        return 409, {"error": "not_held"}
++    except ReservationExpired:
++        return 409, {"error": "expired"}
++    return 200, {
++        "id": reservation.id,
++        "picked": [{"warehouse": p.warehouse_id, "bin": p.bin_id, "quantity": p.quantity} for p in picked],
++    }
+diff --git a/stockroom/models.py b/stockroom/models.py
+index ef80629..1d4e56c 100644
+--- a/stockroom/models.py
++++ b/stockroom/models.py
+@@ -19,6 +19,12 @@ class Bin:
+     on_hand: int = 0
+     pick_order: int = 0
+     received_on: date = date(2000, 1, 1)
++    reserved: int = 0
++
++    @property
++    def free(self):
++        """Units not held by a reservation; never negative, even after a count."""
++        return max(self.on_hand - self.reserved, 0)
+ 
+ 
+ @dataclass(frozen=True)
+diff --git a/stockroom/picking.py b/stockroom/picking.py
+new file mode 100644
+index 0000000..8b6552c
+--- /dev/null
++++ b/stockroom/picking.py
+@@ -0,0 +1,27 @@
++"""Plans which bins to take units from, for picks and for reservations."""
++
++from typing import NamedTuple
++
++
++class Take(NamedTuple):
++    bin_id: str
++    quantity: int
++
++
++def pick_sequence(bins):
++    """The order to draw stock from ``bins``."""
++    return sorted(bins, key=lambda b: (b.pick_order, b.received_on, b.bin_id))
++
++
++def plan(bins, quantity):
++    """Split ``quantity`` across the free units in ``bins``; returns (takes, shortfall)."""
++    takes = []
++    remaining = quantity
++    for candidate in pick_sequence(bins):
++        if remaining == 0:
++            break
++        units = min(candidate.free, remaining)
++        if units > 0:
++            takes.append(Take(candidate.bin_id, units))
++            remaining -= units
++    return takes, remaining
+diff --git a/stockroom/reports.py b/stockroom/reports.py
+index ce82154..2140cde 100644
+--- a/stockroom/reports.py
++++ b/stockroom/reports.py
+@@ -2,18 +2,20 @@
+ 
+ 
+ def stock_report(stock, warehouse_ids):
+-    """Rows of units per SKU and warehouse."""
++    """Rows per SKU and warehouse: units on hand, units reserved, and units free to promise."""
+     rows = []
+     for warehouse_id in warehouse_ids:
+         for sku in stock.skus(warehouse_id):
+             rows.append({
+                 "warehouse": warehouse_id,
+                 "sku": sku,
+-                "units": stock.available(sku, warehouse_id),
++                "units": stock.on_hand(sku, warehouse_id),
++                "reserved": stock.reserved(sku, warehouse_id),
++                "available": stock.available(sku, warehouse_id),
+             })
+     return rows
+ 
+ 
+ def low_stock(stock, warehouse_ids, threshold):
+-    """Rows at or below ``threshold`` units."""
+-    return [row for row in stock_report(stock, warehouse_ids) if row["units"] <= threshold]
++    """Rows whose units free to promise are at or below ``threshold``."""
++    return [row for row in stock_report(stock, warehouse_ids) if row["available"] <= threshold]
+diff --git a/stockroom/reservations.py b/stockroom/reservations.py
+new file mode 100644
+index 0000000..dc1f283
+--- /dev/null
++++ b/stockroom/reservations.py
+@@ -0,0 +1,162 @@
++"""Reservations: units held for an order until it is picked or the hold expires."""
++
++import itertools
++from dataclasses import dataclass
++from datetime import timedelta
++
++from .picking import plan
++
++HELD = "held"
++FULFILLED = "fulfilled"
++RELEASED = "released"
++EXPIRED = "expired"
++
++
++class ReservationError(Exception):
++    pass
++
++
++class UnknownReservation(ReservationError):
++    pass
++
++
++class DuplicateReservation(ReservationError):
++    pass
++
++
++class NotHeld(ReservationError):
++    pass
++
++
++class ReservationExpired(ReservationError):
++    pass
++
++
++class Unavailable(ReservationError):
++    def __init__(self, sku, requested, available):
++        super().__init__(f"{sku}: requested {requested}, available {available}")
++        self.available = available
++
++
++@dataclass(frozen=True)
++class Allocation:
++    warehouse_id: str
++    bin_id: str
++    quantity: int
++
++
++@dataclass
++class Reservation:
++    id: str
++    order_id: str
++    channel: str
++    sku: str
++    requested: int
++    allocations: tuple
++    created_at: object
++    expires_at: object
++    status: str = HELD
++
++    @property
++    def held(self):
++        return sum(allocation.quantity for allocation in self.allocations)
++
++    @property
++    def shortfall(self):
++        return self.requested - self.held
++
++
++def order_warehouses(warehouse_ids, priority):
++    """Warehouses named in ``priority`` first, in that order, then the rest by id."""
++    known = set(warehouse_ids)
++    first = list(dict.fromkeys(warehouse_id for warehouse_id in priority if warehouse_id in known))
++    return first + sorted(known - set(first))
++
++
++class ReservationBook:
++    """Every reservation at one site; the host keeps one alongside its Stock."""
++
++    def __init__(self, stock, clock):
++        self._stock = stock
++        self._clock = clock
++        self._by_id = {}
++        self._ids = itertools.count(1)
++
++    def reserve(self, order_id, channel, sku, quantity, warehouses, ttl, allow_partial=False):
++        """Hold ``quantity`` units of ``sku`` for one order line, trying warehouses in
++        the order given. With ``allow_partial``, hold what is free and report the
++        shortfall; without it, hold all or nothing.
++        """
++        if any(r.status == HELD and (r.channel, r.order_id, r.sku) == (channel, order_id, sku)
++               for r in self._by_id.values()):
++            raise DuplicateReservation(f"{channel}/{order_id} already holds {sku}")
++        allocations = []
++        remaining = quantity
++        for warehouse_id in warehouses:
++            if remaining == 0:
++                break
++            takes, remaining = plan(self._stock.bins(sku, warehouse_id), remaining)
++            allocations.extend(Allocation(warehouse_id, take.bin_id, take.quantity) for take in takes)
++        held = quantity - remaining
++        if held == 0 or (remaining and not allow_partial):
++            raise Unavailable(sku, quantity, held)
++        for allocation in allocations:
++            self._stock.hold(allocation.warehouse_id, allocation.bin_id, allocation.quantity)
++        now = self._clock()
++        reservation = Reservation(
++            id=f"res_{next(self._ids):06d}",
++            order_id=order_id,
++            channel=channel,
++            sku=sku,
++            requested=quantity,
++            allocations=tuple(allocations),
++            created_at=now,
++            expires_at=now + timedelta(seconds=ttl),
++        )
++        self._by_id[reservation.id] = reservation
++        return reservation
++
++    def get(self, reservation_id):
++        try:
++            return self._by_id[reservation_id]
++        except (KeyError, TypeError):
++            raise UnknownReservation(str(reservation_id)) from None
++
++    def release(self, reservation_id, status=RELEASED):
++        """Give a held reservation's units back to free stock."""
++        reservation = self._held(reservation_id)
++        for allocation in reservation.allocations:
++            self._stock.unhold(allocation.warehouse_id, allocation.bin_id, allocation.quantity)
++        reservation.status = status
++        return reservation
++
++    def fulfill(self, reservation_id):
++        """Pick a reservation's units and return the allocations actually picked. A bin
++        that lost stock after the hold yields what it has; an expired hold is released.
++        """
++        reservation = self._held(reservation_id)
++        if self._clock() >= reservation.expires_at:
++            self.release(reservation_id, status=EXPIRED)
++            raise ReservationExpired(reservation_id)
++        picked = []
++        for allocation in reservation.allocations:
++            units = self._stock.take_held(allocation.warehouse_id, allocation.bin_id, allocation.quantity)
++            picked.append(Allocation(allocation.warehouse_id, allocation.bin_id, units))
++        reservation.status = FULFILLED
++        return picked
++
++    def due(self, now):
++        """Held reservations whose expiry is at or before ``now``."""
++        return [r for r in self._by_id.values() if r.status == HELD and r.expires_at <= now]
++
++    def prune(self, before):
++        """Forget finished reservations whose hold would have ended before ``before``."""
++        for reservation in [r for r in self._by_id.values() if r.status != HELD and r.expires_at < before]:
++            del self._by_id[reservation.id]
++
++    def _held(self, reservation_id):
++        reservation = self.get(reservation_id)
++        if reservation.status != HELD:
++            raise NotHeld(f"{reservation_id} is {reservation.status}")
++        return reservation
++
+diff --git a/stockroom/settings.py b/stockroom/settings.py
+index 1b9d76b..5e17c69 100644
+--- a/stockroom/settings.py
++++ b/stockroom/settings.py
+@@ -12,14 +12,23 @@ class SettingsError(ValueError):
+ class Settings:
+     low_stock_threshold: int = 5
+     max_adjustment: int = 1000
++    reservation_ttl: int = 900
++    max_reservation_ttl: int = 86400
++    warehouse_priority: tuple = ()
+ 
+     @classmethod
+     def from_env(cls, environ=None):
+         env = os.environ if environ is None else environ
+-        return cls(
++        settings = cls(
+             low_stock_threshold=_int(env, "STOCKROOM_LOW_STOCK_THRESHOLD", 5, minimum=0),
+             max_adjustment=_int(env, "STOCKROOM_MAX_ADJUSTMENT", 1000, minimum=1),
++            reservation_ttl=_int(env, "STOCKROOM_RESERVATION_TTL", 900, minimum=1),
++            max_reservation_ttl=_int(env, "STOCKROOM_MAX_RESERVATION_TTL", 86400, minimum=1),
++            warehouse_priority=_list(env, "STOCKROOM_WAREHOUSE_PRIORITY"),
+         )
++        if settings.reservation_ttl > settings.max_reservation_ttl:
++            raise SettingsError("STOCKROOM_RESERVATION_TTL exceeds STOCKROOM_MAX_RESERVATION_TTL")
++        return settings
+ 
+ 
+ def _int(env, name, default, minimum):
+@@ -34,3 +43,7 @@ def _int(env, name, default, minimum):
+         raise SettingsError(f"{name} must be at least {minimum}, got {value}")
+     return value
+ 
++
++def _list(env, name):
++    raw = env.get(name, "")
++    return tuple(item.strip() for item in raw.split(",") if item.strip())
+diff --git a/stockroom/stock.py b/stockroom/stock.py
+index cef87b4..727996d 100644
+--- a/stockroom/stock.py
++++ b/stockroom/stock.py
+@@ -1,6 +1,7 @@
+ """Stock levels by warehouse and bin."""
+ 
+ from .models import Event
++from .picking import plan
+ 
+ 
+ class UnknownBin(KeyError):
+@@ -54,10 +55,18 @@ class Stock:
+     def skus(self, warehouse_id=None):
+         return sorted({b.sku for b in self._bins.values() if warehouse_id in (None, b.warehouse_id)})
+ 
+-    def available(self, sku, warehouse_id=None):
+-        """Units of ``sku`` in stock, in one warehouse or across all of them."""
++    def on_hand(self, sku, warehouse_id=None):
++        """Units of ``sku`` physically in stock, in one warehouse or across all of them."""
+         return sum(b.on_hand for b in self.bins(sku, warehouse_id))
+ 
++    def reserved(self, sku, warehouse_id=None):
++        """Units of ``sku`` held by reservations."""
++        return sum(b.reserved for b in self.bins(sku, warehouse_id))
++
++    def available(self, sku, warehouse_id=None):
++        """Units of ``sku`` free to promise: on hand minus reserved."""
++        return sum(b.free for b in self.bins(sku, warehouse_id))
++
+     def home_bin(self, sku, warehouse_id):
+         """The bin receipts and count adjustments go to: the SKU's first bin there."""
+         bins = self.bins(sku, warehouse_id)
+@@ -89,24 +98,38 @@ class Stock:
+         """Take ``quantity`` units for an order and return the (bin_id, units) taken.
+ 
+         Stock is taken oldest-received first so that it rotates; perishable SKUs
+-        carry a best-before date. Raises InsufficientStock, taking nothing, if the
+-        warehouse holds too few units.
++        carry a best-before date. Units held by reservations are never taken.
++        Raises InsufficientStock, taking nothing, if too few units are free.
+         """
+-        bins = sorted(self.bins(sku, warehouse_id), key=lambda b: b.received_on)
+-        total = sum(b.on_hand for b in bins)
+-        if total < quantity:
+-            raise InsufficientStock(sku, warehouse_id, quantity, total)
+-        takes = []
+-        remaining = quantity
+-        for candidate in bins:
+-            units = min(candidate.on_hand, remaining)
+-            if units > 0:
+-                candidate.on_hand -= units
+-                takes.append((candidate.bin_id, units))
+-                remaining -= units
+-        detail = ",".join(f"{bin_id}x{units}" for bin_id, units in takes)
++        takes, shortfall = plan(self.bins(sku, warehouse_id), quantity)
++        if shortfall:
++            raise InsufficientStock(sku, warehouse_id, quantity, quantity - shortfall)
++        for take in takes:
++            self.bin(warehouse_id, take.bin_id).on_hand -= take.quantity
++        detail = ",".join(f"{take.bin_id}x{take.quantity}" for take in takes)
+         self._record("pick", sku, warehouse_id, -quantity, detail)
+         return takes
+ 
++    def hold(self, warehouse_id, bin_id, quantity):
++        """Reserve ``quantity`` free units in a bin."""
++        target = self.bin(warehouse_id, bin_id)
++        if quantity > target.free:
++            raise InsufficientStock(target.sku, warehouse_id, quantity, target.free)
++        target.reserved += quantity
++
++    def unhold(self, warehouse_id, bin_id, quantity):
++        """Return held units to free stock."""
++        target = self.bin(warehouse_id, bin_id)
++        target.reserved = max(target.reserved - quantity, 0)
++
++    def take_held(self, warehouse_id, bin_id, quantity):
++        """Pick units that were held and return how many were actually in the bin."""
++        target = self.bin(warehouse_id, bin_id)
++        units = min(quantity, target.on_hand)
++        target.on_hand -= units
++        target.reserved = max(target.reserved - quantity, 0)
++        self._record("pick", target.sku, warehouse_id, -units, f"{bin_id}x{units} reserved")
++        return units
++
+     def _record(self, kind, sku, warehouse_id, quantity, detail=""):
+         self._events.record(Event(self._clock(), kind, sku, warehouse_id, quantity, detail))
+diff --git a/stockroom/sweeper.py b/stockroom/sweeper.py
+new file mode 100644
+index 0000000..f1b5701
+--- /dev/null
++++ b/stockroom/sweeper.py
+@@ -0,0 +1,30 @@
++"""Releases reservations whose hold has expired.
++
++The host's scheduler calls sweep() once a minute, so a hold can outlive its
++expiry by up to a minute; fulfill() checks the expiry itself.
++"""
++
++from dataclasses import dataclass
++from datetime import timedelta
++
++from .reservations import EXPIRED
++
++RETENTION = timedelta(days=7)
++
++
++@dataclass(frozen=True)
++class SweepResult:
++    expired: int
++    units: int
++
++
++def sweep(book, now):
++    """Expire every held reservation due at ``now``, forget finished ones older than
++    RETENTION, and return what was released."""
++    expired = units = 0
++    for reservation in book.due(now):
++        units += reservation.held
++        book.release(reservation.id, status=EXPIRED)
++        expired += 1
++    book.prune(now - RETENTION)
++    return SweepResult(expired=expired, units=units)
+diff --git a/tests/test_api.py b/tests/test_api.py
+index 67560de..6068490 100644
+--- a/tests/test_api.py
++++ b/tests/test_api.py
+@@ -2,17 +2,20 @@ import unittest
+ 
+ from stockroom import api
+ from stockroom.models import Principal
++from stockroom.reservations import ReservationBook
+ from stockroom.settings import Settings
+ 
+ from tests.helpers import make_stock
+ 
+ ADMIN = Principal("k-admin", frozenset({"admin"}))
+ EAST_CLERK = Principal("k-clerk", frozenset({"stock:read", "stock:write"}), frozenset({"east"}))
++WEB = Principal("k-web", frozenset({"reservations:write", "stock:write"}), frozenset({"east", "west"}), "web")
++APP = Principal("k-app", frozenset({"reservations:write", "stock:write"}), frozenset({"east", "west"}), "app")
+ 
+ 
+ def make_ctx(**settings):
+-    stock, _ = make_stock()
+-    return api.Context(stock, Settings(**settings))
++    stock, clock = make_stock()
++    return api.Context(stock, Settings(**settings), ReservationBook(stock, clock))
+ 
+ 
+ class StockHandlerTests(unittest.TestCase):
+@@ -48,5 +51,45 @@ class StockHandlerTests(unittest.TestCase):
+         self.assertEqual(api.receive(make_ctx(), EAST_CLERK, body)[0], 400)
+ 
+ 
++class ReserveHandlerTests(unittest.TestCase):
++    def test_reserve_without_warehouse_follows_priority(self):
++        ctx = make_ctx(warehouse_priority=("west",))
++        status, body = api.reserve(ctx, WEB, {"sku": "TEA-01", "order_id": "o-1", "quantity": 10})
++        self.assertEqual(status, 201)
++        self.assertEqual([(a["warehouse"], a["quantity"]) for a in body["allocations"]], [("west", 8), ("east", 2)])
++
++    def test_reserve_needs_a_channel_key(self):
++        body = {"sku": "TEA-01", "order_id": "o-1", "quantity": 1, "warehouse_id": "east"}
++        self.assertEqual(api.reserve(make_ctx(), EAST_CLERK, body)[0], 403)
++
++    def test_reserve_in_forbidden_warehouse(self):
++        limited = Principal("k-web2", frozenset({"reservations:write"}), frozenset({"east"}), "web")
++        body = {"sku": "TEA-01", "order_id": "o-1", "quantity": 1, "warehouse_id": "west"}
++        self.assertEqual(api.reserve(make_ctx(), limited, body)[0], 403)
++
++    def test_reserve_validates_quantity_and_ttl(self):
++        ctx = make_ctx(max_reservation_ttl=900)
++        base = {"sku": "TEA-01", "order_id": "o-1", "warehouse_id": "east"}
++        self.assertEqual(api.reserve(ctx, WEB, dict(base, quantity=0))[0], 400)
++        self.assertEqual(api.reserve(ctx, WEB, dict(base, quantity=1, ttl_seconds=901))[0], 400)
++
++
++class ReservationHandlerTests(unittest.TestCase):
++    def setUp(self):
++        self.ctx = make_ctx()
++        _, body = api.reserve(self.ctx, WEB, {"sku": "TEA-01", "order_id": "o-1", "quantity": 4,
++                                              "warehouse_id": "west"})
++        self.reservation_id = body["id"]
++
++    def test_other_channel_sees_unknown_reservation(self):
++        body = {"reservation_id": self.reservation_id}
++        self.assertEqual(api.release_reservation(self.ctx, APP, body)[0], 404)
++        self.assertEqual(api.fulfill_reservation(self.ctx, APP, body)[0], 404)
++
++    def test_fulfill(self):
++        status, body = api.fulfill_reservation(self.ctx, WEB, {"reservation_id": self.reservation_id})
++        self.assertEqual((status, body["picked"]), (200, [{"warehouse": "west", "bin": "W-03", "quantity": 4}]))
++
++
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/tests/test_reports.py b/tests/test_reports.py
+index 7f5a416..994ded1 100644
+--- a/tests/test_reports.py
++++ b/tests/test_reports.py
+@@ -11,10 +11,17 @@ class StockReportTests(unittest.TestCase):
+         rows = stock_report(stock, ["east"])
+         self.assertEqual([(r["sku"], r["units"]) for r in rows], [("MUG-02", 3), ("TEA-01", 16)])
+ 
+-    def test_low_stock(self):
++    def test_rows_split_reserved_units(self):
+         stock, _ = make_stock()
++        stock.hold("east", "E-01", 7)
++        row = [r for r in stock_report(stock, ["east"]) if r["sku"] == "TEA-01"][0]
++        self.assertEqual((row["units"], row["reserved"], row["available"]), (16, 7, 9))
++
++    def test_low_stock_uses_units_free_to_promise(self):
++        stock, _ = make_stock()
++        stock.hold("west", "W-03", 4)
+         self.assertEqual([(r["warehouse"], r["sku"]) for r in low_stock(stock, ["east", "west"], 4)],
+-                         [("east", "MUG-02")])
++                         [("east", "MUG-02"), ("west", "TEA-01")])
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/tests/test_reservations.py b/tests/test_reservations.py
+new file mode 100644
+index 0000000..1d7b795
+--- /dev/null
++++ b/tests/test_reservations.py
+@@ -0,0 +1,75 @@
++import unittest
++
++from stockroom.reservations import (
++    EXPIRED,
++    FULFILLED,
++    DuplicateReservation,
++    NotHeld,
++    ReservationBook,
++    ReservationExpired,
++    Unavailable,
++)
++
++from tests.helpers import make_stock
++
++
++def make_book():
++    stock, clock = make_stock()
++    return ReservationBook(stock, clock), stock, clock
++
++
++class ReserveTests(unittest.TestCase):
++    def test_all_or_nothing_by_default(self):
++        book, stock, _ = make_book()
++        with self.assertRaises(Unavailable) as caught:
++            book.reserve("o-1", "web", "MUG-02", 5, ["east"], ttl=600)
++        self.assertEqual(caught.exception.available, 3)
++        self.assertEqual(stock.reserved("MUG-02"), 0)
++
++    def test_partial_hold_reports_shortfall(self):
++        book, _, _ = make_book()
++        reservation = book.reserve("o-1", "web", "MUG-02", 5, ["east"], ttl=600, allow_partial=True)
++        self.assertEqual((reservation.held, reservation.shortfall), (3, 2))
++
++    def test_spills_into_the_next_warehouse(self):
++        book, _, _ = make_book()
++        reservation = book.reserve("o-1", "web", "TEA-01", 20, ["east", "west"], ttl=600)
++        self.assertEqual([(a.warehouse_id, a.quantity) for a in reservation.allocations],
++                         [("east", 10), ("east", 6), ("west", 4)])
++
++    def test_one_held_reservation_per_order_line(self):
++        book, _, _ = make_book()
++        book.reserve("o-1", "web", "TEA-01", 1, ["east"], ttl=600)
++        with self.assertRaises(DuplicateReservation):
++            book.reserve("o-1", "web", "TEA-01", 1, ["east"], ttl=600)
++        book.reserve("o-1", "app", "TEA-01", 1, ["east"], ttl=600)
++
++
++class LifecycleTests(unittest.TestCase):
++    def test_release_frees_units(self):
++        book, stock, _ = make_book()
++        reservation = book.reserve("o-1", "web", "TEA-01", 5, ["west"], ttl=600)
++        book.release(reservation.id)
++        self.assertEqual(stock.available("TEA-01", "west"), 8)
++        with self.assertRaises(NotHeld):
++            book.release(reservation.id)
++
++    def test_fulfill_picks_held_units(self):
++        book, stock, _ = make_book()
++        reservation = book.reserve("o-1", "web", "TEA-01", 5, ["west"], ttl=600)
++        picked = book.fulfill(reservation.id)
++        self.assertEqual([(p.bin_id, p.quantity) for p in picked], [("W-03", 5)])
++        self.assertEqual((reservation.status, stock.on_hand("TEA-01", "west"), stock.reserved("TEA-01")),
++                         (FULFILLED, 3, 0))
++
++    def test_fulfill_after_expiry_releases_instead(self):
++        book, stock, clock = make_book()
++        reservation = book.reserve("o-1", "web", "TEA-01", 5, ["west"], ttl=60)
++        clock.advance(60)
++        with self.assertRaises(ReservationExpired):
++            book.fulfill(reservation.id)
++        self.assertEqual((reservation.status, stock.on_hand("TEA-01", "west")), (EXPIRED, 8))
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/tests/test_stock.py b/tests/test_stock.py
+index e095f47..83abdd5 100644
+--- a/tests/test_stock.py
++++ b/tests/test_stock.py
+@@ -52,15 +52,36 @@ class PickTests(unittest.TestCase):
+         stock, _ = make_stock()
+         takes = stock.pick("TEA-01", "east", 12)
+         self.assertEqual(takes, [("E-01", 10), ("E-09", 2)])
+-        self.assertEqual(stock.available("TEA-01", "east"), 4)
++        self.assertEqual(stock.on_hand("TEA-01", "east"), 4)
+ 
+     def test_pick_short_takes_nothing(self):
+         stock, _ = make_stock()
+         with self.assertRaises(InsufficientStock) as caught:
+             stock.pick("TEA-01", "west", 9)
+         self.assertEqual(caught.exception.available, 8)
+-        self.assertEqual(stock.available("TEA-01", "west"), 8)
++        self.assertEqual(stock.on_hand("TEA-01", "west"), 8)
+ 
++    def test_same_day_bins_are_picked_in_walk_order(self):
++        stock, _ = make_stock()
++        stock.add_bin(Bin("west", "W-12", "SOAP-3", on_hand=4, pick_order=12, received_on=date(2026, 3, 9)))
++        stock.add_bin(Bin("west", "W-02", "SOAP-3", on_hand=4, pick_order=2, received_on=date(2026, 3, 9)))
++        self.assertEqual(stock.pick("SOAP-3", "west", 5), [("W-02", 4), ("W-12", 1)])
++
++    def test_pick_leaves_reserved_units(self):
++        stock, _ = make_stock()
++        stock.hold("west", "W-03", 6)
++        with self.assertRaises(InsufficientStock):
++            stock.pick("TEA-01", "west", 3)
++        self.assertEqual(stock.pick("TEA-01", "west", 2), [("W-03", 2)])
++
++
++class HoldTests(unittest.TestCase):
++    def test_take_held_yields_what_the_bin_has(self):
++        stock, _ = make_stock()
++        stock.hold("east", "E-04", 3)
++        stock.adjust("MUG-02", "east", "E-04", -2, "damaged")
++        self.assertEqual(stock.take_held("east", "E-04", 3), 1)
++        self.assertEqual((stock.on_hand("MUG-02"), stock.reserved("MUG-02")), (0, 0))
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/tests/test_sweeper.py b/tests/test_sweeper.py
+new file mode 100644
+index 0000000..3f4a5a3
+--- /dev/null
++++ b/tests/test_sweeper.py
+@@ -0,0 +1,25 @@
++import unittest
++
++from stockroom.reservations import EXPIRED, HELD, ReservationBook, UnknownReservation
++from stockroom.sweeper import SweepResult, sweep
++
++from tests.helpers import make_stock
++
++
++class SweepTests(unittest.TestCase):
++    def test_expires_only_due_reservations(self):
++        stock, clock = make_stock()
++        book = ReservationBook(stock, clock)
++        short = book.reserve("o-1", "web", "TEA-01", 4, ["west"], ttl=60)
++        long = book.reserve("o-2", "web", "TEA-01", 2, ["west"], ttl=3600)
++        clock.advance(120)
++        self.assertEqual(sweep(book, clock()), SweepResult(expired=1, units=4))
++        self.assertEqual((short.status, long.status), (EXPIRED, HELD))
++        self.assertEqual(stock.available("TEA-01", "west"), 6)
++        clock.advance(8 * 86400)
++        sweep(book, clock())
++        self.assertRaises(UnknownReservation, book.get, short.id)
++
++
++if __name__ == "__main__":
++    unittest.main()

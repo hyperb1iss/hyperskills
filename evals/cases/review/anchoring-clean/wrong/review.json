@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "payouts/client.py",
+      "line": 40,
+      "blocking": true,
+      "title": "Retrying after GatewayTimeout can pay a transfer twice",
+      "trigger": "The first attempt is applied but its reply times out; the client sends the transfer again.",
+      "impact": "Duplicate payout. Timeouts should not be retried."
+    }
+  ]
+}

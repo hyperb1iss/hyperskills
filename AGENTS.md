@@ -12,6 +12,8 @@ Treat the repository as shared space. Check status before edits, inspect existin
 
 ## Repository Map
 
+Case directories under `evals/cases/` are summarized with a file count; list one with `git ls-files` when you need its contents.
+
 <!-- BEGIN GENERATED: repository-map -->
 
 ```text
@@ -46,240 +48,76 @@ hyperskills/
 │   ├── cases/
 │   │   ├── README.md
 │   │   ├── atomic-export/
-│   │   │   ├── fixture/
-│   │   │   │   ├── exporter.py
-│   │   │   │   └── notes.txt
+│   │   │   ├── fixture/ (2 files)
 │   │   │   └── prompt.md
 │   │   ├── atomic_worker.py
 │   │   ├── clarification/
-│   │   │   ├── discoverable/
-│   │   │   │   ├── fixture/
-│   │   │   │   │   ├── TEAM.md
-│   │   │   │   │   └── exporter.py
-│   │   │   │   └── prompt.md
+│   │   │   ├── discoverable/ (3 files)
 │   │   │   ├── grade.py
-│   │   │   ├── missing/
-│   │   │   │   ├── fixture/
-│   │   │   │   │   └── exporter.py
-│   │   │   │   └── prompt.md
+│   │   │   ├── missing/ (2 files)
 │   │   │   ├── oracle_adapter.py
 │   │   │   ├── replies.json
-│   │   │   ├── stated/
-│   │   │   │   ├── fixture/
-│   │   │   │   │   └── exporter.py
-│   │   │   │   └── prompt.md
+│   │   │   ├── stated/ (2 files)
 │   │   │   └── worker.py
 │   │   ├── grade.py
 │   │   ├── oracle_adapter.py
 │   │   ├── prose/
-│   │   │   ├── preserve/
-│   │   │   │   ├── README.md
-│   │   │   │   ├── citation-trap-proposal/
-│   │   │   │   │   ├── fixture/
-│   │   │   │   │   │   └── draft.md
-│   │   │   │   │   ├── oracle/
-│   │   │   │   │   │   └── edited.md
-│   │   │   │   │   ├── prompt.md
-│   │   │   │   │   ├── spec.json
-│   │   │   │   │   └── wrong/
-│   │   │   │   │       └── edited.md
-│   │   │   │   ├── citation-trap-related-work/
-│   │   │   │   │   ├── fixture/
-│   │   │   │   │   │   └── draft.md
-│   │   │   │   │   ├── oracle/
-│   │   │   │   │   │   └── edited.md
-│   │   │   │   │   ├── prompt.md
-│   │   │   │   │   ├── spec.json
-│   │   │   │   │   └── wrong/
-│   │   │   │   │       └── edited.md
-│   │   │   │   ├── grade.py
-│   │   │   │   ├── hedge-trap-field-study/
-│   │   │   │   │   ├── fixture/
-│   │   │   │   │   │   └── draft.md
-│   │   │   │   │   ├── oracle/
-│   │   │   │   │   │   └── edited.md
-│   │   │   │   │   ├── prompt.md
-│   │   │   │   │   ├── spec.json
-│   │   │   │   │   └── wrong/
-│   │   │   │   │       └── edited.md
-│   │   │   │   ├── hedge-trap-postmortem/
-│   │   │   │   │   ├── fixture/
-│   │   │   │   │   │   └── draft.md
-│   │   │   │   │   ├── oracle/
-│   │   │   │   │   │   └── edited.md
-│   │   │   │   │   ├── prompt.md
-│   │   │   │   │   ├── spec.json
-│   │   │   │   │   └── wrong/
-│   │   │   │   │       └── edited.md
-│   │   │   │   ├── padded-slop-help-article/
-│   │   │   │   │   ├── fixture/
-│   │   │   │   │   │   └── draft.md
-│   │   │   │   │   ├── oracle/
-│   │   │   │   │   │   └── edited.md
-│   │   │   │   │   ├── prompt.md
-│   │   │   │   │   ├── spec.json
-│   │   │   │   │   └── wrong/
-│   │   │   │   │       └── edited.md
-│   │   │   │   ├── padded-slop-status-update/
-│   │   │   │   │   ├── fixture/
-│   │   │   │   │   │   └── draft.md
-│   │   │   │   │   ├── oracle/
-│   │   │   │   │   │   └── edited.md
-│   │   │   │   │   ├── prompt.md
-│   │   │   │   │   ├── spec.json
-│   │   │   │   │   └── wrong/
-│   │   │   │   │       └── edited.md
-│   │   │   │   ├── test_preserve.py
-│   │   │   │   ├── voice-trap-chat-message/
-│   │   │   │   │   ├── fixture/
-│   │   │   │   │   │   └── draft.md
-│   │   │   │   │   ├── oracle/
-│   │   │   │   │   │   └── edited.md
-│   │   │   │   │   ├── prompt.md
-│   │   │   │   │   ├── spec.json
-│   │   │   │   │   └── wrong/
-│   │   │   │   │       └── edited.md
-│   │   │   │   └── voice-trap-volunteer-email/
-│   │   │   │       ├── fixture/
-│   │   │   │       │   └── draft.md
-│   │   │   │       ├── oracle/
-│   │   │   │       │   └── edited.md
-│   │   │   │       ├── prompt.md
-│   │   │   │       ├── spec.json
-│   │   │   │       └── wrong/
-│   │   │   │           └── edited.md
-│   │   │   └── reader/
-│   │   │       ├── README.md
-│   │   │       ├── grade.py
-│   │   │       ├── handoff-report/
-│   │   │       │   ├── fixture/
-│   │   │       │   │   ├── draft.md
-│   │   │       │   │   └── notes.md
-│   │   │       │   ├── oracle/
-│   │   │       │   │   └── edited.md
-│   │   │       │   ├── prompt-untold.md
-│   │   │       │   ├── prompt.md
-│   │   │       │   ├── protected.json
-│   │   │       │   └── questions.json
-│   │   │       ├── incident-summary/
-│   │   │       │   ├── fixture/
-│   │   │       │   │   ├── draft.md
-│   │   │       │   │   └── notes.md
-│   │   │       │   ├── oracle/
-│   │   │       │   │   └── edited.md
-│   │   │       │   ├── prompt-untold.md
-│   │   │       │   ├── prompt.md
-│   │   │       │   ├── protected.json
-│   │   │       │   └── questions.json
-│   │   │       ├── review-reply/
-│   │   │       │   ├── fixture/
-│   │   │       │   │   ├── draft.md
-│   │   │       │   │   └── notes.md
-│   │   │       │   ├── oracle/
-│   │   │       │   │   └── edited.md
-│   │   │       │   ├── prompt-untold.md
-│   │   │       │   ├── prompt.md
-│   │   │       │   ├── protected.json
-│   │   │       │   └── questions.json
-│   │   │       └── status-update/
-│   │   │           ├── fixture/
-│   │   │           │   ├── draft.md
-│   │   │           │   └── notes.md
-│   │   │           ├── oracle/
-│   │   │           │   └── edited.md
-│   │   │           ├── prompt-untold.md
-│   │   │           ├── prompt.md
-│   │   │           ├── protected.json
-│   │   │           └── questions.json
+│   │   │   ├── preserve/ (43 files)
+│   │   │   └── reader/ (30 files)
 │   │   ├── prose-preservation/
-│   │   │   ├── fixture/
-│   │   │   │   └── draft.md
+│   │   │   ├── fixture/ (1 file)
 │   │   │   └── prompt.md
 │   │   ├── research-release/
-│   │   │   ├── fixture/
-│   │   │   │   ├── news.md
-│   │   │   │   └── releases.json
+│   │   │   ├── fixture/ (2 files)
 │   │   │   └── prompt.md
+│   │   ├── review/
+│   │   │   ├── README.md
+│   │   │   ├── anchoring/ (18 files)
+│   │   │   ├── anchoring-clean/ (18 files)
+│   │   │   ├── batch-stop/ (18 files)
+│   │   │   ├── batch-stop-clean/ (18 files)
+│   │   │   ├── bugfix-regression/ (19 files)
+│   │   │   ├── bugfix-regression-clean/ (19 files)
+│   │   │   ├── cross-file/ (20 files)
+│   │   │   ├── cross-file-clean/ (20 files)
+│   │   │   ├── edge-value/ (17 files)
+│   │   │   ├── edge-value-clean/ (17 files)
+│   │   │   ├── fail-open/ (18 files)
+│   │   │   ├── fail-open-clean/ (18 files)
+│   │   │   ├── grade.py
+│   │   │   ├── instruction-file/ (17 files)
+│   │   │   ├── instruction-file-clean/ (17 files)
+│   │   │   ├── large-dev-b/ (35 files)
+│   │   │   ├── large-dev-b-clean/ (35 files)
+│   │   │   ├── large-holdout-a/ (33 files)
+│   │   │   ├── large-holdout-a-clean/ (33 files)
+│   │   │   ├── large-holdout-b/ (31 files)
+│   │   │   ├── large-holdout-b-clean/ (31 files)
+│   │   │   ├── large-ledger/ (38 files)
+│   │   │   ├── large-ledger-clean/ (38 files)
+│   │   │   ├── silent-failure/ (17 files)
+│   │   │   ├── silent-failure-clean/ (17 files)
+│   │   │   ├── test-stays-green/ (20 files)
+│   │   │   ├── test-stays-green-clean/ (20 files)
+│   │   │   ├── test_review.py
+│   │   │   ├── unbounded-growth/ (18 files)
+│   │   │   └── unbounded-growth-clean/ (18 files)
 │   │   ├── review-boundary/
-│   │   │   ├── fixture/
-│   │   │   │   ├── cache.py
-│   │   │   │   └── unique.py
+│   │   │   ├── fixture/ (2 files)
 │   │   │   └── prompt.md
 │   │   ├── screen/
 │   │   │   ├── README.md
-│   │   │   ├── batch-isolation/
-│   │   │   │   ├── fixture/
-│   │   │   │   │   └── jobs/
-│   │   │   │   │       ├── __init__.py
-│   │   │   │   │       ├── accounts.py
-│   │   │   │   │       └── invoices.py
-│   │   │   │   ├── oracle/
-│   │   │   │   │   └── jobs/
-│   │   │   │   │       └── invoices.py
-│   │   │   │   └── prompt.md
-│   │   │   ├── config-fail-open/
-│   │   │   │   ├── fixture/
-│   │   │   │   │   └── settings.py
-│   │   │   │   ├── oracle/
-│   │   │   │   │   └── settings.py
-│   │   │   │   └── prompt.md
-│   │   │   ├── discard-trace/
-│   │   │   │   ├── fixture/
-│   │   │   │   │   └── sensors/
-│   │   │   │   │       ├── __init__.py
-│   │   │   │   │       ├── clean.py
-│   │   │   │   │       └── stale.py
-│   │   │   │   ├── oracle/
-│   │   │   │   │   └── sensors/
-│   │   │   │   │       └── clean.py
-│   │   │   │   └── prompt.md
+│   │   │   ├── batch-isolation/ (5 files)
+│   │   │   ├── config-fail-open/ (3 files)
+│   │   │   ├── discard-trace/ (5 files)
 │   │   │   ├── grade.py
-│   │   │   ├── overflow-label/
-│   │   │   │   ├── fixture/
-│   │   │   │   │   └── labels.py
-│   │   │   │   ├── oracle/
-│   │   │   │   │   └── labels.py
-│   │   │   │   └── prompt.md
-│   │   │   ├── regression-test/
-│   │   │   │   ├── fixture/
-│   │   │   │   │   ├── pricing.py
-│   │   │   │   │   └── tests/
-│   │   │   │   │       └── test_pricing.py
-│   │   │   │   ├── oracle/
-│   │   │   │   │   ├── pricing.py
-│   │   │   │   │   └── tests/
-│   │   │   │   │       └── test_pricing.py
-│   │   │   │   └── prompt.md
-│   │   │   ├── silent-call/
-│   │   │   │   ├── fixture/
-│   │   │   │   │   ├── exporter.py
-│   │   │   │   │   └── sample_contacts.json
-│   │   │   │   ├── oracle/
-│   │   │   │   │   └── exporter.py
-│   │   │   │   └── prompt.md
-│   │   │   ├── silent-drop/
-│   │   │   │   ├── fixture/
-│   │   │   │   │   └── ingest/
-│   │   │   │   │       ├── __init__.py
-│   │   │   │   │       ├── orders.py
-│   │   │   │   │       └── refunds.py
-│   │   │   │   ├── oracle/
-│   │   │   │   │   └── ingest/
-│   │   │   │   │       └── refunds.py
-│   │   │   │   └── prompt.md
-│   │   │   ├── summary-edge/
-│   │   │   │   ├── fixture/
-│   │   │   │   │   └── report.py
-│   │   │   │   ├── oracle/
-│   │   │   │   │   └── report.py
-│   │   │   │   └── prompt.md
+│   │   │   ├── overflow-label/ (3 files)
+│   │   │   ├── regression-test/ (5 files)
+│   │   │   ├── silent-call/ (4 files)
+│   │   │   ├── silent-drop/ (5 files)
+│   │   │   ├── summary-edge/ (3 files)
 │   │   │   ├── test_screen.py
-│   │   │   ├── unbounded-growth/
-│   │   │   │   ├── fixture/
-│   │   │   │   │   └── limits.py
-│   │   │   │   ├── oracle/
-│   │   │   │   │   └── limits.py
-│   │   │   │   └── prompt.md
+│   │   │   ├── unbounded-growth/ (3 files)
 │   │   │   └── worker.py
 │   │   └── test_graders.py
 │   ├── clarification.json
@@ -317,6 +155,7 @@ hyperskills/
 │   │   │   └── replay-work-item-mirror.md
 │   │   ├── suite.json
 │   │   └── test_replay.py
+│   ├── review-sonnet.json
 │   ├── screen-fable.json
 │   └── screen-sonnet.json
 ├── release.json

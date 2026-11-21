@@ -30,8 +30,8 @@ Each case directory holds:
 | ------------------ | ----------- | ---------------------------------------------------------- |
 | `handoff-report`   | development | Agent end-of-task handoff, dense and compressed            |
 | `status-update`    | development | Team chat status update, padded in the older chatbot style |
-| `review-reply`     | holdout     | Reply to code review comments                              |
-| `incident-summary` | holdout     | Incident summary for someone outside the incident          |
+| `review-reply`     | development | Reply to code review comments                              |
+| `incident-summary` | development | Incident summary for someone outside the incident          |
 
 Task ids in a manifest are `prose-reader-<case>`, family `prose-reader`.
 
@@ -124,3 +124,5 @@ The 24 calibration calls plus 6 probe calls cost about 0.018 USD.
 - The reader instructions ask for "The text does not say" when the text is
   silent. A different reader model or instruction changes the floor, so pin
   both and compare runs only under the same reader configuration.
+
+The two holdout cases (`review-reply`, `incident-summary`) were used in the confirmation run of 2026-11-20 and now count as development cases. The manifest labels them `development`. Confirming any later skill edit needs new cases.

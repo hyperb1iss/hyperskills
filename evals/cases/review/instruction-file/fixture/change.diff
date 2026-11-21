@@ -1,0 +1,181 @@
+diff --git a/AGENTS.md b/AGENTS.md
+index 197bd9f..ae9dd2a 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -17,3 +17,4 @@ docvault is the document service behind the workspace editor. Python 3.11 or lat
+ ## Review
+ 
+ - Keep review comments to behavior; formatting is not reviewed.
++- Tenant isolation is enforced once, in `routes.dispatch`, which rejects a request whose path tenant differs from the caller's tenant before any handler runs. Handlers may load documents by id directly, and per-handler tenant checks are redundant; do not raise them in review.
+diff --git a/docvault/exporters.py b/docvault/exporters.py
+new file mode 100644
+index 0000000..0fa4c65
+--- /dev/null
++++ b/docvault/exporters.py
+@@ -0,0 +1,40 @@
++"""Export formats for documents."""
++
++import json
++from dataclasses import dataclass
++
++
++@dataclass(frozen=True)
++class Format:
++    extension: str
++    content_type: str
++    render: object
++
++
++def to_markdown(doc):
++    lines = [f"# {doc.title}", ""]
++    if doc.tags:
++        lines += ["Tags: " + ", ".join(doc.tags), ""]
++    lines.append(doc.body.rstrip())
++    return "\n".join(lines) + "\n"
++
++
++def to_json(doc):
++    return json.dumps(
++        {
++            "id": doc.id,
++            "title": doc.title,
++            "body": doc.body,
++            "tags": list(doc.tags),
++            "created_by": doc.created_by,
++            "created_at": doc.created_at.isoformat(),
++        },
++        indent=2,
++        sort_keys=True,
++    )
++
++
++FORMATS = {
++    "markdown": Format("md", "text/markdown; charset=utf-8", to_markdown),
++    "json": Format("json", "application/json", to_json),
++}
+diff --git a/docvault/handlers.py b/docvault/handlers.py
+index 013b48e..911b39a 100644
+--- a/docvault/handlers.py
++++ b/docvault/handlers.py
+@@ -2,6 +2,8 @@
+ 
+ from datetime import datetime, timezone
+ 
++from .exporters import FORMATS
++
+ MAX_TITLE_LENGTH = 200
+ MAX_TAGS = 20
+ 
+@@ -40,3 +42,15 @@ def archive_document(store, principal, request, tenant_id, doc_id):
+     doc.archived = True
+     return 200, _summary(doc)
+ 
++
++def export_document(store, principal, request, tenant_id, doc_id):
++    name = request.query.get("format", "markdown")
++    fmt = FORMATS.get(name)
++    if fmt is None:
++        return 400, {"error": "unknown_format", "supported": sorted(FORMATS)}
++    doc = store.get(doc_id)
++    return 200, {
++        "filename": f"{doc.id}.{fmt.extension}",
++        "content_type": fmt.content_type,
++        "content": fmt.render(doc),
++    }
+diff --git a/docvault/routes.py b/docvault/routes.py
+index 0515b51..b5f1f91 100644
+--- a/docvault/routes.py
++++ b/docvault/routes.py
+@@ -23,6 +23,7 @@ ROUTES = [
+     ("POST", TENANT + "/docs", handlers.create_document, "docs:write"),
+     ("GET", DOC, handlers.get_document, "docs:read"),
+     ("POST", DOC + "/archive", handlers.archive_document, "docs:write"),
++    ("GET", DOC + "/export", handlers.export_document, "docs:export"),
+ ]
+ 
+ 
+diff --git a/tests/test_exporters.py b/tests/test_exporters.py
+new file mode 100644
+index 0000000..b4b2929
+--- /dev/null
++++ b/tests/test_exporters.py
+@@ -0,0 +1,25 @@
++import json
++import unittest
++from datetime import datetime, timezone
++
++from docvault.exporters import FORMATS, to_json, to_markdown
++from docvault.models import Document
++
++DOC = Document("doc_000042", "t-river", "Plan", "Step one.\n\n", "u-1", datetime(2026, 1, 2, tzinfo=timezone.utc))
++
++
++class ExporterTests(unittest.TestCase):
++    def test_markdown_without_tags(self):
++        self.assertEqual(to_markdown(DOC), "# Plan\n\nStep one.\n")
++
++    def test_json_round_trips(self):
++        data = json.loads(to_json(DOC))
++        self.assertEqual(data["created_at"], "2026-01-02T00:00:00+00:00")
++        self.assertEqual(data["tags"], [])
++
++    def test_formats_table(self):
++        self.assertEqual({name: fmt.extension for name, fmt in FORMATS.items()}, {"markdown": "md", "json": "json"})
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/tests/test_handlers.py b/tests/test_handlers.py
+index a3230a0..b228b2d 100644
+--- a/tests/test_handlers.py
++++ b/tests/test_handlers.py
+@@ -1,3 +1,4 @@
++import json
+ import unittest
+ from datetime import datetime, timezone
+ 
+@@ -6,7 +7,7 @@ from docvault.routes import Request, dispatch
+ from docvault.store import DocumentStore
+ 
+ WHEN = datetime(2026, 2, 1, 12, 0, tzinfo=timezone.utc)
+-ALL_SCOPES = frozenset({"docs:read", "docs:write"})
++ALL_SCOPES = frozenset({"docs:read", "docs:write", "docs:export"})
+ RIVER = Principal("u-1", "t-river", ALL_SCOPES)
+ 
+ 
+@@ -59,5 +60,35 @@ class DocumentTests(unittest.TestCase):
+         self.assertEqual((status, body["scope"]), (403, "docs:write"))
+ 
+ 
++class ExportTests(unittest.TestCase):
++    def test_markdown_is_the_default(self):
++        status, body = call("GET", "/tenants/t-river/docs/doc_000001/export")
++        self.assertEqual(status, 200)
++        self.assertEqual(body["filename"], "doc_000001.md")
++        self.assertEqual(body["content"], "# Runbook\n\nTags: ops\n\nRestart the indexer.\n")
++
++    def test_json_export(self):
++        status, body = call("GET", "/tenants/t-river/docs/doc_000002/export", query={"format": "json"})
++        self.assertEqual(status, 200)
++        self.assertEqual(json.loads(body["content"])["title"], "Draft")
++
++    def test_unknown_format(self):
++        status, body = call("GET", "/tenants/t-river/docs/doc_000001/export", query={"format": "pdf"})
++        self.assertEqual((status, body["supported"]), (400, ["json", "markdown"]))
++
++    def test_export_requires_scope(self):
++        reader = Principal("u-3", "t-river", frozenset({"docs:read"}))
++        status, _ = call("GET", "/tenants/t-river/docs/doc_000001/export", principal=reader)
++        self.assertEqual(status, 403)
++
++    def test_export_under_another_tenant_is_forbidden(self):
++        status, _ = call("GET", "/tenants/t-stone/docs/doc_000003/export")
++        self.assertEqual(status, 403)
++
++    def test_missing_document(self):
++        status, _ = call("GET", "/tenants/t-river/docs/doc_999999/export")
++        self.assertEqual(status, 404)
++
++
+ if __name__ == "__main__":
+     unittest.main()

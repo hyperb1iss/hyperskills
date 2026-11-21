@@ -1,0 +1,26 @@
+{
+  "split": "development",
+  "kind": "defect",
+  "twin": "fail-open-clean",
+  "class": "fail-open",
+  "trap": null,
+  "defect": {
+    "file": "hookline/signatures.py",
+    "start_line": 46,
+    "end_line": 51,
+    "function": "verify"
+  },
+  "also_accept": [
+    {
+      "file": "hookline/handlers.py",
+      "start_line": 14,
+      "end_line": 17
+    },
+    {
+      "file": "tests/test_signatures.py",
+      "start_line": 31,
+      "end_line": 33
+    }
+  ],
+  "held_out_until": "2026-11-20"
+}

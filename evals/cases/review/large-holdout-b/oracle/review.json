@@ -1,0 +1,29 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "stockroom/api.py",
+      "line": 150,
+      "blocking": true,
+      "title": "reserve without warehouse_id skips the warehouse check and draws from every warehouse",
+      "trigger": "A channel key scoped to east posts a reservation with no warehouse_id. The can_access_warehouse check only runs when warehouse_id is given, and the fallback list is every warehouse in priority order, not visible_warehouses(principal, ...).",
+      "impact": "Keys can hold stock in warehouses they have no rights to, locking it away from other channels until the hold expires and learning bin locations there. Filter the fallback through visible_warehouses, as get_stock does."
+    },
+    {
+      "file": "stockroom/snapshots.py",
+      "line": 9,
+      "blocking": true,
+      "title": "Count sheets and the finance export now use units free to promise, so cycle counts inflate stock by the reserved units",
+      "trigger": "This PR changes Stock.available() to on hand minus reserved, but warehouse_snapshot (untouched, documented as units physically in the warehouse) still calls it. counting.reconcile compares counted units with that snapshot and posts the difference: counting 16 units of which 5 are reserved posts +5 to the home bin.",
+      "impact": "Every cycle count adds phantom stock equal to the reserved units, and the nightly finance export understates stock on the shelves. Use stock.on_hand here."
+    },
+    {
+      "file": "stockroom/picking.py",
+      "line": 13,
+      "blocking": true,
+      "title": "pick() now orders bins by walk sequence before receipt date, so it no longer takes the oldest stock first",
+      "trigger": "The fix routes Stock.pick through picking.plan, whose pick_sequence sorts by (pick_order, received_on). The old pick sorted by received_on. A SKU with an older lot in a bin late in the walk and a newer lot early in the walk is now picked newest first.",
+      "impact": "Stock rotation breaks for perishable SKUs (pick's own docstring promises oldest first), and reservations hold the newest stock. Sort by (received_on, pick_order): same-day bins still follow the walk order the reported fix needs."
+    }
+  ]
+}

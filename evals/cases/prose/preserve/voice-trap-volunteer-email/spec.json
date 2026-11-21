@@ -1,14 +1,21 @@
 {
   "trap": "voice-trap",
-  "split": "holdout",
+  "split": "development",
   "surface": "personal email to a group",
   "protected": [
     "Saturday",
     "Fernhill",
     "9:30",
-    ["until 9", "till 9", "until nine"],
+    [
+      "until 9",
+      "till 9",
+      "until nine"
+    ],
     "parks office",
-    ["12 pairs", "twelve pairs"],
+    [
+      "12 pairs",
+      "twelve pairs"
+    ],
     "compost bays",
     "first frost",
     "Thursday",
@@ -18,5 +25,10 @@
   "max_contraction_drop": 1,
   "max_first_person_drop": 1,
   "max_growth": 0.1,
-  "wrong_must_fail": ["similar_to_draft", "contractions_kept", "first_person_kept"]
+  "wrong_must_fail": [
+    "similar_to_draft",
+    "contractions_kept",
+    "first_person_kept"
+  ],
+  "held_out_until": "2026-11-20"
 }

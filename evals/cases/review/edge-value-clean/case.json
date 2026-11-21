@@ -1,0 +1,8 @@
+{
+  "split": "development",
+  "kind": "clean",
+  "twin": "edge-value",
+  "class": "edge-value",
+  "trap": null,
+  "also_accept": []
+}

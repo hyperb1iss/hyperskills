@@ -255,4 +255,5 @@ test-eval-cases:
 	@python3 evals/cases/test_graders.py
 	@python3 evals/cases/screen/test_screen.py
 	@python3 evals/cases/prose/preserve/test_preserve.py
+	@python3 evals/cases/review/test_review.py
 	@python3 evals/replay/test_replay.py

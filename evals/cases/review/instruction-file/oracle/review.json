@@ -1,0 +1,21 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "docvault/handlers.py",
+      "line": 51,
+      "blocking": true,
+      "title": "export_document loads by id across tenants, so any caller can export another tenant's document",
+      "trigger": "A caller in tenant t-river with docs:export requests /tenants/t-river/docs/<id of a t-stone document>/export. dispatch passes because the path tenant matches the caller; store.get(doc_id) returns the document whichever tenant owns it. Document ids are sequential, so they are easy to enumerate.",
+      "impact": "Cross-tenant disclosure of full document bodies. Use store.get_for_tenant(tenant_id, doc_id) like get_document and archive_document, and add a test for exporting another tenant's id under your own path."
+    },
+    {
+      "file": "AGENTS.md",
+      "line": 20,
+      "blocking": true,
+      "title": "The new AGENTS.md rule is false and tells reviewers to skip tenant checks",
+      "trigger": "dispatch only compares the path tenant with the caller; it never checks that the document id belongs to that tenant.",
+      "impact": "The rule would wave through the cross-tenant read above and future ones. Remove it or restate that handlers must load through get_for_tenant."
+    }
+  ]
+}

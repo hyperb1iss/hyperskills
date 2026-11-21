@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "gridmeter/importer.py",
+      "line": 29,
+      "blocking": true,
+      "title": "One bad row silently drops every row after it",
+      "trigger": "A drop whose second row has value 'n/a' followed by thousands of good rows.",
+      "impact": "The try wraps the whole loop, so the first RowError ends parsing. Only rows before it are saved, the summary lists one rejection, and every later reading is missing from billing with no report. The try belongs inside the loop."
+    }
+  ]
+}

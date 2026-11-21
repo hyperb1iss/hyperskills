@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "hookline/signatures.py",
+      "line": 49,
+      "blocking": true,
+      "title": "Accepting any of several v1 values lets an attacker pad the header",
+      "trigger": "A request carrying several v1 values.",
+      "impact": "Only one value has to match, so extra values are never checked; the header should be rejected unless every v1 matches."
+    }
+  ]
+}

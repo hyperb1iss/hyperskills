@@ -1,0 +1,13 @@
+{
+  "verdict": "approve",
+  "findings": [
+    {
+      "file": "storefront/catalog.py",
+      "line": 8,
+      "blocking": false,
+      "title": "to_cents silently rounds sub-cent prices",
+      "trigger": "A catalog row priced 1.995 becomes 200 cents.",
+      "impact": "Consider rejecting prices with more than two decimal places instead of rounding."
+    }
+  ]
+}

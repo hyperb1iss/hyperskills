@@ -1,0 +1,13 @@
+{
+  "verdict": "approve",
+  "findings": [
+    {
+      "file": "stockpile/access.py",
+      "line": 60,
+      "blocking": false,
+      "title": "issue_key defaults to a key that can act nowhere",
+      "trigger": "An admin issues a key and forgets the warehouses argument.",
+      "impact": "The key authenticates but every scoped route answers 403. Making warehouses a required argument would surface the mistake at issue time."
+    }
+  ]
+}

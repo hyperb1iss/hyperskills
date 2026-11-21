@@ -1,0 +1,9 @@
+{
+  "split": "development",
+  "kind": "clean",
+  "twin": "large-holdout-b",
+  "class": "multi-defect",
+  "trap": null,
+  "also_accept": [],
+  "held_out_until": "2026-11-20"
+}

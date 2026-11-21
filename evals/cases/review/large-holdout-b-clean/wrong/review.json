@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "stockroom/sweeper.py",
+      "line": 25,
+      "blocking": true,
+      "title": "Expired holds keep stock locked until the next sweep",
+      "trigger": "A reservation expires at 09:00:10; the sweep runs at 09:01:00.",
+      "impact": "Units stay unavailable to other orders for up to a minute after expiry."
+    }
+  ]
+}

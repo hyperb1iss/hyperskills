@@ -1,0 +1,8 @@
+{
+  "split": "development",
+  "kind": "clean",
+  "twin": "silent-failure",
+  "class": "silent-failure",
+  "trap": null,
+  "also_accept": []
+}

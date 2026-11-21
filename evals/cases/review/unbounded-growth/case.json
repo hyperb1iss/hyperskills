@@ -1,0 +1,26 @@
+{
+  "split": "development",
+  "kind": "defect",
+  "twin": "unbounded-growth-clean",
+  "class": "unbounded-growth",
+  "trap": null,
+  "defect": {
+    "file": "routeplan/cache.py",
+    "start_line": 41,
+    "end_line": 43,
+    "function": "put_unknown"
+  },
+  "also_accept": [
+    {
+      "file": "routeplan/client.py",
+      "start_line": 34,
+      "end_line": 34
+    },
+    {
+      "file": "routeplan/cache.py",
+      "start_line": 15,
+      "end_line": 15
+    }
+  ],
+  "held_out_until": "2026-11-20"
+}

@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "contactbook/csvio.py",
+      "line": 11,
+      "blocking": true,
+      "title": "bom defaults to on, so backups get the mark too and restoring one silently loads no contacts",
+      "trigger": "write_backup calls write_contacts without the new flag, so every backup now starts with a byte-order mark. restore_backup opens the file as plain utf-8, so csv.DictReader reads the first header as a BOM followed by 'email'; row.get('email') is None for every row and read_contacts skips them all.",
+      "impact": "restore_backup returns an empty book and restore_into reports 0 changes with no error, so a restore after data loss restores nothing. Default bom to False (the download already passes bom=True), or make read_contacts tolerate the mark, and add a backup-then-restore test."
+    }
+  ]
+}

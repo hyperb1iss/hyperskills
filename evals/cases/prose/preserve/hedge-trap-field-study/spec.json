@@ -1,13 +1,19 @@
 {
   "trap": "hedge-trap",
-  "split": "holdout",
+  "split": "development",
   "surface": "scientific results paragraph",
   "protected": [
     "412",
-    ["9 plots", "nine plots"],
+    [
+      "9 plots",
+      "nine plots"
+    ],
     "Harrow Ridge",
     "chipped alder",
-    ["120-day", "120 days"],
+    [
+      "120-day",
+      "120 days"
+    ],
     "71%",
     "58%",
     "frost heave",
@@ -210,5 +216,6 @@
     "calibration:did not measure",
     "calibration:not statistically distinguishable",
     "no_certainty_upgrade"
-  ]
+  ],
+  "held_out_until": "2026-11-20"
 }

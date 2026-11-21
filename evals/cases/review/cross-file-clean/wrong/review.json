@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "storefront/tax.py",
+      "line": 26,
+      "blocking": true,
+      "title": "Tax is now rounded on cents and can differ from the old dollar rounding",
+      "trigger": "Decimal(subtotal) * rate is quantized to a whole cent instead of to 0.01 dollars.",
+      "impact": "Invoices may change by a cent compared with the previous implementation."
+    }
+  ]
+}

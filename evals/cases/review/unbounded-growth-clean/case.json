@@ -1,0 +1,9 @@
+{
+  "split": "development",
+  "kind": "clean",
+  "twin": "unbounded-growth",
+  "class": "unbounded-growth",
+  "trap": null,
+  "also_accept": [],
+  "held_out_until": "2026-11-20"
+}

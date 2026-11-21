@@ -1,0 +1,35 @@
+{
+  "split": "development",
+  "kind": "defect",
+  "twin": "cross-file-clean",
+  "class": "unit-mismatch",
+  "trap": "cross-file",
+  "defect": {
+    "file": "storefront/loyalty.py",
+    "start_line": 14,
+    "end_line": 17,
+    "function": "points_for"
+  },
+  "also_accept": [
+    {
+      "file": "storefront/orders.py",
+      "start_line": 27,
+      "end_line": 29
+    },
+    {
+      "file": "storefront/invoice.py",
+      "start_line": 20,
+      "end_line": 20
+    },
+    {
+      "file": "storefront/cart.py",
+      "start_line": 42,
+      "end_line": 44
+    },
+    {
+      "file": "storefront/loyalty.py",
+      "start_line": 20,
+      "end_line": 24
+    }
+  ]
+}

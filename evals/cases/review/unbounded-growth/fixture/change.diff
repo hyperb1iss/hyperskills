@@ -1,0 +1,194 @@
+diff --git a/routeplan/cache.py b/routeplan/cache.py
+index c35796c..10ba13e 100644
+--- a/routeplan/cache.py
++++ b/routeplan/cache.py
+@@ -1,18 +1,28 @@
+ """Bounded LRU cache for geocoding results."""
+ from collections import OrderedDict
+ 
++NOT_FOUND = object()
++
+ 
+ class GeoCache:
+-    def __init__(self, max_entries=10_000, ttl=86_400):
++    def __init__(self, max_entries=10_000, ttl=86_400, unknown_ttl=3_600):
+         if max_entries < 1:
+             raise ValueError("max_entries must be at least 1")
+         self.max_entries = max_entries
+         self.ttl = ttl
++        self.unknown_ttl = unknown_ttl
+         self._entries = OrderedDict()
++        self._unknown = {}
+         self.hits = 0
+         self.misses = 0
+ 
+     def get(self, key, now):
++        expires = self._unknown.get(key)
++        if expires is not None:
++            if expires > now:
++                self.hits += 1
++                return NOT_FOUND
++            del self._unknown[key]
+         item = self._entries.get(key)
+         if item is None or item[1] <= now:
+             self._entries.pop(key, None)
+@@ -28,5 +38,12 @@ class GeoCache:
+         while len(self._entries) > self.max_entries:
+             self._entries.popitem(last=False)
+ 
++    def put_unknown(self, key, now):
++        """Remember that the backend could not place key, so repeats skip the backend."""
++        self._unknown[key] = now + self.unknown_ttl
++
++    def stats(self):
++        return {"entries": len(self._entries), "unknown": len(self._unknown), "hits": self.hits, "misses": self.misses}
++
+     def __len__(self):
+         return len(self._entries)
+diff --git a/routeplan/client.py b/routeplan/client.py
+index f69dac0..4df24f5 100644
+--- a/routeplan/client.py
++++ b/routeplan/client.py
+@@ -1,7 +1,7 @@
+ """Geocoding client. Each planner worker keeps one client for the life of the process."""
+ import time
+ 
+-from .cache import GeoCache
++from .cache import NOT_FOUND, GeoCache
+ from .normalize import normalize
+ 
+ 
+@@ -13,12 +13,26 @@ class GeocodeClient:
+ 
+     def lookup(self, address):
+         """Return (lat, lon) for an address, or None when the backend cannot place it."""
+-        key = normalize(address)
++        return self.lookup_many([address])[address]
++
++    def lookup_many(self, addresses):
++        """Resolve addresses, sending every cache miss to the backend in one batch call."""
+         now = self.clock()
+-        point = self.cache.get(key, now)
+-        if point is not None:
+-            return point
+-        point = self.backend.geocode(key)
+-        if point is not None:
+-            self.cache.put(key, point, now)
+-        return point
++        keys = {address: normalize(address) for address in addresses}
++        found, missing = {}, []
++        for key in dict.fromkeys(keys.values()):
++            cached = self.cache.get(key, now)
++            if cached is None:
++                missing.append(key)
++            else:
++                found[key] = None if cached is NOT_FOUND else cached
++        if missing:
++            results = self.backend.geocode_batch(missing)
++            for key in missing:
++                point = results.get(key)
++                if point is None:
++                    self.cache.put_unknown(key, now)
++                else:
++                    self.cache.put(key, point, now)
++                found[key] = point
++        return {address: found[key] for address, key in keys.items()}
+diff --git a/routeplan/normalize.py b/routeplan/normalize.py
+index 1007a02..49828fd 100644
+--- a/routeplan/normalize.py
++++ b/routeplan/normalize.py
+@@ -11,8 +11,10 @@ ABBREVIATIONS = {
+     "east": "e",
+     "west": "w",
+ }
++UNIT = re.compile(r"[\s,]+(?:(?:apt|apartment|unit|suite)\b\.?|#)\s*\w*\d\w*[\s,.]*$")
+ 
+ 
+ def normalize(address):
+-    words = re.sub(r"[^\w\s]", " ", address.lower()).split()
++    text = UNIT.sub("", address.lower())
++    words = re.sub(r"[^\w\s]", " ", text).split()
+     return " ".join(ABBREVIATIONS.get(word, word) for word in words)
+diff --git a/routeplan/planner.py b/routeplan/planner.py
+index 1407693..cc04c29 100644
+--- a/routeplan/planner.py
++++ b/routeplan/planner.py
+@@ -14,8 +14,9 @@ def distance(a, b):
+ 
+ def plan_route(client, depot, addresses):
+     plan = Plan()
++    points = client.lookup_many(addresses)
+     for address in addresses:
+-        point = client.lookup(address)
++        point = points[address]
+         if point is None:
+             plan.unresolved.append(address)
+         else:
+diff --git a/tests/test_cache.py b/tests/test_cache.py
+index 559d5d7..1d1da26 100644
+--- a/tests/test_cache.py
++++ b/tests/test_cache.py
+@@ -26,6 +26,13 @@ class CacheTests(unittest.TestCase):
+         self.assertIsNone(cache.get("b", 2))
+         self.assertEqual(len(cache), 2)
+ 
++    def test_unknown_addresses_are_remembered_until_they_expire(self):
++        cache = GeoCache(unknown_ttl=60)
++        cache.put_unknown("nowhere", 0)
++        self.assertIsNotNone(cache.get("nowhere", 59))
++        self.assertIsNone(cache.get("nowhere", 60))
++        self.assertEqual(cache.stats()["unknown"], 0)
++
+ 
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/tests/test_client.py b/tests/test_client.py
+index 6d30378..5da1e52 100644
+--- a/tests/test_client.py
++++ b/tests/test_client.py
+@@ -9,9 +9,9 @@ class FakeBackend:
+         self.known = known
+         self.calls = []
+ 
+-    def geocode(self, key):
+-        self.calls.append(key)
+-        return self.known.get(key)
++    def geocode_batch(self, keys):
++        self.calls.append(list(keys))
++        return {key: self.known[key] for key in keys if key in self.known}
+ 
+ 
+ class ClientTests(unittest.TestCase):
+@@ -26,8 +26,17 @@ class ClientTests(unittest.TestCase):
+         client = GeocodeClient(FakeBackend({}), clock=lambda: 0)
+         self.assertIsNone(client.lookup("nowhere"))
+ 
++    def test_batch_sends_each_miss_once(self):
++        backend = FakeBackend({"12 harbor st": (1.0, 2.0), "9 mill rd": (3.0, 4.0)})
++        client = GeocodeClient(backend, clock=lambda: 0)
++        addresses = ["12 Harbor St", "12 Harbor St Apt 4", "9 Mill Rd", "nowhere"]
++        self.assertEqual(client.lookup_many(addresses)["12 Harbor St Apt 4"], (1.0, 2.0))
++        self.assertEqual(client.lookup_many(addresses)["nowhere"], None)
++        self.assertEqual(backend.calls, [["12 harbor st", "9 mill rd", "nowhere"]])
++
+     def test_normalize(self):
+         self.assertEqual(normalize("  4 North Mill Road, "), "4 n mill rd")
++        self.assertEqual(normalize("4 Mill Rd #12"), normalize("4 mill road, suite 3"))
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/tests/test_planner.py b/tests/test_planner.py
+index a8b58db..c7b0dcb 100644
+--- a/tests/test_planner.py
++++ b/tests/test_planner.py
+@@ -7,8 +7,8 @@ POINTS = {"1 a st": (1.0, 0.0), "2 b st": (-1.5, 0.0), "3 c st": (3.0, 0.0)}
+ 
+ 
+ class Backend:
+-    def geocode(self, key):
+-        return POINTS.get(key)
++    def geocode_batch(self, keys):
++        return {key: POINTS[key] for key in keys if key in POINTS}
+ 
+ 
+ class PlannerTests(unittest.TestCase):

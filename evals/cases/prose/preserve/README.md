@@ -9,13 +9,13 @@ The prompt names the reader and asks for an edit into `edited.md`, with facts pr
 | Case                         | Split       | Trap          | Surface                      |
 | ---------------------------- | ----------- | ------------- | ---------------------------- |
 | `padded-slop-status-update`  | development | padded-slop   | internal status update       |
-| `padded-slop-help-article`   | holdout     | padded-slop   | customer help article        |
+| `padded-slop-help-article`   | development | padded-slop   | customer help article        |
 | `citation-trap-related-work` | development | citation-trap | paper related-work section   |
-| `citation-trap-proposal`     | holdout     | citation-trap | grant proposal section       |
+| `citation-trap-proposal`     | development | citation-trap | grant proposal section       |
 | `voice-trap-chat-message`    | development | voice-trap    | team chat message            |
-| `voice-trap-volunteer-email` | holdout     | voice-trap    | personal email to a group    |
+| `voice-trap-volunteer-email` | development | voice-trap    | personal email to a group    |
 | `hedge-trap-postmortem`      | development | hedge-trap    | incident postmortem section  |
-| `hedge-trap-field-study`     | holdout     | hedge-trap    | scientific results paragraph |
+| `hedge-trap-field-study`     | development | hedge-trap    | scientific results paragraph |
 
 Each case directory holds `prompt.md`, `fixture/draft.md` (the only file the agent sees), `spec.json` (protected strings, calibration patterns, thresholds), `oracle/edited.md` (a good edit that passes), and `wrong/edited.md` (a plausible edit that springs the trap). The spec's `wrong_must_fail` list names the checks the wrong edit is built to fail; the tests hold it to that.
 
@@ -75,6 +75,8 @@ All thresholds are author-chosen. They sit between edits the author judged accep
 | Changed (citation and hedge traps) | edit differs from draft | Added beyond the four trap definitions so a no-op cannot pass a case whose prompt asked for tightening.                                                                                                                                                                                                                |
 
 ## Development and holdout hygiene
+
+The holdout cases in this family were used in the confirmation run of 2026-11-20. They are relabeled `development`, with `held_out_until` recording when they stopped being untouched. Confirming any later skill edit needs new cases.
 
 Each trap has one development case and one holdout case with different content and surface. Tune skill wording against development cases only. Whoever edits a skill must not read a holdout's draft, spec, oracle, or wrong edit before freezing that edit; the case table above (trap and surface) is the most they should know. Once a holdout informs an edit, it becomes development material: relabel it and write a replacement with new content.
 

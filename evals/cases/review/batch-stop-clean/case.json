@@ -1,0 +1,8 @@
+{
+  "split": "development",
+  "kind": "clean",
+  "twin": "batch-stop",
+  "class": "batch-stop",
+  "trap": null,
+  "also_accept": []
+}

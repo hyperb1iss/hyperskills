@@ -46,7 +46,7 @@
     {
       "id": "prose-reader-review-reply",
       "family": "prose-reader",
-      "split": "holdout",
+      "split": "development",
       "prompt": "cases/prose/reader/review-reply/prompt-untold.md",
       "fixture": "cases/prose/reader/review-reply/fixture",
       "skills": ["deslop"],
@@ -59,7 +59,7 @@
     {
       "id": "prose-reader-incident-summary",
       "family": "prose-reader",
-      "split": "holdout",
+      "split": "development",
       "prompt": "cases/prose/reader/incident-summary/prompt-untold.md",
       "fixture": "cases/prose/reader/incident-summary/fixture",
       "skills": ["deslop"],
@@ -124,7 +124,7 @@
     {
       "id": "prose-preserve-padded-slop-help-article",
       "family": "prose-preserve",
-      "split": "holdout",
+      "split": "development",
       "prompt": "cases/prose/preserve/padded-slop-help-article/prompt.md",
       "fixture": "cases/prose/preserve/padded-slop-help-article/fixture",
       "skills": ["deslop"],
@@ -137,7 +137,7 @@
     {
       "id": "prose-preserve-citation-trap-proposal",
       "family": "prose-preserve",
-      "split": "holdout",
+      "split": "development",
       "prompt": "cases/prose/preserve/citation-trap-proposal/prompt.md",
       "fixture": "cases/prose/preserve/citation-trap-proposal/fixture",
       "skills": ["deslop"],
@@ -150,7 +150,7 @@
     {
       "id": "prose-preserve-voice-trap-volunteer-email",
       "family": "prose-preserve",
-      "split": "holdout",
+      "split": "development",
       "prompt": "cases/prose/preserve/voice-trap-volunteer-email/prompt.md",
       "fixture": "cases/prose/preserve/voice-trap-volunteer-email/fixture",
       "skills": ["deslop"],
@@ -163,7 +163,7 @@
     {
       "id": "prose-preserve-hedge-trap-field-study",
       "family": "prose-preserve",
-      "split": "holdout",
+      "split": "development",
       "prompt": "cases/prose/preserve/hedge-trap-field-study/prompt.md",
       "fixture": "cases/prose/preserve/hedge-trap-field-study/fixture",
       "skills": ["deslop"],

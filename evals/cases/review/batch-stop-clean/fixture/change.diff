@@ -1,0 +1,191 @@
+diff --git a/gridmeter/cli.py b/gridmeter/cli.py
+index 8c4e6ca..f2cf56c 100644
+--- a/gridmeter/cli.py
++++ b/gridmeter/cli.py
+@@ -13,11 +13,15 @@ def main(argv=None, store=None, out=sys.stdout):
+     load.add_argument("paths", nargs="+")
+     args = parser.parse_args(argv)
+     store = store if store is not None else ReadingStore()
+-    total = 0
++    status = 0
+     for path in args.paths:
+-        total += import_file(path, store)
+-    print(f"imported {total} readings", file=out)
+-    return 0
++        summary = import_file(path, store)
++        print(f"{path}: imported {summary.imported}, rejected {len(summary.rejected)}", file=out)
++        for problem in summary.rejected:
++            print(f"  {problem}", file=out)
++        if summary.rejected:
++            status = 1
++    return status
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/gridmeter/importer.py b/gridmeter/importer.py
+index 95f9340..15d0b3f 100644
+--- a/gridmeter/importer.py
++++ b/gridmeter/importer.py
+@@ -1,17 +1,32 @@
+ """Load a vendor CSV drop into the reading store."""
+ import csv
++from dataclasses import dataclass, field
+ 
+-from .parsing import parse_row
++from .parsing import RowError, parse_row
++
++
++@dataclass
++class ImportSummary:
++    imported: int = 0
++    rejected: list = field(default_factory=list)
+ 
+ 
+ def read_rows(path):
+-    with open(path, newline="", encoding="utf-8") as handle:
+-        yield from csv.DictReader(handle)
++    """Yield (line number, row); csv counts physical lines, so blank lines and quoted newlines are included."""
++    with open(path, newline="", encoding="utf-8-sig") as handle:
++        reader = csv.DictReader(handle)
++        for row in reader:
++            yield reader.line_num, row
+ 
+ 
+ def import_file(path, store):
+-    count = 0
+-    for row in read_rows(path):
+-        store.save(parse_row(row))
+-        count += 1
+-    return count
++    """Parse every row of a drop, then write the good readings in one batch."""
++    summary = ImportSummary()
++    readings = []
++    for line, row in read_rows(path):
++        try:
++            readings.append(parse_row(row))
++        except RowError as error:
++            summary.rejected.append(f"line {line}: {error}")
++    summary.imported = store.save_batch(readings)
++    return summary
+diff --git a/gridmeter/parsing.py b/gridmeter/parsing.py
+index 1e6f26f..088d4ff 100644
+--- a/gridmeter/parsing.py
++++ b/gridmeter/parsing.py
+@@ -16,12 +16,24 @@ class RowError(ValueError):
+     pass
+ 
+ 
++def _parse_time(text):
++    """Older drops use 'YYYY-MM-DD HH:MM' in UTC; newer ones use ISO 8601 with a time and an offset."""
++    text = text.strip()
++    try:
++        return datetime.strptime(text, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
++    except ValueError:
++        moment = datetime.fromisoformat(text)
++    if moment.tzinfo is None:
++        raise ValueError(f"ISO timestamp without a UTC offset: {text!r}")
++    return moment.astimezone(timezone.utc)
++
++
+ def parse_row(row):
+     meter_id = (row.get("meter") or "").strip()
+     if not meter_id:
+         raise RowError("missing meter id")
+     try:
+-        taken_at = datetime.strptime(row["timestamp"].strip(), "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
++        taken_at = _parse_time(row["timestamp"])
+     except (KeyError, AttributeError, ValueError):
+         raise RowError(f"meter {meter_id}: bad timestamp") from None
+     try:
+diff --git a/gridmeter/store.py b/gridmeter/store.py
+index 6340269..463993f 100644
+--- a/gridmeter/store.py
++++ b/gridmeter/store.py
+@@ -10,6 +10,16 @@ class ReadingStore:
+         self._rows[(reading.meter_id, reading.taken_at)] = reading
+         self.writes += 1
+ 
++    def save_batch(self, readings):
++        """Write readings in one round trip; returns how many were not already stored."""
++        fresh = {(r.meter_id, r.taken_at): r for r in readings}
++        if not fresh:
++            return 0
++        new = sum(1 for key in fresh if key not in self._rows)
++        self._rows.update(fresh)
++        self.writes += 1
++        return new
++
+     def count(self):
+         return len(self._rows)
+ 
+diff --git a/tests/test_importer.py b/tests/test_importer.py
+index ccd6b83..23f65b0 100644
+--- a/tests/test_importer.py
++++ b/tests/test_importer.py
+@@ -16,23 +16,36 @@ class ImportTests(unittest.TestCase):
+         self.addCleanup(temp.cleanup)
+         self.dir = temp.name
+ 
+-    def write(self, body):
++    def write(self, body, encoding="utf-8"):
+         path = os.path.join(self.dir, "drop.csv")
+-        with open(path, "w", encoding="utf-8") as handle:
++        with open(path, "w", encoding=encoding) as handle:
+             handle.write(HEADER + body)
+         return path
+ 
+-    def test_imports_every_row(self):
+-        path = self.write("m-1,2026-03-01 10:00,1.5,kWh\nm-2,2026-03-01 10:00,900,Wh\n")
++    def test_imports_every_row_in_one_write(self):
++        path = self.write("m-1,2026-03-01 10:00,1.5,kWh\nm-2,2026-03-01T11:00:00+01:00,900,Wh\n")
+         store = ReadingStore()
+-        self.assertEqual(import_file(path, store), 2)
+-        self.assertEqual(store.count(), 2)
++        summary = import_file(path, store)
++        self.assertEqual((summary.imported, summary.rejected), (2, []))
++        self.assertEqual((store.count(), store.writes), (2, 1))
+ 
+-    def test_cli_reports_total(self):
+-        path = self.write("m-1,2026-03-01 10:00,1.5,kWh\n")
++    def test_reimport_counts_only_new_readings(self):
++        path = self.write("m-1,2026-03-01 10:00,1.5,kWh\n", encoding="utf-8-sig")
++        store = ReadingStore()
++        self.assertEqual(import_file(path, store).imported, 1)
++        self.assertEqual(import_file(path, store).imported, 0)
++
++    def test_rejected_row_is_reported(self):
++        path = self.write("m-1,2026-03-01 10:00,1.5,kWh\n\nm-2,2026-03-01 10:00,900,Wh\nm-3,2026-03-01 10:00,n/a,kWh\n")
++        summary = import_file(path, ReadingStore())
++        self.assertEqual(summary.imported, 2)
++        self.assertEqual(summary.rejected, ["line 5: meter m-3: not a number: 'n/a'"])
++
++    def test_cli_exit_code_reflects_rejections(self):
++        path = self.write("m-1,2026-03-01 10:00,1.5,kWh\nm-2,,1,kWh\n")
+         out = StringIO()
+-        self.assertEqual(cli.main(["import", path], out=out), 0)
+-        self.assertEqual(out.getvalue(), "imported 1 readings\n")
++        self.assertEqual(cli.main(["import", path], out=out), 1)
++        self.assertEqual(out.getvalue(), f"{path}: imported 1, rejected 1\n  line 3: meter m-2: bad timestamp\n")
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/tests/test_parsing.py b/tests/test_parsing.py
+index 741a5fc..b0fa06c 100644
+--- a/tests/test_parsing.py
++++ b/tests/test_parsing.py
+@@ -31,6 +31,15 @@ class ParseRowTests(unittest.TestCase):
+         with self.assertRaisesRegex(RowError, "meter m-1: not a number"):
+             parse_row(row(value="abc"))
+ 
++    def test_offset_timestamp_is_stored_in_utc(self):
++        reading = parse_row(row(timestamp="2026-03-01T11:00:00+01:00"))
++        self.assertEqual(reading.taken_at, datetime(2026, 3, 1, 10, 0, tzinfo=timezone.utc))
++
++    def test_timestamp_needs_a_time_and_an_offset(self):
++        for value in ("2026-03-01", "2026-03-01T10:00"):
++            with self.subTest(value=value), self.assertRaises(RowError):
++                parse_row(row(timestamp=value))
++
+     def test_negative_value(self):
+         with self.assertRaises(RowError):
+             parse_row(row(value="-2"))

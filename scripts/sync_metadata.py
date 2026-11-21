@@ -47,6 +47,17 @@ def source_files(root: Path) -> list[str]:
     return result
 
 
+# Evaluation cases hold whole fixture trees. Listing every file would make the
+# tree, which is loaded with the contributor guide, mostly fixtures, so a
+# directory this many levels below the root is one line with a file count.
+SUMMARIZED_ROOT = ("evals", "cases")
+SUMMARIZED_DEPTH = 2
+
+
+def count_files(node: dict) -> int:
+    return sum(count_files(child) if child else 1 for child in node.values())
+
+
 def render_tree(files: list[str]) -> str:
     tree: dict = {}
     for name in files:
@@ -55,15 +66,20 @@ def render_tree(files: list[str]) -> str:
             node = node.setdefault(part, {})
     lines = ["```text", "hyperskills/"]
 
-    def visit(node: dict, prefix: str) -> None:
+    def visit(node: dict, prefix: str, path: tuple[str, ...]) -> None:
         for index, (name, children) in enumerate(sorted(node.items())):
             last = index == len(node) - 1
-            lines.append(
-                prefix + ("└── " if last else "├── ") + name + ("/" if children else "")
-            )
-            visit(children, prefix + ("    " if last else "│   "))
+            branch = prefix + ("└── " if last else "├── ") + name
+            here = (*path, name)
+            below = len(here) - len(SUMMARIZED_ROOT)
+            if children and here[: len(SUMMARIZED_ROOT)] == SUMMARIZED_ROOT and below >= SUMMARIZED_DEPTH:
+                total = count_files(children)
+                lines.append(f"{branch}/ ({total} file{'' if total == 1 else 's'})")
+                continue
+            lines.append(branch + ("/" if children else ""))
+            visit(children, prefix + ("    " if last else "│   "), here)
 
-    visit(tree, "")
+    visit(tree, "", ())
     return "\n".join([*lines, "```"])
 
 

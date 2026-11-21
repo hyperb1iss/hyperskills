@@ -1,0 +1,13 @@
+{
+  "verdict": "needs_changes",
+  "findings": [
+    {
+      "file": "routeplan/cache.py",
+      "line": 43,
+      "blocking": true,
+      "title": "Remembered misses are never evicted, so the cache grows without bound",
+      "trigger": "A long-running worker plans routes containing many distinct unplaceable addresses, such as typos.",
+      "impact": "put_unknown adds to _unknown with no size limit, and expired entries are only removed when the same key is read again. Unique misses accumulate for the life of the process; max_entries bounds only _entries."
+    }
+  ]
+}

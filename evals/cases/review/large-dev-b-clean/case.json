@@ -1,0 +1,8 @@
+{
+  "split": "development",
+  "kind": "clean",
+  "twin": "large-dev-b",
+  "class": "multi-defect",
+  "trap": null,
+  "also_accept": []
+}
