@@ -57,7 +57,12 @@ class DigestJob:
             if previous is not None and previous >= cadence.slot_start(local_now):
                 report.already_sent += 1
                 continue
-            since = previous if previous is not None else cadence.first_window_start(prefs, now)
+            since = previous
+            if since is None:
+                # Record a first window's start right away, so a failed first digest
+                # is retried over this same window instead of one that has moved on.
+                since = cadence.first_window_start(prefs, now)
+                self._advance(user.id, since)
             since = max(since, oldest)
             digest = collect_digest(self._events, user, prefs, since, now, self._settings.digest_max_events)
             if digest.is_empty():

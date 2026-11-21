@@ -20,6 +20,8 @@ PROMPT = ('Review the pull request in this directory. PR.md is the author\'s des
           '"title": "...", "trigger": "...", "impact": "..."}]}. A finding is blocking when it must be fixed before '
           'merge. Line numbers refer to files in the tree. Do not modify any other file.')
 CASE_KEYS = {'split', 'kind', 'twin', 'class', 'trap'}
+# Records when a former holdout stopped being untouched.
+OPTIONAL_KEYS = {'held_out_until'}
 DEFECT_KEYS = {'id', 'class', 'file', 'start_line', 'end_line', 'function', 'also_accept'}
 HINT = re.compile(r'\b(?:defect|bugs?|todo|fixme)\b', re.I)
 HINT_RADIUS = 10
@@ -184,11 +186,11 @@ class LayoutTests(unittest.TestCase):
                 self.assertTrue(isinstance(data['class'], str) and data['class'])
                 self.assertTrue(data['trap'] is None or (isinstance(data['trap'], str) and data['trap']))
                 if 'defects' in data:
-                    self.assertEqual(set(data) - CASE_KEYS, {'defects'} | ({'also_accept'} & set(data)))
+                    self.assertEqual(set(data) - CASE_KEYS - OPTIONAL_KEYS, {'defects'} | ({'also_accept'} & set(data)))
                     self.assertEqual(data.get('also_accept', []), [])
                 else:
                     extra = {'also_accept', 'defect'} if data['kind'] == 'defect' else {'also_accept'}
-                    self.assertEqual(set(data) - CASE_KEYS, extra)
+                    self.assertEqual(set(data) - CASE_KEYS - OPTIONAL_KEYS, extra)
                 if data['kind'] == 'clean':
                     self.assertEqual(data['also_accept'], [])
                 spans = list(data.get('also_accept', []))
@@ -430,7 +432,17 @@ class GraderTests(unittest.TestCase):
                     result = grade(case, blocking_review((defect['file'], first), *others))
                     self.assertTrue(result['passed'], result)
                     self.assertEqual(result['metrics']['defects_found_strict'], len(defects) - 1)
-                    if last + 1 <= len(source.splitlines()):
+                    # A line just past the function earns no credit, unless that number
+                    # read as a diff line lands back inside an accepted location.
+                    fixture = HERE / case / 'fixture'
+                    by_diff = G.diff_line_map((fixture / 'change.diff').read_text(encoding='utf-8'))
+                    accepted = [(defect['file'], first, last)] + [
+                        (s['file'], s['start_line'], s['end_line']) for s in defect.get('also_accept', [])]
+                    mapped = by_diff.get(last + 1)
+                    lands_inside = bool(mapped) and any(
+                        mapped[0] == f and lo <= mapped[1] <= hi for f, lo, hi in accepted)
+                    in_accepted = any(defect['file'] == f and lo <= last + 1 <= hi for f, lo, hi in accepted)
+                    if last + 1 <= len(source.splitlines()) and not lands_inside and not in_accepted:
                         outside = grade(case, blocking_review((defect['file'], last + 1), *others))
                         self.assertNotIn(defect['id'], outside['metrics']['found_ids'])
         self.assertGreater(probed, 0)

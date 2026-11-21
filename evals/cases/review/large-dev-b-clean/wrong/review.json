@@ -3,7 +3,7 @@
   "findings": [
     {
       "file": "digests/job.py",
-      "line": 76,
+      "line": 81,
       "blocking": true,
       "title": "The ledger is saved only after the whole batch, so a crash re-sends digests",
       "trigger": "The process dies partway through send_batch; nothing sent so far has been recorded.",

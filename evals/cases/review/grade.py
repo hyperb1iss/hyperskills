@@ -148,8 +148,9 @@ def planted_defects(case):
 
 
 def in_span(finding, span, window=0):
-    return (finding['file'] == span['file']
-            and span['start_line'] - window <= finding['line'] <= span['end_line'] + window)
+    lines = finding.get('lines') or [finding['line']]
+    return finding['file'] == span['file'] and any(
+        span['start_line'] - window <= line <= span['end_line'] + window for line in lines)
 
 
 def max_matching(findings, defects, matches):
@@ -176,15 +177,33 @@ def evaluate(case, fixture, workspace, review):
     touched, by_diff_line = diff_files(diff_text), diff_line_map(diff_text)
     lengths = {path: len((fixture / path).read_text(encoding='utf-8', errors='replace').splitlines()) for path in known}
     raw = review.get('findings') if isinstance(review, dict) else None
-    findings, reread = [], 0
+    usable = []
     for item in (raw if isinstance(raw, list) else []):
-        if finding_problems(item):
-            continue
-        item = dict(item, file=normalize_path(item['file'], workspace, known))
+        if not finding_problems(item):
+            usable.append(dict(item, file=normalize_path(item['file'], workspace, known)))
+
+    def diff_reading(item):
         mapped = by_diff_line.get(item['line'])
-        if item['file'] in lengths and item['line'] > lengths[item['file']] and mapped and mapped[0] == item['file']:
-            item['line'] = mapped[1]
+        return mapped[1] if mapped and mapped[0] == item['file'] else None
+
+    def past_end(item):
+        return item['file'] in lengths and item['line'] > lengths[item['file']]
+
+    # Reviewers cite either a line of the head file or a line of change.diff, and
+    # stored trials show both within one review. A number past the end of its
+    # file can only be a diff line. A number valid in both readings keeps both,
+    # because guessing one reading lost correct findings more often than keeping
+    # both credited a coincidence.
+    findings, reread = [], 0
+    for item in usable:
+        mapped = diff_reading(item)
+        if past_end(item) and mapped:
+            item['lines'] = [mapped]
             reread += 1
+        elif mapped and mapped != item['line']:
+            item['lines'] = [item['line'], mapped]
+        else:
+            item['lines'] = [item['line']]
         findings.append(item)
     blocking = [f for f in findings if f['blocking']]
     defects = planted_defects(case)

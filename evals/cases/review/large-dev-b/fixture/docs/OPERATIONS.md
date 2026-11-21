@@ -7,7 +7,10 @@ while that job's previous run is still going: if a run is still going at the nex
 tick, the scheduler skips the tick and pages the on-call engineer. Two runs of the
 same job therefore never overlap.
 
-Jobs are listed in `deploy/schedule.yaml`, which lives with the deployment config.
+Jobs are listed in `deploy/schedule.yaml`, which lives with the deployment config
+in its own repository. A new job ships in two steps: its code merges and deploys
+first, and the schedule entry that runs it is added to the deployment config
+afterwards. A job's code is therefore inert until its entry lands there.
 `digests notify` runs every minute with `--since` set to the previous run's
 `--until`.
 

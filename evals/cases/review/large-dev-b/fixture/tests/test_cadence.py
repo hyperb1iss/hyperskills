@@ -20,6 +20,5 @@ class IsDueTests(unittest.TestCase):
         self.assertFalse(is_due(prefs, MORNING - timedelta(hours=1)))
 
 
-
 if __name__ == "__main__":
     unittest.main()

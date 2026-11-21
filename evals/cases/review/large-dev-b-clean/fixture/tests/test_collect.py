@@ -45,7 +45,6 @@ class CollectTests(unittest.TestCase):
         self.assertEqual(digest.total, 4)
 
 
-
 class RenderTests(unittest.TestCase):
     def setUp(self):
         store = EventStore([event(f"m{i}", "mention", i + 1) for i in range(3)])

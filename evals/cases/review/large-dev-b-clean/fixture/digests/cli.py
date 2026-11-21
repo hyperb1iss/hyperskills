@@ -52,7 +52,7 @@ def build_parser():
     notify.add_argument("--since", type=parse_moment, required=True)
     notify.add_argument("--until", type=parse_moment)
     digest = commands.add_parser("digest", help="send the digests due now")
-    digest.add_argument("--now", type=parse_moment, help="run as if it were this time")
+    digest.add_argument("--now", type=parse_moment, help="with --dry-run, show what would be sent at this time")
     digest.add_argument("--dry-run", action="store_true", help="show what would be sent; send and record nothing")
     return parser
 
@@ -71,6 +71,9 @@ def main(argv, context, out=sys.stdout):
         print(f"sent={report.sent} skipped={report.skipped}", file=out)
         return 0
     if args.command == "digest":
+        if args.now is not None and not args.dry_run:
+            print("--now needs --dry-run; a real run always uses the clock", file=out)
+            return 2
         now = args.now or context.now()
         transport = RecordingTransport() if args.dry_run else context.transport
         job = DigestJob(

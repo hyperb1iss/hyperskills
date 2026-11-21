@@ -28,6 +28,5 @@ class SendBatchTests(unittest.TestCase):
         self.assertEqual(transport.sent[0].to, "ada@example.com")
 
 
-
 if __name__ == "__main__":
     unittest.main()

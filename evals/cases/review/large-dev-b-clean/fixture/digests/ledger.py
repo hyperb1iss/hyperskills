@@ -21,7 +21,7 @@ class DigestLedger:
             self._cutoffs = {user_id: datetime.fromisoformat(value) for user_id, value in raw.items()}
 
     def cutoff_for(self, user_id):
-        """End of the user's last recorded window, or None before their first digest."""
+        """Where the user's next window starts, or None before the user was first due."""
         return self._cutoffs.get(user_id)
 
     def record(self, user_id, cutoff):

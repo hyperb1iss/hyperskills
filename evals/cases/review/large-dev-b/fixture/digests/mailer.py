@@ -59,7 +59,8 @@ class RelayTransport(Transport):
     """Submits messages to the outbound relay through an injected client.
 
     ``client.submit(envelope)`` raises ConnectionError or TimeoutError when the relay
-    cannot be reached.
+    cannot be reached, and another exception when the relay refuses the envelope.
+    Every one of those failures is raised as TransportError.
     """
 
     def __init__(self, client, max_body_bytes=256_000):
@@ -78,5 +79,5 @@ class RelayTransport(Transport):
         }
         try:
             self._client.submit(envelope)
-        except (ConnectionError, TimeoutError) as exc:
+        except Exception as exc:
             raise TransportError(str(exc)) from exc

@@ -34,7 +34,7 @@ index 0000000..1f226f0
 +    """Start of a user's first digest window: one period before ``now``."""
 +    return now - PERIODS[prefs.digest]
 diff --git a/digests/cli.py b/digests/cli.py
-index bf9e7fd..87c571f 100644
+index bf9e7fd..420d6a8 100644
 --- a/digests/cli.py
 +++ b/digests/cli.py
 @@ -9,6 +9,9 @@ import sys
@@ -69,16 +69,19 @@ index bf9e7fd..87c571f 100644
      notify.add_argument("--since", type=parse_moment, required=True)
      notify.add_argument("--until", type=parse_moment)
 +    digest = commands.add_parser("digest", help="send the digests due now")
-+    digest.add_argument("--now", type=parse_moment, help="run as if it were this time")
++    digest.add_argument("--now", type=parse_moment, help="with --dry-run, show what would be sent at this time")
 +    digest.add_argument("--dry-run", action="store_true", help="show what would be sent; send and record nothing")
      return parser
  
  
-@@ -58,4 +70,17 @@ def main(argv, context, out=sys.stdout):
+@@ -58,4 +70,20 @@ def main(argv, context, out=sys.stdout):
          )
          print(f"sent={report.sent} skipped={report.skipped}", file=out)
          return 0
 +    if args.command == "digest":
++        if args.now is not None and not args.dry_run:
++            print("--now needs --dry-run; a real run always uses the clock", file=out)
++            return 2
 +        now = args.now or context.now()
 +        transport = RecordingTransport() if args.dry_run else context.transport
 +        job = DigestJob(
@@ -169,10 +172,10 @@ index 0000000..d399aaa
 +    return (SECTION_ORDER.index(kind) if kind in SECTION_ORDER else len(SECTION_ORDER), kind)
 diff --git a/digests/job.py b/digests/job.py
 new file mode 100644
-index 0000000..139d95a
+index 0000000..4866ba4
 --- /dev/null
 +++ b/digests/job.py
-@@ -0,0 +1,81 @@
+@@ -0,0 +1,86 @@
 +"""The hourly digest job."""
 +
 +from dataclasses import dataclass, field
@@ -232,7 +235,12 @@ index 0000000..139d95a
 +            if previous is not None and previous >= cadence.slot_start(local_now):
 +                report.already_sent += 1
 +                continue
-+            since = previous if previous is not None else cadence.first_window_start(prefs, now)
++            since = previous
++            if since is None:
++                # Record a first window's start right away, so a failed first digest
++                # is retried over this same window instead of one that has moved on.
++                since = cadence.first_window_start(prefs, now)
++                self._advance(user.id, since)
 +            since = max(since, oldest)
 +            digest = collect_digest(self._events, user, prefs, since, now, self._settings.digest_max_events)
 +            if digest.is_empty():
@@ -256,7 +264,7 @@ index 0000000..139d95a
 +            self._ledger.record(user_id, cutoff)
 diff --git a/digests/ledger.py b/digests/ledger.py
 new file mode 100644
-index 0000000..93eeac5
+index 0000000..e229e90
 --- /dev/null
 +++ b/digests/ledger.py
 @@ -0,0 +1,42 @@
@@ -283,7 +291,7 @@ index 0000000..93eeac5
 +            self._cutoffs = {user_id: datetime.fromisoformat(value) for user_id, value in raw.items()}
 +
 +    def cutoff_for(self, user_id):
-+        """End of the user's last recorded window, or None before their first digest."""
++        """Where the user's next window starts, or None before the user was first due."""
 +        return self._cutoffs.get(user_id)
 +
 +    def record(self, user_id, cutoff):
@@ -488,10 +496,10 @@ index 5d296d3..2b4dc76 100644
  
 diff --git a/tests/test_cadence.py b/tests/test_cadence.py
 new file mode 100644
-index 0000000..56d9b4e
+index 0000000..9cf30ac
 --- /dev/null
 +++ b/tests/test_cadence.py
-@@ -0,0 +1,25 @@
+@@ -0,0 +1,24 @@
 +import unittest
 +from datetime import datetime, timedelta, timezone
 +
@@ -514,15 +522,14 @@ index 0000000..56d9b4e
 +        self.assertFalse(is_due(prefs, MORNING - timedelta(hours=1)))
 +
 +
-+
 +if __name__ == "__main__":
 +    unittest.main()
 diff --git a/tests/test_collect.py b/tests/test_collect.py
 new file mode 100644
-index 0000000..7bec5da
+index 0000000..cbd4547
 --- /dev/null
 +++ b/tests/test_collect.py
-@@ -0,0 +1,64 @@
+@@ -0,0 +1,63 @@
 +import unittest
 +from datetime import datetime, timedelta, timezone
 +
@@ -570,7 +577,6 @@ index 0000000..7bec5da
 +        self.assertEqual(digest.total, 4)
 +
 +
-+
 +class RenderTests(unittest.TestCase):
 +    def setUp(self):
 +        store = EventStore([event(f"m{i}", "mention", i + 1) for i in range(3)])
@@ -589,10 +595,10 @@ index 0000000..7bec5da
 +    unittest.main()
 diff --git a/tests/test_job.py b/tests/test_job.py
 new file mode 100644
-index 0000000..5b5cc1f
+index 0000000..1d8342c
 --- /dev/null
 +++ b/tests/test_job.py
-@@ -0,0 +1,117 @@
+@@ -0,0 +1,125 @@
 +import io
 +import os
 +import tempfile
@@ -674,12 +680,17 @@ index 0000000..5b5cc1f
 +        self.assertEqual((report.empty, self.transport.sent), (3, []))
 +        self.assertEqual(self.ledger.cutoff_for("u-ada"), MONDAY_0805)
 +
-+    def test_failed_send_is_not_recorded(self):
++    def test_failed_first_digest_is_retried_over_the_same_window(self):
 +        self.transport = RecordingTransport(refuse={"ada@example.com"})
 +        report = self.make_job().run(MONDAY_0805)
 +        self.assertEqual(report.count("failed"), 1)
-+        self.assertIsNone(self.ledger.cutoff_for("u-ada"))
++        self.assertEqual(self.ledger.cutoff_for("u-ada"), MONDAY_0805 - timedelta(days=1))
 +        self.assertEqual(self.ledger.cutoff_for("u-ben"), MONDAY_0805)
++        self.transport = RecordingTransport()
++        self.make_job().run(MONDAY_0805 + timedelta(days=1))
++        ada = [m for m in self.transport.sent if m.to == "ada@example.com"]
++        self.assertEqual(len(ada), 1)
++        self.assertIn("comment e1", ada[0].body)
 +
 +    def test_digest_command_dry_run_sends_and_records_nothing(self):
 +        context = Context(self.users, self.prefs, self.events, self.transport, Settings(), ledger=self.ledger)
@@ -689,11 +700,15 @@ index 0000000..5b5cc1f
 +        self.assertIn("would send to ada@example.com: 1 update today", out.getvalue())
 +        self.assertEqual((self.transport.sent, self.ledger.cutoff_for("u-ada")), ([], None))
 +
++    def test_digest_command_refuses_now_on_a_real_run(self):
++        context = Context(self.users, self.prefs, self.events, self.transport, Settings(), ledger=self.ledger)
++        code = main(["digest", "--now", MONDAY_0805.isoformat()], context, io.StringIO())
++        self.assertEqual((code, self.transport.sent, self.ledger.cutoff_for("u-ada")), (2, [], None))
++
 +    def test_weekly_digest_goes_out_on_the_chosen_day(self):
 +        wednesday = MONDAY_0805 + timedelta(days=2)
 +        self.make_job(is_due=cadence.is_due).run(wednesday)
 +        self.assertIn("cy@example.com", [m.to for m in self.transport.sent])
-+
 +
 +
 +class LedgerTests(unittest.TestCase):
@@ -707,11 +722,10 @@ index 0000000..5b5cc1f
 +            self.assertEqual(os.listdir(tmp), ["ledger.json"])
 +
 +
-+
 +if __name__ == "__main__":
 +    unittest.main()
 diff --git a/tests/test_preferences.py b/tests/test_preferences.py
-index bfc0534..6371a58 100644
+index bfc0534..3f6fbf8 100644
 --- a/tests/test_preferences.py
 +++ b/tests/test_preferences.py
 @@ -7,6 +7,7 @@ class PreferencesTests(unittest.TestCase):
@@ -722,14 +736,12 @@ index bfc0534..6371a58 100644
  
      def test_muted_kinds_suppress_immediate_mail(self):
          prefs = Preferences.from_record({"user_id": "u-ada", "muted_kinds": ["follow"]})
-@@ -17,6 +18,22 @@ class PreferencesTests(unittest.TestCase):
+@@ -17,6 +18,20 @@ class PreferencesTests(unittest.TestCase):
          with self.assertRaises(InvalidPreferences):
              Preferences.from_record({"user_id": "u-ada", "muted_kinds": ["gossip"]})
  
 +    def test_reads_digest_settings(self):
-+        prefs = Preferences.from_record(
-+            {"user_id": "u-ada", "digest": "weekly", "digest_hour": "7", "digest_weekday": 4}
-+        )
++        prefs = Preferences.from_record({"user_id": "u-ada", "digest": "weekly", "digest_hour": "7", "digest_weekday": 4})
 +        self.assertEqual((prefs.digest, prefs.digest_hour, prefs.digest_weekday), ("weekly", 7, 4))
 +
 +    def test_rejects_out_of_range_digest_settings(self):
@@ -747,10 +759,10 @@ index bfc0534..6371a58 100644
      unittest.main()
 diff --git a/tests/test_sender.py b/tests/test_sender.py
 new file mode 100644
-index 0000000..52c90a4
+index 0000000..c8266c2
 --- /dev/null
 +++ b/tests/test_sender.py
-@@ -0,0 +1,33 @@
+@@ -0,0 +1,32 @@
 +import unittest
 +
 +from digests.mailer import Message, RecordingTransport
@@ -779,7 +791,6 @@ index 0000000..52c90a4
 +        transport = RecordingTransport()
 +        send_batch(transport, [("u-ada", message("  ada@example.com "))])
 +        self.assertEqual(transport.sent[0].to, "ada@example.com")
-+
 +
 +
 +if __name__ == "__main__":

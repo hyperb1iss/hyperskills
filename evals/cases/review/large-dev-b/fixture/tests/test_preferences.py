@@ -19,9 +19,7 @@ class PreferencesTests(unittest.TestCase):
             Preferences.from_record({"user_id": "u-ada", "muted_kinds": ["gossip"]})
 
     def test_reads_digest_settings(self):
-        prefs = Preferences.from_record(
-            {"user_id": "u-ada", "digest": "weekly", "digest_hour": "7", "digest_weekday": 4}
-        )
+        prefs = Preferences.from_record({"user_id": "u-ada", "digest": "weekly", "digest_hour": "7", "digest_weekday": 4})
         self.assertEqual((prefs.digest, prefs.digest_hour, prefs.digest_weekday), ("weekly", 7, 4))
 
     def test_rejects_out_of_range_digest_settings(self):

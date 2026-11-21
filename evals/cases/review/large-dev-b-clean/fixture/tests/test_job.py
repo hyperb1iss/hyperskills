@@ -79,12 +79,17 @@ class DigestJobTests(unittest.TestCase):
         self.assertEqual((report.empty, self.transport.sent), (3, []))
         self.assertEqual(self.ledger.cutoff_for("u-ada"), MONDAY_0805)
 
-    def test_failed_send_is_not_recorded(self):
+    def test_failed_first_digest_is_retried_over_the_same_window(self):
         self.transport = RecordingTransport(refuse={"ada@example.com"})
         report = self.make_job().run(MONDAY_0805)
         self.assertEqual(report.count("failed"), 1)
-        self.assertIsNone(self.ledger.cutoff_for("u-ada"))
+        self.assertEqual(self.ledger.cutoff_for("u-ada"), MONDAY_0805 - timedelta(days=1))
         self.assertEqual(self.ledger.cutoff_for("u-ben"), MONDAY_0805)
+        self.transport = RecordingTransport()
+        self.make_job().run(MONDAY_0805 + timedelta(days=1))
+        ada = [m for m in self.transport.sent if m.to == "ada@example.com"]
+        self.assertEqual(len(ada), 1)
+        self.assertIn("comment e1", ada[0].body)
 
     def test_digest_command_dry_run_sends_and_records_nothing(self):
         context = Context(self.users, self.prefs, self.events, self.transport, Settings(), ledger=self.ledger)
@@ -94,11 +99,15 @@ class DigestJobTests(unittest.TestCase):
         self.assertIn("would send to ada@example.com: 1 update today", out.getvalue())
         self.assertEqual((self.transport.sent, self.ledger.cutoff_for("u-ada")), ([], None))
 
+    def test_digest_command_refuses_now_on_a_real_run(self):
+        context = Context(self.users, self.prefs, self.events, self.transport, Settings(), ledger=self.ledger)
+        code = main(["digest", "--now", MONDAY_0805.isoformat()], context, io.StringIO())
+        self.assertEqual((code, self.transport.sent, self.ledger.cutoff_for("u-ada")), (2, [], None))
+
     def test_weekly_digest_goes_out_on_the_chosen_day(self):
         wednesday = MONDAY_0805 + timedelta(days=2)
         self.make_job(is_due=cadence.is_due).run(wednesday)
         self.assertIn("cy@example.com", [m.to for m in self.transport.sent])
-
 
 
 class LedgerTests(unittest.TestCase):
@@ -110,7 +119,6 @@ class LedgerTests(unittest.TestCase):
             ledger.save()
             self.assertEqual(DigestLedger(path).cutoff_for("u-ada"), MONDAY_0805)
             self.assertEqual(os.listdir(tmp), ["ledger.json"])
-
 
 
 if __name__ == "__main__":
