@@ -447,6 +447,23 @@ class GraderTests(unittest.TestCase):
                         self.assertNotIn(defect['id'], outside['metrics']['found_ids'])
         self.assertGreater(probed, 0)
 
+    def test_a_diff_line_number_valid_as_a_file_line_still_matches(self):
+        probed = 0
+        for case in defect_cases():
+            fixture = HERE / case / 'fixture'
+            by_diff = G.diff_line_map((fixture / 'change.diff').read_text(encoding='utf-8'))
+            oracle = review_of(case, 'oracle')
+            renumbered = []
+            for item in oracle['findings']:
+                length = len((fixture / item['file']).read_text(encoding='utf-8').splitlines())
+                cited = [number for number, (path, line) in by_diff.items()
+                         if path == item['file'] and line == item['line'] and number <= length and number != line]
+                renumbered.append(dict(item, line=cited[0]) if cited else item)
+                probed += bool(cited)
+            with self.subTest(case=case):
+                self.assertTrue(grade(case, dict(oracle, findings=renumbered))['passed'])
+        self.assertGreater(probed, 0)
+
     def test_strict_metric_uses_the_window(self):
         for case in defect_cases():
             defect = defects_of(case)[0]
